@@ -7,6 +7,9 @@
 export.cfg
 export_credentials.cfg
 
+# Build configs and export output
+export/
+
 # Imported translations (automatically generated from CSV files)
 *.translation
 
