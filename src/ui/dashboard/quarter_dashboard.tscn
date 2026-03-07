@@ -190,9 +190,23 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Spacer" type="Control" parent="MarginContainer/VBox"]
+[node name="Sep4" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="TeamHeader" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+text = "Your Team"
+
+[node name="TeamScroll" type="ScrollContainer" parent="MarginContainer/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 80)
+
+[node name="TeamContainer" type="VBoxContainer" parent="MarginContainer/VBox/TeamScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
 
 [node name="AdvanceButton" type="Button" parent="MarginContainer/VBox"]
 unique_name_in_owner = true

@@ -157,6 +157,12 @@
       "tier": "emerging",
       "preferred_focus": ["dev_tools"],
       "style": "Developer-first investing. They know the dev tools market cold."
+    },
+    {
+      "name": "Tres Commas Capital",
+      "tier": "mid",
+      "preferred_focus": ["consumer", "marketplace"],
+      "style": "Run by Ross Hahneman. Three Comma Club member. He put radio on the internet. His McLaren has doors that open like this ↑ not like this →."
     }
   ]
 }

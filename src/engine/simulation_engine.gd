@@ -104,7 +104,7 @@ static func _calculate_costs(state: Node) -> void:
 		salary_total += emp.salary_per_quarter
 	state.financials.costs_breakdown["salaries"] = salary_total
 
-	var infra_cost := maxf(50.0, state.product.users * 0.01)
+	var infra_cost := maxf(10.0, state.product.users * 0.01)
 	state.financials.costs_breakdown["infrastructure"] = infra_cost
 
 	var office_cost := [0.0, 2_000.0, 5_000.0, 12_000.0]

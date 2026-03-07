@@ -27,6 +27,8 @@ var pending_events: Array[EventData] = []
 
 var is_game_active: bool = false
 var current_slot: String = ""
+var angel_bailout_used: bool = false
+var _milestones_hit: Array[String] = []
 
 const SAVE_DIR := "user://saves/"
 const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
@@ -67,6 +69,8 @@ func new_game(config: Dictionary) -> void:
 	event_log.clear()
 	fired_one_time_events.clear()
 	pending_events.clear()
+	_milestones_hit.clear()
+	angel_bailout_used = false
 
 	difficulty = config.get("difficulty", "normal")
 	starting_scenario = config.get("scenario", "garage")
@@ -122,6 +126,7 @@ func advance_quarter() -> void:
 		current_year += 1
 
 	quarter_advanced.emit(current_quarter)
+	_check_milestone_bonuses()
 	_check_end_conditions()
 	auto_save()
 
@@ -163,6 +168,38 @@ func _check_end_conditions() -> void:
 	elif product.users <= 0 and total_quarters_elapsed() > 12:
 		is_game_active = false
 		game_over.emit("dead_product")
+
+
+const MILESTONES := {
+	"100_users": {"threshold_users": 100, "bonus": 25_000.0, "title": "Milestone: 100 users — investors released a $25K tranche"},
+	"1k_users": {"threshold_users": 1000, "bonus": 50_000.0, "title": "Milestone: 1K users — investors released a $50K tranche"},
+	"first_revenue": {"threshold_revenue": 1.0, "bonus": 15_000.0, "title": "First revenue! Investors released a $15K bonus"},
+	"10k_users": {"threshold_users": 10000, "bonus": 100_000.0, "title": "Milestone: 10K users — investors released a $100K tranche"},
+}
+
+
+func _check_milestone_bonuses() -> void:
+	if financials.funding_rounds.is_empty():
+		return
+
+	for key: String in MILESTONES:
+		if key in _milestones_hit:
+			continue
+		var m: Dictionary = MILESTONES[key]
+		var hit := false
+		if m.has("threshold_users") and product.users >= m["threshold_users"]:
+			hit = true
+		if m.has("threshold_revenue") and financials.revenue >= m["threshold_revenue"]:
+			hit = true
+		if hit:
+			_milestones_hit.append(key)
+			company.cash += m["bonus"]
+			append_event_log({
+				"quarter": current_quarter,
+				"year": current_year,
+				"event_id": "milestone_" + key,
+				"title": m["title"],
+			})
 
 
 func append_event_log(entry: Dictionary) -> void:
@@ -304,6 +341,8 @@ func _serialize() -> Dictionary:
 		"history": history,
 		"event_log": event_log,
 		"fired_events": fired_one_time_events,
+		"milestones_hit": _milestones_hit,
+		"angel_bailout_used": angel_bailout_used,
 	}
 
 
@@ -372,6 +411,8 @@ func _deserialize(data: Dictionary) -> bool:
 	history.assign(data.get("history", []))
 	event_log.assign(data.get("event_log", []))
 	fired_one_time_events.assign(data.get("fired_events", []))
+	_milestones_hit.assign(data.get("milestones_hit", []))
+	angel_bailout_used = data.get("angel_bailout_used", false)
 
 	is_game_active = true
 	return true
@@ -441,6 +482,8 @@ func _clear_run_state() -> void:
 	event_log.clear()
 	fired_one_time_events.clear()
 	pending_events.clear()
+	_milestones_hit.clear()
+	angel_bailout_used = false
 	current_quarter = 1
 	current_year = 1
 	is_game_active = false

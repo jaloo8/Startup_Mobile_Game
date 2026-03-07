@@ -9,8 +9,19 @@ extends Control
 @onready var candidate_panel: PanelContainer = %CandidatePanel
 
 var _candidates: Array[EmployeeData] = []
-var _interviewed: Dictionary = {}  # employee_name -> true
+var _interviewed: Dictionary = {}
 var _card_style: StyleBoxFlat
+var _assign_target: EmployeeData
+
+const POSTING_FEE := 5_000.0
+
+const ASSIGNMENT_DESCRIPTIONS := {
+	EmployeeData.Assignment.FEATURES: "Build new product features.\nMore features attract users.",
+	EmployeeData.Assignment.BUGS: "Squash bugs.\nFewer bugs means less churn.",
+	EmployeeData.Assignment.TECH_DEBT: "Clean up messy code.\nHigh tech debt slows everyone down.",
+	EmployeeData.Assignment.INFRA: "Improve stability and uptime.\nUnstable products lose users fast.",
+	EmployeeData.Assignment.RND: "Research and improve UX.\nBetter UX means happier users.",
+}
 
 
 func _ready() -> void:
@@ -18,6 +29,7 @@ func _ready() -> void:
 	hire_btn.pressed.connect(_on_hire_pressed)
 	back_btn.pressed.connect(_on_back)
 	candidate_panel.visible = false
+	_update_hire_button()
 	_refresh_list()
 
 
@@ -25,6 +37,25 @@ func _exit_tree() -> void:
 	_candidates.clear()
 	_interviewed.clear()
 	_card_style = null
+	_assign_target = null
+
+
+func _update_hire_button() -> void:
+	if GameState.employees.size() >= GameState.company.office_capacity():
+		hire_btn.disabled = true
+		hire_btn.text = "Office Full — Upgrade to Hire"
+		hire_btn.modulate = Color(1, 1, 1, 0.5)
+		return
+
+	if GameState.company.cash < POSTING_FEE:
+		hire_btn.disabled = true
+		hire_btn.text = "Can't afford to post ($%sK)" % str(snapped(POSTING_FEE / 1000.0, 0.1))
+		hire_btn.modulate = Color(1, 1, 1, 0.5)
+		return
+
+	hire_btn.disabled = false
+	hire_btn.text = "Post Job Listing ($%sK)" % str(snapped(POSTING_FEE / 1000.0, 0.1))
+	hire_btn.modulate = Color(1, 1, 1, 1)
 
 
 func _refresh_list() -> void:
@@ -68,50 +99,56 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	_add_stat(stats_row, "Stress", emp.stress)
 
 	var salary_label := Label.new()
-	salary_label.text = "$%sK/yr • %s" % [
-		str(snapped(emp.salary_per_quarter * 4 / 1000.0, 0.1)),
-		EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned"),
-	]
+	salary_label.text = "$%sK/yr" % str(snapped(emp.salary_per_quarter * 4 / 1000.0, 0.1))
 	salary_label.add_theme_font_size_override("font_size", 13)
 	salary_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 	vbox.add_child(salary_label)
 
-	var btn_row := HBoxContainer.new()
-	btn_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(btn_row)
+	var assign_row := HBoxContainer.new()
+	assign_row.add_theme_constant_override("separation", 6)
+	vbox.add_child(assign_row)
 
-	var assign_btn := OptionButton.new()
-	assign_btn.custom_minimum_size = Vector2(140, 32)
+	var assign_label := Label.new()
+	assign_label.text = "Focus:"
+	assign_label.add_theme_font_size_override("font_size", 13)
+	assign_row.add_child(assign_label)
+
 	for a_key in EmployeeData.ASSIGNMENT_NAMES:
-		assign_btn.add_item(EmployeeData.ASSIGNMENT_NAMES[a_key], a_key)
-	assign_btn.selected = _find_assignment_index(assign_btn, emp.assignment)
-	var emp_ref := emp
-	assign_btn.item_selected.connect(_on_assign_changed.bind(emp_ref, assign_btn))
-	btn_row.add_child(assign_btn)
+		if a_key == EmployeeData.Assignment.UNASSIGNED:
+			continue
+		var btn := Button.new()
+		btn.text = EmployeeData.ASSIGNMENT_NAMES[a_key]
+		btn.custom_minimum_size = Vector2(0, 30)
+		btn.toggle_mode = true
+		btn.button_pressed = (emp.assignment == a_key)
+		btn.add_theme_font_size_override("font_size", 11)
+		if emp.assignment == a_key:
+			btn.modulate = Color(0.4, 0.8, 1.0)
+		btn.pressed.connect(_on_assign_direct.bind(emp, a_key))
+		assign_row.add_child(btn)
+
+	var action_row := HBoxContainer.new()
+	action_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(action_row)
 
 	var fire_btn := Button.new()
 	fire_btn.text = "Let Go"
-	fire_btn.custom_minimum_size = Vector2(70, 32)
-	fire_btn.pressed.connect(_on_fire.bind(emp_ref))
-	btn_row.add_child(fire_btn)
+	fire_btn.custom_minimum_size = Vector2(70, 30)
+	fire_btn.pressed.connect(_on_fire.bind(emp))
+	action_row.add_child(fire_btn)
 
 	return panel
 
 
-func _on_assign_changed(idx: int, emp: EmployeeData, btn: OptionButton) -> void:
-	emp.assignment = btn.get_item_id(idx) as EmployeeData.Assignment
+func _on_assign_direct(emp: EmployeeData, assignment: EmployeeData.Assignment) -> void:
+	emp.assignment = assignment
+	_refresh_list()
 
 
 func _on_fire(emp: EmployeeData) -> void:
 	GameState.fire_employee(emp)
+	_update_hire_button()
 	_refresh_list()
-
-
-func _find_assignment_index(option_btn: OptionButton, assignment: EmployeeData.Assignment) -> int:
-	for i in option_btn.item_count:
-		if option_btn.get_item_id(i) == assignment:
-			return i
-	return option_btn.item_count - 1
 
 
 func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
@@ -131,13 +168,25 @@ func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
 
 func _on_hire_pressed() -> void:
 	if GameState.employees.size() >= GameState.company.office_capacity():
-		hire_btn.disabled = true
-		hire_btn.text = "Office Full — Upgrade to Hire"
+		_update_hire_button()
 		return
+
+	if GameState.company.cash < POSTING_FEE:
+		_update_hire_button()
+		return
+
+	GameState.company.cash -= POSTING_FEE
+	GameState.append_event_log({
+		"quarter": GameState.current_quarter,
+		"year": GameState.current_year,
+		"event_id": "job_posting",
+		"title": "Posted a job listing — $%sK" % str(snapped(POSTING_FEE / 1000.0, 0.1)),
+	})
 
 	_candidates = HiringEngine.generate_candidates(3, GameState.market)
 	_interviewed.clear()
 	candidate_panel.visible = true
+	_update_hire_button()
 	_refresh_candidates()
 
 
@@ -163,11 +212,24 @@ func _refresh_candidates() -> void:
 		name_lbl.add_theme_font_size_override("font_size", 15)
 		vbox.add_child(name_lbl)
 
+		var cost_per_q: float = candidate.salary_per_quarter
+		var runway: float = GameState.financials.runway_quarters(GameState.company.cash)
+		var salary_text := "Asking $%sK/yr ($%sK/quarter)" % [
+			str(snapped(cost_per_q * 4 / 1000.0, 0.1)),
+			str(snapped(cost_per_q / 1000.0, 0.1)),
+		]
 		var salary_lbl := Label.new()
-		salary_lbl.text = "Asking $%sK/yr" % str(snapped(candidate.salary_per_quarter * 4 / 1000.0, 0.1))
+		salary_lbl.text = salary_text
 		salary_lbl.add_theme_font_size_override("font_size", 13)
 		salary_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 		vbox.add_child(salary_lbl)
+
+		if runway != INF and runway < 4.0:
+			var warn_lbl := Label.new()
+			warn_lbl.text = "⚠ You have ~%d quarters of runway left" % roundi(runway)
+			warn_lbl.add_theme_font_size_override("font_size", 12)
+			warn_lbl.add_theme_color_override("font_color", Color(0.95, 0.6, 0.2))
+			vbox.add_child(warn_lbl)
 
 		var interviewed: bool = _interviewed.has(candidate.employee_name)
 		if interviewed:
@@ -231,7 +293,60 @@ func _on_hire_candidate(candidate: EmployeeData) -> void:
 		_candidates.erase(candidate)
 		candidate_panel.visible = not _candidates.is_empty()
 		_refresh_candidates()
+		_assign_target = candidate
+		_show_assign_prompt(candidate)
+		_update_hire_button()
 		_refresh_list()
+
+
+func _show_assign_prompt(emp: EmployeeData) -> void:
+	var overlay := ColorRect.new()
+	overlay.name = "AssignOverlay"
+	overlay.color = Color(0, 0, 0, 0.7)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+
+	var panel := PanelContainer.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.offset_left = -280
+	panel.offset_right = 280
+	panel.offset_top = -220
+	panel.offset_bottom = 220
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.14)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 20
+	style.content_margin_bottom = 20
+	panel.add_theme_stylebox_override("panel", style)
+	overlay.add_child(panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
+	panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "Where should %s focus?" % emp.employee_name
+	title.add_theme_font_size_override("font_size", 18)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+
+	for a_key in ASSIGNMENT_DESCRIPTIONS:
+		var btn := Button.new()
+		btn.text = "%s\n%s" % [EmployeeData.ASSIGNMENT_NAMES[a_key], ASSIGNMENT_DESCRIPTIONS[a_key]]
+		btn.custom_minimum_size = Vector2(0, 50)
+		btn.add_theme_font_size_override("font_size", 13)
+		btn.pressed.connect(_on_assign_from_prompt.bind(emp, a_key, overlay))
+		vbox.add_child(btn)
+
+
+func _on_assign_from_prompt(emp: EmployeeData, assignment: EmployeeData.Assignment, overlay: Control) -> void:
+	emp.assignment = assignment
+	overlay.queue_free()
+	_assign_target = null
+	_refresh_list()
 
 
 func _on_pass_candidate(candidate: EmployeeData) -> void:

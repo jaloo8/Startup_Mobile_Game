@@ -143,5 +143,30 @@
     "term": "Term Sheet",
     "short": "The deal investors are offering",
     "tip": "A document outlining the terms of an investment — how much money, at what valuation, what control they get. It's not legally binding, but it's the framework for the final deal."
+  },
+  "assign_features": {
+    "term": "Features",
+    "short": "Build new product features",
+    "tip": "Engineers assigned to Features work on shipping new functionality. More features attract more users. Feature quality depends on engineer skill — high-skill engineers ship better work."
+  },
+  "assign_bugs": {
+    "term": "Bug Fixes",
+    "short": "Squash bugs in the product",
+    "tip": "Engineers assigned to Bug Fixes reduce your bug count. Fewer bugs means less user churn. Bugs accumulate naturally — especially when tech debt is high."
+  },
+  "assign_tech_debt": {
+    "term": "Tech Debt Reduction",
+    "short": "Clean up messy code",
+    "tip": "Tech debt builds up when you ship fast and cut corners. High tech debt slows down ALL work and generates more bugs. Assign engineers here to pay it down."
+  },
+  "assign_infra": {
+    "term": "Infrastructure",
+    "short": "Improve stability and uptime",
+    "tip": "Infrastructure work keeps your servers running. Low stability causes outages, which drives users away. Essential as your user base grows."
+  },
+  "assign_rnd": {
+    "term": "R&D",
+    "short": "Research and improve UX",
+    "tip": "R&D improves your product's user experience score. Better UX means users enjoy your product more, stay longer, and recommend it to others."
   }
 }

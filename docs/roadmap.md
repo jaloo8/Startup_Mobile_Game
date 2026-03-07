@@ -246,6 +246,7 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Template engine** — {variable} substitution in event text with per-event variations (Classic Mode / Tier 1)
 
 **Phase 2 — Systems Depth (TODO):**
+- [ ] **Employee sorting/filtering** — Sort and filter employees by role, skill level, morale, assignment on the People screen
 - [ ] **Fundraising** — VC meetings, term sheets, dilution calc, board seats
 - [ ] **Events (40 more)** — Expand to 50+ with 3-5 variations each (use AI batch generation, hand-edit)
 - [ ] **Event resolution UI** — Player must resolve events (choose options) before advancing quarter
@@ -279,6 +280,18 @@ Do these in order. Each one should be playable before starting the next.
   - Their response to events (a Perfectionist hates shipping buggy features, an Ambitious employee wants promotions faster)
   - Interview accuracy (a good read depends on interviewer personality matching)
   - Team composition bonuses/penalties (all Lone Wolves = no collaboration bonus; mix of Mentors + Juniors = faster skill growth)
+- [ ] **Employee aging & retirement** — Employees have ages; between 60-80 they may retire depending on:
+  - Wealth accumulated (high salary over many years → earlier retirement)
+  - Loyalty to the company (long tenure, high morale → stays longer)
+  - Passion for the work (engaged employees with meaningful assignments delay retirement)
+  - Retirement triggers a farewell event with potential knowledge-transfer bonuses if planned
+- [ ] **Executive poaching system** — Attempt to recruit named executives from competitor companies:
+  - Browse competitor org charts and target specific C-suite/VP-level talent with known elite skills
+  - Poached execs are expensive but a guaranteed quality hire — no interview RNG
+  - Risk of getting caught: competitor may file a lawsuit (cash penalty, reputation hit, legal fees)
+  - Probability of getting caught scales with target's seniority and competitor's size
+  - Successful poaches weaken the competitor and trigger retaliatory events
+  - Non-compete clauses: some execs can't work in the same focus area for 1-2 quarters after joining
 
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
@@ -287,8 +300,19 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Difficulty tuning** — Balance sandbox/normal/hardcore across 10+ test runs
 - [ ] **Tutorial** — Guided first quarter
 - [ ] **Sound effects** — Minimal UI sounds (optional)
+- [ ] **Visual office/garage scene** — Animated character sprites for employees in the workspace (garage → office → campus progression)
+- [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
 
 **Phase 4 — Content & Replayability (TODO):**
+- [ ] **Silicon Valley (show) character pack** — Parody versions of the show's cast as recruitable/encounter-able characters, each with specific skills and personalities that match their TV counterparts:
+  - Erlich Bachman parody — loudmouth incubator founder, high business/low technical, may demand office space in your garage
+  - Gilfoyle parody — elite systems engineer, abrasive personality, loyal if you earn respect, clashes with certain teammates
+  - Dinesh parody — solid engineer who craves validation, competitive with peers, morale drops if overshadowed
+  - Jared parody — operations savant, absurdly loyal, keeps team morale high, mysterious dark backstory flavor text
+  - Gavin Belson parody — competitor CEO who may poach your people or make acquisition offers, grandiose event dialogue
+  - Monica parody — VC partner contact who gives better fundraising intel and friendlier term sheets
+  - Big Head parody — low skill but incredibly lucky, stumbles into success, cheap to hire but unpredictable output
+  - Each character triggers unique events and dialogue when on your team or encountered
 - [ ] **Expand competitor roster** — Add more parody companies per category; flesh out each with multiple product lines, unique behaviors, and market moves (acquisitions, pivots, IPOs)
 - [ ] **Competitor product depth** — Each major competitor can have multiple products (e.g., Googlr has search, cloud, ads, hardware) that affect different market segments
 - [ ] **Community mod packs** — Ship a companion "real names" JSON; build a simple import flow (paste URL or pick file) for user-created competitor packs

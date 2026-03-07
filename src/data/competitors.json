@@ -98,6 +98,7 @@
     {"name": "Webfloe", "focus": "dev_tools", "size": "startup", "tagline": "No-code website builder for designers"},
     {"name": "Discrd", "focus": "consumer", "size": "startup", "tagline": "Voice and text chat for communities"},
     {"name": "Candva", "focus": "consumer", "size": "startup", "tagline": "Easy graphic design for non-designers"},
-    {"name": "Deel.co", "focus": "saas", "size": "startup", "tagline": "Global payroll and contractor management"}
+    {"name": "Deel.co", "focus": "saas", "size": "startup", "tagline": "Global payroll and contractor management"},
+    {"name": "Pied Pyper", "focus": "dev_tools", "size": "startup", "tagline": "Middle-out compression algorithm. Somehow still alive."}
   ]
 }

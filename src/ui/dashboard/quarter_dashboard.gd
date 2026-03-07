@@ -17,6 +17,7 @@ extends Control
 @onready var market_btn: Button = %MarketButton
 @onready var menu_btn: Button = %MenuButton
 @onready var event_log_container: VBoxContainer = %EventLogContainer
+@onready var team_container: VBoxContainer = %TeamContainer
 @onready var event_popup: EventPopup = %EventPopup
 
 const MAX_VISIBLE_EVENTS := 10
@@ -78,6 +79,8 @@ func _refresh(_q: int) -> void:
 	else:
 		runway_label.text = "~%d quarters" % roundi(rw)
 
+	_refresh_team()
+
 
 func _on_event(event: EventData) -> void:
 	_pending_events.append(event)
@@ -127,10 +130,35 @@ const GAME_OVER_MESSAGES := {
 }
 
 func _on_game_over(reason: String) -> void:
-	advance_btn.disabled = true
-	advance_btn.text = "Game Over"
-	var display_reason: String = GAME_OVER_MESSAGES.get(reason, reason.replace("_", " ").capitalize())
-	quarter_label.text = display_reason
+	GameState.set_meta("game_over_reason", reason)
+	SceneLoader.goto_scene("res://src/ui/game_over/game_over_screen.tscn")
+
+
+func _refresh_team() -> void:
+	_free_children(team_container)
+
+	if GameState.employees.is_empty():
+		var lbl := Label.new()
+		lbl.text = "No team yet — visit People to hire"
+		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5))
+		team_container.add_child(lbl)
+		return
+
+	for emp: EmployeeData in GameState.employees:
+		var lbl := Label.new()
+		var assign_name: String = EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned")
+		lbl.text = "%s — %s · %s" % [emp.employee_name, emp.display_title(), assign_name]
+		lbl.add_theme_font_size_override("font_size", 13)
+		var morale_color: Color
+		if emp.morale >= 70:
+			morale_color = Color(0.55, 0.8, 0.55)
+		elif emp.morale >= 40:
+			morale_color = Color(0.85, 0.75, 0.35)
+		else:
+			morale_color = Color(0.9, 0.4, 0.35)
+		lbl.add_theme_color_override("font_color", morale_color)
+		team_container.add_child(lbl)
 
 
 func _on_people() -> void:

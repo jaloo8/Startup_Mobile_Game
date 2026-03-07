@@ -385,5 +385,50 @@
     "weight": 0.9,
     "one_time": false,
     "cooldown_quarters": 4
+  },
+  {
+    "id": "ross_hahneman_visit",
+    "title": "Billionaire Drop-In",
+    "category": "money",
+    "stage": "any",
+    "description_template": "A McLaren with vertical doors just parked sideways across your parking lot. Ross Hahneman — Three Comma Club billionaire — walks in like he owns the place. 'I put radio on the internet,' he says by way of introduction. 'What do you guys do?'",
+    "variations": [
+      "You hear a car engine that costs more than your office. Ross Hahneman kicks open your door wearing a blazer with no shirt underneath. 'I heard about {company_name}. You need money? I have money. Three commas worth.'",
+      "Your intern comes running: 'There's a guy in the parking lot doing donuts in a McLaren.' Ross Hahneman strolls in, aviators on, and tosses his keys to nobody in particular. 'So, {company_name}. Pitch me. You have sixty seconds.'",
+      "A LinkedIn message from Ross Hahneman: 'Saw {company_name} on my feed. I'm in the area. By area I mean I flew here on my jet. Coming by in 20.' He's not asking."
+    ],
+    "choices": [
+      {
+        "label": "Take his money",
+        "effects": { "cash": 75000, "reputation": -5 },
+        "outcome_template": "He writes a check on the spot. Literally on the spot — he pulls out a checkbook. The money is real but he's already texting his publicist about it. Your credible investors are rolling their eyes.",
+        "outcome_variations": [
+          "Deal done. He insists on a photo for his Instagram. Caption: 'Just invested in the next billion-dollar company. Three Comma Club stays winning.' Your board is not amused.",
+          "He wires the money before you've even signed paperwork. 'Contracts are for people who don't trust each other. I trust me.' Somehow, the money clears."
+        ]
+      },
+      {
+        "label": "Politely decline",
+        "effects": { "reputation": 5 },
+        "outcome_template": "'Your loss,' he shrugs, revving the McLaren so loud your office windows rattle. He peels out. Your team watches in stunned silence. At least your cap table is clean.",
+        "outcome_variations": [
+          "He takes it surprisingly well. 'Respect the hustle.' He gives you a fist bump and leaves. His McLaren sets off three car alarms on the way out.",
+          "He seems confused that someone said no to him. 'Do you know who I am? I have three commas.' You hold firm. He'll be back."
+        ]
+      },
+      {
+        "label": "Ask for double",
+        "effects": { "cash": 150000, "reputation": -10 },
+        "outcome_template": "He laughs so hard he spills his green juice on your whiteboard. 'I like you. Bold.' He doubles the check. Your investors are furious but the runway is looking real comfortable.",
+        "outcome_variations": [
+          "'Nobody's ever asked me for MORE,' he says, genuinely delighted. He writes a bigger check and immediately tweets about it. Your brand takes a hit but your bank account doesn't care.",
+          "He stares at you for a long second. Then grins. 'That's Three Comma energy right there.' The wire hits your account before he's left the parking lot."
+        ]
+      }
+    ],
+    "trigger_conditions": { "quarter": 3 },
+    "weight": 0.4,
+    "one_time": true,
+    "cooldown_quarters": 0
   }
 ]
