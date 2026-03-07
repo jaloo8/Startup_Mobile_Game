@@ -1,139 +1,324 @@
-# Roguelike GM — Roadmap & Timeline
+# Venture — Roadmap & Development Guide
 
-**Goal:** Nothing → shipped game, in order. Work through phases sequentially; don’t skip to polish before the loop is fun.
-
----
-
-## Phase 0: Setup (Week 0)
-
-**Objective:** Project runs, design is locked, tests can run.
-
-| # | Objective | Status |
-|---|-----------|--------|
-| 0.1 | Godot 4 installed; project opens and runs (F5) | Done |
-| 0.2 | Repo structure in place (docs, src, assets, tests) | Done |
-| 0.3 | GdUnit4 addon installed and at least one test runs | |
-| 0.4 | GDD and MVP scope locked (sport, core loop, 3–5 cards/blinds) | |
-| 0.5 | Main menu has a working “Start run” that loads game board | |
+**Goal:** Nothing → shipped game in 13 weeks. Work through phases sequentially; each one should be playable before starting the next.
 
 ---
 
-## Phase 1: Vertical slice (Weeks 1–2)
+## Development Phases
 
-**Objective:** One complete run, start to finish, with placeholders. No content depth yet — just prove the loop.
+### Phase 0: Paper Prototype (Weekend 1)
 
-| # | Objective | Status |
-|---|-----------|--------|
-| 1.1 | Start run: game board loads with a deck and initial hand | |
-| 1.2 | Hand displays as cards (placeholder art OK); can select a card | |
-| 1.3 | Play card to lineup (offense/defense slots); lineup visible | |
-| 1.4 | “Confirm lineup” or “Face blind” button; one blind with a score threshold | |
-| 1.5 | Scoring formula implemented; win if score ≥ threshold, else lose | |
-| 1.6 | Win → “Next blind” or “Run complete”; lose → “Run over” + summary | |
-| 1.7 | Run summary screen: score, blinds beaten; option to start new run | |
-| 1.8 | Unit tests for scoring and deck (GdUnit4) passing | |
+**Goal:** Validate the core decision loop is fun before writing code.
 
-**Exit condition:** You can play one full run (start → lineup → one blind → win/lose → summary) on desktop.
+**What to do:**
+- Open a spreadsheet or use index cards
+- Create 5 employee cards with stats
+- Create a simple product tracker (features, tech debt, bugs)
+- Create a cash tracker (starting cash, burn rate, revenue)
+- Play 4 "quarters" manually:
+  - Allocate employees to tasks
+  - Roll dice for outcomes (or just decide what feels realistic)
+  - Process an event card you wrote
+  - Update numbers
+- **Signal it's working:** You find yourself agonizing over allocation tradeoffs
 
----
-
-## Phase 2: Full core loop (Weeks 3–4)
-
-**Objective:** Multiple blinds, modifiers, and enough content to feel like a real run.
-
-| # | Objective | Status |
-|---|-----------|--------|
-| 2.1 | 3–5 blinds in order; escalating score thresholds | |
-| 2.2 | 3–5 “Joker” modifiers (coaches/schemes) that affect score | |
-| 2.3 | Modifiers applied correctly in scoring (unit tests updated) | |
-| 2.4 | Between blinds: optional draft/shop (add 1–2 cards to deck) or keep minimal | |
-| 2.5 | Run length feels right (~15–25 min); tune blind count/difficulty | |
-| 2.6 | Playtest: core loop is fun with placeholder art; document what to fix | |
-
-**Exit condition:** “One more run” is believable; you want to play again after a run ends.
+**Deliverable:** A one-page notes doc on what felt fun and what felt tedious.
 
 ---
 
-## Phase 3: On device (Weeks 5–6)
+### Phase 1: Skeleton App (Weeks 1–2)
 
-**Objective:** Game runs on your iPhone and is shareable via TestFlight.
+**Goal:** Playable but ugly. Core loop works end-to-end.
 
-| # | Objective | Status |
-|---|-----------|--------|
-| 3.1 | Apple Developer account ($99/year) and Mac with Xcode | |
-| 3.2 | Godot iOS export preset configured; export produces Xcode project | |
-| 3.3 | Build from Xcode to physical iPhone via USB; game launches | |
-| 3.4 | Touch input works; UI readable and usable on phone (layout/safe area) | |
-| 3.5 | TestFlight build uploaded; install and play on device from TestFlight | |
-| 3.6 | One or two testers try a build; collect feedback | |
+**Build in this order:**
+1. Data model (GameState, Company, Employee, Product, Financials)
+2. New game setup screen (pick company type, name, difficulty)
+3. Quarter cycle: advance button that runs the simulation
+4. Employees screen (list view, stats, hire/fire)
+5. Product screen (allocation sliders for team work distribution)
+6. Finance screen (cash, burn, revenue, runway display)
+7. End-of-quarter results screen
+8. Save/load
 
-**Exit condition:** You and a tester can play a full run on iPhone.
+**Cursor prompt for Phase 1:**
 
----
+```
+I'm building a tech startup management sim game for iOS using SwiftUI.
+The game is structured as a turn-based simulation where each turn
+represents one quarter (3 months).
 
-## Phase 4: Content & balance (Weeks 7–9)
+Start by creating the core data model. Here are the key entities:
 
-**Objective:** More variety, balanced numbers, no placeholder-dependent design.
+[Paste the Data Model from game-design.md Section 4.2]
 
-| # | Objective | Status |
-|---|-----------|--------|
-| 4.1 | Expand to 10+ player cards and 5+ modifiers (or your target counts) | |
-| 4.2 | 5–8 blinds with distinct themes/modifiers | |
-| 4.3 | Balance pass: win rate and run length in target range | |
-| 4.4 | Data-driven where possible (cards/blinds in resources or JSON) | |
-| 4.5 | Bug list from playtests addressed | |
+Then create a SimulationEngine class that processes one quarter:
+[Paste the Simulation Engine steps from game-design.md Section 4.3]
 
----
+Use MVVM architecture. All game state should be in a single
+observable GameState object. Keep the UI minimal for now —
+just list views and basic text. We'll make it pretty later.
 
-## Phase 5: Polish (Weeks 10–12)
+Start with the Employee system:
+- Generate random employees with stats
+- Display them in a list
+- Allow hiring from a candidate pool
+- Allow firing
+- Allow assigning to work categories (Features, Bugs, TechDebt, Infra, R&D)
 
-**Objective:** Replace placeholders; game looks and sounds like a real product.
-
-| # | Objective | Status |
-|---|-----------|--------|
-| 5.1 | Art pass: card art, UI, main menu, run summary | |
-| 5.2 | Audio: menu, card play, win/lose, ambient (or minimal SFX) | |
-| 5.3 | Fonts and readability on small screens | |
-| 5.4 | UX polish: feedback on actions, transitions, no dead-ends | |
-| 5.5 | Settings: volume, maybe accessibility (e.g. text size) | |
-
----
-
-## Phase 6: Monetization & store (Weeks 13–14)
-
-**Objective:** Business model in place (if any) and store listing ready.
-
-| # | Objective | Status |
-|---|-----------|--------|
-| 6.1 | Monetization decided and implemented (see `docs/monetization.md`) | |
-| 6.2 | App Store listing: name, description, keywords, category | |
-| 6.3 | Screenshots and preview video for store page | |
-| 6.4 | Privacy policy / support URL if required | |
-| 6.5 | Final TestFlight round; fix showstopper bugs | |
+Then build the quarterly simulation that takes those assignments
+and produces outcomes (features built, bugs fixed, etc.)
+```
 
 ---
 
-## Phase 7: Ship (Week 15+)
+### Phase 2: Systems Depth (Weeks 3–5)
 
-| # | Objective | Status |
-|---|-----------|--------|
-| 7.1 | Submit for App Review | |
-| 7.2 | Handle review feedback; resubmit if needed | |
-| 7.3 | Release; post-launch plan (patches, first content update) | |
+**Goal:** All core systems functional. Game is playable start to finish.
+
+**Build:**
+1. Hiring pipeline (post job → wait → receive candidates → interview → offer)
+2. Product feature system (specific features to build, not just sliders)
+3. Revenue calculation based on company type
+4. Competitor AI (simple: they grow users and raise money on a schedule)
+5. Event system (create 20+ events, trigger based on context)
+6. Fundraising flow (VC meetings, term sheets, dilution calc)
+7. Win/loss conditions and game over screen
+8. Basic market/economic conditions that shift over time
+
+**Cursor prompt for event system:**
+
+```
+Add an event system to the startup sim game. Events should:
+
+1. Be defined as data (not hardcoded logic) so we can easily add more.
+   Each event has:
+   - id, title, description (narrative text)
+   - choices[] — 2-3 options the player can pick
+   - each choice has: label, effects (changes to game state), outcome_text
+   - trigger_conditions: when this event can fire (e.g., employee_count > 5,
+     quarter > 4, has_raised_funding == true)
+   - weight: probability of firing when conditions are met
+   - one_time: boolean (some events only fire once per game)
+
+2. At the start of each quarter, roll for 1-3 events from the eligible pool.
+   Present them in the Inbox screen. Player must resolve all events before
+   advancing the quarter.
+
+3. Here are 10 starter events to implement:
+   [Paste 10 events from game-design.md Section 3.6 with specific effects]
+
+Make the event definitions loadable from a JSON file so I can
+add more without changing code.
+```
 
 ---
 
-## Summary timeline (approximate)
+### Phase 3: Polish & Balance (Weeks 6–8)
+
+**Goal:** Game feels good to play. Numbers are balanced. UI is clean.
+
+**Build:**
+1. UI overhaul — clean mobile-native design (reference PGM3's minimal aesthetic)
+2. Charts and graphs (revenue over time, user growth, employee morale trends)
+3. Employee detail view with history and development arc
+4. Quarterly report that summarizes what happened (narrative + stats)
+5. Game balance tuning — play 10+ complete runs, adjust numbers
+6. Difficulty balancing across all three modes
+7. Tutorial / first-quarter guided experience
+8. Sound effects and minimal music (optional, nice-to-have)
+
+**Cursor prompt for UI polish:**
+
+```
+Redesign the employee list screen for the startup sim game.
+Current design is a basic SwiftUI List. I want it to feel like
+a premium mobile game, similar to Pocket GM 3's player cards.
+
+Each employee card should show:
+- Name and role/specialty (e.g., "Sarah Chen — Senior Backend")
+- Skill bar (visual, color-coded: red < 30, yellow 30-70, green > 70)
+- Morale indicator (emoji or icon)
+- Current assignment badge (Features/Bugs/Debt/Infra/R&D)
+- Salary (compact format: "$85K/yr")
+- Tap to expand for full detail view
+
+Use a dark theme with accent colors. No gradients. Clean typography.
+Cards should have subtle rounded corners and a thin border.
+Sort options: by name, skill, morale, salary, specialty.
+```
+
+---
+
+### Phase 4: Content & Replayability (Weeks 9–11)
+
+**Goal:** Enough content for 20+ hours of unique gameplay.
+
+**Build:**
+1. Expand to 50+ events (use AI batch generation, then hand-edit for quality)
+2. All 4 Software company types fully differentiated with unique mechanics
+3. Unlockable scenarios (starting conditions that change the game)
+4. Statistics and achievement system (track across runs)
+5. "Postmortem" game-over screen with timeline visualization
+6. Seed system — share seeds for specific market conditions
+
+**AI prompt for batch-generating events:**
+
+```
+I'm building a tech startup management sim. I need events that
+feel authentic to the startup experience. Each event should force
+a meaningful decision with real tradeoffs.
+
+Generate 20 events in this JSON format:
+{
+  "id": "unique_id",
+  "title": "Short title",
+  "description": "2-3 sentence narrative description from CEO's perspective",
+  "stage": "early/growth/late",
+  "company_types": ["saas", "consumer"],
+  "choices": [
+    {
+      "label": "Short action label",
+      "effects": { "cash": -5000, "morale_all": -5, "reputation": +10 },
+      "outcome": "1-2 sentence result description"
+    }
+  ]
+}
+
+Focus on events in these categories:
+- Employee drama (conflicts, departures, surprises)
+- Product crises (outages, security, technical)
+- Financial pressure (costs, revenue, fundraising)
+- Market shifts (competitors, regulations, trends)
+- Growth challenges (scaling, culture, process)
+
+Make the tradeoffs genuinely hard. No obvious "right answer."
+```
+
+---
+
+### Phase 5: Ship (Weeks 12–13)
+
+**Goal:** App Store submission.
+
+**Build:**
+1. App Store screenshots and description
+2. App icon
+3. Final bug fixes and crash testing
+4. TestFlight beta to 10–20 friends for feedback
+5. Incorporate critical feedback
+6. Submit to App Store
+
+---
+
+## Summary Timeline
 
 | Phase | Focus | Weeks |
-|-------|--------|-------|
-| 0 | Setup | 0 |
-| 1 | Vertical slice (one run) | 1–2 |
-| 2 | Full core loop | 3–4 |
-| 3 | On device + TestFlight | 5–6 |
-| 4 | Content & balance | 7–9 |
-| 5 | Polish | 10–12 |
-| 6 | Monetization & store | 13–14 |
-| 7 | Ship | 15+ |
+|-------|-------|-------|
+| 0 | Paper prototype | Weekend 1 |
+| 1 | Skeleton app (core loop end-to-end) | 1–2 |
+| 2 | Systems depth (all systems functional) | 3–5 |
+| 3 | Polish & balance (UI, tuning, tutorial) | 6–8 |
+| 4 | Content & replayability (events, scenarios) | 9–11 |
+| 5 | Ship (TestFlight, App Store) | 12–13 |
 
-Adjust weeks to your pace. Don’t move to the next phase until the exit condition is met — especially Phase 1 → 2 (loop must feel good before content).
+---
+
+## Priority Checklist
+
+Do these in order. Each one should be playable before starting the next.
+
+### v1.0 — Base Game (Software Path)
+
+- [ ] **Data model** — GameState with PathModule protocol for future DLC support
+- [ ] **Advance quarter** — Button that processes a turn (even if nothing happens)
+- [ ] **Employee system** — Generate, hire, view, fire employees
+- [ ] **Work allocation** — Assign employees to tasks, see output
+- [ ] **Product metrics** — Features, bugs, tech debt affected by work
+- [ ] **Basic finances** — Burn rate, revenue, cash, runway countdown
+- [ ] **Game over** — Bankruptcy when cash hits zero
+- [ ] **Events (10)** — First batch of narrative events with choices
+- [ ] **SaaS revenue model** — Subscription + user growth for first company type
+- [ ] **Competitors** — Basic AI companies that grow and compete
+- [ ] **Fundraising** — VC system with offers and dilution
+- [ ] **Events (30 more)** — Expand the event library
+- [ ] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools differentiated
+- [ ] **UI polish** — Make it look like a real game
+- [ ] **Tutorial** — Guided first quarter
+- [ ] **Win conditions** — IPO, acquisition, profitability
+- [ ] **Difficulty tuning** — Balance all three difficulty modes
+- [ ] **Achievements** — Track across runs
+- [ ] **Ship it**
+
+### v1.2 — DLC #1: The Intelligence Age (AI/ML Path)
+
+- [ ] **GPU/Compute budget system** — Resource management for training and inference
+- [ ] **Model quality score** — Training runs improve model, affects product quality
+- [ ] **AI revenue models** — Usage-based API pricing, subscription
+- [ ] **3 AI company types** — AI SaaS/API, AI-Powered App, AI Research Lab
+- [ ] **AI employee specialties** — ML Engineer, Research Scientist, Data Engineer
+- [ ] **40 AI-specific events** — Hype cycles, model leaks, compute costs, talent war
+- [ ] **Balance & test**
+
+### v1.3 — DLC #3: Press Start (Gaming Path)
+
+- [ ] **Game project system** — Multiple projects with genres, platforms, quality scores
+- [ ] **Review score simulation** — Press + user reviews based on quality and market fit
+- [ ] **Wishlist / hype mechanic** — Pre-launch marketing affects launch spike
+- [ ] **3 Gaming company types** — Indie, AA, Live Service
+- [ ] **Gaming employee specialties** — Game Designer, QA, Community Manager
+- [ ] **40 gaming-specific events** — Crunch, delays, viral moments, publisher pressure
+- [ ] **Balance & test**
+
+### v1.4 — DLC #2: Silicon Dreams (Hardware Path)
+
+- [ ] **Manufacturing system** — Fabless vs. own production, BOM, defect rates
+- [ ] **Supply chain management** — Components, suppliers, shortages, tariffs
+- [ ] **Product generations** — Multi-quarter R&D cycles, tape-out risk
+- [ ] **Inventory system** — Demand forecasting, dead stock, stockouts
+- [ ] **3 Hardware company types** — Consumer Electronics, Chip Design, Robotics
+- [ ] **Hardware employee specialties** — RTL Designer, MechE, Supply Chain Ops
+- [ ] **40 hardware-specific events** — Fab delays, recalls, supply shortages, certification
+- [ ] **Balance & test**
+
+### v1.5 — DLC #4: The Platform Play (OS & Platform Path)
+
+- [ ] **Developer ecosystem system** — Track third-party developers, SDK adoption
+- [ ] **Platform governance decisions** — Fees, policies, API changes
+- [ ] **Network effects model** — Users ↔ developers flywheel
+- [ ] **2 Platform company types** — OS, Developer Platform/Cloud
+- [ ] **Platform employee specialties** — DevRel, Platform Engineer, Partner Manager
+- [ ] **30 platform-specific events** — Antitrust, developer revolt, ecosystem health
+- [ ] **Balance & test**
+
+---
+
+## Cursor-Specific Workflow Tips
+
+### Session structure — work in vertical slices, not horizontal layers
+- Don't: "Build all the UI, then all the logic, then all the data"
+- Do: "Build the Employee hiring flow end-to-end, then the Product allocation flow end-to-end"
+
+### Prompt patterns that work well with Cursor
+
+1. **Start each feature with the data model change:**
+   "Add a `fundraising_round` property to the Company model with fields for..."
+
+2. **Then ask for the logic:**
+   "Write a function that simulates a VC meeting. Input: company metrics. Output: offer or rejection with terms."
+
+3. **Then ask for the UI:**
+   "Create a SwiftUI view that displays the VC offer as a card with Accept/Negotiate/Decline buttons."
+
+4. **Always provide context about the broader system:**
+   "This is part of a startup sim game. The player is the CEO. This screen appears when they choose to pursue fundraising in the Money tab."
+
+### Common Cursor pitfalls for game dev
+
+- **Cursor will over-engineer.** Tell it to keep things simple. "Use a simple dictionary for this, not a full database table."
+- **Cursor will forget game state connections.** Remind it: "Remember, employee morale affects their work output in the simulation engine."
+- **Cursor will make UI too complex.** Tell it: "Mobile-first. One column. Thumb-reachable. No horizontal scrolling."
+- **Test each system as you build it.** Don't build 5 systems then try to connect them. Build one, play it, then build the next.
+
+---
+
+*Update checklist status as you complete each objective.*
