@@ -59,6 +59,11 @@ func _on_start() -> void:
 	GameState.market.competitors = CompetitorAI.generate_starting_competitors(6, GameState.company.type)
 	GameState.save_game(GameState.current_slot)
 
+	Analytics.track_new_game(
+		CompanyData.TYPE_NAMES.get(config["type"], "unknown"),
+		config["difficulty"],
+		config["scenario"],
+	)
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 

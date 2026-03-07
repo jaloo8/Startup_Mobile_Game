@@ -37,6 +37,7 @@ func _ready() -> void:
 	_wire_glossary(%EquityTitle, "equity")
 	_wire_glossary(%ValuationTitle, "valuation")
 	_refresh()
+	Analytics.track_screen("finance")
 
 
 func _refresh() -> void:
@@ -73,6 +74,7 @@ func _wire_glossary(btn: Button, key: String) -> void:
 
 
 func _on_fundraise() -> void:
+	Analytics.track_fundraise_attempt()
 	if not FundraisingEngine.can_fundraise(GameState):
 		fundraise_btn.text = "Too early — build more first"
 		fundraise_btn.disabled = true
@@ -129,6 +131,9 @@ func _on_fundraise() -> void:
 func _on_accept_offer() -> void:
 	if _current_offer.get("rejected", false):
 		return
+	var firm_name: String = _current_offer.get("firm_name", "unknown")
+	var amount: float = _current_offer.get("amount", 0.0)
+	Analytics.track_fundraise_result(true, firm_name, amount)
 	FundraisingEngine.accept_offer(GameState, _current_offer)
 	offer_panel.visible = false
 	fundraise_btn.visible = true
@@ -137,6 +142,8 @@ func _on_accept_offer() -> void:
 
 
 func _on_decline_offer() -> void:
+	var firm_name: String = _current_offer.get("firm_name", "unknown")
+	Analytics.track_fundraise_result(false, firm_name, 0.0)
 	offer_panel.visible = false
 	fundraise_btn.visible = true
 	fundraise_btn.text = "Talk to Investors"

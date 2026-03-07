@@ -194,6 +194,7 @@ func _check_milestone_bonuses() -> void:
 		if hit:
 			_milestones_hit.append(key)
 			company.cash += m["bonus"]
+			Analytics.track_milestone_bonus(key, m["bonus"])
 			append_event_log({
 				"quarter": current_quarter,
 				"year": current_year,

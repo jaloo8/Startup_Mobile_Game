@@ -21,6 +21,7 @@ func _ready() -> void:
 	%UxTitle.pressed.connect(Glossary.show_term.bind("ux_score"))
 	%ChurnTitle.pressed.connect(Glossary.show_term.bind("churn_rate"))
 	_refresh()
+	Analytics.track_screen("product")
 
 
 func _refresh() -> void:

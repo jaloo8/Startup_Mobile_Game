@@ -31,6 +31,7 @@ func _ready() -> void:
 	candidate_panel.visible = false
 	_update_hire_button()
 	_refresh_list()
+	Analytics.track_screen("people")
 
 
 func _exit_tree() -> void:
@@ -142,10 +143,12 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 
 func _on_assign_direct(emp: EmployeeData, assignment: EmployeeData.Assignment) -> void:
 	emp.assignment = assignment
+	Analytics.track_assignment_change(EmployeeData.ASSIGNMENT_NAMES.get(assignment, "unknown"))
 	_refresh_list()
 
 
 func _on_fire(emp: EmployeeData) -> void:
+	Analytics.track_fire()
 	GameState.fire_employee(emp)
 	_update_hire_button()
 	_refresh_list()
@@ -176,6 +179,7 @@ func _on_hire_pressed() -> void:
 		return
 
 	GameState.company.cash -= POSTING_FEE
+	Analytics.track_job_posted(POSTING_FEE)
 	GameState.append_event_log({
 		"quarter": GameState.current_quarter,
 		"year": GameState.current_year,
@@ -285,11 +289,16 @@ func _refresh_candidates() -> void:
 
 func _on_interview(candidate: EmployeeData) -> void:
 	_interviewed[candidate.employee_name] = true
+	Analytics.track_interview()
 	_refresh_candidates()
 
 
 func _on_hire_candidate(candidate: EmployeeData) -> void:
 	if GameState.hire_employee(candidate):
+		Analytics.track_hire(
+			EmployeeData.SPECIALTY_NAMES.get(candidate.specialty, "unknown"),
+			EmployeeData.SENIORITY_NAMES.get(candidate.seniority, "unknown"),
+		)
 		_candidates.erase(candidate)
 		candidate_panel.visible = not _candidates.is_empty()
 		_refresh_candidates()

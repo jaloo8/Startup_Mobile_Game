@@ -15,6 +15,7 @@ func _ready() -> void:
 	_player_style = _make_style(Color(0.15, 0.20, 0.30))
 	back_btn.pressed.connect(_on_back)
 	_refresh()
+	Analytics.track_screen("market")
 
 
 func _exit_tree() -> void:

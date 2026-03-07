@@ -23,6 +23,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 GameState="*res://src/autoload/game_state.gd"
 SceneLoader="*res://src/autoload/scene_loader.gd"
 Glossary="*res://src/autoload/glossary.gd"
+Analytics="*res://src/autoload/analytics.gd"
 
 [display]
 

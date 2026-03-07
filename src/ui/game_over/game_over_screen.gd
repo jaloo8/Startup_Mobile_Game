@@ -56,6 +56,7 @@ func _ready() -> void:
 	decline_angel_btn.pressed.connect(_on_decline_angel)
 	restart_btn.pressed.connect(_on_restart)
 	menu_btn.pressed.connect(_on_menu)
+	Analytics.track_screen("game_over")
 
 	var reason: String = GameState.get_meta("game_over_reason", "bankruptcy") if GameState.has_meta("game_over_reason") else "bankruptcy"
 	var display_reason: String = GAME_OVER_MESSAGES.get(reason, reason.replace("_", " ").capitalize())
@@ -119,6 +120,8 @@ func _calculate_angel_offer() -> Dictionary:
 
 func _on_accept_angel() -> void:
 	var offer := _calculate_angel_offer()
+	var angel_name: String = _chosen_angel.get("name", "unknown")
+	Analytics.track_angel_decision(true, angel_name, offer["amount"])
 	GameState.angel_bailout_used = true
 	GameState.company.cash += offer["amount"]
 	GameState.company.equity_owned -= offer["equity"]
@@ -141,6 +144,8 @@ func _on_accept_angel() -> void:
 
 
 func _on_decline_angel() -> void:
+	var angel_name: String = _chosen_angel.get("name", "unknown")
+	Analytics.track_angel_decision(false, angel_name, 0.0)
 	angel_panel.visible = false
 
 

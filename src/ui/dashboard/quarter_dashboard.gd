@@ -44,6 +44,7 @@ func _ready() -> void:
 	GameState.event_triggered.connect(_on_event)
 
 	_refresh(GameState.current_quarter)
+	Analytics.track_screen("dashboard")
 
 
 func _wire_glossary_button(btn: Button, glossary_key: String) -> void:
@@ -98,7 +99,9 @@ func _on_event(event: EventData) -> void:
 func _on_advance() -> void:
 	_free_children(event_log_container)
 	_pending_events.clear()
+	Analytics.track_quarter_advanced(GameState.current_year, GameState.current_quarter)
 	GameState.advance_quarter()
+	Analytics.track_revenue(GameState.financials.revenue)
 
 	if not _pending_events.is_empty():
 		advance_btn.disabled = true
@@ -117,6 +120,7 @@ func _show_next_event() -> void:
 
 
 func _on_event_resolved(_event: EventData, _choice_index: int) -> void:
+	Analytics.track_event_choice(_event.id, _choice_index)
 	if not _pending_events.is_empty():
 		_pending_events.remove_at(0)
 	_show_next_event()
@@ -130,6 +134,7 @@ const GAME_OVER_MESSAGES := {
 }
 
 func _on_game_over(reason: String) -> void:
+	Analytics.track_game_over(reason, GameState.current_year, GameState.current_quarter)
 	GameState.set_meta("game_over_reason", reason)
 	SceneLoader.goto_scene("res://src/ui/game_over/game_over_screen.tscn")
 
