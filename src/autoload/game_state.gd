@@ -26,8 +26,11 @@ var fired_one_time_events: Array[String] = []
 var pending_events: Array[EventData] = []
 
 var is_game_active: bool = false
+var current_slot: String = ""
 
 const SAVE_DIR := "user://saves/"
+const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
+const MAX_SLOTS := 5
 const MAX_HISTORY_SIZE := 200
 const MAX_EVENT_LOG_SIZE := 500
 const DIFFICULTY_MULTS := {
@@ -171,7 +174,9 @@ func append_event_log(entry: Dictionary) -> void:
 # --- Save / Load (threaded to avoid mobile stutter) ---
 
 func auto_save() -> void:
-	save_game_async("autosave")
+	if current_slot.is_empty():
+		return
+	save_game_async(current_slot)
 
 
 func save_game_async(slot_name: String) -> void:
@@ -319,7 +324,7 @@ func _deserialize(data: Dictionary) -> bool:
 
 	product = ProductData.new()
 	var pd: Dictionary = data.get("product", {})
-	product.features = pd.get("features", [])
+	product.features.assign(pd.get("features", []))
 	product.tech_debt = pd.get("tech_debt", 0)
 	product.bugs = pd.get("bugs", 0)
 	product.stability = pd.get("stability", 80)
@@ -334,12 +339,12 @@ func _deserialize(data: Dictionary) -> bool:
 	financials.revenue = fd.get("revenue", 0.0)
 	financials.burn_rate = fd.get("burn_rate", 0.0)
 	financials.costs_breakdown = fd.get("costs", {})
-	financials.funding_rounds = fd.get("funding_rounds", [])
-	financials.investors = fd.get("investors", [])
+	financials.funding_rounds.assign(fd.get("funding_rounds", []))
+	financials.investors.assign(fd.get("investors", []))
 
 	market = MarketData.new()
 	var md: Dictionary = data.get("market", {})
-	market.competitors = md.get("competitors", [])
+	market.competitors.assign(md.get("competitors", []))
 	market.market_trend = md.get("trend", 0)
 	market.economy_state = md.get("economy", 0)
 
@@ -364,9 +369,78 @@ func _deserialize(data: Dictionary) -> bool:
 	current_year = data.get("year", 1)
 	difficulty = data.get("difficulty", "normal")
 	starting_scenario = data.get("scenario", "garage")
-	history = data.get("history", [])
-	event_log = data.get("event_log", [])
-	fired_one_time_events = data.get("fired_events", [])
+	history.assign(data.get("history", []))
+	event_log.assign(data.get("event_log", []))
+	fired_one_time_events.assign(data.get("fired_events", []))
 
 	is_game_active = true
 	return true
+
+
+# --- Slot Management ---
+
+func list_saves() -> Array[Dictionary]:
+	var saves: Array[Dictionary] = []
+	for slot in SLOT_NAMES:
+		var info := peek_save(slot)
+		info["slot"] = slot
+		saves.append(info)
+	return saves
+
+
+func peek_save(slot_name: String) -> Dictionary:
+	var path := SAVE_DIR + slot_name + ".json"
+	if not FileAccess.file_exists(path):
+		return {"exists": false}
+
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return {"exists": false}
+
+	var json := JSON.new()
+	if json.parse(file.get_as_text()) != OK:
+		file = null
+		return {"exists": false}
+	file = null
+
+	var data: Dictionary = json.data if json.data is Dictionary else {}
+	var cd: Dictionary = data.get("company", {})
+	var pd: Dictionary = data.get("product", {})
+	var fd: Dictionary = data.get("financials", {})
+
+	return {
+		"exists": true,
+		"company_name": cd.get("name", "Unknown"),
+		"company_type": cd.get("type", 0),
+		"cash": cd.get("cash", 0.0),
+		"users": pd.get("users", 0),
+		"quarter": data.get("quarter", 1),
+		"year": data.get("year", 1),
+		"difficulty": data.get("difficulty", "normal"),
+		"revenue": fd.get("revenue", 0.0),
+		"employees": data.get("employees", []).size(),
+	}
+
+
+func delete_save(slot_name: String) -> void:
+	var path := SAVE_DIR + slot_name + ".json"
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+	if current_slot == slot_name:
+		current_slot = ""
+		_clear_run_state()
+
+
+func _clear_run_state() -> void:
+	company = null
+	product = null
+	financials = null
+	market = null
+	employees.clear()
+	history.clear()
+	event_log.clear()
+	fired_one_time_events.clear()
+	pending_events.clear()
+	current_quarter = 1
+	current_year = 1
+	is_game_active = false

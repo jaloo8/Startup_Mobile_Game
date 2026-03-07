@@ -250,6 +250,12 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Events (40 more)** — Expand to 50+ with 3-5 variations each (use AI batch generation, hand-edit)
 - [ ] **Event resolution UI** — Player must resolve events (choose options) before advancing quarter
 - [ ] **Hiring pipeline** — Post job → wait → candidates with hidden stats → interview → offer/reject
+- [ ] **Deep interviews system** — Assign a team member to conduct the interview instead of free-peek:
+  - **Who interviews matters:** VP has high accuracy at reading candidates but costs the most time/resources; Director is solid but less accurate; Manager is average; Engineer is cheap but quality depends on their people skill stat
+  - **Interviewer skill affects reveal:** High people-skill interviewer reveals true stats more accurately; low people-skill may misjudge (show inflated or deflated stats with a margin of error)
+  - **Time/resource cost:** Senior interviewers tied up for a quarter tick can't do their normal work output that quarter (opportunity cost)
+  - **Culture fit detection:** Only interviewers with high culture-fit themselves can reliably assess a candidate's culture fit — otherwise it shows as "???"
+  - **Interview feedback flavor text:** Each interviewer gives a short written assessment that reflects their own biases and accuracy
 - [ ] **Specific features to build** — Pick from feature list instead of just accumulating progress
 - [ ] **Market shifts** — Economy state changes (bull/bear), affects fundraising and hiring
 - [ ] **News ticker** — 150+ headline templates shown each quarter
@@ -257,8 +263,22 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Quarterly report** — Narrative summary of what happened each quarter
 - [ ] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools with unique mechanics
 - [ ] **Win conditions** — IPO ($100M+ ARR), acquisition, sustainable business (4Q profit), unicorn ($1B val)
-- [ ] **Founder burnout** — CEO morale as a loss condition
+- [ ] **CEO background & skills** — Player picks a founder archetype at game start that gives stat bonuses/penalties:
+  - **Engineer** — Can personally contribute to product (features, bugs, infra). Weaker at fundraising and BD. Interviews are decent for technical roles, weaker for business roles
+  - **Finance** — Better fundraising outcomes (higher valuations, lower dilution). Better at managing burn rate (cost events have smaller penalties). Weaker at product decisions
+  - **Recruiter/People** — Best interviewer in the company. Hiring pipeline moves faster, better culture-fit reads. Can spot flight-risk employees early. Weaker at product and finance
+  - **Business/Sales** — Better at BD deals, partnership events, and reputation. Revenue grows faster from deals. Weaker at technical product decisions
+  - **Custom** — Distribute a limited pool of trait points (e.g., 20 points across 4 stats, each 1-10). Player designs their own founder. Can't max everything — real tradeoffs required
+  - **God Mode** — Unlockable after first win (or cheat code). All stats maxed. For fun/sandbox, excluded from leaderboard/achievements
+  - CEO has their own stats (technical, finance, people, business — each 1-10) that affect event outcomes, interview quality, VC negotiations, and product contributions
+  - CEO can "level up" skills slowly through choices (picking the finance option in events nudges finance skill up)
+- [ ] **Founder burnout** — CEO morale as a loss condition (ties into CEO having their own stress/energy meter)
 - [ ] **Board takeover** — Miss VC targets repeatedly → game over
+- [ ] **Employee personalities** — Each employee has 1-2 personality traits (e.g., Perfectionist, Team Player, Lone Wolf, Mentor, Ambitious, Laid-back) that affect:
+  - How they interact with other employees (conflicts, synergies)
+  - Their response to events (a Perfectionist hates shipping buggy features, an Ambitious employee wants promotions faster)
+  - Interview accuracy (a good read depends on interviewer personality matching)
+  - Team composition bonuses/penalties (all Lone Wolves = no collaboration bonus; mix of Mentors + Juniors = faster skill growth)
 
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource

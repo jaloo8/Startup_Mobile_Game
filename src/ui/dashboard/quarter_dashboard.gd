@@ -150,7 +150,8 @@ func _on_market() -> void:
 
 
 func _on_menu() -> void:
-	GameState.save_game("autosave")
+	if not GameState.current_slot.is_empty():
+		GameState.save_game(GameState.current_slot)
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
 
 

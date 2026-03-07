@@ -57,9 +57,10 @@ func _on_start() -> void:
 	GameState.new_game(config)
 	EventEngine.load_events("res://src/data/events.json")
 	GameState.market.competitors = CompetitorAI.generate_starting_competitors(6, GameState.company.type)
+	GameState.save_game(GameState.current_slot)
 
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 
 func _on_back() -> void:
-	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+	SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")
