@@ -1,0 +1,84 @@
+{
+  "_mod_info": "This file controls the competitor companies in the game. Edit it to add your own! The game picks randomly from this list each playthrough. Only 'name' is required — everything else is optional and the game will fill in defaults.",
+  "_format": {
+    "name": "Company name (required)",
+    "focus": "One of: saas, consumer, marketplace, dev_tools (optional, random if missing)",
+    "size": "One of: startup, growth, enterprise (optional — controls starting strength)",
+    "tagline": "Short description shown in-game (optional)"
+  },
+  "_modding_tips": "Want to use real company names? Just edit this file. Share your version with others by hosting it anywhere (GitHub Pages, Pastebin, etc). To restore defaults, delete this file and the game will recreate it.",
+
+  "competitors": [
+
+    {"name": "Orange", "focus": "consumer", "size": "enterprise", "tagline": "Premium hardware and walled-garden ecosystem"},
+    {"name": "Googlr", "focus": "consumer", "size": "enterprise", "tagline": "Search, ads, cloud, and everything in between"},
+    {"name": "Macrosoft", "focus": "saas", "size": "enterprise", "tagline": "Enterprise software, cloud, and operating systems"},
+    {"name": "Amazn", "focus": "marketplace", "size": "enterprise", "tagline": "E-commerce empire and cloud services"},
+    {"name": "Meto", "focus": "consumer", "size": "enterprise", "tagline": "Social networks and the metaverse"},
+
+    {"name": "Nvidya", "focus": "dev_tools", "size": "enterprise", "tagline": "GPUs and AI accelerator hardware"},
+    {"name": "Netflex", "focus": "consumer", "size": "enterprise", "tagline": "Streaming entertainment platform"},
+    {"name": "Teslo", "focus": "consumer", "size": "enterprise", "tagline": "Electric vehicles and clean energy"},
+    {"name": "Salesforge", "focus": "saas", "size": "enterprise", "tagline": "Enterprise CRM and business cloud"},
+    {"name": "Adobo", "focus": "saas", "size": "enterprise", "tagline": "Creative tools for design and media"},
+
+    {"name": "Oracl", "focus": "saas", "size": "enterprise", "tagline": "Databases, cloud infrastructure, and enterprise software"},
+    {"name": "IBC", "focus": "saas", "size": "enterprise", "tagline": "Legacy enterprise computing and consulting"},
+    {"name": "Intl", "focus": "dev_tools", "size": "enterprise", "tagline": "Processors and semiconductor manufacturing"},
+    {"name": "Cisko", "focus": "dev_tools", "size": "enterprise", "tagline": "Networking hardware and enterprise infrastructure"},
+    {"name": "Delll", "focus": "consumer", "size": "enterprise", "tagline": "PCs, servers, and enterprise hardware"},
+
+    {"name": "ClosedAI", "focus": "dev_tools", "size": "growth", "tagline": "Frontier AI models and research"},
+    {"name": "Striipe", "focus": "dev_tools", "size": "growth", "tagline": "Payment infrastructure for the internet"},
+    {"name": "Ubr", "focus": "marketplace", "size": "growth", "tagline": "Ride-sharing and delivery platform"},
+    {"name": "Slak", "focus": "saas", "size": "growth", "tagline": "Team messaging and collaboration"},
+    {"name": "Spotifi", "focus": "consumer", "size": "growth", "tagline": "Music streaming and podcasts"},
+
+    {"name": "Spase X", "focus": "dev_tools", "size": "growth", "tagline": "Rockets, satellites, and internet from space"},
+    {"name": "Twitr", "focus": "consumer", "size": "growth", "tagline": "Microblogging and real-time news"},
+    {"name": "Shopifly", "focus": "marketplace", "size": "growth", "tagline": "E-commerce platform for online stores"},
+    {"name": "Zuum", "focus": "saas", "size": "growth", "tagline": "Video conferencing and virtual meetings"},
+    {"name": "Snapp Inc", "focus": "consumer", "size": "growth", "tagline": "Disappearing photos and AR filters"},
+
+    {"name": "Cloudflair", "focus": "dev_tools", "size": "growth", "tagline": "CDN, security, and edge computing"},
+    {"name": "Dockr", "focus": "dev_tools", "size": "growth", "tagline": "Containers and developer deployment tools"},
+    {"name": "Databriks", "focus": "dev_tools", "size": "growth", "tagline": "Data lakehouse and AI analytics"},
+    {"name": "Snowflek", "focus": "saas", "size": "growth", "tagline": "Cloud data warehousing"},
+    {"name": "MongoDV", "focus": "dev_tools", "size": "growth", "tagline": "NoSQL database platform"},
+
+    {"name": "Atlantian", "focus": "saas", "size": "growth", "tagline": "Project tracking and team collaboration"},
+    {"name": "Intuut", "focus": "saas", "size": "enterprise", "tagline": "Tax, accounting, and small business software"},
+    {"name": "HubSplat", "focus": "saas", "size": "growth", "tagline": "Marketing, sales, and CRM platform"},
+    {"name": "Palantar", "focus": "saas", "size": "growth", "tagline": "Big data analytics and intelligence"},
+    {"name": "CrowdStrke", "focus": "dev_tools", "size": "growth", "tagline": "Cybersecurity and endpoint protection"},
+
+    {"name": "Datadawg", "focus": "dev_tools", "size": "growth", "tagline": "Cloud monitoring and observability"},
+    {"name": "Twilo", "focus": "dev_tools", "size": "growth", "tagline": "Communications APIs for developers"},
+    {"name": "Zendeq", "focus": "saas", "size": "growth", "tagline": "Customer support and helpdesk software"},
+    {"name": "GitLob", "focus": "dev_tools", "size": "growth", "tagline": "Code hosting and open source collaboration"},
+    {"name": "Vercl", "focus": "dev_tools", "size": "startup", "tagline": "Frontend deployment and serverless platform"},
+
+    {"name": "PalPay", "focus": "marketplace", "size": "enterprise", "tagline": "Online payments and digital wallets"},
+    {"name": "Squar", "focus": "marketplace", "size": "growth", "tagline": "Point-of-sale and financial services for merchants"},
+    {"name": "Coinbaze", "focus": "marketplace", "size": "growth", "tagline": "Cryptocurrency exchange and wallet"},
+    {"name": "Robinhuud", "focus": "consumer", "size": "growth", "tagline": "Commission-free stock trading app"},
+
+    {"name": "Airbnd", "focus": "marketplace", "size": "enterprise", "tagline": "Short-term rentals and travel experiences"},
+    {"name": "DoorDsh", "focus": "marketplace", "size": "growth", "tagline": "Food delivery and local logistics"},
+    {"name": "iBay", "focus": "marketplace", "size": "enterprise", "tagline": "Online auctions and peer-to-peer marketplace"},
+    {"name": "Instacrt", "focus": "marketplace", "size": "growth", "tagline": "Grocery delivery and pickup"},
+    {"name": "Etsee", "focus": "marketplace", "size": "growth", "tagline": "Handmade and vintage marketplace"},
+
+    {"name": "Reddyt", "focus": "consumer", "size": "growth", "tagline": "Forums, communities, and internet culture"},
+    {"name": "TokTik", "focus": "consumer", "size": "enterprise", "tagline": "Short-form video and viral content"},
+    {"name": "Pintrest", "focus": "consumer", "size": "growth", "tagline": "Visual discovery and inspiration boards"},
+    {"name": "Disni+", "focus": "consumer", "size": "enterprise", "tagline": "Streaming, theme parks, and entertainment empire"},
+    {"name": "Walmrt", "focus": "marketplace", "size": "enterprise", "tagline": "Retail giant with a growing tech division"},
+
+    {"name": "AMX", "focus": "dev_tools", "size": "enterprise", "tagline": "CPUs and GPUs for gamers and data centers"},
+    {"name": "Qualcomn", "focus": "dev_tools", "size": "enterprise", "tagline": "Mobile chipsets and wireless technology"},
+    {"name": "SAQ", "focus": "saas", "size": "enterprise", "tagline": "Enterprise resource planning and business operations"},
+    {"name": "ServiceGo", "focus": "saas", "size": "growth", "tagline": "IT service management and digital workflows"},
+    {"name": "Workdae", "focus": "saas", "size": "growth", "tagline": "HR, finance, and enterprise planning software"}
+  ]
+}

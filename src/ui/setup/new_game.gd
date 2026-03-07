@@ -56,7 +56,7 @@ func _on_start() -> void:
 
 	GameState.new_game(config)
 	EventEngine.load_events("res://src/data/events.json")
-	GameState.market.competitors = CompetitorAI.generate_starting_competitors(4)
+	GameState.market.competitors = CompetitorAI.generate_starting_competitors(6, GameState.company.type)
 
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 

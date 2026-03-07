@@ -286,7 +286,7 @@
     "description_template": "A junior developer you hired 3 quarters ago just mass-refactored the codebase over the weekend. Code is way cleaner. But there are no tests.",
     "variations": [
       "Monday morning. Your junior dev {employee_name} sends a Slack message: 'Hey, so I was bored this weekend and rewrote the entire auth module. PR is up!' The diff is +2,000 / -3,500 lines. There are no tests.",
-      "You open GitHub and see a PR with 47 changed files from your newest hire. Subject line: 'Major cleanup :sparkles:' Your senior engineer is already typing a very long review comment.",
+      "You open GitLab and see a merge request with 47 changed files from your newest hire. Subject line: 'Major cleanup :sparkles:' Your senior engineer is already typing a very long review comment.",
       "{employee_name} proudly announces at standup: 'I refactored the billing system over the weekend!' The room goes quiet. Your lead engineer's eye twitches."
     ],
     "choices": [
@@ -305,7 +305,7 @@
         "outcome_template": "Safe call, but the junior is deflated. Others wonder if initiative gets punished here. You add 'refactoring guidelines' to the wiki.",
         "outcome_variations": [
           "You revert the PR and schedule a 1:1. The junior understands but you can see their enthusiasm dim. Other junior devs take note — don't rock the boat.",
-          "Git revert. Done. But the junior spent their whole weekend on this. The team whispers about whether {company_name} actually values initiative."
+          "One click on gitlab.{company_name}.com and it's reverted. Done. But the junior spent their whole weekend on this. The team whispers about whether {company_name} actually values initiative."
         ]
       }
     ],

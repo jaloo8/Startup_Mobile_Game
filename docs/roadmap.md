@@ -269,6 +269,9 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Sound effects** — Minimal UI sounds (optional)
 
 **Phase 4 — Content & Replayability (TODO):**
+- [ ] **Expand competitor roster** — Add more parody companies per category; flesh out each with multiple product lines, unique behaviors, and market moves (acquisitions, pivots, IPOs)
+- [ ] **Competitor product depth** — Each major competitor can have multiple products (e.g., Googlr has search, cloud, ads, hardware) that affect different market segments
+- [ ] **Community mod packs** — Ship a companion "real names" JSON; build a simple import flow (paste URL or pick file) for user-created competitor packs
 - [ ] **Scenario packs** — "Dot-Com Boom", "AI Gold Rush", "Pandemic Pivot", etc. (JSON configs)
 - [ ] **Achievements** — Track across runs
 - [ ] **Postmortem screen** — Timeline of key decisions, shareable
