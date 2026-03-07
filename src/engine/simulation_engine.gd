@@ -161,7 +161,7 @@ static func _process_employee_turnover(state: Node) -> void:
 			"quarter": state.current_quarter,
 			"year": state.current_year,
 			"event_id": "employee_quit",
-			"title": "%s left the company" % emp.employee_name,
+			"title": "%s resigned" % emp.employee_name,
 		})
 
 

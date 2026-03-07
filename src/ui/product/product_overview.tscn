@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/ui/product/product_overview.gd" id="1"]
+[ext_resource type="PackedScene" path="res://src/ui/components/glossary_popup.tscn" id="2"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_heading"]
 font_size = 28
@@ -63,9 +64,12 @@ columns = 2
 theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 10
 
-[node name="TechDebtTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="TechDebtTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Tech Debt"
+flat = true
+alignment = 0
+text = "Tech Debt  ⓘ"
 
 [node name="TechDebtBar" type="ProgressBar" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -74,9 +78,12 @@ max_value = 100.0
 value = 0.0
 show_percentage = true
 
-[node name="StabilityTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="StabilityTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Stability"
+flat = true
+alignment = 0
+text = "Stability  ⓘ"
 
 [node name="StabilityBar" type="ProgressBar" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -85,9 +92,12 @@ max_value = 100.0
 value = 80.0
 show_percentage = true
 
-[node name="UxTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="UxTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "UX Score"
+flat = true
+alignment = 0
+text = "UX Score  ⓘ"
 
 [node name="UxBar" type="ProgressBar" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -114,9 +124,12 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "0"
 
-[node name="ChurnTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="ChurnTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Churn"
+flat = true
+alignment = 0
+text = "Churn Rate  ⓘ"
 
 [node name="ChurnLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -139,3 +152,5 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
+
+[node name="GlossaryPopup" parent="." instance=ExtResource("2")]

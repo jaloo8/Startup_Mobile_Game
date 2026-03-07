@@ -12,7 +12,7 @@ static func step(market: MarketData) -> void:
 		var current_users: int = comp.get("users", 0)
 
 		var organic := ceili(current_users * growth_rate)
-		var base := randi_range(BASE_USER_GROWTH_PER_QUARTER / 2, BASE_USER_GROWTH_PER_QUARTER)
+		var base := randi_range(int(BASE_USER_GROWTH_PER_QUARTER / 2), BASE_USER_GROWTH_PER_QUARTER)
 		comp["users"] = current_users + organic + base
 
 		comp["product_quality"] = mini(100, comp.get("product_quality", 50) + randi_range(0, 3))

@@ -40,7 +40,7 @@ static func load_events(path: String) -> void:
 		ev.title = str(entry.get("title", ""))
 
 		ev.description = str(entry.get("description_template", entry.get("description", "")))
-		ev.choices = entry.get("choices", [])
+		ev.choices.assign(entry.get("choices", []))
 		ev.trigger_conditions = entry.get("trigger_conditions", {})
 		ev.weight = float(entry.get("weight", 1.0))
 		ev.one_time = bool(entry.get("one_time", false))

@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://src/ui/dashboard/quarter_dashboard.gd" id="1"]
+[ext_resource type="PackedScene" path="res://src/ui/components/glossary_popup.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://src/ui/components/event_popup.tscn" id="3"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_heading"]
 font_size = 28
@@ -64,9 +66,12 @@ columns = 2
 theme_override_constants/h_separation = 24
 theme_override_constants/v_separation = 8
 
-[node name="CashTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="CashTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Cash"
+flat = true
+alignment = 0
+text = "Cash  ⓘ"
 
 [node name="CashLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -74,9 +79,12 @@ layout_mode = 2
 text = "$0"
 horizontal_alignment = 2
 
-[node name="RevenueTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="RevenueTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Revenue"
+flat = true
+alignment = 0
+text = "Revenue  ⓘ"
 
 [node name="RevenueLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -84,9 +92,12 @@ layout_mode = 2
 text = "$0"
 horizontal_alignment = 2
 
-[node name="BurnTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="BurnTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Burn Rate"
+flat = true
+alignment = 0
+text = "Burn Rate  ⓘ"
 
 [node name="BurnLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -94,9 +105,12 @@ layout_mode = 2
 text = "$0"
 horizontal_alignment = 2
 
-[node name="RunwayTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="RunwayTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Runway"
+flat = true
+alignment = 0
+text = "Runway  ⓘ"
 
 [node name="RunwayLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -145,12 +159,19 @@ size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 44)
 text = "Product"
 
+[node name="FinanceButton" type="Button" parent="MarginContainer/VBox/NavRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "Finances"
+
 [node name="Sep3" type="HSeparator" parent="MarginContainer/VBox"]
 layout_mode = 2
 
 [node name="EventsLabel" type="Label" parent="MarginContainer/VBox"]
 layout_mode = 2
-text = "What happened"
+text = "This Quarter"
 
 [node name="EventLogScroll" type="ScrollContainer" parent="MarginContainer/VBox"]
 layout_mode = 2
@@ -171,3 +192,8 @@ unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 text = "Advance Quarter →"
+
+[node name="EventPopup" parent="." instance=ExtResource("3")]
+unique_name_in_owner = true
+
+[node name="GlossaryPopup" parent="." instance=ExtResource("2")]

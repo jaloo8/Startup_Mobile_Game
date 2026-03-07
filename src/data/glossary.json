@@ -1,0 +1,147 @@
+{
+  "ARR": {
+    "term": "ARR",
+    "short": "Annual Recurring Revenue",
+    "tip": "Your total subscription revenue if every current customer stayed for a full year. It's the number VCs care about most for SaaS companies."
+  },
+  "MRR": {
+    "term": "MRR",
+    "short": "Monthly Recurring Revenue",
+    "tip": "The subscription revenue you can count on each month. ARR is just this times 12."
+  },
+  "burn_rate": {
+    "term": "Burn Rate",
+    "short": "How fast you spend money",
+    "tip": "Your total costs per quarter. If you're spending more than you earn, you're 'burning' through your savings. Every startup founder checks this obsessively."
+  },
+  "runway": {
+    "term": "Runway",
+    "short": "How long until you run out of money",
+    "tip": "Cash divided by burn rate. If you have $300K and burn $100K per quarter, you have 3 quarters of runway. When this hits zero, it's game over — literally."
+  },
+  "churn_rate": {
+    "term": "Churn Rate",
+    "short": "Percentage of users who leave",
+    "tip": "The percentage of your users who stop using your product each quarter. High churn means your product isn't sticky enough — people try it and leave."
+  },
+  "tech_debt": {
+    "term": "Tech Debt",
+    "short": "Shortcuts that slow you down later",
+    "tip": "When you ship code fast and cut corners, it works now but makes everything harder later. Like credit card debt — easy to accumulate, painful to pay off. Assign engineers to Tech Debt to reduce it."
+  },
+  "dau": {
+    "term": "DAU",
+    "short": "Daily Active Users",
+    "tip": "How many people actually use your product each day. A big user count with low DAU means people signed up but don't come back — that's a problem."
+  },
+  "ux_score": {
+    "term": "UX Score",
+    "short": "How good your product feels to use",
+    "tip": "User experience quality. Higher UX means better conversion and retention — people stick around when the product feels good. Assign engineers to R&D to improve this."
+  },
+  "stability": {
+    "term": "Stability",
+    "short": "How reliable your servers are",
+    "tip": "Server uptime and reliability. Low stability means outages, which means users leave. Assign engineers to Infrastructure to improve this."
+  },
+  "morale": {
+    "term": "Morale",
+    "short": "How your team feels about working here",
+    "tip": "Happy employees work better and stay longer. Overwork, low pay, and chaos tank morale. Below 60 morale, employees start thinking about quitting."
+  },
+  "stress": {
+    "term": "Stress",
+    "short": "Workload pressure on an employee",
+    "tip": "Builds up from being assigned to work. High stress eats into morale over time. Employees recover stress gradually each quarter, but piling it on leads to burnout."
+  },
+  "skill": {
+    "term": "Skill",
+    "short": "How good someone is at their job",
+    "tip": "A higher skill means more and better output each quarter. Employees with high growth potential improve their skill over time if they're assigned to work."
+  },
+  "equity": {
+    "term": "Equity",
+    "short": "Your ownership percentage",
+    "tip": "How much of the company you own. You start at 100%. Every time you raise money from investors, you give up some equity in exchange for cash. Less equity means less payout if you sell."
+  },
+  "dilution": {
+    "term": "Dilution",
+    "short": "Losing ownership when you raise money",
+    "tip": "When investors put money in, they get a percentage of the company. Your ownership goes down — that's dilution. A $2M raise at a $10M valuation means giving up 20%."
+  },
+  "valuation": {
+    "term": "Valuation",
+    "short": "What investors think your company is worth",
+    "tip": "Not real money — it's a negotiated number. A higher valuation means you give up less equity for the same amount of cash. VCs and founders haggle over this."
+  },
+  "seed_round": {
+    "term": "Seed Round",
+    "short": "First real fundraising round",
+    "tip": "The first major investment in your company, usually $500K–$3M. Comes from angel investors or early-stage VCs. Used to build the product and find initial customers."
+  },
+  "series_a": {
+    "term": "Series A",
+    "short": "Growth-stage funding round",
+    "tip": "A bigger round, usually $5M–$15M. Investors want to see product-market fit — real users, real revenue, real growth. This is where many startups fail to raise."
+  },
+  "product_market_fit": {
+    "term": "Product-Market Fit",
+    "short": "People actually want what you built",
+    "tip": "The magic moment when your product meets real demand. Users grow organically, retention is strong, and people recommend it without being asked. Every startup is searching for this."
+  },
+  "cac": {
+    "term": "CAC",
+    "short": "Customer Acquisition Cost",
+    "tip": "How much you spend to get one new customer. Marketing spend divided by new customers. If CAC is higher than what a customer pays you, you're losing money on every user."
+  },
+  "ltv": {
+    "term": "LTV",
+    "short": "Lifetime Value",
+    "tip": "Total revenue you'll earn from one customer over their entire time using your product. The golden rule: LTV needs to be at least 3x your CAC, or the math doesn't work."
+  },
+  "gmv": {
+    "term": "GMV",
+    "short": "Gross Merchandise Value",
+    "tip": "Total value of transactions on your marketplace. If 1,000 items sell for $50 each, your GMV is $50K. Your actual revenue is the take rate — the small percentage you keep from each sale."
+  },
+  "take_rate": {
+    "term": "Take Rate",
+    "short": "Your cut of each transaction",
+    "tip": "The percentage a marketplace keeps from each sale. Uber takes ~25%, Airbnb takes ~14%, the App Store takes 30%. Higher take rate means more revenue but pushes sellers to competitors."
+  },
+  "saas": {
+    "term": "SaaS",
+    "short": "Software as a Service",
+    "tip": "Software you pay for monthly or yearly instead of buying once. Think Slack, Notion, Dropbox. Predictable recurring revenue makes this the most popular startup model."
+  },
+  "b2b": {
+    "term": "B2B",
+    "short": "Business-to-Business",
+    "tip": "Your customers are other companies, not regular people. B2B deals are bigger but take longer to close. One enterprise contract can be worth thousands of consumer subscriptions."
+  },
+  "ipo": {
+    "term": "IPO",
+    "short": "Initial Public Offering",
+    "tip": "When a private company sells shares to the public for the first time. The ultimate exit — your company is now traded on the stock market. Requires massive revenue and scale."
+  },
+  "pivot": {
+    "term": "Pivot",
+    "short": "Changing direction when something isn't working",
+    "tip": "Startups pivot when their original idea isn't gaining traction. Slack started as a gaming company. Instagram started as a check-in app. Sometimes the pivot is the company."
+  },
+  "bootstrapping": {
+    "term": "Bootstrapping",
+    "short": "Building without outside investors",
+    "tip": "Growing your company using only revenue and personal savings — no VC money. Full control, no dilution, but slower growth and every dollar matters."
+  },
+  "board_seat": {
+    "term": "Board Seat",
+    "short": "An investor's seat at the decision table",
+    "tip": "When VCs invest, they often get a seat on your board of directors. The board can influence major decisions — and if things go badly, they can replace you as CEO."
+  },
+  "term_sheet": {
+    "term": "Term Sheet",
+    "short": "The deal investors are offering",
+    "tip": "A document outlining the terms of an investment — how much money, at what valuation, what control they get. It's not legally binding, but it's the framework for the final deal."
+  }
+}

@@ -9,6 +9,7 @@ extends Control
 @onready var candidate_panel: PanelContainer = %CandidatePanel
 
 var _candidates: Array[EmployeeData] = []
+var _interviewed: Dictionary = {}  # employee_name -> true
 var _card_style: StyleBoxFlat
 
 
@@ -22,6 +23,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	_candidates.clear()
+	_interviewed.clear()
 	_card_style = null
 
 
@@ -66,12 +68,9 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	_add_stat(stats_row, "Stress", emp.stress)
 
 	var salary_label := Label.new()
-	var assignment_text: String = EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned")
-	if emp.assignment == EmployeeData.Assignment.UNASSIGNED:
-		assignment_text = "Not assigned"
-	salary_label.text = "$%sK/yr  •  %s" % [
+	salary_label.text = "$%sK/yr • %s" % [
 		str(snapped(emp.salary_per_quarter * 4 / 1000.0, 0.1)),
-		assignment_text,
+		EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned"),
 	]
 	salary_label.add_theme_font_size_override("font_size", 13)
 	salary_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
@@ -91,8 +90,8 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	btn_row.add_child(assign_btn)
 
 	var fire_btn := Button.new()
-	fire_btn.text = "Fire"
-	fire_btn.custom_minimum_size = Vector2(60, 32)
+	fire_btn.text = "Let Go"
+	fire_btn.custom_minimum_size = Vector2(70, 32)
 	fire_btn.pressed.connect(_on_fire.bind(emp_ref))
 	btn_row.add_child(fire_btn)
 
@@ -100,7 +99,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 
 
 func _on_assign_changed(idx: int, emp: EmployeeData, btn: OptionButton) -> void:
-	emp.assignment = btn.get_item_id(idx)
+	emp.assignment = btn.get_item_id(idx) as EmployeeData.Assignment
 
 
 func _on_fire(emp: EmployeeData) -> void:
@@ -132,11 +131,12 @@ func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
 
 func _on_hire_pressed() -> void:
 	if GameState.employees.size() >= GameState.company.office_capacity():
-		hire_btn.text = "No room — upgrade your office"
+		hire_btn.disabled = true
+		hire_btn.text = "Office Full — Upgrade to Hire"
 		return
 
-	hire_btn.text = "Post Job Listing"
 	_candidates = HiringEngine.generate_candidates(3, GameState.market)
+	_interviewed.clear()
 	candidate_panel.visible = true
 	_refresh_candidates()
 
@@ -144,28 +144,86 @@ func _on_hire_pressed() -> void:
 func _refresh_candidates() -> void:
 	_free_children(candidate_container)
 
-	for candidate in _candidates:
-		var hbox := HBoxContainer.new()
-		hbox.add_theme_constant_override("separation", 8)
+	if _candidates.is_empty():
+		var lbl := Label.new()
+		lbl.text = "No more candidates this round."
+		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
+		candidate_container.add_child(lbl)
+		return
 
-		var info := Label.new()
-		info.text = "%s — %s  •  Skill %d  •  $%sK/yr" % [
-			candidate.employee_name,
-			candidate.display_title(),
-			candidate.skill,
-			str(snapped(candidate.salary_per_quarter * 4 / 1000.0, 0.1)),
-		]
-		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_theme_font_size_override("font_size", 13)
-		hbox.add_child(info)
+	for candidate in _candidates:
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _card_style)
+		var vbox := VBoxContainer.new()
+		vbox.add_theme_constant_override("separation", 4)
+		card.add_child(vbox)
+
+		var name_lbl := Label.new()
+		name_lbl.text = "%s — %s" % [candidate.employee_name, candidate.display_title()]
+		name_lbl.add_theme_font_size_override("font_size", 15)
+		vbox.add_child(name_lbl)
+
+		var salary_lbl := Label.new()
+		salary_lbl.text = "Asking $%sK/yr" % str(snapped(candidate.salary_per_quarter * 4 / 1000.0, 0.1))
+		salary_lbl.add_theme_font_size_override("font_size", 13)
+		salary_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
+		vbox.add_child(salary_lbl)
+
+		var interviewed: bool = _interviewed.has(candidate.employee_name)
+		if interviewed:
+			var stats_row := HBoxContainer.new()
+			stats_row.add_theme_constant_override("separation", 16)
+			vbox.add_child(stats_row)
+			_add_stat(stats_row, "Skill", candidate.skill)
+			_add_stat(stats_row, "Speed", candidate.speed)
+			_add_stat(stats_row, "Morale", candidate.morale)
+
+			var growth_lbl := Label.new()
+			var growth_text: String
+			match candidate.growth_potential:
+				EmployeeData.GrowthPotential.HIGH: growth_text = "High growth potential"
+				EmployeeData.GrowthPotential.MEDIUM: growth_text = "Moderate growth potential"
+				_: growth_text = "Limited growth potential"
+			growth_lbl.text = growth_text
+			growth_lbl.add_theme_font_size_override("font_size", 12)
+			growth_lbl.add_theme_color_override("font_color", Color(0.55, 0.75, 0.9))
+			vbox.add_child(growth_lbl)
+		else:
+			var hidden_lbl := Label.new()
+			hidden_lbl.text = "Interview to learn more about this candidate"
+			hidden_lbl.add_theme_font_size_override("font_size", 12)
+			hidden_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
+			vbox.add_child(hidden_lbl)
+
+		var btn_row := HBoxContainer.new()
+		btn_row.add_theme_constant_override("separation", 8)
+		vbox.add_child(btn_row)
+
+		if not interviewed:
+			var interview_btn := Button.new()
+			interview_btn.text = "Interview"
+			interview_btn.custom_minimum_size = Vector2(90, 32)
+			interview_btn.pressed.connect(_on_interview.bind(candidate))
+			btn_row.add_child(interview_btn)
 
 		var hire_one_btn := Button.new()
 		hire_one_btn.text = "Hire"
-		hire_one_btn.custom_minimum_size = Vector2(60, 32)
+		hire_one_btn.custom_minimum_size = Vector2(70, 32)
 		hire_one_btn.pressed.connect(_on_hire_candidate.bind(candidate))
-		hbox.add_child(hire_one_btn)
+		btn_row.add_child(hire_one_btn)
 
-		candidate_container.add_child(hbox)
+		var pass_btn := Button.new()
+		pass_btn.text = "Pass"
+		pass_btn.custom_minimum_size = Vector2(60, 32)
+		pass_btn.pressed.connect(_on_pass_candidate.bind(candidate))
+		btn_row.add_child(pass_btn)
+
+		candidate_container.add_child(card)
+
+
+func _on_interview(candidate: EmployeeData) -> void:
+	_interviewed[candidate.employee_name] = true
+	_refresh_candidates()
 
 
 func _on_hire_candidate(candidate: EmployeeData) -> void:
@@ -174,6 +232,12 @@ func _on_hire_candidate(candidate: EmployeeData) -> void:
 		candidate_panel.visible = not _candidates.is_empty()
 		_refresh_candidates()
 		_refresh_list()
+
+
+func _on_pass_candidate(candidate: EmployeeData) -> void:
+	_candidates.erase(candidate)
+	candidate_panel.visible = not _candidates.is_empty()
+	_refresh_candidates()
 
 
 func _on_back() -> void:

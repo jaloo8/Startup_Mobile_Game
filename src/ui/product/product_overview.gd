@@ -16,6 +16,10 @@ const MAX_VISIBLE_FEATURES := 50
 
 func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
+	%TechDebtTitle.pressed.connect(Glossary.show_term.bind("tech_debt"))
+	%StabilityTitle.pressed.connect(Glossary.show_term.bind("stability"))
+	%UxTitle.pressed.connect(Glossary.show_term.bind("ux_score"))
+	%ChurnTitle.pressed.connect(Glossary.show_term.bind("churn_rate"))
 	_refresh()
 
 
@@ -24,33 +28,32 @@ func _refresh() -> void:
 	if p == null:
 		return
 
-	var avg_q := roundi(p.avg_feature_quality())
 	if p.feature_count() == 0:
 		features_label.text = "No features shipped yet"
 	elif p.feature_count() == 1:
 		features_label.text = "1 feature shipped"
 	else:
-		features_label.text = "%d features shipped — %d avg quality" % [p.feature_count(), avg_q]
+		features_label.text = "%d features shipped · avg quality %d/100" % [p.feature_count(), roundi(p.avg_feature_quality())]
 	tech_debt_bar.value = p.tech_debt
 	if p.bugs == 0:
-		bugs_label.text = "No known bugs"
+		bugs_label.text = "None"
 	elif p.bugs == 1:
-		bugs_label.text = "1 bug"
+		bugs_label.text = "1 known bug"
 	else:
-		bugs_label.text = "%d bugs" % p.bugs
+		bugs_label.text = "%d known bugs" % p.bugs
 	stability_bar.value = p.stability
 	ux_bar.value = p.ux_score
 	if p.users == 0:
 		users_label.text = "No users yet"
 	else:
-		users_label.text = "%s users, %s active daily" % [_fmt(p.users), _fmt(p.dau)]
+		users_label.text = "%s users · %s daily active" % [_fmt(p.users), _fmt(p.dau)]
 	churn_label.text = "%.1f%% per quarter" % (p.churn_rate * 100)
 
 	_free_children(feature_list_container)
 
 	if p.features.is_empty():
 		var lbl := Label.new()
-		lbl.text = "No features shipped yet."
+		lbl.text = "Assign engineers to Features to start building."
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		feature_list_container.add_child(lbl)
 		return
@@ -69,7 +72,7 @@ func _refresh() -> void:
 			color = Color(0.9, 0.8, 0.2)
 		else:
 			color = Color(0.9, 0.3, 0.3)
-		lbl.text = "%s — %d/100 (shipped Q%d)" % [f.get("name", "?"), quality, f.get("quarter_shipped", 0)]
+		lbl.text = "%s · %d/100 · shipped Q%d" % [f.get("name", "?"), quality, f.get("quarter_shipped", 0)]
 		lbl.add_theme_font_size_override("font_size", 14)
 		lbl.add_theme_color_override("font_color", color)
 		feature_list_container.add_child(lbl)

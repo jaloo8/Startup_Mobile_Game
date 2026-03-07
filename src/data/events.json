@@ -49,7 +49,7 @@
     "title": "Cloud Bill Shock",
     "category": "product",
     "stage": "any",
-    "description_template": "An unoptimized database query has been running in production for weeks. Your cloud bill doubled this quarter — an extra {cash_amount} gone.",
+    "description_template": "An unoptimized database query has been running in production for weeks. Your cloud bill doubled this quarter. That's money you didn't budget for.",
     "variations": [
       "Your CFO (you — there is no CFO) opens the AWS console and nearly spills coffee on the keyboard. Some engineer left a debug loop running in production. The bill is double what you budgeted.",
       "You get an email from your cloud provider: 'Your usage has exceeded your billing alert threshold by 200%.' Someone forgot to add pagination to a database query that's been scanning your entire users table every 30 seconds.",
@@ -319,7 +319,7 @@
     "title": "Acquisition Offer",
     "category": "money",
     "stage": "late",
-    "description_template": "A larger company wants to acquire {company_name}. The offer: {cash} (more than your current valuation). Your investors are excited. Your team is nervous.",
+    "description_template": "A larger company wants to acquire {company_name}. The offer is generous — more than your current valuation. Your investors are excited. Your team is nervous.",
     "variations": [
       "An M&A lawyer's email lands in your inbox. A public company wants to buy {company_name}. The number has a lot of zeros. You stare at it for 10 minutes before telling anyone.",
       "Your lead investor calls: 'We got a call. [Big Corp] wants to make an offer for {company_name}.' The amount would make you wealthy. It would also end the dream.",

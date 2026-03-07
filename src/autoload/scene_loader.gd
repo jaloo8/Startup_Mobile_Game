@@ -6,8 +6,6 @@ extends Node
 signal scene_changed(scene_path: String)
 
 var _cache: Dictionary = {}  # path -> PackedScene
-var _loading_path: String = ""
-var _current_scene: Node = null
 
 const PRELOAD_SCENES := [
 	"res://src/ui/main_menu/main_menu.tscn",
@@ -15,6 +13,7 @@ const PRELOAD_SCENES := [
 	"res://src/ui/dashboard/quarter_dashboard.tscn",
 	"res://src/ui/people/employee_list.tscn",
 	"res://src/ui/product/product_overview.tscn",
+	"res://src/ui/finance/finance_overview.tscn",
 ]
 
 

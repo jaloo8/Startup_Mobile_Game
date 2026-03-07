@@ -2,15 +2,63 @@
 
 ---
 
-## Revenue Model
+## Revenue Model — Dual Track
 
-### Base Game — $4.99 (iOS / Android / Steam)
+Players choose how they want to play. Both options fund development.
 
-- Software Path: 4 company types (SaaS B2B, Consumer App, Marketplace, Dev Tools)
-- Full core engine (people, money, events, competitors, fundraising)
-- 3 difficulty modes, 3 starting scenarios
-- 50+ events
+### Free-to-Play (Ad-Supported)
+
+The full base game, free to download. Ads appear at natural break points
+so they don't interrupt gameplay flow.
+
+**Ad placements (non-intrusive, thematic where possible):**
+- **Between quarters** — After hitting "Advance Quarter" and before results show.
+  Framed as a loading beat: "Simulating Q3..." with a short ad. Natural pause.
+- **After game over** — Before the postmortem screen. Player is already pausing.
+- **Optional rewarded ads** — "Watch a short ad to get an extra candidate in your
+  hiring pool" or "Watch to reveal a hidden stat on a candidate." Feels like a
+  small in-game perk, not a dark pattern.
+
+**What F2P players get:**
+- Full Software path (all 4 company types)
+- All core systems (people, product, money, events, competitors)
+- All difficulty modes and starting scenarios
 - All win conditions
+- Limited to 1 save slot (premium gets 3)
+
+**What F2P players don't get:**
+- Ad-free experience
+- DLC paths (locked behind purchase, same as premium)
+- Multiple save slots
+- Scenario packs (free players get "Modern Day" only)
+
+**Upgrade path:** A single "Remove Ads — $4.99" IAP converts F2P to premium.
+Same price as buying premium outright. No penalty for trying free first.
+
+### Premium — $4.99 (iOS / Android / Steam)
+
+- No ads, ever
+- 3 save slots
+- All scenario packs
+- Software Path: 4 company types
+- Full core engine
+- All difficulty modes, starting scenarios, win conditions
+
+### Ad Revenue Estimates
+
+Conservative estimates at scale:
+- Interstitial eCPM: ~$5-10 (iOS), ~$2-5 (Android)
+- 1-2 ads per session × 10-minute sessions
+- At 10K DAU: ~$150-500/month from ads alone
+- Rewarded ads convert ~5-15% of impressions, higher eCPM ($15-30)
+
+Even modest ad revenue provides a baseline while premium purchases and DLC
+drive the real revenue. The F2P track primarily serves as a discovery funnel —
+players try it free, enjoy it, and either upgrade to premium or buy DLC.
+
+---
+
+### DLC Packs (available to both F2P and Premium players)
 
 ### DLC Pack #1 — "The Intelligence Age" (AI/ML Path) — $2.99
 

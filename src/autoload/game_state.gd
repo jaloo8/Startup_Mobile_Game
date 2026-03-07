@@ -4,7 +4,9 @@ extends Node
 
 signal quarter_advanced(quarter_number: int)
 signal game_over(reason: String)
+@warning_ignore("unused_signal")
 signal event_triggered(event: EventData)
+@warning_ignore("unused_signal")
 signal employee_quit(employee: EmployeeData)
 
 var company: CompanyData
