@@ -79,6 +79,25 @@
     {"name": "Qualcomn", "focus": "dev_tools", "size": "enterprise", "tagline": "Mobile chipsets and wireless technology"},
     {"name": "SAQ", "focus": "saas", "size": "enterprise", "tagline": "Enterprise resource planning and business operations"},
     {"name": "ServiceGo", "focus": "saas", "size": "growth", "tagline": "IT service management and digital workflows"},
-    {"name": "Workdae", "focus": "saas", "size": "growth", "tagline": "HR, finance, and enterprise planning software"}
+    {"name": "Workdae", "focus": "saas", "size": "growth", "tagline": "HR, finance, and enterprise planning software"},
+
+    {"name": "Figmo", "focus": "saas", "size": "startup", "tagline": "Collaborative design tool taking over UI/UX"},
+    {"name": "Noshun", "focus": "saas", "size": "startup", "tagline": "All-in-one workspace for notes, docs, and projects"},
+    {"name": "Lineir", "focus": "saas", "size": "startup", "tagline": "Issue tracking built for speed"},
+    {"name": "Supabaas", "focus": "dev_tools", "size": "startup", "tagline": "Open-source Firebase alternative"},
+    {"name": "Retuul", "focus": "dev_tools", "size": "startup", "tagline": "Build internal tools without writing frontend code"},
+    {"name": "Loom.tv", "focus": "saas", "size": "startup", "tagline": "Async video messaging for teams"},
+    {"name": "Muural", "focus": "saas", "size": "startup", "tagline": "Visual collaboration and whiteboarding"},
+    {"name": "Raeplyt", "focus": "saas", "size": "startup", "tagline": "AI writing assistant for everyone"},
+    {"name": "Perplx", "focus": "consumer", "size": "startup", "tagline": "AI-powered answer engine"},
+    {"name": "Midjournee", "focus": "consumer", "size": "startup", "tagline": "AI image generation from text prompts"},
+    {"name": "Anyscal", "focus": "dev_tools", "size": "startup", "tagline": "Distributed computing for AI workloads"},
+    {"name": "Plaid.io", "focus": "dev_tools", "size": "startup", "tagline": "Financial data API connecting banks to apps"},
+    {"name": "Caleendly", "focus": "saas", "size": "startup", "tagline": "Scheduling links that just work"},
+    {"name": "Airtayble", "focus": "saas", "size": "startup", "tagline": "Spreadsheet meets database for teams"},
+    {"name": "Webfloe", "focus": "dev_tools", "size": "startup", "tagline": "No-code website builder for designers"},
+    {"name": "Discrd", "focus": "consumer", "size": "startup", "tagline": "Voice and text chat for communities"},
+    {"name": "Candva", "focus": "consumer", "size": "startup", "tagline": "Easy graphic design for non-designers"},
+    {"name": "Deel.co", "focus": "saas", "size": "startup", "tagline": "Global payroll and contractor management"}
   ]
 }

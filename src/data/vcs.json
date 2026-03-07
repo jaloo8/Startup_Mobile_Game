@@ -1,0 +1,162 @@
+{
+  "_mod_info": "VC firms that can offer your company funding. Each has industry preferences and a prestige tier that affects deal quality and difficulty. Only 'name' is required.",
+  "_format": {
+    "name": "Firm name (required)",
+    "tier": "One of: elite, top, mid, emerging (controls check size and prestige)",
+    "preferred_focus": "Array of preferred industries: saas, consumer, marketplace, dev_tools (optional — empty means generalist)",
+    "style": "Short flavor text about the firm's reputation (optional)",
+    "check_min": "Minimum investment amount in dollars (optional, derived from tier if missing)",
+    "check_max": "Maximum investment amount in dollars (optional, derived from tier if missing)"
+  },
+
+  "firms": [
+    {
+      "name": "Sequoya Capital",
+      "tier": "elite",
+      "preferred_focus": [],
+      "style": "Legendary firm. They funded half of Silicon Valley. Getting a meeting is the hard part."
+    },
+    {
+      "name": "Z Combinator",
+      "tier": "elite",
+      "preferred_focus": ["saas", "dev_tools"],
+      "style": "The startup factory. Their batch network is worth more than the check."
+    },
+    {
+      "name": "Andersen Horwitz",
+      "tier": "elite",
+      "preferred_focus": [],
+      "style": "Massive platform firm. They'll assign you a dedicated ops team and 47 Slack channels."
+    },
+    {
+      "name": "Benchmrk",
+      "tier": "elite",
+      "preferred_focus": ["marketplace", "consumer"],
+      "style": "Small partnership, legendary picks. They only do a few deals a year."
+    },
+    {
+      "name": "Foundrs Fund",
+      "tier": "elite",
+      "preferred_focus": ["dev_tools", "consumer"],
+      "style": "Contrarian bets on hard tech. They want founders who think different."
+    },
+    {
+      "name": "Accl Partners",
+      "tier": "top",
+      "preferred_focus": ["saas"],
+      "style": "Early-stage SaaS is their bread and butter. They've seen every B2B pitch."
+    },
+    {
+      "name": "Litespeed Venture",
+      "tier": "top",
+      "preferred_focus": ["consumer", "marketplace"],
+      "style": "Growth-stage specialists. They move fast when they see traction."
+    },
+    {
+      "name": "Greylok Partners",
+      "tier": "top",
+      "preferred_focus": ["saas", "dev_tools"],
+      "style": "Enterprise focus. Their partners are ex-operators who actually read your metrics."
+    },
+    {
+      "name": "Generl Catalyst",
+      "tier": "top",
+      "preferred_focus": [],
+      "style": "Stage-agnostic generalists. They'll lead your seed or your Series D."
+    },
+    {
+      "name": "Kleiner Perkns",
+      "tier": "top",
+      "preferred_focus": ["consumer", "dev_tools"],
+      "style": "Legacy firm reinventing themselves. Still have deep networks."
+    },
+    {
+      "name": "Indx Ventures",
+      "tier": "top",
+      "preferred_focus": ["marketplace", "consumer"],
+      "style": "European roots, global reach. They love marketplaces and network effects."
+    },
+    {
+      "name": "Tigr Global",
+      "tier": "top",
+      "preferred_focus": [],
+      "style": "Aggressive crossover fund. They write big checks fast and don't ask for board seats.",
+      "check_min": 5000000,
+      "check_max": 50000000
+    },
+    {
+      "name": "SoftBnk Vision",
+      "tier": "top",
+      "preferred_focus": [],
+      "style": "Mega-fund energy. They'll either 10x your round or ghost you completely.",
+      "check_min": 10000000,
+      "check_max": 100000000
+    },
+    {
+      "name": "Bessemr Venture",
+      "tier": "mid",
+      "preferred_focus": ["saas"],
+      "style": "SaaS metrics nerds. They have a public spreadsheet ranking every cloud company."
+    },
+    {
+      "name": "Khoslo Ventures",
+      "tier": "mid",
+      "preferred_focus": ["dev_tools"],
+      "style": "Deep tech focus. They want to see real innovation, not another wrapper."
+    },
+    {
+      "name": "Insyte Partners",
+      "tier": "mid",
+      "preferred_focus": ["saas", "dev_tools"],
+      "style": "Growth equity firm. They come in late but bring serious operational support."
+    },
+    {
+      "name": "NEO Associates",
+      "tier": "mid",
+      "preferred_focus": [],
+      "style": "One of the largest VC firms by AUM. Diversified across every sector."
+    },
+    {
+      "name": "Redpoynt",
+      "tier": "mid",
+      "preferred_focus": ["saas", "consumer"],
+      "style": "Consistent performers. Not flashy, but their portfolio companies rarely die."
+    },
+    {
+      "name": "Ribbt Capital",
+      "tier": "mid",
+      "preferred_focus": ["marketplace"],
+      "style": "Fintech obsessed. If your product touches money, they want to talk."
+    },
+    {
+      "name": "First Rnd Capital",
+      "tier": "emerging",
+      "preferred_focus": ["saas", "dev_tools"],
+      "style": "Pre-seed and seed specialists. They help with hiring your first 10 people."
+    },
+    {
+      "name": "Craft Venures",
+      "tier": "emerging",
+      "preferred_focus": ["consumer"],
+      "style": "Consumer-focused seed fund. They have strong opinions about product design."
+    },
+    {
+      "name": "Floodgait",
+      "tier": "emerging",
+      "preferred_focus": [],
+      "style": "Micro-fund that punches above its weight. Quick decisions, no BS."
+    },
+    {
+      "name": "Initializ Capital",
+      "tier": "emerging",
+      "preferred_focus": ["dev_tools", "saas"],
+      "style": "Technical founders backing technical founders. They'll review your architecture."
+    },
+    {
+      "name": "Boldstart VC",
+      "tier": "emerging",
+      "preferred_focus": ["dev_tools"],
+      "style": "Developer-first investing. They know the dev tools market cold."
+    }
+  ]
+}

@@ -14,6 +14,7 @@ extends Control
 @onready var people_btn: Button = %PeopleButton
 @onready var product_btn: Button = %ProductButton
 @onready var finance_btn: Button = %FinanceButton
+@onready var market_btn: Button = %MarketButton
 @onready var menu_btn: Button = %MenuButton
 @onready var event_log_container: VBoxContainer = %EventLogContainer
 @onready var event_popup: EventPopup = %EventPopup
@@ -28,6 +29,7 @@ func _ready() -> void:
 	people_btn.pressed.connect(_on_people)
 	product_btn.pressed.connect(_on_product)
 	finance_btn.pressed.connect(_on_finance)
+	market_btn.pressed.connect(_on_market)
 	menu_btn.pressed.connect(_on_menu)
 	event_popup.event_resolved.connect(_on_event_resolved)
 
@@ -141,6 +143,10 @@ func _on_product() -> void:
 
 func _on_finance() -> void:
 	SceneLoader.goto_scene("res://src/ui/finance/finance_overview.tscn")
+
+
+func _on_market() -> void:
+	SceneLoader.goto_scene("res://src/ui/market/market_leaderboard.tscn")
 
 
 func _on_menu() -> void:

@@ -81,24 +81,54 @@ func _on_fundraise() -> void:
 	_current_offer = FundraisingEngine.generate_offer(GameState)
 	var o := _current_offer
 
+	if o.get("rejected", false):
+		var firm_name: String = o.get("firm_name", "The firm")
+		var style: String = o.get("firm_style", "")
+		var reason: String = o.get("reason", "They passed.")
+		var header := "%s\n%s" % [firm_name, style] if not style.is_empty() else firm_name
+		offer_label.text = "%s\n\nYou pitched your %s round.\n\n\"%s\"\n\nTry again next quarter — or build more traction first." % [header, o["round"], reason]
+		accept_btn.visible = false
+		decline_btn.text = "Back to It"
+		offer_panel.visible = true
+		fundraise_btn.visible = false
+		return
+
+	var firm_name: String = o.get("firm_name", "Investors")
+	var style: String = o.get("firm_style", "")
+	var tier: String = o.get("tier", "mid")
+
+	var header := firm_name
+	if not style.is_empty():
+		header += "\n%s" % style
+
+	var tier_label := ""
+	match tier:
+		"elite": tier_label = " (Elite Tier)"
+		"top": tier_label = " (Top Tier)"
+
 	var board_note := ""
 	if o.get("board_seat", false):
 		board_note = "\n\nThey want a board seat. That means oversight — and if you miss targets, they could push to replace you."
 	else:
 		board_note = "\n\nNo board seat. They're hands-off for now."
 
-	offer_label.text = "%s Round\n\nOffering $%s at a $%s pre-money valuation.\n\nYou'd give up %.1f%% of the company.%s" % [
+	offer_label.text = "%s%s\n\n%s Round\n\nOffering $%s at a $%s pre-money valuation.\n\nYou'd give up %.1f%% of the company.%s" % [
+		header, tier_label,
 		o["round"],
 		_fmt_money(o["amount"]),
 		_fmt_money(o["valuation"]),
 		o["dilution"],
 		board_note,
 	]
+	accept_btn.visible = true
+	decline_btn.text = "Walk Away"
 	offer_panel.visible = true
 	fundraise_btn.visible = false
 
 
 func _on_accept_offer() -> void:
+	if _current_offer.get("rejected", false):
+		return
 	FundraisingEngine.accept_offer(GameState, _current_offer)
 	offer_panel.visible = false
 	fundraise_btn.visible = true
