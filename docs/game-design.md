@@ -574,4 +574,27 @@ These are starting values. You WILL need to tune them through playtesting.
 
 ---
 
+---
+
+## 7. Development Mantras
+
+1. **Playable over perfect.** A working game with placeholder UI beats a beautiful screen with no logic behind it.
+2. **One system at a time.** Don't build the fundraising system until hiring works.
+3. **Decisions over numbers.** If a screen shows stats but doesn't ask the player to DECIDE something, it's not gameplay.
+4. **Every quarter should have tension.** If a quarter passes with nothing interesting happening, add more events.
+5. **Steal from PGM3.** Its UI patterns, session structure, and "just one more season" hooks are your north star.
+6. **Your life is content.** Every frustrating thing about working in tech is a potential game event.
+7. **Ship in 3 months.** Scope to what one person can build in 13 weeks with AI assistance. Cut ruthlessly.
+
+---
+
+## Related Docs
+
+- **[AI Integration Spec](ai-integration.md)** — Three-tier narrative system (Classic / Dynamic / Online)
+- **[Content Schemas](content-schemas.md)** — JSON formats for events, bios, headlines, VC dialogue, postmortems, scenario packs; batch generation prompts
+- **[Roadmap](roadmap.md)** — Phase-by-phase checklist with current progress
+- **[Monetization](monetization.md)** — Pricing, DLC structure, platform fees
+
+---
+
 *Living document. Update as mechanics are locked and playtested.*

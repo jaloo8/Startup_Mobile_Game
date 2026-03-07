@@ -76,7 +76,7 @@ horizontal_alignment = 2
 
 [node name="RevenueTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 layout_mode = 2
-text = "Revenue / Q"
+text = "Revenue"
 
 [node name="RevenueLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -86,7 +86,7 @@ horizontal_alignment = 2
 
 [node name="BurnTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 layout_mode = 2
-text = "Burn / Q"
+text = "Burn Rate"
 
 [node name="BurnLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -150,7 +150,7 @@ layout_mode = 2
 
 [node name="EventsLabel" type="Label" parent="MarginContainer/VBox"]
 layout_mode = 2
-text = "Events this quarter:"
+text = "What happened"
 
 [node name="EventLogScroll" type="ScrollContainer" parent="MarginContainer/VBox"]
 layout_mode = 2

@@ -116,7 +116,7 @@ text = "0"
 
 [node name="ChurnTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 layout_mode = 2
-text = "Churn Rate"
+text = "Churn"
 
 [node name="ChurnLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true

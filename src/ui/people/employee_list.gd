@@ -66,9 +66,12 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	_add_stat(stats_row, "Stress", emp.stress)
 
 	var salary_label := Label.new()
-	salary_label.text = "$%sK/yr • %s" % [
+	var assignment_text: String = EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned")
+	if emp.assignment == EmployeeData.Assignment.UNASSIGNED:
+		assignment_text = "Not assigned"
+	salary_label.text = "$%sK/yr  •  %s" % [
 		str(snapped(emp.salary_per_quarter * 4 / 1000.0, 0.1)),
-		EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned"),
+		assignment_text,
 	]
 	salary_label.add_theme_font_size_override("font_size", 13)
 	salary_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
@@ -129,7 +132,7 @@ func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
 
 func _on_hire_pressed() -> void:
 	if GameState.employees.size() >= GameState.company.office_capacity():
-		hire_btn.text = "Office full!"
+		hire_btn.text = "No room — upgrade your office"
 		return
 
 	hire_btn.text = "Post Job Listing"
@@ -146,7 +149,7 @@ func _refresh_candidates() -> void:
 		hbox.add_theme_constant_override("separation", 8)
 
 		var info := Label.new()
-		info.text = "%s — %s | Skill:%d | $%sK/yr" % [
+		info.text = "%s — %s  •  Skill %d  •  $%sK/yr" % [
 			candidate.employee_name,
 			candidate.display_title(),
 			candidate.skill,

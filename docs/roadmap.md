@@ -230,25 +230,60 @@ Do these in order. Each one should be playable before starting the next.
 
 ### v1.0 — Base Game (Software Path)
 
-- [ ] **Data model** — GameState autoload with path-module pattern for future DLC support
-- [ ] **Advance quarter** — Button that processes a turn (even if nothing happens)
-- [ ] **Employee system** — Generate, hire, view, fire employees
-- [ ] **Work allocation** — Assign employees to tasks, see output
-- [ ] **Product metrics** — Features, bugs, tech debt affected by work
-- [ ] **Basic finances** — Burn rate, revenue, cash, runway countdown
-- [ ] **Game over** — Bankruptcy when cash hits zero
-- [ ] **Events (10)** — First batch of narrative events with choices
-- [ ] **SaaS revenue model** — Subscription + user growth for first company type
-- [ ] **Competitors** — Basic AI companies that grow and compete
-- [ ] **Fundraising** — VC system with offers and dilution
-- [ ] **Events (30 more)** — Expand the event library
-- [ ] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools differentiated
-- [ ] **UI polish** — Make it look like a real game
+**Phase 1 — Core Loop (DONE):**
+- [x] **Data model** — GameState autoload with Resource-based models (Company, Employee, Product, Financials, Market, Event)
+- [x] **Advance quarter** — 12-step simulation engine (work output, growth, revenue, costs, competitors, events, morale, quits, skill growth, clamping)
+- [x] **Employee system** — Generate candidates, hire, view, fire, assign work categories, skill growth, quit mechanic
+- [x] **Work allocation** — Assign employees to Features/Bugs/Tech Debt/Infra/R&D, see output each quarter
+- [x] **Product metrics** — Feature shipping, bugs, tech debt, stability, UX score, churn rate affected by work
+- [x] **Basic finances** — Burn rate (salaries + infra + office), revenue (4 models), cash, runway display
+- [x] **Game over** — Bankruptcy and dead product conditions
+- [x] **Events (10)** — 10 narrative events with template variables, variations, weighted selection, cooldowns
+- [x] **All 4 revenue models** — SaaS, Consumer, Marketplace, Dev Tools each calculate differently
+- [x] **Competitors** — 4 AI companies that grow users, improve products, raise funding
+- [x] **Save/load** — Threaded auto-save, JSON serialization, continue from main menu
+- [x] **Scene management** — Preloaded scene cache, deferred transitions, signal cleanup (mobile-optimized)
+- [x] **Template engine** — {variable} substitution in event text with per-event variations (Classic Mode / Tier 1)
+
+**Phase 2 — Systems Depth (TODO):**
+- [ ] **Fundraising** — VC meetings, term sheets, dilution calc, board seats
+- [ ] **Events (40 more)** — Expand to 50+ with 3-5 variations each (use AI batch generation, hand-edit)
+- [ ] **Event resolution UI** — Player must resolve events (choose options) before advancing quarter
+- [ ] **Hiring pipeline** — Post job → wait → candidates with hidden stats → interview → offer/reject
+- [ ] **Specific features to build** — Pick from feature list instead of just accumulating progress
+- [ ] **Market shifts** — Economy state changes (bull/bear), affects fundraising and hiring
+- [ ] **News ticker** — 150+ headline templates shown each quarter
+- [ ] **Employee bios** — 200+ bio templates with personality tags
+- [ ] **Quarterly report** — Narrative summary of what happened each quarter
+- [ ] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools with unique mechanics
+- [ ] **Win conditions** — IPO ($100M+ ARR), acquisition, sustainable business (4Q profit), unicorn ($1B val)
+- [ ] **Founder burnout** — CEO morale as a loss condition
+- [ ] **Board takeover** — Miss VC targets repeatedly → game over
+
+**Phase 3 — Polish & Balance (TODO):**
+- [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
+- [ ] **Charts and graphs** — Revenue over time, user growth, morale trends
+- [ ] **Employee detail view** — History, development arc, full stats
+- [ ] **Difficulty tuning** — Balance sandbox/normal/hardcore across 10+ test runs
 - [ ] **Tutorial** — Guided first quarter
-- [ ] **Win conditions** — IPO, acquisition, profitability
-- [ ] **Difficulty tuning** — Balance all three difficulty modes
+- [ ] **Sound effects** — Minimal UI sounds (optional)
+
+**Phase 4 — Content & Replayability (TODO):**
+- [ ] **Scenario packs** — "Dot-Com Boom", "AI Gold Rush", "Pandemic Pivot", etc. (JSON configs)
 - [ ] **Achievements** — Track across runs
-- [ ] **Ship it**
+- [ ] **Postmortem screen** — Timeline of key decisions, shareable
+- [ ] **Seed system** — Share seeds for specific market conditions
+
+**Phase 5 — Ship (TODO):**
+- [ ] **App Store / Play Store assets** — Screenshots, description, icon
+- [ ] **TestFlight / internal beta** — 10-20 testers
+- [ ] **Final bug fixes**
+- [ ] **Submit**
+
+**Post-Launch — AI Narrative (TODO):**
+- [ ] **Classic Mode content** — Hit all content quantity targets (50 events, 200 bios, 150 headlines)
+- [ ] **Dynamic Mode (v1.2)** — On-device LLM (llama.cpp GDExtension), model download flow, fallback system
+- [ ] **Online Mode (v1.3)** — Cloud API proxy, Claude Haiku integration, rate limiting
 
 ### v1.2 — DLC #1: The Intelligence Age (AI/ML Path)
 

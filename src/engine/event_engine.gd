@@ -1,12 +1,16 @@
 class_name EventEngine
 extends RefCounted
-## Loads events from JSON, checks triggers, and rolls for quarter events.
+## Loads events from JSON, checks triggers, rolls for quarter events,
+## and resolves template variables for Classic Mode narrative.
 
 static var _all_events: Array[EventData] = []
+static var _cooldowns: Dictionary = {}  # event_id -> quarters_remaining
 
 
 static func load_events(path: String) -> void:
 	_all_events.clear()
+	_cooldowns.clear()
+
 	if not FileAccess.file_exists(path):
 		push_warning("EventEngine: file not found: %s" % path)
 		return
@@ -34,11 +38,18 @@ static func load_events(path: String) -> void:
 		var ev := EventData.new()
 		ev.id = str(entry.get("id", ""))
 		ev.title = str(entry.get("title", ""))
-		ev.description = str(entry.get("description", ""))
+
+		ev.description = str(entry.get("description_template", entry.get("description", "")))
 		ev.choices = entry.get("choices", [])
 		ev.trigger_conditions = entry.get("trigger_conditions", {})
 		ev.weight = float(entry.get("weight", 1.0))
 		ev.one_time = bool(entry.get("one_time", false))
+
+		ev.set_meta("variations", entry.get("variations", []))
+		ev.set_meta("category", entry.get("category", ""))
+		ev.set_meta("stage", entry.get("stage", "any"))
+		ev.set_meta("cooldown", int(entry.get("cooldown_quarters", 0)))
+
 		_all_events.append(ev)
 
 	print("EventEngine: loaded %d events" % _all_events.size())
@@ -48,18 +59,20 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 	if _all_events.is_empty():
 		return []
 
+	_tick_cooldowns()
+
 	var context := _build_context(state)
 	var eligible: Array[EventData] = []
-	var total_weight := 0.0
 
 	for ev in _all_events:
 		if ev.one_time and ev.id in state.fired_one_time_events:
 			continue
+		if _cooldowns.has(ev.id) and _cooldowns[ev.id] > 0:
+			continue
 		if ev.is_eligible(context):
 			eligible.append(ev)
-			total_weight += ev.weight
 
-	if eligible.is_empty() or total_weight <= 0.0:
+	if eligible.is_empty():
 		return []
 
 	var count := randi_range(1, mini(3, eligible.size()))
@@ -74,10 +87,41 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 			break
 		picked.append(chosen)
 		remaining.erase(chosen)
+
 		if chosen.one_time:
 			state.fired_one_time_events.append(chosen.id)
 
+		var cd: int = chosen.get_meta("cooldown", 0) if chosen.has_meta("cooldown") else 0
+		if cd > 0:
+			_cooldowns[chosen.id] = cd
+
 	return picked
+
+
+static func resolve_event_text(event: EventData, state: Node) -> String:
+	var base_template: String = event.description
+	var variations: Array = event.get_meta("variations", []) if event.has_meta("variations") else []
+	var chosen_template := TemplateEngine.pick_variation(base_template, variations)
+	var ctx := TemplateEngine.build_context(state)
+	return TemplateEngine.apply(chosen_template, ctx)
+
+
+static func resolve_outcome_text(choice: Dictionary, state: Node) -> String:
+	var base: String = choice.get("outcome_template", choice.get("outcome_text", ""))
+	var variations: Array = choice.get("outcome_variations", [])
+	var chosen := TemplateEngine.pick_variation(base, variations)
+	var ctx := TemplateEngine.build_context(state)
+	return TemplateEngine.apply(chosen, ctx)
+
+
+static func _tick_cooldowns() -> void:
+	var expired: Array[String] = []
+	for event_id in _cooldowns:
+		_cooldowns[event_id] -= 1
+		if _cooldowns[event_id] <= 0:
+			expired.append(event_id)
+	for eid in expired:
+		_cooldowns.erase(eid)
 
 
 static func _weighted_pick(pool: Array[EventData]) -> EventData:

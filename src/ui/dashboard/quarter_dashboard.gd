@@ -41,21 +41,23 @@ func _exit_tree() -> void:
 func _refresh(_q: int) -> void:
 	if GameState.company == null:
 		return
-	quarter_label.text = "Y%d Q%d" % [GameState.current_year, GameState.current_quarter]
-	company_label.text = "%s — %s" % [GameState.company.company_name, GameState.company.type_name()]
+	quarter_label.text = "Year %d, Q%d" % [GameState.current_year, GameState.current_quarter]
+	company_label.text = "%s  •  %s" % [GameState.company.company_name, GameState.company.type_name()]
 	cash_label.text = "$%s" % format_money(GameState.company.cash)
-	users_label.text = "%s users" % format_number(GameState.product.users)
+	users_label.text = "%s" % format_number(GameState.product.users)
 	employees_label.text = "%d / %d" % [GameState.employees.size(), GameState.company.office_capacity()]
 	revenue_label.text = "$%s" % format_money(GameState.financials.revenue)
 	burn_label.text = "$%s" % format_money(GameState.financials.burn_rate)
 
-	var rw := GameState.financials.runway_quarters(GameState.company.cash)
-	if rw == INF:
-		runway_label.text = "∞"
+	var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
+	if rw == INF or rw > 40:
+		runway_label.text = "Plenty"
 	elif rw < 0:
-		runway_label.text = "IN DEBT"
+		runway_label.text = "In debt"
+	elif rw < 2:
+		runway_label.text = "%.1f quarters — critical" % rw
 	else:
-		runway_label.text = "%.1f Q" % rw
+		runway_label.text = "%.1f quarters" % rw
 
 
 func _on_event(event: EventData) -> void:
@@ -64,10 +66,20 @@ func _on_event(event: EventData) -> void:
 		event_log_container.remove_child(oldest)
 		oldest.queue_free()
 
-	var label := Label.new()
-	label.text = "• %s" % event.title
-	label.add_theme_font_size_override("font_size", 14)
-	event_log_container.add_child(label)
+	var title_label := Label.new()
+	title_label.text = event.title
+	title_label.add_theme_font_size_override("font_size", 15)
+	title_label.add_theme_color_override("font_color", Color(0.95, 0.85, 0.4))
+	event_log_container.add_child(title_label)
+
+	var desc_text: String = EventEngine.resolve_event_text(event, GameState)
+	if not desc_text.is_empty():
+		var desc_label := Label.new()
+		desc_label.text = desc_text
+		desc_label.add_theme_font_size_override("font_size", 13)
+		desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
+		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		event_log_container.add_child(desc_label)
 
 
 func _on_advance() -> void:
@@ -75,10 +87,18 @@ func _on_advance() -> void:
 	GameState.advance_quarter()
 
 
+const GAME_OVER_TEXT := {
+	"bankruptcy": "You ran out of money.",
+	"dead_product": "Your product lost all its users.",
+	"founder_burnout": "You burned out.",
+	"board_takeover": "The board replaced you.",
+}
+
 func _on_game_over(reason: String) -> void:
 	advance_btn.disabled = true
-	advance_btn.text = "GAME OVER"
-	quarter_label.text = "GAME OVER: %s" % reason.to_upper()
+	advance_btn.text = "Game Over"
+	var message: String = GAME_OVER_TEXT.get(reason, "It's over.")
+	quarter_label.text = message
 
 
 func _on_people() -> void:

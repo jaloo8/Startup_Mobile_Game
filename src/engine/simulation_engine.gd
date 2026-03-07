@@ -38,7 +38,7 @@ static func _apply_work_output(state: Node) -> void:
 			emp.tenure_quarters += 1
 			continue
 
-		var output := emp.work_output() * state.product.dev_speed_multiplier()
+		var output: float = emp.work_output() * state.product.dev_speed_multiplier()
 		match emp.assignment:
 			EmployeeData.Assignment.FEATURES:
 				state.product.feature_progress += output * 0.15
@@ -76,9 +76,9 @@ static func _update_product_metrics(state: Node) -> void:
 
 
 static func _calculate_user_growth(state: Node) -> void:
-	var quality_factor := state.product.avg_feature_quality() / 100.0
+	var quality_factor: float = state.product.avg_feature_quality() / 100.0
 	var feature_pull := minf(state.product.feature_count() * 0.5, 5.0)
-	var reputation_bonus := state.company.reputation / 100.0
+	var reputation_bonus: float = state.company.reputation / 100.0
 
 	var base_new := BASE_ORGANIC_USERS_PER_QUARTER + ceili(feature_pull * 5)
 	var organic_rate := remap(quality_factor, 0.0, 1.0, 0.01, 0.05)
@@ -161,7 +161,7 @@ static func _process_employee_turnover(state: Node) -> void:
 			"quarter": state.current_quarter,
 			"year": state.current_year,
 			"event_id": "employee_quit",
-			"title": "%s quit (morale: %d)" % [emp.employee_name, emp.morale],
+			"title": "%s left the company" % emp.employee_name,
 		})
 
 

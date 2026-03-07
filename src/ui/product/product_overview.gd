@@ -20,17 +20,31 @@ func _ready() -> void:
 
 
 func _refresh() -> void:
-	var p := GameState.product
+	var p: ProductData = GameState.product
 	if p == null:
 		return
 
-	features_label.text = "%d features (avg quality: %d)" % [p.feature_count(), roundi(p.avg_feature_quality())]
+	var avg_q := roundi(p.avg_feature_quality())
+	if p.feature_count() == 0:
+		features_label.text = "No features shipped yet"
+	elif p.feature_count() == 1:
+		features_label.text = "1 feature shipped"
+	else:
+		features_label.text = "%d features shipped — %d avg quality" % [p.feature_count(), avg_q]
 	tech_debt_bar.value = p.tech_debt
-	bugs_label.text = "%d bugs" % p.bugs
+	if p.bugs == 0:
+		bugs_label.text = "No known bugs"
+	elif p.bugs == 1:
+		bugs_label.text = "1 bug"
+	else:
+		bugs_label.text = "%d bugs" % p.bugs
 	stability_bar.value = p.stability
 	ux_bar.value = p.ux_score
-	users_label.text = "%s users (%s DAU)" % [_fmt(p.users), _fmt(p.dau)]
-	churn_label.text = "Churn: %.1f%%" % (p.churn_rate * 100)
+	if p.users == 0:
+		users_label.text = "No users yet"
+	else:
+		users_label.text = "%s users, %s active daily" % [_fmt(p.users), _fmt(p.dau)]
+	churn_label.text = "%.1f%% per quarter" % (p.churn_rate * 100)
 
 	_free_children(feature_list_container)
 
@@ -55,7 +69,7 @@ func _refresh() -> void:
 			color = Color(0.9, 0.8, 0.2)
 		else:
 			color = Color(0.9, 0.3, 0.3)
-		lbl.text = "%s — quality %d (Q%d)" % [f.get("name", "?"), quality, f.get("quarter_shipped", 0)]
+		lbl.text = "%s — %d/100 (shipped Q%d)" % [f.get("name", "?"), quality, f.get("quarter_shipped", 0)]
 		lbl.add_theme_font_size_override("font_size", 14)
 		lbl.add_theme_color_override("font_color", color)
 		feature_list_container.add_child(lbl)
