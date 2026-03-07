@@ -1,0 +1,173 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/ui/dashboard/quarter_dashboard.gd" id="1"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_heading"]
+font_size = 28
+font_color = Color(0.95, 0.95, 0.97, 1)
+
+[node name="QuarterDashboard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="QuarterLabel" type="Label" parent="MarginContainer/VBox/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Y1 Q1"
+label_settings = SubResource("LabelSettings_heading")
+
+[node name="MenuButton" type="Button" parent="MarginContainer/VBox/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+text = "Menu"
+
+[node name="CompanyLabel" type="Label" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "My Startup — SaaS B2B"
+
+[node name="Sep1" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="StatsGrid" type="GridContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 8
+
+[node name="CashTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+layout_mode = 2
+text = "Cash"
+
+[node name="CashLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "$0"
+horizontal_alignment = 2
+
+[node name="RevenueTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+layout_mode = 2
+text = "Revenue / Q"
+
+[node name="RevenueLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "$0"
+horizontal_alignment = 2
+
+[node name="BurnTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+layout_mode = 2
+text = "Burn / Q"
+
+[node name="BurnLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "$0"
+horizontal_alignment = 2
+
+[node name="RunwayTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+layout_mode = 2
+text = "Runway"
+
+[node name="RunwayLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "∞"
+horizontal_alignment = 2
+
+[node name="UsersTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+layout_mode = 2
+text = "Users"
+
+[node name="UsersLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+horizontal_alignment = 2
+
+[node name="TeamTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+layout_mode = 2
+text = "Team"
+
+[node name="EmployeesLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 / 4"
+horizontal_alignment = 2
+
+[node name="Sep2" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="NavRow" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PeopleButton" type="Button" parent="MarginContainer/VBox/NavRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "People"
+
+[node name="ProductButton" type="Button" parent="MarginContainer/VBox/NavRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "Product"
+
+[node name="Sep3" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="EventsLabel" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+text = "Events this quarter:"
+
+[node name="EventLogScroll" type="ScrollContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 100)
+
+[node name="EventLogContainer" type="VBoxContainer" parent="MarginContainer/VBox/EventLogScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AdvanceButton" type="Button" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+text = "Advance Quarter →"

@@ -43,24 +43,24 @@
 **Cursor prompt for Phase 1:**
 
 ```
-I'm building a tech startup management sim game for iOS using SwiftUI.
+I'm building a tech startup management sim game in Godot 4.3 (GDScript).
 The game is structured as a turn-based simulation where each turn
 represents one quarter (3 months).
 
-Start by creating the core data model. Here are the key entities:
+Start by creating the core data model as Resource classes. Key entities:
 
 [Paste the Data Model from game-design.md Section 4.2]
 
 Then create a SimulationEngine class that processes one quarter:
 [Paste the Simulation Engine steps from game-design.md Section 4.3]
 
-Use MVVM architecture. All game state should be in a single
-observable GameState object. Keep the UI minimal for now —
-just list views and basic text. We'll make it pretty later.
+Use an autoload GameState singleton for all run state. Keep the UI
+minimal for now — just Control nodes with Labels and Buttons.
+We'll make it pretty later.
 
 Start with the Employee system:
 - Generate random employees with stats
-- Display them in a list
+- Display them in a list (VBoxContainer of employee cards)
 - Allow hiring from a candidate pool
 - Allow firing
 - Allow assigning to work categories (Features, Bugs, TechDebt, Infra, R&D)
@@ -131,8 +131,8 @@ add more without changing code.
 
 ```
 Redesign the employee list screen for the startup sim game.
-Current design is a basic SwiftUI List. I want it to feel like
-a premium mobile game, similar to Pocket GM 3's player cards.
+Current design is a basic VBoxContainer of labels. I want it to feel
+like a premium mobile game, similar to Pocket GM 3's player cards.
 
 Each employee card should show:
 - Name and role/specialty (e.g., "Sarah Chen — Senior Backend")
@@ -143,8 +143,9 @@ Each employee card should show:
 - Tap to expand for full detail view
 
 Use a dark theme with accent colors. No gradients. Clean typography.
-Cards should have subtle rounded corners and a thin border.
+Use PanelContainer with StyleBoxFlat for cards — rounded corners, thin border.
 Sort options: by name, skill, morale, salary, specialty.
+Apply a custom Godot Theme resource for consistency.
 ```
 
 ---
@@ -229,7 +230,7 @@ Do these in order. Each one should be playable before starting the next.
 
 ### v1.0 — Base Game (Software Path)
 
-- [ ] **Data model** — GameState with PathModule protocol for future DLC support
+- [ ] **Data model** — GameState autoload with path-module pattern for future DLC support
 - [ ] **Advance quarter** — Button that processes a turn (even if nothing happens)
 - [ ] **Employee system** — Generate, hire, view, fire employees
 - [ ] **Work allocation** — Assign employees to tasks, see output
@@ -301,22 +302,22 @@ Do these in order. Each one should be playable before starting the next.
 ### Prompt patterns that work well with Cursor
 
 1. **Start each feature with the data model change:**
-   "Add a `fundraising_round` property to the Company model with fields for..."
+   "Add a `fundraising_round` property to CompanyData resource with fields for..."
 
 2. **Then ask for the logic:**
-   "Write a function that simulates a VC meeting. Input: company metrics. Output: offer or rejection with terms."
+   "Write a static function in SimulationEngine that simulates a VC meeting. Input: company metrics. Output: offer or rejection with terms."
 
 3. **Then ask for the UI:**
-   "Create a SwiftUI view that displays the VC offer as a card with Accept/Negotiate/Decline buttons."
+   "Create a Godot scene with PanelContainers that displays the VC offer as a card with Accept/Negotiate/Decline buttons."
 
 4. **Always provide context about the broader system:**
-   "This is part of a startup sim game. The player is the CEO. This screen appears when they choose to pursue fundraising in the Money tab."
+   "This is part of a startup sim game built in Godot 4.3. The player is the CEO. This screen appears when they choose to pursue fundraising in the Money tab."
 
 ### Common Cursor pitfalls for game dev
 
-- **Cursor will over-engineer.** Tell it to keep things simple. "Use a simple dictionary for this, not a full database table."
-- **Cursor will forget game state connections.** Remind it: "Remember, employee morale affects their work output in the simulation engine."
-- **Cursor will make UI too complex.** Tell it: "Mobile-first. One column. Thumb-reachable. No horizontal scrolling."
+- **Cursor will over-engineer.** Tell it to keep things simple. "Use a simple Dictionary for this, not a full Resource class."
+- **Cursor will forget game state connections.** Remind it: "Remember, employee morale affects their work output in the simulation engine. Check game_state.gd."
+- **Cursor will make UI too complex.** Tell it: "Mobile-first. One column. Thumb-reachable. No horizontal scrolling. Use VBoxContainer."
 - **Test each system as you build it.** Don't build 5 systems then try to connect them. Build one, play it, then build the next.
 
 ---

@@ -1,0 +1,217 @@
+[
+  {
+    "id": "lead_engineer_poached",
+    "title": "Lead Engineer Got an Offer",
+    "description": "Your lead engineer just got a job offer from a competitor. They want a 30% raise to stay.",
+    "choices": [
+      {
+        "label": "Counter-offer with 30% raise",
+        "effects": { "salary_increase_pct": 30 },
+        "outcome_text": "They accept. Morale stabilizes but your burn rate just went up."
+      },
+      {
+        "label": "Let them go",
+        "effects": { "lose_best_engineer": true },
+        "outcome_text": "They leave. The team is shaken and productivity drops while you backfill."
+      },
+      {
+        "label": "Counter with equity instead",
+        "effects": { "equity_grant_pct": 0.5, "salary_increase_pct": 10 },
+        "outcome_text": "They accept the equity deal. They're more invested now — literally."
+      }
+    ],
+    "trigger_conditions": { "employee_count": 3 },
+    "weight": 1.0,
+    "one_time": false
+  },
+  {
+    "id": "cloud_cost_spike",
+    "title": "Cloud Costs Doubled",
+    "description": "An unoptimized database query has been running in production for weeks. Your cloud bill doubled this quarter.",
+    "choices": [
+      {
+        "label": "Pull an engineer to fix it now",
+        "effects": { "cash": -5000, "tech_debt": -5 },
+        "outcome_text": "Fixed. But that engineer's feature work is delayed."
+      },
+      {
+        "label": "Pay the bill and move on",
+        "effects": { "cash": -15000 },
+        "outcome_text": "Expensive lesson. At least nothing else broke."
+      }
+    ],
+    "trigger_conditions": { "employee_count": 1 },
+    "weight": 1.2,
+    "one_time": false
+  },
+  {
+    "id": "viral_tiktok",
+    "title": "Viral TikTok Moment",
+    "description": "Someone posted a TikTok about your product and it's blowing up. +50K signups in 48 hours. Can your infrastructure handle it?",
+    "choices": [
+      {
+        "label": "Scale up infrastructure immediately",
+        "effects": { "cash": -20000, "users": 50000 },
+        "outcome_text": "Servers held. You captured the wave. Users are flooding in."
+      },
+      {
+        "label": "Hope for the best",
+        "effects": { "users": 15000, "stability": -20 },
+        "outcome_text": "Site went down for 3 hours during peak traffic. You got some users but lost more."
+      }
+    ],
+    "trigger_conditions": { "users": 1000 },
+    "weight": 0.5,
+    "one_time": true
+  },
+  {
+    "id": "team_conflict",
+    "title": "Team Conflict",
+    "description": "Two team members are clashing over technical direction. It's dragging down the whole team's morale.",
+    "choices": [
+      {
+        "label": "Mediate the conflict yourself",
+        "effects": { "morale_all": 5 },
+        "outcome_text": "Took a full day but they found common ground. Team respects you stepped in."
+      },
+      {
+        "label": "Side with the senior engineer",
+        "effects": { "morale_all": -5, "tech_debt": -3 },
+        "outcome_text": "Right technical call, but the other engineer feels unheard. Watch that morale."
+      },
+      {
+        "label": "Ignore it",
+        "effects": { "morale_all": -10 },
+        "outcome_text": "It festers. Two weeks later the junior puts in their notice."
+      }
+    ],
+    "trigger_conditions": { "employee_count": 4 },
+    "weight": 1.5,
+    "one_time": false
+  },
+  {
+    "id": "security_vuln",
+    "title": "Security Vulnerability Disclosed",
+    "description": "A user found a security vulnerability and posted it on Twitter. The clock is ticking.",
+    "choices": [
+      {
+        "label": "All-hands emergency patch",
+        "effects": { "tech_debt": 5, "reputation": 5, "stress_all": 15 },
+        "outcome_text": "Patched in 6 hours. Transparent incident report earns respect."
+      },
+      {
+        "label": "Patch quietly over the weekend",
+        "effects": { "reputation": -10 },
+        "outcome_text": "Fixed, but people noticed the silence. Trust took a hit."
+      }
+    ],
+    "trigger_conditions": { "users": 500 },
+    "weight": 0.8,
+    "one_time": false
+  },
+  {
+    "id": "vc_coffee_chat",
+    "title": "VC Wants Coffee",
+    "description": "A partner at a well-known VC firm reached out for a casual coffee chat. Could lead to a funding round.",
+    "choices": [
+      {
+        "label": "Take the meeting",
+        "effects": { "fundraising_opportunity": true },
+        "outcome_text": "Great conversation. They want to see your metrics next quarter."
+      },
+      {
+        "label": "Not ready yet — decline politely",
+        "effects": { "reputation": 2 },
+        "outcome_text": "They respect the focus. Door stays open for later."
+      }
+    ],
+    "trigger_conditions": { "quarter": 2 },
+    "weight": 1.0,
+    "one_time": true
+  },
+  {
+    "id": "competitor_free_tier",
+    "title": "Competitor Goes Free",
+    "description": "Your biggest competitor just raised $50M and is offering their product for free. Users are comparing you.",
+    "choices": [
+      {
+        "label": "Launch a free tier to compete",
+        "effects": { "users": 2000, "cash": -10000 },
+        "outcome_text": "You stem the bleeding. Free users are pouring in, but conversion is uncertain."
+      },
+      {
+        "label": "Double down on quality and stay premium",
+        "effects": { "reputation": 10, "users": -500 },
+        "outcome_text": "You lose some price-sensitive users but your paying customers are more loyal."
+      },
+      {
+        "label": "Slash prices 50%",
+        "effects": { "users": 500 },
+        "outcome_text": "Keeps you competitive but your margins just got a lot thinner."
+      }
+    ],
+    "trigger_conditions": { "year": 2 },
+    "weight": 0.7,
+    "one_time": true
+  },
+  {
+    "id": "junior_refactor",
+    "title": "Surprise Weekend Refactor",
+    "description": "A junior developer you hired 3 quarters ago just mass-refactored the codebase over the weekend. Code is cleaner but untested.",
+    "choices": [
+      {
+        "label": "Review and keep the changes",
+        "effects": { "tech_debt": -15, "bugs": 3 },
+        "outcome_text": "Impressive initiative. Tech debt way down, but a few bugs slipped through."
+      },
+      {
+        "label": "Revert everything",
+        "effects": { "morale_all": -5 },
+        "outcome_text": "Safe call, but the junior is deflated. Others wonder if initiative gets punished here."
+      }
+    ],
+    "trigger_conditions": { "employee_count": 3 },
+    "weight": 0.6,
+    "one_time": true
+  },
+  {
+    "id": "acquisition_offer",
+    "title": "Acquisition Offer",
+    "description": "A larger company wants to acquire you. The offer is decent but you're just getting started.",
+    "choices": [
+      {
+        "label": "Accept the offer",
+        "effects": { "game_win": "acquisition" },
+        "outcome_text": "You sell. The team gets payouts. The dream continues under a bigger roof."
+      },
+      {
+        "label": "Decline and keep building",
+        "effects": { "reputation": 15, "morale_all": 10 },
+        "outcome_text": "The team is fired up. Turning down money to bet on yourselves — that's startup energy."
+      }
+    ],
+    "trigger_conditions": { "year": 3, "users": 10000 },
+    "weight": 0.3,
+    "one_time": true
+  },
+  {
+    "id": "glassdoor_review",
+    "title": "Bad Glassdoor Review",
+    "description": "A former employee rated your company 2/5 stars on Glassdoor. 'No work-life balance, founder is clueless.' Ouch.",
+    "choices": [
+      {
+        "label": "Respond publicly and professionally",
+        "effects": { "reputation": 5 },
+        "outcome_text": "Mature response. Candidates notice you handle criticism well."
+      },
+      {
+        "label": "Ignore it",
+        "effects": { "reputation": -5 },
+        "outcome_text": "It lingers. Your next three candidates all mention they saw it."
+      }
+    ],
+    "trigger_conditions": { "employee_count": 2 },
+    "weight": 0.9,
+    "one_time": false
+  }
+]

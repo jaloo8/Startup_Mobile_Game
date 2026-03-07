@@ -9,6 +9,7 @@ export_credentials.cfg
 
 # Build configs and export output
 export/
+build/
 
 # Imported translations (automatically generated from CSV files)
 *.translation
@@ -17,3 +18,16 @@ export/
 .mono/
 data_*/
 mono_crash.*.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Mobile build artifacts
+android/build/
+ios/

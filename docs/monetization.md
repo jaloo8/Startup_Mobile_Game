@@ -4,7 +4,7 @@
 
 ## Revenue Model
 
-### Base Game — $4.99 (iOS) / $4.99 (Android)
+### Base Game — $4.99 (iOS / Android / Steam)
 
 - Software Path: 4 company types (SaaS B2B, Consumer App, Marketplace, Dev Tools)
 - Full core engine (people, money, events, competitors, fundraising)
@@ -84,57 +84,57 @@ Do NOT build all DLCs before shipping. Release schedule:
 Each DLC is a module that plugs into the core engine:
 
 ```
-Base App (always installed):
-├── CoreEngine/
-│   ├── SimulationEngine.swift     (shared quarterly sim loop)
-│   ├── EmployeeEngine.swift       (shared people management)
-│   ├── FinanceEngine.swift        (shared money systems)
-│   └── EventEngine.swift          (shared event dispatch)
-├── Paths/
-│   └── Software/                  (included in base)
-│       ├── SoftwareProductSystem.swift
-│       ├── SoftwareRevenueModel.swift
+src/
+├── engine/                              (shared core — always installed)
+│   ├── simulation_engine.gd             (shared quarterly sim loop)
+│   ├── hiring_engine.gd                 (shared people management)
+│   ├── revenue_engine.gd                (shared money systems)
+│   └── event_engine.gd                  (shared event dispatch)
+├── paths/
+│   └── software/                        (included in base)
+│       ├── software_product_system.gd
+│       ├── software_revenue_model.gd
 │       ├── software_events.json
 │       └── software_features.json
 
 DLC Packs (unlocked via IAP):
-├── Paths/
-│   ├── AI/                        (DLC #1)
-│   │   ├── AIProductSystem.swift
-│   │   ├── ComputeBudgetSystem.swift   ← unique mechanic
-│   │   ├── ModelTrainingSystem.swift   ← unique mechanic
-│   │   ├── AIRevenueModel.swift
+├── paths/
+│   ├── ai/                              (DLC #1)
+│   │   ├── ai_product_system.gd
+│   │   ├── compute_budget_system.gd     ← unique mechanic
+│   │   ├── model_training_system.gd     ← unique mechanic
+│   │   ├── ai_revenue_model.gd
 │   │   ├── ai_events.json
 │   │   └── ai_features.json
-│   ├── Hardware/                   (DLC #2)
-│   │   ├── HardwareProductSystem.swift
-│   │   ├── ManufacturingSystem.swift   ← unique mechanic
-│   │   ├── SupplyChainSystem.swift     ← unique mechanic
-│   │   ├── HardwareRevenueModel.swift
+│   ├── hardware/                        (DLC #2)
+│   │   ├── hardware_product_system.gd
+│   │   ├── manufacturing_system.gd      ← unique mechanic
+│   │   ├── supply_chain_system.gd       ← unique mechanic
+│   │   ├── hardware_revenue_model.gd
 │   │   ├── hardware_events.json
 │   │   └── hardware_features.json
-│   ├── Gaming/                     (DLC #3)
-│   │   ├── GamingProductSystem.swift
-│   │   ├── GameProjectSystem.swift     ← unique mechanic
-│   │   ├── ReviewScoreSystem.swift     ← unique mechanic
-│   │   ├── GamingRevenueModel.swift
+│   ├── gaming/                          (DLC #3)
+│   │   ├── gaming_product_system.gd
+│   │   ├── game_project_system.gd       ← unique mechanic
+│   │   ├── review_score_system.gd       ← unique mechanic
+│   │   ├── gaming_revenue_model.gd
 │   │   ├── gaming_events.json
 │   │   └── gaming_features.json
-│   └── Platform/                   (DLC #4)
-│       ├── PlatformProductSystem.swift
-│       ├── EcosystemHealthSystem.swift ← unique mechanic
-│       ├── PlatformRevenueModel.swift
+│   └── platform/                        (DLC #4)
+│       ├── platform_product_system.gd
+│       ├── ecosystem_health_system.gd   ← unique mechanic
+│       ├── platform_revenue_model.gd
 │       ├── platform_events.json
 │       └── platform_features.json
 ```
 
 ### Key design principle
 
-The core `SimulationEngine` calls a `PathModule` protocol. Each path implements this protocol. When the player starts a new game, the engine loads the appropriate path module. This means:
+The core `SimulationEngine` calls methods on a path module script. Each path implements the same interface (duck-typed or via a base class). When the player starts a new game, the engine loads the appropriate path module. This means:
 - Adding a DLC never requires changing core engine code
 - Each path can have wildly different product/revenue mechanics
 - Events are loaded from JSON, so adding 40 events per DLC is just data, not code
-- The UI adapts based on which path-specific screens are needed
+- The UI adapts based on which path-specific scenes are needed
 
 ---
 
@@ -154,8 +154,11 @@ This creates a "conglomerate" endgame that dramatically extends replayability. B
 ## Notes
 
 - Apple: 30% cut (15% for Small Business Program under $1M/yr revenue)
+- Google Play: 15% for first $1M/yr, 30% after
+- Steam: 30% cut (drops at $10M+ and $50M+ thresholds)
 - Consider pricing and paywall placement carefully for DLC IAP
 - TestFlight and soft launch are good places to test price sensitivity
+- Godot's export templates handle platform-specific IAP integration
 
 ---
 

@@ -10,7 +10,7 @@
 
 **Core fantasy:** You are the CEO/founder of a tech startup. You make every strategic decision — what to build, who to hire, when to raise money, when to pivot. The game simulates realistic consequences. Some decisions pay off quarters later. Others blow up in your face immediately.
 
-**Target platform:** iOS first (Swift/SwiftUI), Android follow-up
+**Target platform:** iOS and Android (Godot 4.3), Steam/desktop future
 **Monetization:** Premium $4.99 base game (Software path) + $2.99 DLC packs per path
 **Session length:** 10–20 minutes (one "quarter" per session, natural stopping points)
 **Total game length:** 20–40 quarters (5–10 years of startup life per run)
@@ -447,24 +447,23 @@ MARKET EVENTS:
 ### 4.1 Stack
 
 ```
-Platform:       iOS first (SwiftUI), then Android (Kotlin/Compose) or cross-platform
-Architecture:   MVVM (Model-View-ViewModel)
-Data:           Local SQLite or CoreData (no server needed)
-State:          All game state in a single serializable GameState object
-Save system:    Auto-save each quarter, 3 manual save slots
-UI framework:   SwiftUI with custom components (menus, charts, employee cards)
+Engine:         Godot 4.3 (Forward Plus)
+Language:       GDScript
+Platforms:      iOS, Android, Steam/desktop (all from one codebase)
+Architecture:   Autoload singletons + Resource-based data model
+Data:           Godot Resources (serializable) + JSON for content
+State:          All game state in a single GameState autoload
+Save system:    Auto-save each quarter, 3 manual save slots (Resource serialization)
+UI framework:   Godot Control nodes, custom theme
 ```
 
-**Why native iOS first:**
-- Premium games perform better on iOS (higher willingness to pay)
-- SwiftUI is fast to iterate with
+**Why Godot:**
+- Cross-platform from day one (iOS, Android, Steam, web, desktop)
+- GDScript is fast to iterate with, beginner-friendly
 - No server costs, no backend — pure local game
-- Can port to Android later with shared game logic
-
-**Alternative: Cross-platform with React Native or Flutter**
-- Faster to ship on both platforms
-- Flutter especially good for custom UI
-- Tradeoff: slightly less native feel
+- Godot's scene/node system maps well to UI-heavy management sims
+- Free and open source, no revenue share or licensing fees
+- Built-in export templates for mobile and desktop
 
 ### 4.2 Core Data Model
 

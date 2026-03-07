@@ -12,8 +12,13 @@ config_version=5
 
 config/name="Venture"
 run/main_loop_type="SceneTree"
-run/main_scene="res://src/scenes/main_menu.tscn"
+run/main_scene="res://src/ui/main_menu/main_menu.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
+
+[autoload]
+
+GameState="*res://src/autoload/game_state.gd"
+SceneLoader="*res://src/autoload/scene_loader.gd"
 
 [display]
 
