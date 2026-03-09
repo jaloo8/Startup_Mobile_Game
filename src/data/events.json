@@ -13,7 +13,9 @@
     "choices": [
       {
         "label": "Counter-offer with a raise",
-        "effects": { "salary_increase_pct": 30 },
+        "effects": {
+          "salary_increase_pct": 30
+        },
         "outcome_template": "{employee_name} accepts your counter. But two other engineers are now eyeing the door, wondering if they should also threaten to leave to get a raise.",
         "outcome_variations": [
           "Deal done. {employee_name} stays. But the precedent is set — word spreads that the way to get a raise here is to wave a competing offer.",
@@ -22,7 +24,10 @@
       },
       {
         "label": "Let them go",
-        "effects": { "lose_best_engineer": true, "morale_all": -10 },
+        "effects": {
+          "lose_best_engineer": true,
+          "morale_all": -10
+        },
         "outcome_template": "{employee_name} clears their desk on Friday. The team is quiet all week. They were the only person who understood the payment integration.",
         "outcome_variations": [
           "They're gone. Three days later you realize {employee_name} was the only person with access to the production database credentials. Scramble mode.",
@@ -31,7 +36,10 @@
       },
       {
         "label": "Counter with equity instead",
-        "effects": { "equity_grant_pct": 0.5, "salary_increase_pct": 10 },
+        "effects": {
+          "equity_grant_pct": 0.5,
+          "salary_increase_pct": 10
+        },
         "outcome_template": "{employee_name} hesitates. 'Equity in a startup... that's just Monopoly money right now.' But they take the deal. For now.",
         "outcome_variations": [
           "{employee_name} lights up. 'You're giving me ownership? I'm in.' Their productivity jumps next quarter. They believe in the mission now.",
@@ -39,7 +47,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "employee_count": 3 },
+    "trigger_conditions": {
+      "employee_count": 3
+    },
     "weight": 1.0,
     "one_time": false,
     "cooldown_quarters": 4
@@ -58,7 +68,10 @@
     "choices": [
       {
         "label": "Pull an engineer to fix it now",
-        "effects": { "cash": -5000, "tech_debt": -5 },
+        "effects": {
+          "cash": -5000,
+          "tech_debt": -5
+        },
         "outcome_template": "Fixed. But that engineer's feature work is delayed by a week. At least you found three other inefficiencies while investigating.",
         "outcome_variations": [
           "Your senior backend dev fixes it in 4 hours and writes a postmortem. The team learns something. But the sprint is blown.",
@@ -67,7 +80,9 @@
       },
       {
         "label": "Pay the bill and move on",
-        "effects": { "cash": -15000 },
+        "effects": {
+          "cash": -15000
+        },
         "outcome_template": "Expensive lesson. At least nothing else broke. You make a mental note to set up billing alerts... eventually.",
         "outcome_variations": [
           "You eat the cost. The query is still running. Next quarter will be just as bad unless someone fixes it.",
@@ -75,7 +90,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "employee_count": 1 },
+    "trigger_conditions": {
+      "employee_count": 1
+    },
     "weight": 1.2,
     "one_time": false,
     "cooldown_quarters": 6
@@ -94,7 +111,10 @@
     "choices": [
       {
         "label": "Scale up infrastructure immediately",
-        "effects": { "cash": -20000, "users": 50000 },
+        "effects": {
+          "cash": -20000,
+          "users": 50000
+        },
         "outcome_template": "Servers held. You captured the wave. {company_name} is trending. Users are flooding in and retention looks decent.",
         "outcome_variations": [
           "Your infrastructure team pulls an all-nighter but keeps the site up. The viral moment becomes a case study in your next fundraising deck.",
@@ -103,7 +123,11 @@
       },
       {
         "label": "Hope for the best",
-        "effects": { "users": 15000, "stability": -20, "reputation": -5 },
+        "effects": {
+          "users": 15000,
+          "stability": -20,
+          "reputation": -5
+        },
         "outcome_template": "Site went down for 3 hours during peak traffic. Screenshots of your error page are all over Twitter. You got some users but lost more to first impressions.",
         "outcome_variations": [
           "The site crashes. Hard. By the time it's back up, the viral moment has passed. You captured maybe 30% of what you could have.",
@@ -111,7 +135,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "users": 1000 },
+    "trigger_conditions": {
+      "users": 1000
+    },
     "weight": 0.5,
     "one_time": true,
     "cooldown_quarters": 0
@@ -130,7 +156,9 @@
     "choices": [
       {
         "label": "Mediate the conflict yourself",
-        "effects": { "morale_all": 5 },
+        "effects": {
+          "morale_all": 5
+        },
         "outcome_template": "Took a full day but they found common ground. The team respects that you stepped in instead of ignoring it.",
         "outcome_variations": [
           "You sit them both down, let each present their case, and guide them to a compromise. Neither is fully happy, but both feel heard. Morale recovers.",
@@ -139,7 +167,10 @@
       },
       {
         "label": "Side with the senior engineer",
-        "effects": { "morale_all": -5, "tech_debt": -3 },
+        "effects": {
+          "morale_all": -5,
+          "tech_debt": -3
+        },
         "outcome_template": "Right technical call, but the other engineer feels unheard. They start updating their LinkedIn.",
         "outcome_variations": [
           "The senior's approach wins. Code quality improves. But the other engineer is demoralized and their output drops.",
@@ -148,7 +179,9 @@
       },
       {
         "label": "Ignore it",
-        "effects": { "morale_all": -10 },
+        "effects": {
+          "morale_all": -10
+        },
         "outcome_template": "It festers. Two weeks later the junior engineer puts in their notice. They say the culture is 'toxic.'",
         "outcome_variations": [
           "The conflict metastasizes. Now there are two camps and people are choosing lunch tables based on allegiance. This was a mistake.",
@@ -156,7 +189,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "employee_count": 4 },
+    "trigger_conditions": {
+      "employee_count": 4
+    },
     "weight": 1.5,
     "one_time": false,
     "cooldown_quarters": 3
@@ -175,7 +210,11 @@
     "choices": [
       {
         "label": "All-hands emergency patch",
-        "effects": { "tech_debt": 5, "reputation": 5, "stress_all": 15 },
+        "effects": {
+          "tech_debt": 5,
+          "reputation": 5,
+          "stress_all": 15
+        },
         "outcome_template": "Patched in 6 hours. You publish a transparent incident report. The security community respects the fast response. Trust actually goes up.",
         "outcome_variations": [
           "The team rallies. Patch goes out in 4 hours. Your postmortem blog post goes viral for all the right reasons.",
@@ -184,7 +223,9 @@
       },
       {
         "label": "Patch quietly over the weekend",
-        "effects": { "reputation": -10 },
+        "effects": {
+          "reputation": -10
+        },
         "outcome_template": "Fixed, but people noticed the silence. A tech journalist writes: '{company_name} quietly patched a critical vulnerability without disclosing it.' Trust takes a hit.",
         "outcome_variations": [
           "You fix it silently. Two weeks later someone diffs your code and posts the patch. 'Why didn't they tell us?' Bad look.",
@@ -192,7 +233,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "users": 500 },
+    "trigger_conditions": {
+      "users": 500
+    },
     "weight": 0.8,
     "one_time": false,
     "cooldown_quarters": 5
@@ -211,7 +254,9 @@
     "choices": [
       {
         "label": "Take the meeting",
-        "effects": { "fundraising_opportunity": true },
+        "effects": {
+          "fundraising_opportunity": true
+        },
         "outcome_template": "Great conversation. They want to see your metrics next quarter. The clock is ticking — you need to make those numbers look good.",
         "outcome_variations": [
           "Coffee turns into a 2-hour deep dive. They're genuinely interested. 'Send us your deck,' they say. This could be real.",
@@ -220,7 +265,9 @@
       },
       {
         "label": "Not ready yet — decline politely",
-        "effects": { "reputation": 2 },
+        "effects": {
+          "reputation": 2
+        },
         "outcome_template": "They respect the focus. 'Love founders who know when to say no,' they reply. Door stays open for later.",
         "outcome_variations": [
           "You reply: 'We'd love to chat when we hit [milestone]. Not quite there yet.' They respect the self-awareness. Your reputation with VCs actually goes up.",
@@ -228,7 +275,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "quarter": 2 },
+    "trigger_conditions": {
+      "quarter": 2
+    },
     "weight": 1.0,
     "one_time": true,
     "cooldown_quarters": 0
@@ -247,7 +296,10 @@
     "choices": [
       {
         "label": "Launch a free tier to compete",
-        "effects": { "users": 2000, "cash": -10000 },
+        "effects": {
+          "users": 2000,
+          "cash": -10000
+        },
         "outcome_template": "You stem the bleeding. Free users pour in but conversion to paid is uncertain. You're now in a war of attrition — and they have $50M more than you.",
         "outcome_variations": [
           "The free tier works. Signups spike. But your margins just got crushed and your runway shortened by 3 quarters.",
@@ -256,7 +308,10 @@
       },
       {
         "label": "Double down on quality and stay premium",
-        "effects": { "reputation": 10, "users": -500 },
+        "effects": {
+          "reputation": 10,
+          "users": -500
+        },
         "outcome_template": "You lose some price-sensitive users but your paying customers are more loyal. 'We're not the cheap option. We're the good option.' Bold move.",
         "outcome_variations": [
           "You write a blog post: 'Why we're not going free.' It resonates with your core audience. You lose casuals but retain power users.",
@@ -265,7 +320,9 @@
       },
       {
         "label": "Slash prices 50%",
-        "effects": { "users": 500 },
+        "effects": {
+          "users": 500
+        },
         "outcome_template": "Keeps you competitive but your margins just got thin. You'll need to grow faster to make the math work.",
         "outcome_variations": [
           "Existing users are happy about the price drop. New users trickle in. But your burn rate is now higher relative to revenue.",
@@ -273,7 +330,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "year": 2 },
+    "trigger_conditions": {
+      "year": 2
+    },
     "weight": 0.7,
     "one_time": true,
     "cooldown_quarters": 0
@@ -292,7 +351,10 @@
     "choices": [
       {
         "label": "Review and keep the changes",
-        "effects": { "tech_debt": -15, "bugs": 3 },
+        "effects": {
+          "tech_debt": -15,
+          "bugs": 3
+        },
         "outcome_template": "Impressive initiative. Tech debt drops significantly, but a few bugs slip through. The junior is beaming. Your senior engineer is writing a wiki page titled 'How to Propose Large Refactors.'",
         "outcome_variations": [
           "After a careful review, most of the changes are actually good. A few bugs surface but they're minor. The junior learned the codebase deeply. Net positive.",
@@ -301,7 +363,9 @@
       },
       {
         "label": "Revert everything",
-        "effects": { "morale_all": -5 },
+        "effects": {
+          "morale_all": -5
+        },
         "outcome_template": "Safe call, but the junior is deflated. Others wonder if initiative gets punished here. You add 'refactoring guidelines' to the wiki.",
         "outcome_variations": [
           "You revert the PR and schedule a 1:1. The junior understands but you can see their enthusiasm dim. Other junior devs take note — don't rock the boat.",
@@ -309,7 +373,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "employee_count": 3 },
+    "trigger_conditions": {
+      "employee_count": 3
+    },
     "weight": 0.6,
     "one_time": true,
     "cooldown_quarters": 0
@@ -328,7 +394,9 @@
     "choices": [
       {
         "label": "Accept the offer",
-        "effects": { "game_win": "acquisition" },
+        "effects": {
+          "game_win": "acquisition"
+        },
         "outcome_template": "You sell {company_name}. The team gets payouts. You sign a 2-year retention agreement. The dream continues under a bigger roof — for now.",
         "outcome_variations": [
           "Champagne in the office. Tears. Some happy, some bittersweet. Your co-founder whispers: 'We actually did it.' The hard part is over. The different hard part begins.",
@@ -337,7 +405,10 @@
       },
       {
         "label": "Decline and keep building",
-        "effects": { "reputation": 15, "morale_all": 10 },
+        "effects": {
+          "reputation": 15,
+          "morale_all": 10
+        },
         "outcome_template": "The team is fired up. Turning down that much money to bet on yourselves — that's startup energy. Your next fundraise will be easier.",
         "outcome_variations": [
           "You send the polite decline. The acquirer is surprised — 'Are you sure?' You are. The team rallies. Morale hits an all-time high.",
@@ -345,7 +416,10 @@
         ]
       }
     ],
-    "trigger_conditions": { "year": 3, "users": 10000 },
+    "trigger_conditions": {
+      "year": 3,
+      "users": 10000
+    },
     "weight": 0.3,
     "one_time": true,
     "cooldown_quarters": 0
@@ -364,7 +438,9 @@
     "choices": [
       {
         "label": "Respond publicly and professionally",
-        "effects": { "reputation": 5 },
+        "effects": {
+          "reputation": 5
+        },
         "outcome_template": "Mature response. You acknowledge the feedback and outline specific changes you're making. Candidates notice you handle criticism well.",
         "outcome_variations": [
           "Your response goes semi-viral on LinkedIn. 'This is how a founder should handle negative feedback.' Recruiting pipeline actually improves.",
@@ -373,7 +449,9 @@
       },
       {
         "label": "Ignore it",
-        "effects": { "reputation": -5 },
+        "effects": {
+          "reputation": -5
+        },
         "outcome_template": "It lingers. Your next three candidates all mention they saw it. One turns down your offer citing 'culture concerns.'",
         "outcome_variations": [
           "The review sits unanswered for months. More reviews trickle in — some good, but the bad one is still the most visible. Recruiting gets harder.",
@@ -381,7 +459,9 @@
         ]
       }
     ],
-    "trigger_conditions": { "employee_count": 2 },
+    "trigger_conditions": {
+      "employee_count": 2
+    },
     "weight": 0.9,
     "one_time": false,
     "cooldown_quarters": 4
@@ -400,7 +480,10 @@
     "choices": [
       {
         "label": "Take his money",
-        "effects": { "cash": 75000, "reputation": -5 },
+        "effects": {
+          "cash": 75000,
+          "reputation": -5
+        },
         "outcome_template": "He writes a check on the spot. Literally on the spot — he pulls out a checkbook. The money is real but he's already texting his publicist about it. Your credible investors are rolling their eyes.",
         "outcome_variations": [
           "Deal done. He insists on a photo for his Instagram. Caption: 'Just invested in the next billion-dollar company. Three Comma Club stays winning.' Your board is not amused.",
@@ -409,7 +492,9 @@
       },
       {
         "label": "Politely decline",
-        "effects": { "reputation": 5 },
+        "effects": {
+          "reputation": 5
+        },
         "outcome_template": "'Your loss,' he shrugs, revving the McLaren so loud your office windows rattle. He peels out. Your team watches in stunned silence. At least your cap table is clean.",
         "outcome_variations": [
           "He takes it surprisingly well. 'Respect the hustle.' He gives you a fist bump and leaves. His McLaren sets off three car alarms on the way out.",
@@ -418,7 +503,10 @@
       },
       {
         "label": "Ask for double",
-        "effects": { "cash": 150000, "reputation": -10 },
+        "effects": {
+          "cash": 150000,
+          "reputation": -10
+        },
         "outcome_template": "He laughs so hard he spills his green juice on your whiteboard. 'I like you. Bold.' He doubles the check. Your investors are furious but the runway is looking real comfortable.",
         "outcome_variations": [
           "'Nobody's ever asked me for MORE,' he says, genuinely delighted. He writes a bigger check and immediately tweets about it. Your brand takes a hit but your bank account doesn't care.",
@@ -426,9 +514,1567 @@
         ]
       }
     ],
-    "trigger_conditions": { "quarter": 3 },
+    "trigger_conditions": {
+      "quarter": 3
+    },
     "weight": 0.4,
     "one_time": true,
     "cooldown_quarters": 0
+  },
+  {
+    "id": "office_dog_debate",
+    "title": "The Dog Question",
+    "category": "people",
+    "stage": "any",
+    "description_template": "Someone brought their golden retriever to the office. Half the team is delighted. The other half is sneezing. A Slack poll is brewing.",
+    "variations": [
+      "It started innocently — {employee_name} brought their dog for 'just one day.' That was three weeks ago. The dog now has its own desk plant. Two people are allergic.",
+      "A heated #pets-at-work Slack channel has emerged. It has more activity than #engineering. Someone made a PowerPoint presentation titled 'Why Dogs Boost Productivity (With Charts).'"
+    ],
+    "choices": [
+      {
+        "label": "Allow dogs in the office",
+        "effects": {
+          "morale_all": 8
+        },
+        "outcome_template": "Morale spikes. The office vibe is genuinely better. One engineer says it's the best perk you offer. The allergic developer starts working from home Tuesdays.",
+        "outcome_variations": [
+          "Dogs are in. Productivity actually goes up — people take walking breaks instead of doom-scrolling. Your Instagram gets way more followers.",
+          "The office smells slightly different now but everyone is happier. Your recruiter starts listing 'dog-friendly office' on job posts."
+        ]
+      },
+      {
+        "label": "No pets policy",
+        "effects": {
+          "morale_all": -3,
+          "stress_all": -5
+        },
+        "outcome_template": "Clean and professional. But the Slack channel goes quiet in protest. {employee_name} is noticeably less cheerful.",
+        "outcome_variations": [
+          "Policy set. The office stays clean. Two people are relieved, five are disappointed. Someone puts a photo of a sad puppy on the fridge.",
+          "No dogs. No drama. But also no joy. The office feels a little more corporate now."
+        ]
+      },
+      {
+        "label": "Dog Fridays only",
+        "effects": {
+          "morale_all": 5
+        },
+        "outcome_template": "The compromise nobody asked for but everyone accepts. Fridays are now the most productive day because people actually want to come in.",
+        "outcome_variations": [
+          "Friday attendance triples. The dogs have become a team-building activity. Your allergic developer wears a mask on Fridays and says it's worth it.",
+          "Dog Friday becomes a {company_name} tradition. It's the first thing new hires mention in interviews."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 3
+    },
+    "weight": 0.8,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "first_intern",
+    "title": "Intern Application",
+    "category": "people",
+    "stage": "early",
+    "description_template": "A college junior emailed asking about internships at {company_name}. Their resume is surprisingly good. They're willing to work for 'the experience.'",
+    "variations": [
+      "A student from Stanford cold-emailed you. Their GitHub has more stars than your company repo. They want to intern. For free. You feel both flattered and guilty.",
+      "Your alma mater's career office forwarded an application. Kid built a full-stack app as a class project that's better than your MVP. They're asking about internships."
+    ],
+    "choices": [
+      {
+        "label": "Hire them as a paid intern",
+        "effects": {
+          "cash": -8000,
+          "morale_all": 3
+        },
+        "outcome_template": "They're eager, fast, and ask questions that make your senior engineers think. Paying them was the right call — and it's a good look for recruiting.",
+        "outcome_variations": [
+          "Best hire-per-dollar you've made. They ship a small feature in week two. Three other students from their school are now asking about {company_name}.",
+          "The intern is great. They also live-tweet their experience and your brand awareness jumps with the college crowd."
+        ]
+      },
+      {
+        "label": "Unpaid internship",
+        "effects": {
+          "reputation": -8
+        },
+        "outcome_template": "They accept but word gets out. A Twitter thread about 'startup exploitation' mentions {company_name} by name. Not a great look.",
+        "outcome_variations": [
+          "The intern does good work but tells their classmates about the pay situation. Your next recruiting event at that school is... awkward.",
+          "Someone screenshots your unpaid internship listing and it ends up on a 'worst startup practices' Reddit thread. Reputation hit."
+        ]
+      },
+      {
+        "label": "Not ready for interns yet",
+        "effects": {},
+        "outcome_template": "You send a kind rejection. They reply: 'No worries! I'll follow {company_name} — rooting for you.' Somehow that feels worse than the rejection.",
+        "outcome_variations": [
+          "Passed. Probably the right call — you don't have bandwidth to mentor anyone right now. But that kid was sharp.",
+          "You decline politely. Six months later you see they interned at {competitor_name} instead. Their LinkedIn post about it has 500 likes."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 2
+    },
+    "weight": 0.7,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "remote_work_request",
+    "title": "Remote Work Request",
+    "category": "people",
+    "stage": "any",
+    "description_template": "{employee_name} wants to go fully remote. Their partner got a job in another city. They're one of your best people.",
+    "variations": [
+      "{employee_name} books a 1:1 and leads with: 'I love working here, but...' Their partner accepted a job across the country. They want to go remote or they'll have to leave.",
+      "An email from {employee_name}: 'I need to talk about my work arrangement.' They want to move home to take care of a family member. Fully remote or nothing."
+    ],
+    "choices": [
+      {
+        "label": "Allow full remote",
+        "effects": {
+          "morale_all": 3
+        },
+        "outcome_template": "{employee_name} is grateful and productive. But now three other people are asking why they can't go remote too.",
+        "outcome_variations": [
+          "Remote works great for {employee_name}. Their output doesn't drop. But the in-office team feels a slight disconnect. Welcome to hybrid.",
+          "They move. Slack messages replace hallway conversations. It's fine. Until someone suggests the whole company should go remote."
+        ]
+      },
+      {
+        "label": "Deny the request",
+        "effects": {
+          "morale_all": -5
+        },
+        "outcome_template": "{employee_name} is quiet for a week. Then they put in their two weeks. You lose a great person over a policy.",
+        "outcome_variations": [
+          "They leave. The team is upset. 'You could have just let them work from home,' someone mutters at standup.",
+          "{employee_name} accepts it for now but their engagement visibly drops. They're updating their LinkedIn."
+        ]
+      },
+      {
+        "label": "Trial period — 3 months remote",
+        "effects": {
+          "morale_all": 2
+        },
+        "outcome_template": "Fair compromise. {employee_name} is motivated to prove remote works. You'll revisit in 3 months with data.",
+        "outcome_variations": [
+          "The trial goes well. {employee_name} ships on time. You quietly extend it indefinitely. Nobody complains.",
+          "Mixed results. Communication is harder but their output is solid. You extend the trial. It becomes permanent by default."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 4
+    },
+    "weight": 1.0,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "star_demands_promotion",
+    "title": "Promotion Ultimatum",
+    "category": "people",
+    "stage": "growth",
+    "description_template": "Your best engineer just asked for a VP title. They've been carrying the team. But giving it to them will make everyone else wonder where their promotion is.",
+    "variations": [
+      "{employee_name} closes your office door. 'I've been here since day one. I need a title that reflects that. VP of Engineering.' They're not bluffing.",
+      "During your 1:1, {employee_name} slides their laptop across the table showing a LinkedIn job listing. 'This is what companies are offering people with my experience. I want VP or I'm taking calls.'"
+    ],
+    "choices": [
+      {
+        "label": "Give them the title",
+        "effects": {
+          "morale_all": -3
+        },
+        "outcome_template": "They're thrilled. But three other people schedule 1:1s within the week asking about their career paths. You've opened a can of worms.",
+        "outcome_variations": [
+          "VP it is. {employee_name} is energized. But now you need a leveling framework because everyone wants to know what title they'll get.",
+          "The title change goes through. Morale is mixed — the team respects {employee_name} but wonders if shouting gets results."
+        ]
+      },
+      {
+        "label": "Decline — too early for VP titles",
+        "effects": {
+          "morale_all": -2
+        },
+        "outcome_template": "You explain that titles will come as the company grows. They accept it but their enthusiasm dims. Their recruiter DMs stay open.",
+        "outcome_variations": [
+          "You hold firm. {employee_name} nods but you can tell they're disappointed. Output stays high but the spark is gone.",
+          "They respect the reasoning but start taking recruiter calls 'just to see what's out there.' You have maybe two quarters before they leave."
+        ]
+      },
+      {
+        "label": "Raise + expanded scope, no title change",
+        "effects": {
+          "cash": -5000
+        },
+        "outcome_template": "More money, more responsibility, same title. It buys time. They accept but this conversation will come back.",
+        "outcome_variations": [
+          "The raise helps. The expanded scope makes them feel valued. But the title thing will resurface. Clock is ticking.",
+          "Smart compromise. They get the substance without the politics of a VP title. Works for now."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5
+    },
+    "weight": 0.8,
+    "one_time": false,
+    "cooldown_quarters": 5
+  },
+  {
+    "id": "union_talk",
+    "title": "Organizing Whispers",
+    "category": "people",
+    "stage": "growth",
+    "description_template": "You overheard two employees talking about 'organizing' in the kitchen. Could be nothing. Could be the start of a labor movement at {company_name}.",
+    "variations": [
+      "A shared Google Doc titled 'Employee Concerns' is making the rounds. It has bullet points about pay transparency, overtime, and PTO. Seven people have edited it.",
+      "Someone anonymously posted on Blind about working conditions at {company_name}. The replies are mostly supportive. Your head of people is concerned."
+    ],
+    "choices": [
+      {
+        "label": "Address the concerns directly",
+        "effects": {
+          "cash": -15000,
+          "morale_all": 10
+        },
+        "outcome_template": "You call an all-hands and go through every concern. You raise the PTO minimum and commit to pay bands. Expensive, but trust is restored.",
+        "outcome_variations": [
+          "Transparency wins. The Google Doc gets archived. People feel heard. It costs money but the alternative was worse.",
+          "You publish salary bands, add 5 PTO days, and commit to quarterly feedback. The organizing energy redirects into actual productivity."
+        ]
+      },
+      {
+        "label": "Ignore it",
+        "effects": {
+          "morale_all": -8
+        },
+        "outcome_template": "The whispers get louder. Two people quit in the same week citing 'culture.' The Blind post gets picked up by a tech reporter.",
+        "outcome_variations": [
+          "Ignoring it was a mistake. The anonymous posts multiply. Your next three candidates all ask about 'the Blind situation' in interviews.",
+          "Nothing changes. The organizers get frustrated and leave. You lose good people because you didn't listen."
+        ]
+      },
+      {
+        "label": "Preemptive raises for everyone",
+        "effects": {
+          "cash": -25000,
+          "morale_all": 12
+        },
+        "outcome_template": "Across-the-board 10% raises. It's expensive but the organizing energy dissolves overnight. People feel valued.",
+        "outcome_variations": [
+          "Money talks. The raises land well. The Google Doc gets deleted. But your burn rate just jumped significantly.",
+          "Everyone's happy. For now. You'll need to sustain this pay level going forward. But the crisis is averted."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 6
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "side_project_viral",
+    "title": "Employee's Side Project",
+    "category": "people",
+    "stage": "any",
+    "description_template": "{employee_name} built a side project on evenings and weekends. It just hit the front page of Hacker News. It's tangentially related to what {company_name} does.",
+    "variations": [
+      "Your engineer {employee_name} sheepishly shows you their phone. Their weekend project — an open-source tool — has 2,000 GitHub stars and climbing. 'I built it on my own time,' they clarify quickly.",
+      "{employee_name}'s side project got featured on Product Hunt. It's trending #2. The problem: it solves a problem suspiciously similar to a feature on your roadmap."
+    ],
+    "choices": [
+      {
+        "label": "Celebrate it publicly",
+        "effects": {
+          "morale_all": 5,
+          "reputation": 5
+        },
+        "outcome_template": "You tweet about it. '{company_name} is proud to have builders like {employee_name}.' The team loves that you support side projects. Recruiting gets easier.",
+        "outcome_variations": [
+          "Great move. The positive press reflects well on {company_name}. Other engineers are inspired. Your employer brand just leveled up.",
+          "You share it in the company all-hands. {employee_name} beams. Three other engineers start their own side projects. Innovation culture unlocked."
+        ]
+      },
+      {
+        "label": "Claim IP ownership",
+        "effects": {
+          "morale_all": -12,
+          "reputation": -8
+        },
+        "outcome_template": "Legal sends a letter. {employee_name} is furious. The Hacker News thread turns into a discussion about how {company_name} treats employees. Not good.",
+        "outcome_variations": [
+          "You invoke the IP clause. {employee_name} lawyers up. The whole team watches. Even if you're legally right, you've lost the room.",
+          "The IP claim leaks. Tech Twitter is not kind. 'Another startup stealing from their own employees.' Your next five candidates decline."
+        ]
+      },
+      {
+        "label": "Negotiate to integrate it",
+        "effects": {
+          "cash": -10000,
+          "tech_debt": -5
+        },
+        "outcome_template": "You offer to buy the project and integrate it into {company_name}'s product. {employee_name} gets a bonus. Everyone wins.",
+        "outcome_variations": [
+          "Fair deal. The tool becomes an official feature. {employee_name} is recognized as the creator. Other engineers see that good work gets rewarded.",
+          "You acquire the side project for a bonus plus credit. It saves your team three months of development. Smart move."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 3
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "diversity_pressure",
+    "title": "Diversity in Tech Spotlight",
+    "category": "people",
+    "stage": "growth",
+    "description_template": "A tech publication just ran an article about diversity in startups. {company_name} was mentioned — and not in a flattering way. 'Another homogeneous founding team.'",
+    "variations": [
+      "A viral Twitter thread lists startups with non-diverse teams. {company_name} is on it. The replies are brutal. Your head of people is drafting a response.",
+      "An investor in your pipeline asks: 'What does your diversity data look like?' You don't have diversity data. That's the problem."
+    ],
+    "choices": [
+      {
+        "label": "Hire a DEI consultant",
+        "effects": {
+          "cash": -12000,
+          "reputation": 8
+        },
+        "outcome_template": "The consultant identifies blind spots in your hiring pipeline. It takes two quarters but your candidate pool diversifies. The press notices.",
+        "outcome_variations": [
+          "Real change takes time but the consultant's recommendations are practical. Your next 5 hires come from a wider pool. It shows.",
+          "The consultant is worth every penny. They fix your job descriptions alone, which doubles applications from underrepresented groups."
+        ]
+      },
+      {
+        "label": "Ignore the article",
+        "effects": {
+          "reputation": -10
+        },
+        "outcome_template": "The article stays in Google search results for {company_name}. Every candidate sees it. Every investor asks about it. Silence is a statement.",
+        "outcome_variations": [
+          "You say nothing. The internet remembers. Six months later someone brings it up in a board meeting. Still no answer.",
+          "Ignoring it was easier in the short term but the long-term cost to recruiting and brand is real."
+        ]
+      },
+      {
+        "label": "Public commitment with action items",
+        "effects": {
+          "cash": -5000,
+          "reputation": 5
+        },
+        "outcome_template": "You publish a blog post with specific, measurable goals and a timeline. It's not perfect but it's honest. People respect the transparency.",
+        "outcome_variations": [
+          "The blog post lands well. You'll be held accountable to these numbers. Better start delivering.",
+          "Putting numbers out there is scary but it forces action. Your recruiting approach starts to shift."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5,
+      "year": 2
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "engineer_rage_quit",
+    "title": "Public Meltdown",
+    "category": "people",
+    "stage": "any",
+    "description_template": "An engineer just rage-quit in the #general Slack channel. Full message. Tagged everyone. It's... detailed.",
+    "variations": [
+      "11:47 AM. @channel in #general. A 500-word message from {employee_name} about everything wrong with {company_name}. Technical debt, leadership, the coffee machine. They end with 'I quit. Effective now.'",
+      "{employee_name} just posted their resignation letter — in Slack. In #general. Tagged the whole company. It mentions you by name. Twice. The office is very quiet."
+    ],
+    "choices": [
+      {
+        "label": "Reach out privately",
+        "effects": {
+          "morale_all": 3
+        },
+        "outcome_template": "You DM them within minutes. A call happens. They're embarrassed. They agree to a proper exit. The team respects how you handled it.",
+        "outcome_variations": [
+          "Private conversation de-escalates everything. They apologize for the public message. You help them save face. Mature leadership.",
+          "You call them. They vent for 30 minutes. Some of their points are valid. They leave on decent terms. The team takes note that you listened."
+        ]
+      },
+      {
+        "label": "Let them go, do damage control",
+        "effects": {
+          "morale_all": -5
+        },
+        "outcome_template": "You delete the message (after everyone screenshot it) and send a short note to the team. 'We wish them well.' The team is shaken.",
+        "outcome_variations": [
+          "Message deleted. But 14 people already screenshot it. It shows up on Blind within the hour. Damage is done.",
+          "You post a brief, professional response in #general. The team moves on. Mostly. The Slack message becomes company folklore."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 4
+    },
+    "weight": 0.6,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "whale_feature_request",
+    "title": "The Whale Wants a Feature",
+    "category": "product",
+    "stage": "growth",
+    "description_template": "Your biggest customer — 30% of revenue — wants a custom feature. It's not on your roadmap. But losing them isn't on your roadmap either.",
+    "variations": [
+      "Email from your largest account: 'We need SSO integration by end of quarter or we'll have to evaluate alternatives.' They represent a third of your revenue. Your roadmap just became negotiable.",
+      "Your biggest customer's VP of Engineering corners you at a conference. 'We love {company_name}. But we need [obscure enterprise feature] or procurement won't renew.' This is a six-figure contract."
+    ],
+    "choices": [
+      {
+        "label": "Build it — the customer is always right",
+        "effects": {
+          "cash": 20000,
+          "tech_debt": 8
+        },
+        "outcome_template": "Feature built. Customer retained. But your roadmap is now being driven by one client, and the codebase has a weird custom branch. Welcome to enterprise software.",
+        "outcome_variations": [
+          "Done in 3 weeks. The customer is thrilled. But your product is now slightly frankensteined. Other customers don't need this feature at all.",
+          "You build it. They renew for 2 years. But your engineers are grumbling about building 'consulting features' instead of the real product."
+        ]
+      },
+      {
+        "label": "Decline — stick to the roadmap",
+        "effects": {
+          "reputation": 5,
+          "cash": -15000
+        },
+        "outcome_template": "You lose the contract. Revenue takes a hit. But your product stays focused. The team respects the conviction.",
+        "outcome_variations": [
+          "They leave. It stings. But six months later you realize the product is better because you didn't chase one customer's wish list.",
+          "Gone. 30% of revenue walks out the door. Your board is concerned. But your engineers are relieved — the roadmap makes sense again."
+        ]
+      },
+      {
+        "label": "Negotiate — build a version that helps everyone",
+        "effects": {
+          "cash": 5000,
+          "tech_debt": 3
+        },
+        "outcome_template": "You find a middle ground — a generalized version of the feature that serves the whale and other customers. Takes longer but it's the right architecture.",
+        "outcome_variations": [
+          "Smart compromise. The feature becomes a selling point for enterprise prospects. The whale stays. Your product team is proud of the solution.",
+          "You scope a version that's useful for multiple customers. It takes an extra month but now it's a real feature, not a hack."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 500,
+      "employee_count": 3
+    },
+    "weight": 0.8,
+    "one_time": false,
+    "cooldown_quarters": 5
+  },
+  {
+    "id": "copycat_competitor",
+    "title": "They Copied Us",
+    "category": "product",
+    "stage": "growth",
+    "description_template": "{competitor_name} just launched a feature that looks suspiciously like yours. Same UI. Same copy. They even used similar colors.",
+    "variations": [
+      "A customer sends you a screenshot: '{competitor_name} just released this. Isn't this exactly what you built?' You look at it. It's your feature with different fonts.",
+      "Your designer posts in #general: 'Has anyone seen {competitor_name}'s new update?' The silence is deafening. Everyone has. It's your product with a new logo."
+    ],
+    "choices": [
+      {
+        "label": "Innovate faster — ship the next thing",
+        "effects": {
+          "reputation": 8,
+          "stress_all": 5
+        },
+        "outcome_template": "You push the team to ship the next version before the clone can catch up. Being first matters more than being copied.",
+        "outcome_variations": [
+          "Your team rallies. The next feature drops in 3 weeks. {competitor_name} is playing catch-up again. Innovation is your moat.",
+          "Sprint mode. Stressful but effective. You stay ahead. Customers notice you're always first to ship."
+        ]
+      },
+      {
+        "label": "Send a legal threat",
+        "effects": {
+          "cash": -8000,
+          "reputation": -3
+        },
+        "outcome_template": "Your lawyer sends a cease and desist. {competitor_name} ignores it. You spent $8K on legal fees for a strongly worded letter. Welcome to tech.",
+        "outcome_variations": [
+          "The C&D arrives. They laugh. Features aren't patentable (usually). You're out legal fees and look petty.",
+          "Legal route goes nowhere. Copyright doesn't cover functionality. Your lawyer bills you anyway. Lesson learned."
+        ]
+      },
+      {
+        "label": "Publicly call them out",
+        "effects": {
+          "reputation": 5,
+          "users": 300
+        },
+        "outcome_template": "You write a thread showing the side-by-side comparison. It goes viral. Sympathy users sign up. {competitor_name} has to respond.",
+        "outcome_variations": [
+          "The comparison thread gets 50K impressions. People love an underdog story. New signups spike for a week.",
+          "You tag them directly. They respond with corporate speak. The internet sides with you. Small win."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 1000
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "open_source_threat",
+    "title": "Open Source Alternative",
+    "category": "product",
+    "stage": "growth",
+    "description_template": "An open-source project that does 70% of what {company_name} does just hit 5K GitHub stars. It's free. And it's getting better every week.",
+    "variations": [
+      "Hacker News post: 'I built an open-source alternative to {company_name}. Free forever.' 200 comments. Most of them positive. Your Slack is tense.",
+      "A developer advocate at a big company just tweeted: 'Why pay for {company_name} when [open-source tool] exists?' The tweet has 3K likes. Your sales team is fielding questions."
+    ],
+    "choices": [
+      {
+        "label": "Open-source part of your own product",
+        "effects": {
+          "users": 1500,
+          "reputation": 10
+        },
+        "outcome_template": "You open-source the core and keep premium features paid. The developer community applauds. Contributions start flowing in.",
+        "outcome_variations": [
+          "Bold move. The open-source version becomes the entry point. Paid conversions actually increase. The community builds what you couldn't.",
+          "Developers love it. Your GitHub stars overtake the competitor. The premium tier sells better because people trust you now."
+        ]
+      },
+      {
+        "label": "Double down on premium features",
+        "effects": {
+          "reputation": 3,
+          "users": -200
+        },
+        "outcome_template": "You focus on what free can't offer: support, integrations, compliance. Enterprise customers stay. Hobbyists leave. That's fine.",
+        "outcome_variations": [
+          "You lose the bottom of the market but own the top. Enterprise deals get easier when your pitch is 'we support this.'",
+          "The open-source tool takes the hobbyists. You take the paying customers. Different markets. You're fine."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 2000,
+      "year": 2
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "product_hunt_launch",
+    "title": "Product Hunt Day",
+    "category": "product",
+    "stage": "any",
+    "description_template": "{company_name} is launching on Product Hunt tomorrow. You've got one shot at a good first impression. The team is wired on caffeine and anxiety.",
+    "variations": [
+      "Launch day. Your Product Hunt post goes live at midnight. By 6am you have 200 upvotes. By noon you're #3. The team is glued to their screens hitting refresh.",
+      "The Product Hunt launch is tomorrow. Your designer spent all night on the banner. Your copywriter rewrote the tagline twelve times. Everyone is nervous."
+    ],
+    "choices": [
+      {
+        "label": "All-hands on deck — respond to every comment",
+        "effects": {
+          "users": 3000,
+          "stress_all": 10,
+          "reputation": 5
+        },
+        "outcome_template": "The whole team monitors comments, answers questions, fixes bugs in real-time. You finish #1 for the day. Signups explode.",
+        "outcome_variations": [
+          "Product of the Day. The team is exhausted but euphoric. 3,000 new signups. TechCrunch picks up the story.",
+          "Intense 18 hours. Every comment answered within minutes. Users are impressed by the responsiveness. You finish in the top 3."
+        ]
+      },
+      {
+        "label": "Launch and let it ride",
+        "effects": {
+          "users": 800,
+          "reputation": 2
+        },
+        "outcome_template": "Decent showing. Not viral but respectable. Some new users, some press mentions. Could have been bigger if you'd pushed harder.",
+        "outcome_variations": [
+          "Mid-pack finish. Some users, some visibility. Your designer is disappointed but the product spoke for itself.",
+          "Quiet launch. You get a few hundred signups and some nice comments. Not the big splash you hoped for."
+        ]
+      },
+      {
+        "label": "Postpone — we're not ready",
+        "effects": {
+          "morale_all": -3
+        },
+        "outcome_template": "Smart call or cold feet? The team is deflated. But you'll get another shot when the product is more polished.",
+        "outcome_variations": [
+          "You pull the launch. The team is disappointed but understands. You'll try again next quarter with a better product.",
+          "Postponed. Your designer sulks for a week. But the extra time means a better launch story later."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 2
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "app_store_rejection",
+    "title": "App Store Rejection",
+    "category": "product",
+    "stage": "any",
+    "description_template": "Your latest update was rejected by the app store. The reason is vague: 'Guideline 4.2 — Minimum Functionality.' Your team spent three weeks on this update.",
+    "variations": [
+      "Rejection notice: 'Your app does not comply with Guideline 4.2.' No further explanation. Your mobile developer is staring at the screen trying to decode what Apple wants.",
+      "The app store review team rejected your update. The feedback is a single sentence that could mean anything. Three weeks of work. On hold."
+    ],
+    "choices": [
+      {
+        "label": "Rush a fix and resubmit",
+        "effects": {
+          "stress_all": 8,
+          "bugs": 2
+        },
+        "outcome_template": "Your mobile dev pulls a 36-hour session to guess what the reviewer wanted and resubmit. It passes. But the code is held together with duct tape.",
+        "outcome_variations": [
+          "Resubmitted in 48 hours. Approved. But the rush introduced two bugs that you'll find next week. App store roulette.",
+          "Fixed and resubmitted. It passes on the second try. Your developer swears loudly and takes the rest of the day off."
+        ]
+      },
+      {
+        "label": "Appeal the decision",
+        "effects": {
+          "stress_all": 3
+        },
+        "outcome_template": "You write a detailed appeal. Three days later, a human reviews it and approves the original build. It was a mistake. Wasted a week.",
+        "outcome_variations": [
+          "Appeal works. The reviewer made an error. You get an apology email. Three days wasted but the code is clean.",
+          "After a back-and-forth with app review, they approve it unchanged. The system is broken but at least you didn't hack your code."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 3
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 5
+  },
+  {
+    "id": "data_migration_nightmare",
+    "title": "Database Disaster",
+    "category": "product",
+    "stage": "any",
+    "description_template": "A database migration went sideways. Some user records are corrupted. It's 2am and your phone is blowing up with alerts.",
+    "variations": [
+      "The migration script had a bug. 5% of user records now have corrupted profile data. Your support inbox has 47 unread tickets. It's getting worse.",
+      "Someone ran the migration against production instead of staging. Data is scrambled. Your CTO is on a flight. You're the only one who can fix this."
+    ],
+    "choices": [
+      {
+        "label": "Rollback everything",
+        "effects": {
+          "stability": 5,
+          "stress_all": 8
+        },
+        "outcome_template": "Full rollback. You lose a week of new data but the corruption stops. Users are mildly annoyed. Could have been much worse.",
+        "outcome_variations": [
+          "Rollback complete at 4am. Some recent data is lost but the database is clean. You write a postmortem before sleeping.",
+          "Everything reverted. Users who signed up in the last week need to re-enter some data. Not great but not catastrophic."
+        ]
+      },
+      {
+        "label": "Fix forward — patch the corrupted records",
+        "effects": {
+          "bugs": 5,
+          "stress_all": 12
+        },
+        "outcome_template": "Your team writes repair scripts through the night. Most records are fixed. Some edge cases will haunt you for months.",
+        "outcome_variations": [
+          "48 hours of non-stop work. 95% of records repaired. The remaining 5% are manually fixed over the next quarter. Nobody sleeps well.",
+          "Fix-forward works but leaves ghosts in the database. Random bugs surface for weeks. You vow to never skip staging again."
+        ]
+      },
+      {
+        "label": "Manual repair for affected users",
+        "effects": {
+          "cash": -5000,
+          "stress_all": 5,
+          "reputation": 3
+        },
+        "outcome_template": "You hire a contractor to manually fix each affected account and send personal apology emails. Expensive but thorough. Users appreciate the care.",
+        "outcome_variations": [
+          "Every affected user gets a personal email and their data fixed. It costs money and time but zero users churn. Trust maintained.",
+          "Manual repair takes a week. You offer affected users a free month. They appreciate the transparency. Good save."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 2
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "surprise_tax_bill",
+    "title": "Tax Season Surprise",
+    "category": "money",
+    "stage": "any",
+    "description_template": "Your accountant just called. You owe more in taxes than you budgeted for. Something about R&D credit disqualification and state nexus obligations. The number is painful.",
+    "variations": [
+      "Tax day. Your accountant's email subject line: 'We need to talk.' You owe back taxes in two states you forgot you had employees in. Remote work has tax consequences.",
+      "The IRS sent a notice. Your R&D tax credits were partially disqualified. You owe the difference plus interest. Your accountant says this happens to 'a lot of startups.'"
+    ],
+    "choices": [
+      {
+        "label": "Pay it immediately",
+        "effects": {
+          "cash": -25000
+        },
+        "outcome_template": "Painful but done. You hire a better accountant going forward. This won't happen again. Probably.",
+        "outcome_variations": [
+          "Check sent. The cash hit hurts but at least it's resolved. You set a calendar reminder: 'Review tax obligations quarterly.'",
+          "Paid in full. Your runway shortens but the IRS is off your back. Small price for peace of mind."
+        ]
+      },
+      {
+        "label": "Negotiate a payment plan",
+        "effects": {
+          "cash": -10000,
+          "stress_all": 5
+        },
+        "outcome_template": "Spread over 4 quarters. Less painful per quarter but the overhead of managing payments adds stress. At least you keep more cash now.",
+        "outcome_variations": [
+          "Payment plan approved. $10K now, rest over time. The interest is annoying but your runway survives intact.",
+          "Quarterly payments. It's manageable. But every quarter you're reminded of that time you didn't understand nexus taxes."
+        ]
+      },
+      {
+        "label": "Dispute the assessment",
+        "effects": {
+          "cash": -5000,
+          "stress_all": 8
+        },
+        "outcome_template": "You hire a tax lawyer to challenge it. Months of back-and-forth. Eventually they reduce it by 40%. Net positive but stressful.",
+        "outcome_variations": [
+          "The dispute drags on for two quarters. Eventually the bill gets cut in half. Worth it financially, not worth it emotionally.",
+          "Your tax lawyer finds errors in the assessment. Bill reduced by 35%. But the legal fees ate most of the savings."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "year": 2
+    },
+    "weight": 0.8,
+    "one_time": false,
+    "cooldown_quarters": 8
+  },
+  {
+    "id": "annual_contract_discount",
+    "title": "Big Fish, Big Discount",
+    "category": "money",
+    "stage": "growth",
+    "description_template": "A Fortune 500 company wants to use {company_name}. But they want a 40% volume discount on an annual contract. It's a lot of revenue — at a lot less margin.",
+    "variations": [
+      "Their procurement team sends a 47-page vendor agreement. Buried in it: 40% discount, net-90 payment terms, and a requirement for SOC 2 compliance. The deal is worth six figures.",
+      "The VP of Engineering loves your product. Procurement does not love your pricing. 'We need 40% off or we go with {competitor_name}.' Classic enterprise hardball."
+    ],
+    "choices": [
+      {
+        "label": "Accept the discount",
+        "effects": {
+          "cash": 30000,
+          "reputation": 5
+        },
+        "outcome_template": "Big logo on your customer page. Revenue boost. But the margin is thin and they'll expect this pricing forever. Enterprise sales 101.",
+        "outcome_variations": [
+          "Deal signed. Your sales deck now has a Fortune 500 logo. That alone is worth the discount in your next fundraise.",
+          "40% off hurts but the annual commitment locks in predictable revenue. Your board is pleased. Your margins are not."
+        ]
+      },
+      {
+        "label": "Counter at 20%",
+        "effects": {
+          "cash": 15000,
+          "reputation": 3
+        },
+        "outcome_template": "They push back. You hold. Eventually they agree to 25%. Not what they wanted, not what you wanted. Classic negotiation.",
+        "outcome_variations": [
+          "25% discount. Everyone is slightly unhappy, which means it's a fair deal. The contract closes next month.",
+          "You counter. They counter. You split the difference. The deal takes 3x longer but the terms are reasonable."
+        ]
+      },
+      {
+        "label": "Walk away — protect your pricing",
+        "effects": {
+          "reputation": 3
+        },
+        "outcome_template": "You decline. They're surprised — startups usually cave. 'Call us when you're ready to be serious,' they say. Six months later they come back at 15% off.",
+        "outcome_variations": [
+          "You walk. Scary but principled. Three months later they come back. At a better price. Sometimes no is the best negotiation tactic.",
+          "They go with {competitor_name}. It stings. But your pricing integrity means every other customer pays full price."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 3000
+    },
+    "weight": 0.6,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "investor_board_updates",
+    "title": "Board Meeting Overhead",
+    "category": "money",
+    "stage": "growth",
+    "description_template": "Your lead investor wants monthly board update calls. Detailed financials, KPI dashboards, competitive analysis. It's a lot of CEO time for a seed-stage company.",
+    "variations": [
+      "Email from your board member: 'Going forward I'd like monthly update calls with a written report. I've attached a template.' The template has 47 line items.",
+      "Your lead investor sits you down: 'I need more visibility into the business. Monthly calls, written updates, full financial package.' You're spending more time reporting than building."
+    ],
+    "choices": [
+      {
+        "label": "Comply — keep the investor happy",
+        "effects": {
+          "stress_all": 8,
+          "reputation": 3
+        },
+        "outcome_template": "You spend 2 days a month on board prep now. The investor is happy. Your calendar is not. But the relationship is strong for the next raise.",
+        "outcome_variations": [
+          "Monthly updates become a grind but the investor's feedback is actually useful. They flag a cash flow issue you missed.",
+          "Board prep eats into building time. But when you need a bridge round, this investor is first to wire money. Trust was worth the time."
+        ]
+      },
+      {
+        "label": "Push back — quarterly is enough",
+        "effects": {
+          "reputation": -3
+        },
+        "outcome_template": "You diplomatically explain that monthly reporting is premature. The investor is miffed but accepts quarterly. The relationship cools slightly.",
+        "outcome_variations": [
+          "Boundary set. Quarterly updates, not monthly. The investor respects it but adds a clause to the next term sheet about reporting requirements.",
+          "You push back. They're annoyed. The next board meeting is tense. But you got 6 extra days per quarter back."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "year": 2
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "runway_panic",
+    "title": "Accounting Error",
+    "category": "money",
+    "stage": "any",
+    "description_template": "Your bookkeeper found a billing error. Several invoices were double-counted. You actually have two fewer quarters of runway than the dashboard shows.",
+    "variations": [
+      "Monday morning bombshell: your accountant discovers that a recurring vendor bill was being classified as revenue. Your actual runway is shorter than you thought. By a lot.",
+      "A reconciliation audit reveals the mistake. An auto-billing service was charging you twice and nobody caught it for 6 months. Your real cash position is worse than reported."
+    ],
+    "choices": [
+      {
+        "label": "Cut costs immediately",
+        "effects": {
+          "morale_all": -8
+        },
+        "outcome_template": "Perks cut. Travel frozen. The team notices. 'Are we running out of money?' someone asks at standup. You say no. You're not sure.",
+        "outcome_variations": [
+          "Cost cuts stabilize the runway. But the belt-tightening is visible. Morale dips. People start checking job boards.",
+          "You cut the coffee subscription, the team lunch, and the office snacks. It saves $3K/month. The symbolism hurts more than the savings help."
+        ]
+      },
+      {
+        "label": "Emergency fundraise",
+        "effects": {
+          "cash": 50000,
+          "reputation": -5
+        },
+        "outcome_template": "You reach out to existing investors for a bridge round. They sense desperation but the money comes through. At unfavorable terms.",
+        "outcome_variations": [
+          "Bridge round closes in 2 weeks. The valuation is flat — no markup. But the runway is saved. You'll need to earn that markup back.",
+          "Your lead investor wires a bridge. 'This is the last time,' they say. The terms include a board seat you didn't want to give up."
+        ]
+      },
+      {
+        "label": "Ride it out — ship faster",
+        "effects": {
+          "stress_all": 10
+        },
+        "outcome_template": "No cuts, no bridge. Just ship faster and hope revenue catches up. It's a bet. The team feels the urgency even if they don't know why.",
+        "outcome_variations": [
+          "You bet on growth. The team senses something is off but channels the energy into shipping. It's a race against the clock.",
+          "High-risk play. If revenue doesn't pick up in 2 quarters, you're in trouble. But cutting would kill momentum."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 3
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "acquihire_offer",
+    "title": "Acqui-Hire Offer",
+    "category": "money",
+    "stage": "growth",
+    "description_template": "A larger company doesn't want {company_name}. They want your team. The offer is decent money to shut down and have everyone join them.",
+    "variations": [
+      "A VP of Engineering at a public company takes you to lunch. 'We don't need your product. We need your people. Name a price per head and we'll write the check.'",
+      "An acqui-hire offer lands in your inbox. They'll pay relocation, signing bonuses, and above-market salaries for your entire engineering team. The product dies."
+    ],
+    "choices": [
+      {
+        "label": "Decline — we're building something",
+        "effects": {
+          "morale_all": 8,
+          "reputation": 5
+        },
+        "outcome_template": "The team finds out you turned it down. They're fired up. 'You chose us over money.' Loyalty spikes. This is what startup culture is.",
+        "outcome_variations": [
+          "You share the offer and the rejection at the next all-hands. Standing ovation. Morale is through the roof.",
+          "Word gets out. Your team feels valued. Your next recruiting pitch writes itself: 'We turned down an acqui-hire to keep building.'"
+        ]
+      },
+      {
+        "label": "Consider it seriously",
+        "effects": {
+          "cash": 80000
+        },
+        "outcome_template": "You negotiate hard. The payout is good. Some of your team would get life-changing money. But {company_name} would cease to exist.",
+        "outcome_variations": [
+          "The numbers make sense on paper. But shutting down the company you built from nothing? The calculator says yes. Your gut says wait.",
+          "You run the math. Per-person, it's generous. But you'd be giving up equity in something that could be worth 100x this. Hard call."
+        ]
+      },
+      {
+        "label": "Counter with a full acquisition",
+        "effects": {
+          "reputation": 3
+        },
+        "outcome_template": "'If you want the team, buy the whole company.' They balk. 'That's not what we offered.' Door closes. But at least you tried.",
+        "outcome_variations": [
+          "You counter high. They walk. But six months later their VP calls back. 'About that acquisition...' Maybe you weren't crazy.",
+          "Full acquisition counter rejected. They only wanted the team. But the conversation opens doors with their competitors."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5,
+      "year": 2
+    },
+    "weight": 0.4,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "government_grant",
+    "title": "Innovation Grant",
+    "category": "money",
+    "stage": "any",
+    "description_template": "{company_name} qualifies for a government tech innovation grant. Free money — but the application is 80 pages and the reporting requirements are intense.",
+    "variations": [
+      "An email from a government agency: 'Your company may qualify for the Small Business Innovation Research program.' The grant is $150K. The application deadline is in 3 weeks.",
+      "A founder friend tips you off: 'Apply for the state tech innovation grant. I got $100K last year. The paperwork is brutal but the money is free.'"
+    ],
+    "choices": [
+      {
+        "label": "Apply — free money is free money",
+        "effects": {
+          "stress_all": 5
+        },
+        "outcome_template": "Three weeks of paperwork. Quarterly reports forever. But 4 months later, a check arrives. Government money with government strings.",
+        "outcome_variations": [
+          "Grant approved. $100K lands in your account. The reporting is annoying but the money doesn't dilute anyone. Worth it.",
+          "You win the grant. The money helps. The quarterly government reports are soul-crushing. But free is free."
+        ]
+      },
+      {
+        "label": "Skip it — too much overhead",
+        "effects": {},
+        "outcome_template": "You pass. The paperwork would have taken your CEO time for weeks. That time is better spent on the product. Probably.",
+        "outcome_variations": [
+          "You pass on the grant. Later you hear a competitor got it. Free money going to your competition. Ouch.",
+          "Smart time management or missed opportunity? Hard to say. But your product shipped on time."
+        ]
+      },
+      {
+        "label": "Hire a grant writer",
+        "effects": {
+          "cash": -3000
+        },
+        "outcome_template": "You pay a specialist to handle the application. They know the system. Two months later: approved. Best $3K you ever spent.",
+        "outcome_variations": [
+          "The grant writer nails it. Application approved first try. They handle the reporting too. This is why specialists exist.",
+          "Grant writer does the heavy lifting. You get the money without the headache. They take a small percentage but it's worth every penny."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 2
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "recession_hits",
+    "title": "Economic Downturn",
+    "category": "market",
+    "stage": "growth",
+    "description_template": "The Fed raised rates again. Tech stocks are cratering. VCs are tightening. The era of free money is over. {company_name} needs to adapt.",
+    "variations": [
+      "CNBC headline: 'Tech Layoffs Accelerate as Recession Fears Mount.' Your investors are suddenly very interested in your path to profitability.",
+      "Three of your enterprise customers just froze their software budgets. 'We'll revisit next quarter.' Revenue projections need updating. Downward."
+    ],
+    "choices": [
+      {
+        "label": "Cut costs and extend runway",
+        "effects": {
+          "cash": 10000,
+          "morale_all": -8
+        },
+        "outcome_template": "Lean mode. Perks gone, hiring frozen, travel banned. The team knows it's serious. But you'll survive while others won't.",
+        "outcome_variations": [
+          "Painful cuts but the runway extends by 4 quarters. Some competitors don't survive. Being alive is a competitive advantage.",
+          "Belt tightened. The culture shifts from 'move fast' to 'survive.' Not fun but necessary. You'll hire again when the sun comes out."
+        ]
+      },
+      {
+        "label": "Maintain spending — this is when leaders invest",
+        "effects": {
+          "cash": -20000,
+          "morale_all": 5
+        },
+        "outcome_template": "Bold. While everyone else is cutting, you're hiring. If the downturn is short, you'll emerge ahead. If it's long... well.",
+        "outcome_variations": [
+          "Counter-cyclical investing. You hire talent that bigger companies are laying off. Risky but the team quality jumps.",
+          "You keep spending. The team is grateful. But your board is nervous. 'What's your plan if this lasts 18 months?'"
+        ]
+      },
+      {
+        "label": "Pivot to enterprise — they still have budgets",
+        "effects": {
+          "users": -500,
+          "cash": 15000
+        },
+        "outcome_template": "You shift focus to larger customers with recession-proof budgets. Revenue stabilizes but your consumer base shrinks.",
+        "outcome_variations": [
+          "Enterprise pivot works. Longer sales cycles but bigger checks. You lose some small customers but gain stability.",
+          "Government and enterprise contracts keep the lights on. It's not sexy but it's surviving. Adapt or die."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "year": 3
+    },
+    "weight": 0.4,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "new_regulation",
+    "title": "New Privacy Regulation",
+    "category": "market",
+    "stage": "growth",
+    "description_template": "A new data privacy regulation just passed. {company_name} has 6 months to comply. Your legal budget just became a line item.",
+    "variations": [
+      "The EU passed a new data regulation. Again. Your product stores user data in ways that probably aren't compliant. Your lawyer's eyes lit up (in a billing-hours kind of way).",
+      "State-level privacy law passed. Affects any company with users in that state. Which includes {company_name}. Compliance deadline: 6 months."
+    ],
+    "choices": [
+      {
+        "label": "Comply early — first mover advantage",
+        "effects": {
+          "cash": -15000,
+          "reputation": 8
+        },
+        "outcome_template": "You're one of the first to comply. Customers trust you more. Competitors scramble. Your marketing team turns compliance into a feature.",
+        "outcome_variations": [
+          "Early compliance. Your 'We're already compliant' email becomes your best-performing marketing campaign ever.",
+          "Expensive but strategic. Enterprise customers who need compliant vendors choose you over competitors who are still scrambling."
+        ]
+      },
+      {
+        "label": "Wait and see what everyone else does",
+        "effects": {
+          "reputation": -3
+        },
+        "outcome_template": "You wait. Most companies wait. Six months later everyone scrambles at once. Lawyers are booked. Consultants are expensive. You're in the pack.",
+        "outcome_variations": [
+          "Waiting was fine — the regulation got delayed anyway. But you're still not compliant and the clock is ticking.",
+          "Everyone waited. Now everyone is scrambling. Legal consultants have tripled their rates. Should have moved earlier."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 1000,
+      "year": 2
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "competitor_ipos",
+    "title": "Competitor Goes Public",
+    "category": "market",
+    "stage": "growth",
+    "description_template": "{competitor_name} just IPO'd. Their stock popped 40% on day one. Your investors are calling. Your employees are asking questions.",
+    "variations": [
+      "CNBC is covering {competitor_name}'s IPO live. $2B valuation. Your lead engineer mutters: 'We could have done that.' Your investor calls within the hour.",
+      "{competitor_name} rings the bell at NYSE. LinkedIn is flooded with their employees celebrating. Your team is watching. Morale is... complicated."
+    ],
+    "choices": [
+      {
+        "label": "Use it as motivation — double down",
+        "effects": {
+          "morale_all": 5,
+          "stress_all": 5
+        },
+        "outcome_template": "You rally the team. 'They IPO'd. That means our market is validated. We're next.' The energy shifts from jealousy to determination.",
+        "outcome_variations": [
+          "The IPO validates your space. VCs who ignored you are now interested. Your team is energized. Time to capitalize.",
+          "Competitive fire. The team ships faster the following quarter. Nothing like a competitor's success to focus the mind."
+        ]
+      },
+      {
+        "label": "Explore acquisition conversations",
+        "effects": {
+          "reputation": -2
+        },
+        "outcome_template": "You put out feelers. If {competitor_name} is public, maybe a bigger company wants to buy their way into the space — through you.",
+        "outcome_variations": [
+          "Two companies express interest in acquiring {company_name} as a way to compete with the newly-public {competitor_name}. Interesting.",
+          "The M&A conversations go nowhere for now. But you're on the radar. When the time is right, the phone will ring."
+        ]
+      },
+      {
+        "label": "Stay the course — IPOs aren't everything",
+        "effects": {
+          "morale_all": 2
+        },
+        "outcome_template": "You send a team note: 'Different companies, different paths.' The team appreciates the calm. Not everyone needs to chase an IPO.",
+        "outcome_variations": [
+          "Steady leadership. The team respects that you're not reactive. Focus on building, not on what competitors are doing.",
+          "Measured response. Some employees wanted more fire, but most appreciate the maturity. You're playing a different game."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "year": 3
+    },
+    "weight": 0.4,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "big_tech_enters",
+    "title": "Big Tech Enters Your Space",
+    "category": "market",
+    "stage": "growth",
+    "description_template": "A FAANG company just announced a product that competes directly with {company_name}. It's free for their existing users. Your phone is ringing.",
+    "variations": [
+      "The keynote just ended. Slide 47: a new product that does exactly what {company_name} does. Built into their existing platform. For free. Your Slack is on fire.",
+      "Blog post from Big Tech: 'Introducing [Product] — built natively into our platform.' It's your product. With a trillion-dollar marketing budget behind it."
+    ],
+    "choices": [
+      {
+        "label": "Niche down — own what they can't",
+        "effects": {
+          "users": -1000,
+          "reputation": 5
+        },
+        "outcome_template": "You focus on the use cases a big company won't serve. Power users. Specific verticals. You lose breadth but gain depth.",
+        "outcome_variations": [
+          "You niche down to a specific industry vertical. Big Tech's generic version can't compete there. You own the niche.",
+          "Smaller market, deeper moat. The casual users leave for free. Your power users stay because you solve their specific problems."
+        ]
+      },
+      {
+        "label": "Fight head-on — out-execute them",
+        "effects": {
+          "stress_all": 10,
+          "reputation": 3
+        },
+        "outcome_template": "David vs Goliath. You're faster, more focused, and care more about the users. Big Tech will lose interest in 18 months. Probably.",
+        "outcome_variations": [
+          "You ship 3 features in the time it takes them to schedule a planning meeting. Speed is your advantage. Use it.",
+          "Head-on competition with Big Tech. Bold or foolish? Both. But your best customers stay because you actually listen to them."
+        ]
+      },
+      {
+        "label": "Try to partner with them instead",
+        "effects": {
+          "cash": 10000
+        },
+        "outcome_template": "You reach out about a partnership or integration. Surprisingly, they're interested. Big companies love buying what they can't build well.",
+        "outcome_variations": [
+          "Integration partnership. Your product becomes the premium tier of their free offering. Revenue jumps. It's an uncomfortable alliance but it works.",
+          "They take the meeting. 'We'd rather buy you than compete with you,' they say casually. Interesting development."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 5000,
+      "year": 2
+    },
+    "weight": 0.3,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "conference_invite",
+    "title": "Conference Speaking Slot",
+    "category": "market",
+    "stage": "any",
+    "description_template": "You've been invited to speak at a major industry conference. 2,000 attendees. It's great exposure but it means a week away from building.",
+    "variations": [
+      "Email from the conference organizer: 'We'd love to have the founder of {company_name} on our main stage.' 2,000 people. Livestreamed. Your palms are already sweating.",
+      "A friend who runs a popular tech conference texts: 'I have a speaking slot that just opened. You. Main stage. Next month. Say yes.'"
+    ],
+    "choices": [
+      {
+        "label": "Accept — great for brand building",
+        "effects": {
+          "reputation": 10,
+          "stress_all": 5,
+          "users": 500
+        },
+        "outcome_template": "Great talk. You nail it. Business cards everywhere. Three enterprise leads come from the conference alone. Worth every minute away.",
+        "outcome_variations": [
+          "Standing ovation energy. Your talk gets shared online. {company_name} gets more signups that week than the entire previous month.",
+          "The talk goes well. You make connections that turn into customers, partnerships, and a potential board advisor. Conferences work."
+        ]
+      },
+      {
+        "label": "Decline — heads down building",
+        "effects": {
+          "morale_all": 2
+        },
+        "outcome_template": "You pass. The week stays productive. But your competitor speaks instead and gets all the press coverage. Opportunity cost is real.",
+        "outcome_variations": [
+          "You stay home and ship a feature. Nobody writes about it. Your competitor's conference talk gets 50K views on YouTube.",
+          "Heads down. Good sprint. But you see photos from the conference and wonder what conversations you missed."
+        ]
+      },
+      {
+        "label": "Send a team member instead",
+        "effects": {
+          "reputation": 5,
+          "morale_all": 3
+        },
+        "outcome_template": "Your best communicator takes the stage. They nail it. The team feels empowered. And you got to keep building.",
+        "outcome_variations": [
+          "Your team member kills it on stage. They come back energized. 'Can I do more of these?' Delegation win.",
+          "They represent {company_name} well. Not the same impact as the founder but the brand still gets exposure."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 2
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 4
+  },
+  {
+    "id": "first_allhands",
+    "title": "First All-Hands Meeting",
+    "category": "culture",
+    "stage": "early",
+    "description_template": "Your team is big enough for an all-hands now. Do you make it a thing, or keep it casual? First impressions of company culture start here.",
+    "variations": [
+      "Someone asks: 'Should we do a team meeting or something? I don't even know what half the team is working on.' Fair point. Time for your first all-hands.",
+      "Ten people in a room. No agenda. Somebody brought donuts. This is either the beginning of great company culture or the beginning of too many meetings."
+    ],
+    "choices": [
+      {
+        "label": "Go big — catered, presentations, Q&A",
+        "effects": {
+          "cash": -3000,
+          "morale_all": 10
+        },
+        "outcome_template": "The all-hands is a hit. People feel connected to the mission. Someone cries during the Q&A (happy tears). This becomes a quarterly tradition.",
+        "outcome_variations": [
+          "Great energy. People who've been heads-down finally see the big picture. The team leaves feeling like they're part of something.",
+          "Catered lunch, product demo, open Q&A. The transparency builds trust. Your designer says it's the best day they've had at {company_name}."
+        ]
+      },
+      {
+        "label": "Keep it casual — standup style",
+        "effects": {
+          "morale_all": 5
+        },
+        "outcome_template": "Quick, efficient, no fluff. Everyone shares what they're working on. Takes 30 minutes. The team appreciates not wasting time.",
+        "outcome_variations": [
+          "Short and sweet. People like that it's not performative. 'This is the least annoying meeting I've ever attended,' says your lead engineer.",
+          "Casual standup works. Low overhead, high signal. Some people want more but most appreciate the efficiency."
+        ]
+      },
+      {
+        "label": "Skip it — Slack updates are enough",
+        "effects": {
+          "morale_all": -3
+        },
+        "outcome_template": "No meeting. People feel disconnected. Two engineers are working on overlapping features. Nobody noticed until code review.",
+        "outcome_variations": [
+          "Without a regular sync, silos form. People stop knowing what the company's priorities are. Communication debt builds.",
+          "Async-only works for some teams. Yours isn't one of them. Someone builds a feature that was cancelled two weeks ago."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 6
+    },
+    "weight": 0.7,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "lease_expires",
+    "title": "Lease Renewal Decision",
+    "category": "culture",
+    "stage": "growth",
+    "description_template": "Your office lease is up for renewal. The landlord wants 20% more. You're also outgrowing the space. Time to decide.",
+    "variations": [
+      "Lease renewal notice. 20% increase. Your office already feels cramped — engineers are desk-sharing on busy days. Something's got to give.",
+      "The landlord emails: 'Renewal terms attached.' You open it. The price jumped. Meanwhile, your last two hires don't have desks."
+    ],
+    "choices": [
+      {
+        "label": "Upgrade to a bigger office",
+        "effects": {
+          "cash": -20000,
+          "morale_all": 8
+        },
+        "outcome_template": "New office. More space. A real conference room. The team is energized. It feels like leveling up.",
+        "outcome_variations": [
+          "Moving day. Chaos. But the new space has windows and a kitchen that isn't a hot plate. Morale spikes.",
+          "Bigger office, bigger rent, bigger energy. People invite friends to visit. 'We're a real company now,' someone says."
+        ]
+      },
+      {
+        "label": "Stay put — negotiate the renewal",
+        "effects": {
+          "cash": -5000
+        },
+        "outcome_template": "You negotiate the increase down to 10%. Same space, slightly more expensive. Functional but not exciting.",
+        "outcome_variations": [
+          "Renewal signed. The space is tight but it works. The money saved goes toward hiring. Practical choice.",
+          "Same office, same desks, same everything. It's fine. The team is starting to feel cramped though."
+        ]
+      },
+      {
+        "label": "Go fully remote",
+        "effects": {
+          "cash": 15000,
+          "morale_all": -2
+        },
+        "outcome_template": "No office. Huge cost savings. But water-cooler moments disappear. Some people thrive. Others feel isolated.",
+        "outcome_variations": [
+          "Remote saves a fortune. Slack and Zoom replace hallways. Productivity stays but culture shifts. Is this still the same company?",
+          "No commute, no rent, no spontaneous whiteboard sessions. Some love it. Some hate it. Hiring gets easier — you can hire anywhere."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5,
+      "year": 2
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "coworking_vs_office",
+    "title": "Space Crunch",
+    "category": "culture",
+    "stage": "any",
+    "description_template": "You're outgrowing your current space. The garage/apartment era is over. Time to find a proper workspace for {company_name}.",
+    "variations": [
+      "Three new hires and nowhere to put them. Someone is working from the couch. Another from the kitchen counter. This isn't scrappy anymore — it's cramped.",
+      "Your designer just sent a passive-aggressive Slack message about desk space with a photo of their 'workspace' (a folding table between the printer and the wall)."
+    ],
+    "choices": [
+      {
+        "label": "Dedicated office space",
+        "effects": {
+          "cash": -12000,
+          "morale_all": 6
+        },
+        "outcome_template": "Your own office. Your name on the door. It costs real money but the team finally has room to breathe and think.",
+        "outcome_variations": [
+          "Signed a lease. The first day in the new space, nobody works — they're too busy arranging desks and arguing about the whiteboard wall.",
+          "Own office. Privacy for calls, space for collaboration. It feels like a commitment. Because it is."
+        ]
+      },
+      {
+        "label": "Co-working space — stay flexible",
+        "effects": {
+          "cash": -5000,
+          "morale_all": 3
+        },
+        "outcome_template": "WeWork-style setup. Flexible, no long commitment, free coffee. You bump into other startups. Networking happens naturally.",
+        "outcome_variations": [
+          "Co-working gives you space without the lease. The team likes the energy of being around other startups. It's buzzy.",
+          "Flexible space. Scale up or down month-to-month. Smart for a company that doesn't know how big it'll be next quarter."
+        ]
+      },
+      {
+        "label": "Stay cramped — save the money",
+        "effects": {
+          "morale_all": -5
+        },
+        "outcome_template": "You tough it out. The money stays in the bank. But the team is unhappy and someone trips over a power cable every day.",
+        "outcome_variations": [
+          "Saving money is smart. The team is less enthusiastic. One engineer starts working from coffee shops just to have elbow room.",
+          "Cramped quarters build character. Or resentment. Two things can be true at the same time."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 4
+    },
+    "weight": 0.7,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "values_debate",
+    "title": "Defining Company Values",
+    "category": "culture",
+    "stage": "any",
+    "description_template": "Someone asks at standup: 'What are our values? Like, as a company?' Silence. Nobody knows because you never wrote them down.",
+    "variations": [
+      "A candidate asks during an interview: 'What are {company_name}'s core values?' You improvise something about 'moving fast and being transparent.' It sounded better in your head.",
+      "Your head of people (who is also your head of everything) suggests defining company values. 'People need to know what we stand for.' They're right."
+    ],
+    "choices": [
+      {
+        "label": "Full team workshop day",
+        "effects": {
+          "morale_all": 8,
+          "stress_all": -5
+        },
+        "outcome_template": "A day off from coding to define who you are. Sticky notes everywhere. Arguments about whether 'hustle' is a value or a red flag. You emerge with 5 values the team actually believes in.",
+        "outcome_variations": [
+          "Workshop day is surprisingly productive. The values aren't corporate fluff — they're real. The team references them in hiring decisions.",
+          "Best team day yet. You end up with values that sound like your company, not like a Fortune 500 poster. People actually remember them."
+        ]
+      },
+      {
+        "label": "Founder writes them — quick and decisive",
+        "effects": {
+          "morale_all": 2
+        },
+        "outcome_template": "You write 5 values over a weekend and post them in Slack. Some resonate. Some feel imposed. Nobody argues because you're the boss.",
+        "outcome_variations": [
+          "Values posted. The team reads them once. Some stick, some don't. It's a start but it doesn't feel collaborative.",
+          "Top-down values. Efficient but not inspiring. The team would have liked a say. You'll revisit this later."
+        ]
+      },
+      {
+        "label": "Table it — we have code to ship",
+        "effects": {
+          "morale_all": -2
+        },
+        "outcome_template": "Values can wait. Product can't. But the next three hires don't know what the culture is supposed to be. Culture forms with or without you.",
+        "outcome_variations": [
+          "No values defined. The culture becomes whatever the loudest people make it. That's not always a good thing.",
+          "You kick the can. Six months later someone asks again. Still no answer. People make assumptions about what {company_name} stands for."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "press_interview",
+    "title": "Media Spotlight",
+    "category": "culture",
+    "stage": "any",
+    "description_template": "A reporter from a major tech publication wants to profile {company_name}. Great exposure, but anything you say is on the record.",
+    "variations": [
+      "Email from a TechCrunch reporter: 'I'm writing about emerging startups in your space. Can we schedule an interview?' The article will reach 2 million readers.",
+      "A podcast producer reaches out: 'We'd love to feature {company_name} on our show. 500K monthly listeners.' Your PR strategy has been hoping for exactly this."
+    ],
+    "choices": [
+      {
+        "label": "Do the interview",
+        "effects": {
+          "reputation": 8,
+          "users": 800
+        },
+        "outcome_template": "The article drops. Great headline. Fair coverage. Your inbox floods with investor and customer interest. Press works.",
+        "outcome_variations": [
+          "The interview goes well. The reporter loves the founding story. The article drives signups for weeks.",
+          "Published. Mostly positive. They misquote you slightly but the overall tone is 'scrappy startup to watch.' Win."
+        ]
+      },
+      {
+        "label": "Decline — stay under the radar",
+        "effects": {},
+        "outcome_template": "You pass. The reporter profiles {competitor_name} instead. They get all the press. Being stealth has its costs.",
+        "outcome_variations": [
+          "Silence. The reporter moves on. Your competitor gets the feature. Their signups spike. You stayed focused. Worth it?",
+          "Under the radar. Some companies thrive in obscurity until launch. You hope you're one of them."
+        ]
+      },
+      {
+        "label": "Written responses only — control the narrative",
+        "effects": {
+          "reputation": 4,
+          "users": 300
+        },
+        "outcome_template": "You send carefully crafted written answers. The article is accurate but lacks the personality of a live interview. Safe but not exciting.",
+        "outcome_variations": [
+          "Written responses published verbatim. Professional but dry. The article is fine. Not great, not bad. Controlled.",
+          "Email interview. You proofread every word five times. The result is polished but impersonal. Better than a misquote though."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 3
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 5
   }
 ]

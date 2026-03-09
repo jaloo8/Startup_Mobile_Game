@@ -18,6 +18,7 @@ const PRELOAD_SCENES := [
 	"res://src/ui/saves/save_slots.tscn",
 	"res://src/ui/game_over/game_over_screen.tscn",
 	"res://src/ui/settings/settings_screen.tscn",
+	"res://src/ui/victory/victory_screen.tscn",
 ]
 
 

@@ -85,7 +85,7 @@ If you are in the EU, EEA, or UK:
 
   - Analytics (Free-to-Play): Legitimate interest in improving
     the Game (GDPR Art. 6(1)(f))
-  - Analytics (Premium): Consent / opt-in (GDPR Art. 6(1)(a))
+  - Analytics (Premium): N/A — no analytics collected
   - Error reporting: Legitimate interest in product stability
     (GDPR Art. 6(1)(f))
 
@@ -127,10 +127,19 @@ When disabled:
 
 6.2 DEFAULT SETTINGS
 
-  Free-to-Play: Analytics enabled by default. Players are
-  informed on first launch and can disable anytime.
+  Free-to-Play: Analytics enabled after age confirmation (13+).
+  Players must confirm age on first launch, are informed about
+  data collection, and can disable anytime.
 
-  Premium: Analytics disabled by default. Can opt in via Settings.
+  Premium: Analytics NOT available. No data is collected from
+  premium users under any circumstances.
+
+6.2a AGE VERIFICATION (FREE-TO-PLAY)
+
+  Before any analytics data is collected, F2P players are asked
+  to confirm they are 13 years of age or older. If a player
+  indicates they are under 13, analytics are permanently
+  disabled for that installation. No data is collected.
 
 6.3 RIGHTS UNDER GDPR (EU/EEA/UK USERS)
 

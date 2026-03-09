@@ -39,16 +39,19 @@ static func _apply_work_output(state: Node) -> void:
 			continue
 
 		var output: float = emp.work_output() * state.product.dev_speed_multiplier()
+		var tech_bonus: float = state.company.founder_stat("technical") * 0.05
+
 		match emp.assignment:
 			EmployeeData.Assignment.FEATURES:
 				state.product.feature_progress += output * 0.15
 				if state.product.feature_progress >= ProductData.FEATURE_COST:
 					state.product.feature_progress -= ProductData.FEATURE_COST
-					var quality := clampi(ceili(output * 0.8) + randi_range(-10, 10), 20, 100)
+					var quality := clampi(ceili(output * 0.8) + randi_range(-10, 10) + roundi(tech_bonus * 5), 20, 100)
 					var fname: String = _feature_names.pick_random()
 					state.product.add_feature(fname, quality, state.current_quarter)
 			EmployeeData.Assignment.BUGS:
-				state.product.bugs = maxi(0, state.product.bugs - maxi(1, ceili(output * 0.1)))
+				var bug_mult := 1.0 + tech_bonus
+				state.product.bugs = maxi(0, state.product.bugs - maxi(1, ceili(output * 0.1 * bug_mult)))
 			EmployeeData.Assignment.TECH_DEBT:
 				state.product.tech_debt = maxi(0, state.product.tech_debt - maxi(1, ceili(output * 0.05)))
 			EmployeeData.Assignment.INFRA:
@@ -80,10 +83,11 @@ static func _calculate_user_growth(state: Node) -> void:
 	var feature_pull := minf(state.product.feature_count() * 0.5, 5.0)
 	var reputation_bonus: float = state.company.reputation / 100.0
 
+	var biz_bonus: float = 1.0 + state.company.founder_stat("business") * 0.04
 	var base_new := BASE_ORGANIC_USERS_PER_QUARTER + ceili(feature_pull * 5)
 	var organic_rate := remap(quality_factor, 0.0, 1.0, 0.01, 0.05)
-	var growth_from_existing := ceili(state.product.users * organic_rate)
-	var reputation_pull := ceili(base_new * reputation_bonus)
+	var growth_from_existing := ceili(state.product.users * organic_rate * biz_bonus)
+	var reputation_pull := ceili(base_new * reputation_bonus * biz_bonus)
 	var total_new := base_new + growth_from_existing + reputation_pull
 
 	var churn_count := ceili(state.product.users * state.product.churn_rate)
@@ -104,7 +108,8 @@ static func _calculate_costs(state: Node) -> void:
 		salary_total += emp.salary_per_quarter
 	state.financials.costs_breakdown["salaries"] = salary_total
 
-	var infra_cost := maxf(10.0, state.product.users * 0.01)
+	var finance_discount: float = 1.0 - state.company.founder_stat("finance") * 0.02
+	var infra_cost := maxf(10.0, state.product.users * 0.01) * maxf(0.6, finance_discount)
 	state.financials.costs_breakdown["infrastructure"] = infra_cost
 
 	var office_cost := [0.0, 2_000.0, 5_000.0, 12_000.0]
@@ -134,11 +139,13 @@ static func _roll_events(state: Node) -> void:
 
 
 static func _update_employee_morale(state: Node) -> void:
+	var people_shield: int = roundi(state.company.founder_stat("people") * 0.3)
+
 	for emp: EmployeeData in state.employees:
 		if emp.stress > 70:
-			emp.morale -= randi_range(5, 12)
+			emp.morale -= maxi(1, randi_range(5, 12) - people_shield)
 		elif emp.stress > 50:
-			emp.morale -= randi_range(2, 8)
+			emp.morale -= maxi(0, randi_range(2, 8) - people_shield)
 		elif emp.stress < 20:
 			emp.morale += randi_range(0, 3)
 

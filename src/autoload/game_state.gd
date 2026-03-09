@@ -5,6 +5,8 @@ extends Node
 signal quarter_advanced(quarter_number: int)
 signal game_over(reason: String)
 @warning_ignore("unused_signal")
+signal game_won(win_type: String)
+@warning_ignore("unused_signal")
 signal event_triggered(event: EventData)
 @warning_ignore("unused_signal")
 signal employee_quit(employee: EmployeeData)
@@ -28,6 +30,7 @@ var pending_events: Array[EventData] = []
 var is_game_active: bool = false
 var current_slot: String = ""
 var angel_bailout_used: bool = false
+var profit_streak: int = 0
 var _milestones_hit: Array[String] = []
 
 const SAVE_DIR := "user://saves/"
@@ -61,6 +64,11 @@ func new_game(config: Dictionary) -> void:
 	company.company_name = config.get("name", "My Startup")
 	company.type = config.get("type", CompanyData.CompanyType.SAAS)
 
+	var bg_key: int = config.get("founder_background", CompanyData.FounderBackground.ENGINEER)
+	company.founder_background = bg_key as CompanyData.FounderBackground
+	var arch: Dictionary = CompanyData.FOUNDER_ARCHETYPES.get(bg_key, {})
+	company.founder_stats = arch.get("stats", {"technical": 5, "finance": 5, "people": 5, "business": 5}).duplicate()
+
 	product = ProductData.new()
 	financials = FinancialsData.new()
 	market = MarketData.new()
@@ -71,6 +79,7 @@ func new_game(config: Dictionary) -> void:
 	pending_events.clear()
 	_milestones_hit.clear()
 	angel_bailout_used = false
+	profit_streak = 0
 
 	difficulty = config.get("difficulty", "normal")
 	starting_scenario = config.get("scenario", "garage")
@@ -162,6 +171,25 @@ func _take_snapshot() -> void:
 
 
 func _check_end_conditions() -> void:
+	if financials.revenue > financials.burn_rate:
+		profit_streak += 1
+	else:
+		profit_streak = 0
+
+	var arr: float = financials.revenue * 4.0
+	if arr >= 100_000_000 and product.users >= 100_000:
+		is_game_active = false
+		game_won.emit("ipo")
+		return
+	if company.valuation >= 1_000_000_000:
+		is_game_active = false
+		game_won.emit("unicorn")
+		return
+	if profit_streak >= 4 and total_quarters_elapsed() >= 12:
+		is_game_active = false
+		game_won.emit("sustainable")
+		return
+
 	if company.cash <= 0 and financials.revenue < financials.burn_rate:
 		is_game_active = false
 		game_over.emit("bankruptcy")
@@ -310,6 +338,8 @@ func _serialize() -> Dictionary:
 			"equity": company.equity_owned,
 			"office_level": company.office_level,
 			"reputation": company.reputation,
+			"founder_background": company.founder_background,
+			"founder_stats": company.founder_stats,
 		},
 		"product": {
 			"features": product.features,
@@ -344,6 +374,7 @@ func _serialize() -> Dictionary:
 		"fired_events": fired_one_time_events,
 		"milestones_hit": _milestones_hit,
 		"angel_bailout_used": angel_bailout_used,
+		"profit_streak": profit_streak,
 	}
 
 
@@ -361,6 +392,8 @@ func _deserialize(data: Dictionary) -> bool:
 	company.equity_owned = cd.get("equity", 100.0)
 	company.office_level = cd.get("office_level", 0)
 	company.reputation = cd.get("reputation", 50)
+	company.founder_background = cd.get("founder_background", 0) as CompanyData.FounderBackground
+	company.founder_stats = cd.get("founder_stats", {"technical": 5, "finance": 5, "people": 5, "business": 5})
 
 	product = ProductData.new()
 	var pd: Dictionary = data.get("product", {})
@@ -414,6 +447,7 @@ func _deserialize(data: Dictionary) -> bool:
 	fired_one_time_events.assign(data.get("fired_events", []))
 	_milestones_hit.assign(data.get("milestones_hit", []))
 	angel_bailout_used = data.get("angel_bailout_used", false)
+	profit_streak = data.get("profit_streak", 0)
 
 	is_game_active = true
 	return true
@@ -485,6 +519,7 @@ func _clear_run_state() -> void:
 	pending_events.clear()
 	_milestones_hit.clear()
 	angel_bailout_used = false
+	profit_streak = 0
 	current_quarter = 1
 	current_year = 1
 	is_game_active = false

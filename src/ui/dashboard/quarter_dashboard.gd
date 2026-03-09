@@ -19,6 +19,8 @@ extends Control
 @onready var event_log_container: VBoxContainer = %EventLogContainer
 @onready var team_container: VBoxContainer = %TeamContainer
 @onready var event_popup: EventPopup = %EventPopup
+@onready var report_panel: PanelContainer = %ReportPanel
+@onready var report_body: Label = %ReportBody
 
 const MAX_VISIBLE_EVENTS := 10
 
@@ -41,6 +43,7 @@ func _ready() -> void:
 
 	GameState.quarter_advanced.connect(_refresh)
 	GameState.game_over.connect(_on_game_over)
+	GameState.game_won.connect(_on_game_won)
 	GameState.event_triggered.connect(_on_event)
 
 	_refresh(GameState.current_quarter)
@@ -54,6 +57,7 @@ func _wire_glossary_button(btn: Button, glossary_key: String) -> void:
 func _exit_tree() -> void:
 	_safe_disconnect(GameState.quarter_advanced, _refresh)
 	_safe_disconnect(GameState.game_over, _on_game_over)
+	_safe_disconnect(GameState.game_won, _on_game_won)
 	_safe_disconnect(GameState.event_triggered, _on_event)
 
 
@@ -103,6 +107,8 @@ func _on_advance() -> void:
 	GameState.advance_quarter()
 	Analytics.track_revenue(GameState.financials.revenue)
 
+	_show_quarterly_report()
+
 	if not _pending_events.is_empty():
 		advance_btn.disabled = true
 		_show_next_event()
@@ -139,6 +145,11 @@ func _on_game_over(reason: String) -> void:
 	SceneLoader.goto_scene("res://src/ui/game_over/game_over_screen.tscn")
 
 
+func _on_game_won(win_type: String) -> void:
+	GameState.set_meta("win_type", win_type)
+	SceneLoader.goto_scene("res://src/ui/victory/victory_screen.tscn")
+
+
 func _refresh_team() -> void:
 	_free_children(team_container)
 
@@ -164,6 +175,18 @@ func _refresh_team() -> void:
 			morale_color = Color(0.9, 0.4, 0.35)
 		lbl.add_theme_color_override("font_color", morale_color)
 		team_container.add_child(lbl)
+
+
+func _show_quarterly_report() -> void:
+	var bullets := QuarterlyReport.generate(GameState)
+	if bullets.is_empty():
+		report_panel.visible = false
+		return
+	var lines: Array[String] = []
+	for b in bullets:
+		lines.append("• " + b)
+	report_body.text = "\n".join(lines)
+	report_panel.visible = true
 
 
 func _on_people() -> void:

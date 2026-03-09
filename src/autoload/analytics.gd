@@ -68,6 +68,10 @@ func _save_settings() -> void:
 
 
 func is_consent_given() -> bool:
+	if _is_premium:
+		return false
+	if not _settings.get("age_confirmed", false):
+		return false
 	return _consent
 
 
@@ -84,11 +88,23 @@ func set_consent(enabled: bool) -> void:
 func set_premium(premium: bool) -> void:
 	_is_premium = premium
 	_settings["is_premium"] = premium
+	if premium:
+		_consent = false
+		_settings["analytics_consent"] = false
 	_save_settings()
 
 
 func is_premium() -> bool:
 	return _is_premium
+
+
+func is_age_confirmed() -> bool:
+	return _settings.get("age_confirmed", false)
+
+
+func confirm_age() -> void:
+	_settings["age_confirmed"] = true
+	_save_settings()
 
 
 # --- Progression Events ---

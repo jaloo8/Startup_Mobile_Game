@@ -71,13 +71,55 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 36)
 text = "Got it"
 
+[node name="AgeGatePanel" type="PanelContainer" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+
+[node name="AgeVBox" type="VBoxContainer" parent="MarginContainer/VBox/AgeGatePanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AgeText" type="Label" parent="MarginContainer/VBox/AgeGatePanel/AgeVBox"]
+layout_mode = 2
+text = "To help us improve the game, we collect anonymous gameplay data. No personal information is ever collected. You must be 13 or older to enable analytics."
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.8, 0.8, 0.85, 1)
+
+[node name="AgeQuestion" type="Label" parent="MarginContainer/VBox/AgeGatePanel/AgeVBox"]
+layout_mode = 2
+text = "Are you 13 years of age or older?"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+
+[node name="AgeButtons" type="HBoxContainer" parent="MarginContainer/VBox/AgeGatePanel/AgeVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="AgeConfirmButton" type="Button" parent="MarginContainer/VBox/AgeGatePanel/AgeVBox/AgeButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 40)
+text = "Yes, I'm 13+"
+
+[node name="AgeDenyButton" type="Button" parent="MarginContainer/VBox/AgeGatePanel/AgeVBox/AgeButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 40)
+text = "No"
+
 [node name="AnalyticsHeader" type="Label" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Analytics"
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
 
 [node name="AnalyticsRow" type="HBoxContainer" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="AnalyticsLabel" type="Label" parent="MarginContainer/VBox/AnalyticsRow"]

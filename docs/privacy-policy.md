@@ -76,7 +76,7 @@ If you are located in the European Union, European Economic Area, or the United 
 | Processing activity | Legal basis | GDPR Article |
 |---------------------|------------|-------------|
 | Analytics (Free-to-Play version) | Legitimate interest in improving the Game | Art. 6(1)(f) |
-| Analytics (Premium version) | Consent (opt-in) | Art. 6(1)(a) |
+| Analytics (Premium version) | N/A — no analytics collected from premium users | N/A |
 | Error/crash reporting | Legitimate interest in maintaining product stability | Art. 6(1)(f) |
 
 **Legitimate interest assessment:** We have conducted a balancing test and determined that our interest in collecting anonymous, aggregated gameplay data to improve the Game does not override your fundamental rights and freedoms, because: (a) the data is anonymous and cannot identify you, (b) collection has no adverse effect on your gameplay experience, (c) you can opt out at any time without consequence, and (d) the data is used solely for product improvement.
@@ -115,10 +115,14 @@ When disabled:
 
 ### 6.2 Default Settings
 
-| Version | Analytics default | Reason |
-|---------|------------------|--------|
-| Free-to-Play | Enabled | Players are informed on first launch and can disable anytime |
-| Premium | Disabled | Premium players have opted out of the ad-supported model |
+| Version | Analytics | Reason |
+|---------|-----------|--------|
+| Free-to-Play | Enabled after age confirmation (13+) | Players must confirm age, are informed on first launch, and can disable anytime |
+| Premium | Not available | No analytics data is collected from premium users under any circumstances |
+
+### 6.2a Age Verification (Free-to-Play)
+
+Before any analytics data is collected in the Free-to-Play version, players are asked to confirm they are 13 years of age or older. If a player indicates they are under 13, analytics are permanently disabled for that installation and no data is collected.
 
 ### 6.3 Rights Under GDPR (EU/EEA/UK Users)
 

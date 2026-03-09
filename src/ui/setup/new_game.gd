@@ -4,6 +4,9 @@ extends Control
 @onready var type_selector: OptionButton = %TypeSelector
 @onready var difficulty_selector: OptionButton = %DifficultySelector
 @onready var scenario_selector: OptionButton = %ScenarioSelector
+@onready var background_selector: OptionButton = %BackgroundSelector
+@onready var background_desc: Label = %BackgroundDesc
+@onready var stat_preview: Label = %StatPreview
 @onready var start_btn: Button = %StartButton
 @onready var back_btn: Button = %BackButton
 
@@ -12,8 +15,11 @@ func _ready() -> void:
 	_populate_type_selector()
 	_populate_difficulty_selector()
 	_populate_scenario_selector()
+	_populate_background_selector()
 	start_btn.pressed.connect(_on_start)
 	back_btn.pressed.connect(_on_back)
+	background_selector.item_selected.connect(_on_background_changed)
+	_on_background_changed(0)
 
 
 func _populate_type_selector() -> void:
@@ -40,6 +46,26 @@ func _populate_scenario_selector() -> void:
 	scenario_selector.add_item("VC-Backed ($2M)")
 
 
+func _populate_background_selector() -> void:
+	background_selector.clear()
+	for bg_key: int in CompanyData.FOUNDER_ARCHETYPES:
+		var arch: Dictionary = CompanyData.FOUNDER_ARCHETYPES[bg_key]
+		background_selector.add_item(arch["name"], bg_key)
+
+
+func _on_background_changed(_idx: int) -> void:
+	var bg_id: int = background_selector.get_selected_id()
+	var arch: Dictionary = CompanyData.FOUNDER_ARCHETYPES.get(bg_id, {})
+	background_desc.text = arch.get("desc", "")
+	var stats: Dictionary = arch.get("stats", {})
+	stat_preview.text = "Tech %d  |  Finance %d  |  People %d  |  Business %d" % [
+		stats.get("technical", 5),
+		stats.get("finance", 5),
+		stats.get("people", 5),
+		stats.get("business", 5),
+	]
+
+
 func _on_start() -> void:
 	var scenarios := ["garage", "accelerator", "spinoff", "vc_backed"]
 	var difficulties := ["sandbox", "normal", "hardcore"]
@@ -47,11 +73,14 @@ func _on_start() -> void:
 	var diff_idx := clampi(difficulty_selector.selected, 0, difficulties.size() - 1)
 	var scen_idx := clampi(scenario_selector.selected, 0, scenarios.size() - 1)
 
+	var bg_id: int = background_selector.get_selected_id()
+
 	var config := {
 		"name": name_input.text.strip_edges() if not name_input.text.strip_edges().is_empty() else "My Startup",
 		"type": type_selector.get_selected_id(),
 		"difficulty": difficulties[diff_idx],
 		"scenario": scenarios[scen_idx],
+		"founder_background": bg_id,
 	}
 
 	GameState.new_game(config)

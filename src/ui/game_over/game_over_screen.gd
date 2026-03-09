@@ -128,7 +128,6 @@ func _on_accept_angel() -> void:
 	GameState.company.equity_owned = maxf(5.0, GameState.company.equity_owned)
 	GameState.is_game_active = true
 
-	var angel_name: String = _chosen_angel.get("name", "An angel investor")
 	GameState.append_event_log({
 		"quarter": GameState.current_quarter,
 		"year": GameState.current_year,

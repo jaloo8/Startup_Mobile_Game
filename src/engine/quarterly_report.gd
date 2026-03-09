@@ -1,0 +1,119 @@
+class_name QuarterlyReport
+extends RefCounted
+## Generates 3-5 narrative bullet points summarizing the quarter.
+## Called after simulation, displayed on the dashboard before events.
+
+
+static func generate(state: Node) -> Array[String]:
+	var bullets: Array[String] = []
+	var history: Array[Dictionary] = state.history
+
+	bullets.append(_revenue_line(state, history))
+	bullets.append(_cash_line(state))
+	bullets.append(_team_line(state, history))
+	bullets.append(_product_line(state))
+	bullets.append(_user_line(state, history))
+
+	return bullets
+
+
+static func _revenue_line(state: Node, history: Array[Dictionary]) -> String:
+	var rev: float = state.financials.revenue
+	if history.size() >= 2:
+		var prev_rev: float = history[-2].get("revenue", 0.0) if history.size() >= 2 else 0.0
+		if prev_rev > 0 and rev > 0:
+			var pct: float = ((rev - prev_rev) / prev_rev) * 100.0
+			if pct > 5:
+				return "Revenue up %.0f%% to $%s this quarter" % [pct, _fmt(rev)]
+			elif pct < -5:
+				return "Revenue down %.0f%% to $%s — need more users or better pricing" % [absf(pct), _fmt(rev)]
+			else:
+				return "Revenue flat at $%s" % _fmt(rev)
+		elif rev > 0 and prev_rev <= 0:
+			return "First revenue! $%s this quarter" % _fmt(rev)
+	if rev > 0:
+		return "Earning $%s per quarter" % _fmt(rev)
+	return "No revenue yet — keep building"
+
+
+static func _cash_line(state: Node) -> String:
+	var cash: float = state.company.cash
+	var burn: float = state.financials.burn_rate
+	var rw: float = state.financials.runway_quarters(cash)
+
+	if rw == INF:
+		return "$%s in the bank — profitable and self-sustaining" % _fmt(cash)
+	elif rw < 1.0:
+		return "Cash critical — less than 1 quarter of runway left"
+	elif rw < 3.0:
+		return "$%s in the bank. ~%d quarters of runway. Time is running out" % [_fmt(cash), roundi(rw)]
+	else:
+		return "$%s in the bank. About %d quarters of runway" % [_fmt(cash), roundi(rw)]
+
+
+static func _team_line(state: Node, history: Array[Dictionary]) -> String:
+	var current_size: int = state.employees.size()
+	if history.size() >= 2:
+		var prev_size: int = history[-2].get("employees", 0)
+		var diff: int = current_size - prev_size
+		if diff > 0:
+			return "Hired %d new team member%s — now %d strong" % [diff, "s" if diff != 1 else "", current_size]
+		elif diff < 0:
+			return "Lost %d team member%s — down to %d" % [absi(diff), "s" if absi(diff) != 1 else "", current_size]
+	if current_size == 0:
+		return "Flying solo — visit People to hire your first employee"
+	return "Team of %d holding steady" % current_size
+
+
+static func _product_line(state: Node) -> String:
+	var features: int = state.product.feature_count()
+	var bugs: int = state.product.bugs
+	var td: int = state.product.tech_debt
+
+	var parts: Array[String] = []
+	if features > 0:
+		parts.append("%d feature%s shipped" % [features, "s" if features != 1 else ""])
+	else:
+		parts.append("No features yet — assign engineers to Features")
+
+	if bugs > 10:
+		parts.append("%d bugs outstanding — users are noticing" % bugs)
+	elif bugs > 0:
+		parts.append("%d bug%s in the backlog" % [bugs, "s" if bugs != 1 else ""])
+
+	if td > 60:
+		parts.append("tech debt is slowing everything down")
+	elif td > 40:
+		parts.append("tech debt building up")
+
+	return ". ".join(parts)
+
+
+static func _user_line(state: Node, history: Array[Dictionary]) -> String:
+	var users: int = state.product.users
+	if history.size() >= 2:
+		var prev_users: int = history[-2].get("users", 0)
+		var diff: int = users - prev_users
+		if diff > 0:
+			return "%s new users this quarter — total %s" % [_fmt_int(diff), _fmt_int(users)]
+		elif diff < 0:
+			return "Lost %s users this quarter — down to %s" % [_fmt_int(absi(diff)), _fmt_int(users)]
+	if users > 0:
+		return "%s users total" % _fmt_int(users)
+	return "No users yet — ship features and they'll come"
+
+
+static func _fmt(amount: float) -> String:
+	if absf(amount) >= 1_000_000:
+		return "%.1fM" % (amount / 1_000_000)
+	elif absf(amount) >= 1_000:
+		return "%.0fK" % (amount / 1_000)
+	return "%.0f" % amount
+
+
+static func _fmt_int(n: int) -> String:
+	if n >= 1_000_000:
+		return "%.1fM" % (n / 1_000_000.0)
+	elif n >= 1_000:
+		return "%.1fK" % (n / 1_000.0)
+	return str(n)

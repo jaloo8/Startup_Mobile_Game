@@ -87,6 +87,9 @@ func _apply_effects(effects: Dictionary) -> void:
 		GameState.product.users = maxi(0, GameState.product.users + int(effects["users"]))
 	if effects.has("stability"):
 		GameState.product.stability = clampi(GameState.product.stability + int(effects["stability"]), 0, 100)
+	if effects.has("game_win"):
+		GameState.is_game_active = false
+		GameState.game_won.emit(str(effects["game_win"]))
 
 
 func _on_continue() -> void:
