@@ -1,8 +1,6 @@
 class_name EventPopup
 extends PanelContainer
-## Modal popup for resolving narrative events.
-## Shows the event description (with template variables resolved)
-## and choice buttons. Player must choose before continuing.
+## Popup for event choices.
 
 signal event_resolved(event: EventData, choice_index: int)
 
@@ -34,14 +32,17 @@ func show_event(event: EventData) -> void:
 	outcome_label.text = ""
 	continue_btn.visible = false
 
-	_free_children(choices_container)
-	for i in event.choices.size():
-		var choice: Dictionary = event.choices[i]
-		var btn := Button.new()
-		btn.text = choice.get("label", "...")
-		btn.custom_minimum_size = Vector2(0, 44)
-		btn.pressed.connect(_on_choice.bind(i))
-		choices_container.add_child(btn)
+	SceneLoader.free_children(choices_container)
+	if event.choices.is_empty():
+		continue_btn.visible = true
+	else:
+		for i in event.choices.size():
+			var choice: Dictionary = event.choices[i]
+			var btn := Button.new()
+			btn.text = choice.get("label", "...")
+			btn.custom_minimum_size = Vector2(0, 44)
+			btn.pressed.connect(_on_choice.bind(i))
+			choices_container.add_child(btn)
 
 	modulate.a = 0.0
 	visible = true
@@ -103,9 +104,3 @@ func _on_continue() -> void:
 func _finish_resolve() -> void:
 	visible = false
 	event_resolved.emit(_current_event, _current_choice_index)
-
-
-static func _free_children(node: Node) -> void:
-	for child in node.get_children():
-		node.remove_child(child)
-		child.queue_free()

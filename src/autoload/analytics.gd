@@ -1,7 +1,5 @@
 extends Node
-## Analytics wrapper — all game code calls this, never the SDK directly.
-## Checks consent, formats events, and delegates to GameAnalytics.
-## Gracefully no-ops if the native SDK isn't available (dev builds).
+## Analytics — routes to GameAnalytics when available, does nothing otherwise.
 
 const SETTINGS_PATH := "user://settings.json"
 const GA_BUILD_VERSION := "0.1.0"

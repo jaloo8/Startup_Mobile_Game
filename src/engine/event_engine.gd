@@ -1,7 +1,6 @@
 class_name EventEngine
 extends RefCounted
-## Loads events from JSON, checks triggers, rolls for quarter events,
-## and resolves template variables for Classic Mode narrative.
+## Loads events from JSON, checks triggers, and picks quarter events.
 
 static var _all_events: Array[EventData] = []
 static var _cooldowns: Dictionary = {}  # event_id -> quarters_remaining
@@ -40,7 +39,8 @@ static func load_events(path: String) -> void:
 		ev.title = str(entry.get("title", ""))
 
 		ev.description = str(entry.get("description_template", entry.get("description", "")))
-		ev.choices.assign(entry.get("choices", []))
+		var raw_choices = entry.get("choices", [])
+		ev.choices.assign(raw_choices if raw_choices is Array else [])
 		ev.trigger_conditions = entry.get("trigger_conditions", {})
 		ev.weight = float(entry.get("weight", 1.0))
 		ev.one_time = bool(entry.get("one_time", false))
@@ -130,12 +130,10 @@ static func _weighted_pick(pool: Array[EventData]) -> EventData:
 		total += maxf(ev.weight, 0.01)
 	if total <= 0.0:
 		return null
-
 	var roll := randf() * total
-	var cumulative := 0.0
 	for ev in pool:
-		cumulative += maxf(ev.weight, 0.01)
-		if roll <= cumulative:
+		roll -= maxf(ev.weight, 0.01)
+		if roll <= 0.0:
 			return ev
 	return pool.back()
 
@@ -152,4 +150,5 @@ static func _build_context(state: Node) -> Dictionary:
 		"reputation": state.company.reputation,
 		"bugs": state.product.bugs,
 		"stability": state.product.stability,
+		"company_type": state.company.type,
 	}

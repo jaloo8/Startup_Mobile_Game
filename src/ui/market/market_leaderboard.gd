@@ -1,6 +1,5 @@
 extends Control
-## Market leaderboard — shows the player's company ranked among competitors.
-## Sorted by users (the primary growth metric). Player row is highlighted.
+## Ranks your company against competitors.
 
 @onready var back_btn: Button = %BackButton
 @onready var list_container: VBoxContainer = %LeaderboardList
@@ -24,7 +23,7 @@ func _exit_tree() -> void:
 
 
 func _refresh() -> void:
-	_free_children(list_container)
+	SceneLoader.free_children(list_container)
 
 	if GameState.company == null:
 		return
@@ -38,7 +37,7 @@ func _refresh() -> void:
 		"users": GameState.product.users,
 		"tagline": GameState.company.type_name(),
 		"is_player": true,
-		"funding": _total_funding(),
+		"funding": GameState.financials.total_raised(),
 		"quality": roundi(GameState.product.avg_feature_quality()),
 	})
 
@@ -105,13 +104,13 @@ func _create_row(rank: int, entry: Dictionary) -> PanelContainer:
 	hbox.add_child(stats_vbox)
 
 	var users_label := Label.new()
-	users_label.text = "%s users" % _fmt_number(entry.get("users", 0))
+	users_label.text = "%s users" % SceneLoader.format_number(entry.get("users", 0))
 	users_label.add_theme_font_size_override("font_size", 13)
 	users_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	stats_vbox.add_child(users_label)
 
 	var funding_label := Label.new()
-	funding_label.text = "$%s raised" % _fmt_money(float(entry.get("funding", 0)))
+	funding_label.text = "$%s raised" % SceneLoader.format_money(float(entry.get("funding", 0)))
 	funding_label.add_theme_font_size_override("font_size", 11)
 	funding_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 	funding_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -120,31 +119,9 @@ func _create_row(rank: int, entry: Dictionary) -> PanelContainer:
 	return panel
 
 
-func _total_funding() -> float:
-	var total := 0.0
-	for round_data: Dictionary in GameState.financials.funding_rounds:
-		total += round_data.get("amount", 0.0)
-	return total
-
 
 func _on_back() -> void:
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
-
-
-static func _fmt_number(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	elif n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)
-
-
-static func _fmt_money(amount: float) -> String:
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount
 
 
 static func _make_style(bg: Color) -> StyleBoxFlat:
@@ -156,9 +133,3 @@ static func _make_style(bg: Color) -> StyleBoxFlat:
 	s.content_margin_top = 10
 	s.content_margin_bottom = 10
 	return s
-
-
-static func _free_children(node: Node) -> void:
-	for child in node.get_children():
-		node.remove_child(child)
-		child.queue_free()

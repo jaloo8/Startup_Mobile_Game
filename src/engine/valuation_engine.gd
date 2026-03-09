@@ -1,8 +1,6 @@
 class_name ValuationEngine
 extends RefCounted
-## Estimates company valuation each quarter based on industry-standard
-## revenue/user multiples, adjusted for growth, economy, and reputation.
-## Fundraising valuations set a floor — investors don't un-value you.
+## Estimates company valuation each quarter.
 
 
 static func estimate(state: Node) -> float:

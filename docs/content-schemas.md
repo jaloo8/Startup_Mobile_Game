@@ -308,4 +308,78 @@ Scenario packs are JSON config files in `src/data/scenarios/`. Zero new code nee
 
 ---
 
+## Feature Catalog Schema
+
+Features live in `src/data/features.json`. Each company type has 10 features forming a dependency tree.
+
+```json
+{
+  "saas": [
+    {
+      "id": "unique_snake_case",
+      "name": "Human-readable name",
+      "description": "One sentence explaining what it does and why it matters.",
+      "cost": 100,
+      "effects": {
+        "revenue_mult": 1.15,
+        "churn_reduction": 0.01,
+        "user_growth_bonus": 10,
+        "ux_bonus": 5,
+        "stability_bonus": 5,
+        "reputation_bonus": 3,
+        "dau_bonus": 0.05
+      },
+      "prerequisites": ["other_feature_id"]
+    }
+  ],
+  "consumer": [],
+  "marketplace": [],
+  "dev_tools": []
+}
+```
+
+**Effects (all optional, additive):**
+
+| Key | Type | Applied to |
+|-----|------|-----------|
+| `revenue_mult` | float (multiplicative) | `ProductData.revenue_mult` |
+| `churn_reduction` | float (absolute) | `ProductData.churn_rate` |
+| `user_growth_bonus` | int (per quarter) | `ProductData.user_growth_flat_bonus` |
+| `ux_bonus` | int (absolute) | `ProductData.ux_score` |
+| `stability_bonus` | int (absolute) | `ProductData.stability` |
+| `reputation_bonus` | int (absolute) | `CompanyData.reputation` |
+| `dau_bonus` | float (absolute ratio) | `ProductData.dau_bonus` |
+
+**Prerequisites** gate availability: a feature only shows up after all listed IDs are completed.
+
+---
+
+## Headlines Schema
+
+Headlines live in `src/data/headlines.json`. Each quarter, 2 are picked and shown on the dashboard.
+
+```json
+[
+  {
+    "template": "Text with {variable} placeholders",
+    "variations": ["Alternative phrasing"],
+    "economy": "bull",
+    "min_users": 1000,
+    "min_quarter": 4
+  }
+]
+```
+
+**Template Variables:** `{competitor}`, `{economy_label}`, `{type_label}`, `{company_name}`, `{users}`, `{year}`, `{quarter}`
+
+**Filters (all optional):**
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `economy` | string | Only show during this economy state (`bull`, `bear`, `neutral`) |
+| `min_users` | int | Player must have at least this many users |
+| `min_quarter` | int | Must be at least this many total quarters into the game |
+
+---
+
 *All content is pre-baked into JSON files at build time. Zero runtime AI needed for v1.0.*

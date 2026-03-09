@@ -1,0 +1,330 @@
+{
+  "saas": [
+    {
+      "id": "user_dashboard",
+      "name": "User Dashboard",
+      "description": "Give customers a central place to see their data. Boosts retention.",
+      "cost": 80,
+      "effects": {"churn_reduction": 0.005, "ux_bonus": 5},
+      "prerequisites": []
+    },
+    {
+      "id": "billing",
+      "name": "Billing & Payments",
+      "description": "Let customers manage subscriptions and invoices. Unlocks premium tiers.",
+      "cost": 100,
+      "effects": {"revenue_mult": 1.15},
+      "prerequisites": []
+    },
+    {
+      "id": "analytics",
+      "name": "Analytics Suite",
+      "description": "Help customers understand their own data. Makes the product stickier.",
+      "cost": 120,
+      "effects": {"churn_reduction": 0.01, "reputation_bonus": 3},
+      "prerequisites": ["user_dashboard"]
+    },
+    {
+      "id": "api_v2",
+      "name": "API v2",
+      "description": "Modern REST API for integrations. Attracts developer-minded customers.",
+      "cost": 140,
+      "effects": {"user_growth_bonus": 8, "reputation_bonus": 5},
+      "prerequisites": []
+    },
+    {
+      "id": "sso_login",
+      "name": "SSO Login",
+      "description": "Enterprise single sign-on. Required for bigger deals.",
+      "cost": 100,
+      "effects": {"revenue_mult": 1.1, "reputation_bonus": 3},
+      "prerequisites": []
+    },
+    {
+      "id": "admin_panel",
+      "name": "Admin Panel",
+      "description": "Account management for team admins. Enterprise customers expect this.",
+      "cost": 90,
+      "effects": {"churn_reduction": 0.005, "revenue_mult": 1.05},
+      "prerequisites": ["user_dashboard"]
+    },
+    {
+      "id": "multi_tenancy",
+      "name": "Multi-tenancy",
+      "description": "Isolate customer data properly. Unlocks enterprise pricing.",
+      "cost": 180,
+      "effects": {"revenue_mult": 1.2, "stability_bonus": 5},
+      "prerequisites": ["admin_panel"]
+    },
+    {
+      "id": "audit_log",
+      "name": "Audit Log",
+      "description": "Track every action for compliance. Fintech and healthcare customers need this.",
+      "cost": 110,
+      "effects": {"reputation_bonus": 5, "revenue_mult": 1.05},
+      "prerequisites": ["admin_panel"]
+    },
+    {
+      "id": "integrations",
+      "name": "Integrations Hub",
+      "description": "Connect to Slack, Jira, and other tools. Makes switching away painful.",
+      "cost": 150,
+      "effects": {"churn_reduction": 0.015, "user_growth_bonus": 10},
+      "prerequisites": ["api_v2"]
+    },
+    {
+      "id": "custom_reports",
+      "name": "Custom Reports",
+      "description": "Let customers build their own dashboards. Power users love this.",
+      "cost": 160,
+      "effects": {"churn_reduction": 0.01, "revenue_mult": 1.1},
+      "prerequisites": ["analytics"]
+    }
+  ],
+  "consumer": [
+    {
+      "id": "profile_pages",
+      "name": "Profile Pages",
+      "description": "Give users a personal space. Foundation for social features.",
+      "cost": 60,
+      "effects": {"ux_bonus": 5, "churn_reduction": 0.005},
+      "prerequisites": []
+    },
+    {
+      "id": "push_notifications",
+      "name": "Push Notifications",
+      "description": "Bring users back with timely alerts. Big DAU booster.",
+      "cost": 80,
+      "effects": {"dau_bonus": 0.05, "churn_reduction": 0.01},
+      "prerequisites": []
+    },
+    {
+      "id": "social_feed",
+      "name": "Social Feed",
+      "description": "A feed of activity from friends and followed accounts. Drives engagement.",
+      "cost": 120,
+      "effects": {"dau_bonus": 0.08, "user_growth_bonus": 15},
+      "prerequisites": ["profile_pages"]
+    },
+    {
+      "id": "stories",
+      "name": "Stories",
+      "description": "Disappearing content. Keeps users checking in daily.",
+      "cost": 100,
+      "effects": {"dau_bonus": 0.06},
+      "prerequisites": ["social_feed"]
+    },
+    {
+      "id": "dark_mode",
+      "name": "Dark Mode",
+      "description": "Users asked for it 500 times. Easy win for satisfaction.",
+      "cost": 40,
+      "effects": {"ux_bonus": 8, "reputation_bonus": 2},
+      "prerequisites": []
+    },
+    {
+      "id": "sharing",
+      "name": "Share to Social",
+      "description": "Let users share content to other platforms. Free marketing.",
+      "cost": 70,
+      "effects": {"user_growth_bonus": 20, "reputation_bonus": 3},
+      "prerequisites": []
+    },
+    {
+      "id": "offline_mode",
+      "name": "Offline Mode",
+      "description": "Works without internet. Tricky to build but users love it.",
+      "cost": 140,
+      "effects": {"churn_reduction": 0.01, "ux_bonus": 10},
+      "prerequisites": []
+    },
+    {
+      "id": "recommendations",
+      "name": "Recommendations",
+      "description": "Personalized content suggestions. Keeps users scrolling.",
+      "cost": 160,
+      "effects": {"dau_bonus": 0.1, "churn_reduction": 0.01},
+      "prerequisites": ["social_feed"]
+    },
+    {
+      "id": "iap",
+      "name": "In-App Purchases",
+      "description": "Sell digital goods. Opens up a whole new revenue stream.",
+      "cost": 130,
+      "effects": {"revenue_mult": 1.25},
+      "prerequisites": ["profile_pages"]
+    },
+    {
+      "id": "live_chat",
+      "name": "Live Chat",
+      "description": "Real-time messaging between users. Massive engagement driver.",
+      "cost": 150,
+      "effects": {"dau_bonus": 0.08, "user_growth_bonus": 10},
+      "prerequisites": ["profile_pages"]
+    }
+  ],
+  "marketplace": [
+    {
+      "id": "seller_onboarding",
+      "name": "Seller Onboarding",
+      "description": "Make it easy for sellers to list products. More supply means more demand.",
+      "cost": 80,
+      "effects": {"user_growth_bonus": 12, "ux_bonus": 5},
+      "prerequisites": []
+    },
+    {
+      "id": "search_filters",
+      "name": "Search & Filters",
+      "description": "Help buyers find what they want fast. Reduces bounce rate.",
+      "cost": 90,
+      "effects": {"churn_reduction": 0.01, "ux_bonus": 8},
+      "prerequisites": []
+    },
+    {
+      "id": "ratings",
+      "name": "Ratings & Reviews",
+      "description": "Trust is everything in a marketplace. Ratings build confidence.",
+      "cost": 100,
+      "effects": {"user_growth_bonus": 10, "reputation_bonus": 5},
+      "prerequisites": []
+    },
+    {
+      "id": "payment_escrow",
+      "name": "Payment Escrow",
+      "description": "Hold funds until delivery is confirmed. Protects both sides.",
+      "cost": 140,
+      "effects": {"reputation_bonus": 8, "churn_reduction": 0.01},
+      "prerequisites": []
+    },
+    {
+      "id": "disputes",
+      "name": "Dispute Resolution",
+      "description": "Handle conflicts between buyers and sellers fairly.",
+      "cost": 110,
+      "effects": {"reputation_bonus": 5, "churn_reduction": 0.005},
+      "prerequisites": ["payment_escrow"]
+    },
+    {
+      "id": "seller_analytics",
+      "name": "Seller Analytics",
+      "description": "Show sellers how they're performing. Happy sellers list more.",
+      "cost": 100,
+      "effects": {"user_growth_bonus": 8, "revenue_mult": 1.05},
+      "prerequisites": ["seller_onboarding"]
+    },
+    {
+      "id": "promoted_listings",
+      "name": "Promoted Listings",
+      "description": "Let sellers pay to boost visibility. New revenue stream.",
+      "cost": 120,
+      "effects": {"revenue_mult": 1.2},
+      "prerequisites": ["search_filters"]
+    },
+    {
+      "id": "categories",
+      "name": "Category Pages",
+      "description": "Organized browsing by category. Users discover more products.",
+      "cost": 70,
+      "effects": {"ux_bonus": 6, "user_growth_bonus": 5},
+      "prerequisites": []
+    },
+    {
+      "id": "delivery_tracking",
+      "name": "Delivery Tracking",
+      "description": "Real-time shipping updates. Reduces support tickets by half.",
+      "cost": 130,
+      "effects": {"ux_bonus": 10, "churn_reduction": 0.01},
+      "prerequisites": ["payment_escrow"]
+    },
+    {
+      "id": "referral_program",
+      "name": "Referral Program",
+      "description": "Reward users for inviting friends. Marketplace growth flywheel.",
+      "cost": 90,
+      "effects": {"user_growth_bonus": 25},
+      "prerequisites": []
+    }
+  ],
+  "dev_tools": [
+    {
+      "id": "cli_tool",
+      "name": "CLI Tool",
+      "description": "Command-line interface for power users. Developers expect this.",
+      "cost": 80,
+      "effects": {"ux_bonus": 5, "reputation_bonus": 3},
+      "prerequisites": []
+    },
+    {
+      "id": "sdk",
+      "name": "SDK",
+      "description": "Client libraries for popular languages. Lowers the integration barrier.",
+      "cost": 120,
+      "effects": {"user_growth_bonus": 15, "churn_reduction": 0.01},
+      "prerequisites": []
+    },
+    {
+      "id": "api_docs",
+      "name": "API Documentation",
+      "description": "Clear, searchable docs with code examples. Developers won't use what they can't understand.",
+      "cost": 90,
+      "effects": {"user_growth_bonus": 12, "reputation_bonus": 5},
+      "prerequisites": []
+    },
+    {
+      "id": "sandbox",
+      "name": "Sandbox Environment",
+      "description": "A safe playground to test integrations. Reduces onboarding friction.",
+      "cost": 100,
+      "effects": {"churn_reduction": 0.01, "ux_bonus": 8},
+      "prerequisites": []
+    },
+    {
+      "id": "webhooks",
+      "name": "Webhooks",
+      "description": "Push real-time events to customer systems. Essential for automation.",
+      "cost": 90,
+      "effects": {"churn_reduction": 0.005, "reputation_bonus": 3},
+      "prerequisites": []
+    },
+    {
+      "id": "rate_limiting",
+      "name": "Rate Limiting",
+      "description": "Protect your API from abuse. Professional-grade infrastructure.",
+      "cost": 70,
+      "effects": {"stability_bonus": 10},
+      "prerequisites": []
+    },
+    {
+      "id": "auth_tokens",
+      "name": "Auth & API Keys",
+      "description": "Secure token management. Enterprise requirement.",
+      "cost": 80,
+      "effects": {"reputation_bonus": 5, "revenue_mult": 1.05},
+      "prerequisites": []
+    },
+    {
+      "id": "usage_dashboard",
+      "name": "Usage Dashboard",
+      "description": "Show customers their API usage. Drives upsells to higher tiers.",
+      "cost": 110,
+      "effects": {"revenue_mult": 1.15, "churn_reduction": 0.005},
+      "prerequisites": ["auth_tokens"]
+    },
+    {
+      "id": "plugin_system",
+      "name": "Plugin System",
+      "description": "Let developers extend your platform. Creates an ecosystem.",
+      "cost": 180,
+      "effects": {"user_growth_bonus": 20, "reputation_bonus": 8},
+      "prerequisites": ["sdk"]
+    },
+    {
+      "id": "cicd_integration",
+      "name": "CI/CD Integration",
+      "description": "Hook into GitHub Actions, Jenkins, etc. Makes your tool part of the workflow.",
+      "cost": 130,
+      "effects": {"churn_reduction": 0.015, "user_growth_bonus": 10},
+      "prerequisites": ["cli_tool"]
+    }
+  ]
+}

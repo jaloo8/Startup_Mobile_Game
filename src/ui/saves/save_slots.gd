@@ -22,7 +22,7 @@ func _exit_tree() -> void:
 
 
 func _refresh() -> void:
-	_free_children(slot_container)
+	SceneLoader.free_children(slot_container)
 	_confirm_slot = ""
 
 	var saves := GameState.list_saves()
@@ -53,8 +53,8 @@ func _create_occupied_slot(info: Dictionary) -> PanelContainer:
 	info_vbox.add_child(name_label)
 
 	var detail_label := Label.new()
-	var cash_str := _fmt_money(info.get("cash", 0.0))
-	var user_str := _fmt_number(info.get("users", 0))
+	var cash_str := SceneLoader.format_money(info.get("cash", 0.0))
+	var user_str := SceneLoader.format_number(info.get("users", 0))
 	detail_label.text = "Year %d, Q%d · $%s · %s users · %d employees" % [
 		info.get("year", 1),
 		info.get("quarter", 1),
@@ -122,6 +122,8 @@ func _on_load(slot_name: String) -> void:
 	GameState.current_slot = slot_name
 	if GameState.load_game(slot_name):
 		EventEngine.load_events("res://src/data/events.json")
+		ProductData.load_feature_catalog("res://src/data/features.json")
+		HeadlineEngine.load_headlines("res://src/data/headlines.json")
 		SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 
@@ -144,22 +146,6 @@ func _on_back() -> void:
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
 
 
-static func _fmt_money(amount: float) -> String:
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount
-
-
-static func _fmt_number(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	elif n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)
-
-
 static func _make_style(bg: Color) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
@@ -169,9 +155,3 @@ static func _make_style(bg: Color) -> StyleBoxFlat:
 	s.content_margin_top = 12
 	s.content_margin_bottom = 12
 	return s
-
-
-static func _free_children(node: Node) -> void:
-	for child in node.get_children():
-		node.remove_child(child)
-		child.queue_free()

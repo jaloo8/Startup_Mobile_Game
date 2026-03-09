@@ -1,7 +1,5 @@
 extends Node
-## Autoload singleton for the in-game glossary.
-## Provides term definitions so newcomers can learn startup
-## terminology without leaving the game.
+## In-game glossary for startup terms.
 
 signal term_requested(term_key: String)
 
@@ -24,11 +22,12 @@ func _load_glossary() -> void:
 	if file == null:
 		return
 
+	var text := file.get_as_text()
+	file = null
 	var json := JSON.new()
-	if json.parse(file.get_as_text()) != OK:
+	if json.parse(text) != OK:
 		push_error("Glossary: parse error")
 		return
-	file = null
 
 	if json.data is Dictionary:
 		_entries = json.data

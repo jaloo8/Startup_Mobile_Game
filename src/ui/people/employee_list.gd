@@ -130,7 +130,7 @@ func _sorted_employees() -> Array[EmployeeData]:
 
 
 func _refresh_list() -> void:
-	_free_children(list_container)
+	SceneLoader.free_children(list_container)
 
 	capacity_label.text = "Team: %d / %d (%s)" % [
 		GameState.employees.size(),
@@ -265,7 +265,7 @@ func _on_hire_pressed() -> void:
 
 
 func _refresh_candidates() -> void:
-	_free_children(candidate_container)
+	SceneLoader.free_children(candidate_container)
 
 	if _candidates.is_empty():
 		var lbl := Label.new()
@@ -338,9 +338,17 @@ func _refresh_candidates() -> void:
 		if not interviewed:
 			var interview_btn := Button.new()
 			interview_btn.text = "Interview"
-			interview_btn.custom_minimum_size = Vector2(90, 32)
+			interview_btn.custom_minimum_size = Vector2(90, 36)
 			interview_btn.pressed.connect(_on_interview.bind(candidate))
 			btn_row.add_child(interview_btn)
+
+			if AdManager.is_ad_available("rewarded_reveal_stats"):
+				var ad_btn := Button.new()
+				ad_btn.text = "Quick Peek (Ad)"
+				ad_btn.custom_minimum_size = Vector2(110, 36)
+				ad_btn.add_theme_font_size_override("font_size", 11)
+				ad_btn.pressed.connect(_on_ad_reveal.bind(candidate))
+				btn_row.add_child(ad_btn)
 
 		var hire_one_btn := Button.new()
 		hire_one_btn.text = "Hire"
@@ -355,6 +363,12 @@ func _refresh_candidates() -> void:
 		btn_row.add_child(pass_btn)
 
 		candidate_container.add_child(card)
+
+
+func _on_ad_reveal(candidate: EmployeeData) -> void:
+	if AdManager.show_ad("rewarded_reveal_stats"):
+		_interviewed[candidate.employee_name] = true
+		_refresh_candidates()
 
 
 func _on_interview(candidate: EmployeeData) -> void:
@@ -447,9 +461,3 @@ static func _make_card_style() -> StyleBoxFlat:
 	s.content_margin_top = 10
 	s.content_margin_bottom = 10
 	return s
-
-
-static func _free_children(node: Node) -> void:
-	for child in node.get_children():
-		node.remove_child(child)
-		child.queue_free()

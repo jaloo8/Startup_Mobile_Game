@@ -1,0 +1,225 @@
+[
+  {
+    "template": "Tech stocks rally as investor confidence returns",
+    "economy": "bull"
+  },
+  {
+    "template": "VC funding hits record highs this quarter",
+    "economy": "bull"
+  },
+  {
+    "template": "IPO window wide open \u2014 three companies go public this week",
+    "economy": "bull"
+  },
+  {
+    "template": "Startups raise more in Q{quarter} than all of last year",
+    "economy": "bull"
+  },
+  {
+    "template": "Angel investors flooding the market with early-stage capital",
+    "economy": "bull"
+  },
+  {
+    "template": "Market correction wipes billions off tech valuations",
+    "economy": "bear"
+  },
+  {
+    "template": "VCs tighten purse strings \u2014 funding rounds down 40%",
+    "economy": "bear"
+  },
+  {
+    "template": "Layoff tracker: 15,000 tech jobs cut this month",
+    "economy": "bear"
+  },
+  {
+    "template": "Startups pivot to profitability as growth-at-all-costs era ends",
+    "economy": "bear"
+  },
+  {
+    "template": "Down rounds become the new normal for late-stage startups",
+    "economy": "bear"
+  },
+  {
+    "template": "Mixed signals from the Fed keep markets flat",
+    "economy": "neutral"
+  },
+  {
+    "template": "Analysts say the worst may be over for tech valuations",
+    "economy": "neutral"
+  },
+  {
+    "template": "{competitor} announces major product overhaul"
+  },
+  {
+    "template": "{competitor} raises a new funding round at undisclosed valuation"
+  },
+  {
+    "template": "{competitor} poaches three senior engineers from a Big Tech giant"
+  },
+  {
+    "template": "{competitor} launches aggressive pricing \u2014 is a price war coming?"
+  },
+  {
+    "template": "{competitor} faces backlash over recent policy changes"
+  },
+  {
+    "template": "Sources say {competitor} is in acquisition talks"
+  },
+  {
+    "template": "{competitor} reports record quarterly revenue"
+  },
+  {
+    "template": "{competitor} opens new office in Austin"
+  },
+  {
+    "template": "{competitor} CEO gives controversial keynote at TechCrunch Disrupt"
+  },
+  {
+    "template": "{competitor} quietly shuts down underperforming product line"
+  },
+  {
+    "template": "Study: {type_label} spending up 23% year-over-year"
+  },
+  {
+    "template": "Enterprise {type_label} adoption accelerates post-pandemic"
+  },
+  {
+    "template": "New regulation could reshape the {type_label} landscape"
+  },
+  {
+    "template": "Analysts predict consolidation wave in the {type_label} space"
+  },
+  {
+    "template": "{type_label} companies see average churn drop to historic lows"
+  },
+  {
+    "template": "Report: customer acquisition costs in {type_label} sector hit new highs"
+  },
+  {
+    "template": "The {type_label} market is expected to double by 2030"
+  },
+  {
+    "template": "Industry survey reveals talent shortage in {type_label}"
+  },
+  {
+    "template": "Is remote work killing startup culture? Founders weigh in"
+  },
+  {
+    "template": "\"Move fast and break things\" is dead. Here's what replaced it"
+  },
+  {
+    "template": "The 4-day work week: fad or future?"
+  },
+  {
+    "template": "Why every startup is obsessed with AI right now"
+  },
+  {
+    "template": "Founder burnout is real \u2014 and it's getting worse"
+  },
+  {
+    "template": "The myth of the solo founder: why cofounders matter"
+  },
+  {
+    "template": "How to build a M company with a 10-person team"
+  },
+  {
+    "template": "The subscription economy just hit  billion"
+  },
+  {
+    "template": "Developer productivity tools see explosive growth"
+  },
+  {
+    "template": "No-code platforms threaten traditional dev shops"
+  },
+  {
+    "template": "Open source is eating enterprise software"
+  },
+  {
+    "template": "Why your next hire should be a designer, not an engineer"
+  },
+  {
+    "template": "Technical debt: the silent startup killer"
+  },
+  {
+    "template": "The best startup advice no one follows"
+  },
+  {
+    "template": "Bootstrapped companies are having a moment"
+  },
+  {
+    "template": "Why some VCs are saying no to every pitch right now"
+  },
+  {
+    "template": "The rise of the solo GP micro fund"
+  },
+  {
+    "template": "What Y Combinator's latest batch says about the market"
+  },
+  {
+    "template": "Local startup {company_name} making waves in {type_label}",
+    "min_users": 500
+  },
+  {
+    "template": "{company_name} joins a growing list of breakout startups",
+    "min_users": 1000
+  },
+  {
+    "template": "Insiders say {company_name} is one to watch this year",
+    "min_users": 2000
+  },
+  {
+    "template": "{company_name} crosses major user milestone amid fierce competition",
+    "min_users": 5000
+  },
+  {
+    "template": "Can {company_name} take on the giants? Early signs say yes",
+    "min_users": 10000
+  },
+  {
+    "template": "{company_name} rumored to be in talks with top-tier VCs",
+    "min_users": 1000
+  },
+  {
+    "template": "Sources: {company_name} IPO timeline accelerating",
+    "min_users": 50000
+  },
+  {
+    "template": "Wall Street analysts begin coverage of {company_name}",
+    "min_users": 50000
+  },
+  {
+    "template": "Acquisition rumors swirl around {company_name}",
+    "min_users": 20000,
+    "min_quarter": 8
+  },
+  {
+    "template": "CES wrap-up: the tech trends that matter this year"
+  },
+  {
+    "template": "SXSW attendees buzzing about three breakout startups"
+  },
+  {
+    "template": "Black Friday broke records \u2014 what it means for marketplaces"
+  },
+  {
+    "template": "Year in review: the biggest startup exits and flameouts"
+  },
+  {
+    "template": "New grads are choosing startups over Big Tech for the first time"
+  },
+  {
+    "template": "Summer slump? VC deal flow drops as partners head to the Hamptons"
+  },
+  {
+    "template": "Back to office mandates causing friction at major tech companies"
+  },
+  {
+    "template": "Cybersecurity breaches up 60% \u2014 opportunity for security startups"
+  },
+  {
+    "template": "Cloud spending surpasses on-premise for the first time"
+  },
+  {
+    "template": "The average startup now takes 7 years to exit"
+  }
+]

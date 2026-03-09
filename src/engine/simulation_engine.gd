@@ -1,7 +1,6 @@
 class_name SimulationEngine
 extends RefCounted
-## Processes one quarter. Called from GameState.advance_quarter().
-## Steps follow GDD Section 4.3 order.
+## Runs one quarter of simulation.
 
 const BASE_ORGANIC_USERS_PER_QUARTER := 10
 const MARKETING_USER_MULT := 0.5
@@ -47,12 +46,22 @@ static func _apply_work_output(state: Node) -> void:
 
 		match emp.assignment:
 			EmployeeData.Assignment.FEATURES:
+				var target_def: Dictionary = state.product.get_target_feature(state.company.type)
+				if target_def.is_empty() and state.product.target_feature_id.is_empty():
+					var available: Array[Dictionary] = state.product.available_features(state.company.type)
+					if available.is_empty():
+						continue
+				var cost: float = float(target_def.get("cost", ProductData.FEATURE_COST))
 				state.product.feature_progress += output * 0.15
-				if state.product.feature_progress >= ProductData.FEATURE_COST:
-					state.product.feature_progress -= ProductData.FEATURE_COST
+				if state.product.feature_progress >= cost:
+					state.product.feature_progress -= cost
 					var quality := clampi(ceili(output * 0.8) + randi_range(-10, 10) + roundi(tech_bonus * 5), 20, 100)
-					var fname: String = _feature_names.pick_random()
-					state.product.add_feature(fname, quality, state.current_quarter)
+					var fname: String = target_def.get("name", _feature_names.pick_random())
+					var fid: String = target_def.get("id", "")
+					state.product.add_feature(fname, quality, state.current_quarter, fid)
+					if not target_def.is_empty():
+						state.product.apply_feature_effects(target_def)
+					state.product.target_feature_id = ""
 			EmployeeData.Assignment.BUGS:
 				var bug_mult := 1.0 + tech_bonus
 				state.product.bugs = maxi(0, state.product.bugs - maxi(1, ceili(output * 0.1 * bug_mult)))
@@ -90,9 +99,28 @@ static func _calculate_user_growth(state: Node) -> void:
 	var biz_bonus: float = 1.0 + state.company.founder_stat("business") * 0.04
 	var base_new := BASE_ORGANIC_USERS_PER_QUARTER + ceili(feature_pull * 5)
 	var organic_rate := remap(quality_factor, 0.0, 1.0, 0.01, 0.05)
+
+	match state.company.type:
+		CompanyData.CompanyType.SAAS:
+			organic_rate *= 0.7
+			if state.product.feature_count() >= 3:
+				organic_rate *= 1.4
+		CompanyData.CompanyType.CONSUMER:
+			base_new = ceili(base_new * 1.6)
+			organic_rate *= 1.3
+		CompanyData.CompanyType.MARKETPLACE:
+			if state.product.users < 500:
+				organic_rate *= 0.4
+			else:
+				organic_rate *= 1.5
+		CompanyData.CompanyType.DEV_TOOLS:
+			organic_rate *= 0.6
+			reputation_bonus *= 1.8
+
 	var growth_from_existing := ceili(state.product.users * organic_rate * biz_bonus)
 	var reputation_pull := ceili(base_new * reputation_bonus * biz_bonus)
-	var total_new := base_new + growth_from_existing + reputation_pull
+	var feature_bonus: int = state.product.user_growth_flat_bonus
+	var total_new := maxi(0, base_new + growth_from_existing + reputation_pull + feature_bonus)
 
 	var econ_growth_mult: float
 	var econ_churn_mult: float
@@ -109,12 +137,32 @@ static func _calculate_user_growth(state: Node) -> void:
 
 	total_new = ceili(total_new * econ_growth_mult)
 
-	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult)
+	var type_churn_mult := 1.0
+	match state.company.type:
+		CompanyData.CompanyType.SAAS:
+			if state.product.feature_count() >= 5:
+				type_churn_mult = 0.7
+		CompanyData.CompanyType.CONSUMER:
+			type_churn_mult = 1.4
+		CompanyData.CompanyType.MARKETPLACE:
+			if state.product.users >= 500:
+				type_churn_mult = 0.8
+		CompanyData.CompanyType.DEV_TOOLS:
+			type_churn_mult = 0.9
+
+	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult)
 	var bug_churn := ceili(state.product.bugs * 0.5)
 	var total_churn := churn_count + bug_churn
 
 	state.product.users = maxi(0, state.product.users + total_new - total_churn)
-	state.product.dau = maxi(0, ceili(state.product.users * clampf(0.3 - state.product.bugs * 0.002, 0.05, 0.5)))
+
+	var dau_ratio := 0.3 - state.product.bugs * 0.002 + state.product.dau_bonus
+	match state.company.type:
+		CompanyData.CompanyType.CONSUMER:
+			dau_ratio += 0.1
+		CompanyData.CompanyType.DEV_TOOLS:
+			dau_ratio -= 0.05
+	state.product.dau = maxi(0, ceili(state.product.users * clampf(dau_ratio, 0.05, 0.7)))
 
 
 static func _calculate_revenue(state: Node) -> void:

@@ -50,6 +50,27 @@ layout_mode = 2
 custom_minimum_size = Vector2(80, 0)
 text = "← Back"
 
+[node name="ProductMockup" type="ColorRect" parent="MarginContainer/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
+color = Color(0.1, 0.1, 0.14, 1)
+
+[node name="PlaceholderLabel" type="Label" parent="MarginContainer/VBox/ProductMockup"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -8.0
+offset_right = 60.0
+offset_bottom = 8.0
+text = "Product Preview"
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.35, 0.35, 0.4, 1)
+horizontal_alignment = 1
+
 [node name="FeaturesLabel" type="Label" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -137,6 +158,44 @@ layout_mode = 2
 text = "5.0%"
 
 [node name="Sep2" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="BuildHeader" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+text = "Now Building"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+
+[node name="BuildStatus" type="Label" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No feature selected"
+theme_override_font_sizes/font_size = 14
+
+[node name="BuildProgress" type="ProgressBar" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = true
+
+[node name="PickFeatureButton" type="Button" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+text = "Choose Next Feature"
+
+[node name="FeaturePickerPanel" type="PanelContainer" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+
+[node name="FeaturePickerContainer" type="VBoxContainer" parent="MarginContainer/VBox/FeaturePickerPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Sep3" type="HSeparator" parent="MarginContainer/VBox"]
 layout_mode = 2
 
 [node name="FeatureHeader" type="Label" parent="MarginContainer/VBox"]

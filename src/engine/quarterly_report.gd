@@ -1,7 +1,6 @@
 class_name QuarterlyReport
 extends RefCounted
-## Generates 3-5 narrative bullet points summarizing the quarter.
-## Called after simulation, displayed on the dashboard before events.
+## Builds a short narrative summary for the quarter.
 
 
 static func generate(state: Node) -> Array[String]:
@@ -29,19 +28,19 @@ static func generate(state: Node) -> Array[String]:
 static func _revenue_line(state: Node, history: Array[Dictionary]) -> String:
 	var rev: float = state.financials.revenue
 	if history.size() >= 2:
-		var prev_rev: float = history[-2].get("revenue", 0.0) if history.size() >= 2 else 0.0
+		var prev_rev: float = history[-2].get("revenue", 0.0)
 		if prev_rev > 0 and rev > 0:
 			var pct: float = ((rev - prev_rev) / prev_rev) * 100.0
 			if pct > 5:
-				return "Revenue up %.0f%% to $%s this quarter" % [pct, _fmt(rev)]
+				return "Revenue up %.0f%% to $%s this quarter" % [pct, SceneLoader.format_money(rev)]
 			elif pct < -5:
-				return "Revenue down %.0f%% to $%s — need more users or better pricing" % [absf(pct), _fmt(rev)]
+				return "Revenue down %.0f%% to $%s — need more users or better pricing" % [absf(pct), SceneLoader.format_money(rev)]
 			else:
-				return "Revenue flat at $%s" % _fmt(rev)
+				return "Revenue flat at $%s" % SceneLoader.format_money(rev)
 		elif rev > 0 and prev_rev <= 0:
-			return "First revenue! $%s this quarter" % _fmt(rev)
+			return "First revenue! $%s this quarter" % SceneLoader.format_money(rev)
 	if rev > 0:
-		return "Earning $%s per quarter" % _fmt(rev)
+		return "Earning $%s per quarter" % SceneLoader.format_money(rev)
 	return "No revenue yet — keep building"
 
 
@@ -51,13 +50,13 @@ static func _cash_line(state: Node) -> String:
 	var rw: float = state.financials.runway_quarters(cash)
 
 	if rw == INF:
-		return "$%s in the bank — profitable and self-sustaining" % _fmt(cash)
+		return "$%s in the bank — profitable and self-sustaining" % SceneLoader.format_money(cash)
 	elif rw < 1.0:
 		return "Cash critical — less than 1 quarter of runway left"
 	elif rw < 3.0:
-		return "$%s in the bank. ~%d quarters of runway. Time is running out" % [_fmt(cash), roundi(rw)]
+		return "$%s in the bank. ~%d quarters of runway. Time is running out" % [SceneLoader.format_money(cash), roundi(rw)]
 	else:
-		return "$%s in the bank. About %d quarters of runway" % [_fmt(cash), roundi(rw)]
+		return "$%s in the bank. About %d quarters of runway" % [SceneLoader.format_money(cash), roundi(rw)]
 
 
 static func _team_line(state: Node, history: Array[Dictionary]) -> String:
@@ -104,20 +103,12 @@ static func _user_line(state: Node, history: Array[Dictionary]) -> String:
 		var prev_users: int = history[-2].get("users", 0)
 		var diff: int = users - prev_users
 		if diff > 0:
-			return "%s new users this quarter — total %s" % [_fmt_int(diff), _fmt_int(users)]
+			return "%s new users this quarter — total %s" % [SceneLoader.format_number(diff), SceneLoader.format_number(users)]
 		elif diff < 0:
-			return "Lost %s users this quarter — down to %s" % [_fmt_int(absi(diff)), _fmt_int(users)]
+			return "Lost %s users this quarter — down to %s" % [SceneLoader.format_number(absi(diff)), SceneLoader.format_number(users)]
 	if users > 0:
-		return "%s users total" % _fmt_int(users)
+		return "%s users total" % SceneLoader.format_number(users)
 	return "No users yet — ship features and they'll come"
-
-
-static func _fmt(amount: float) -> String:
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount
 
 
 static func _economy_line(state: Node) -> String:
@@ -152,9 +143,3 @@ static func _board_line(state: Node) -> String:
 	return ""
 
 
-static func _fmt_int(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	elif n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)

@@ -58,9 +58,9 @@ func _ready() -> void:
 	stats_label.text = "%s\n\nTime: %s\nFinal valuation: $%s\nRevenue: $%s per quarter\nUsers: %s\nTeam: %d people\nEquity retained: %d%%\nFeatures shipped: %d" % [
 		data["flavor"],
 		time_text,
-		_format_money(GameState.company.valuation if GameState.company else 0.0),
-		_format_money(GameState.financials.revenue if GameState.financials else 0.0),
-		_format_number(GameState.product.users if GameState.product else 0),
+		SceneLoader.format_money(GameState.company.valuation if GameState.company else 0.0),
+		SceneLoader.format_money(GameState.financials.revenue if GameState.financials else 0.0),
+		SceneLoader.format_number(GameState.product.users if GameState.product else 0),
 		GameState.employees.size(),
 		roundi(GameState.company.equity_owned) if GameState.company else 0,
 		GameState.product.feature_count() if GameState.product else 0,
@@ -107,19 +107,3 @@ func _on_new_game() -> void:
 	SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")
 
 
-static func _format_money(amount: float) -> String:
-	if absf(amount) >= 1_000_000_000:
-		return "%.1fB" % (amount / 1_000_000_000)
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount
-
-
-static func _format_number(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	elif n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)

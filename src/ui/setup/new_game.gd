@@ -9,6 +9,14 @@ extends Control
 @onready var stat_preview: Label = %StatPreview
 @onready var start_btn: Button = %StartButton
 @onready var back_btn: Button = %BackButton
+@onready var type_illustration_label: Label = %TypeIllustrationLabel
+
+const TYPE_ILLUSTRATION_LABELS := {
+	CompanyData.CompanyType.SAAS: "SaaS — Cloud dashboard illustration",
+	CompanyData.CompanyType.CONSUMER: "Consumer — Phone app illustration",
+	CompanyData.CompanyType.MARKETPLACE: "Marketplace — Shopping illustration",
+	CompanyData.CompanyType.DEV_TOOLS: "Dev Tools — Terminal illustration",
+}
 
 
 func _ready() -> void:
@@ -19,7 +27,15 @@ func _ready() -> void:
 	start_btn.pressed.connect(_on_start)
 	back_btn.pressed.connect(_on_back)
 	background_selector.item_selected.connect(_on_background_changed)
+	type_selector.item_selected.connect(_on_type_changed)
 	_on_background_changed(0)
+	_on_type_changed(0)
+
+
+func _on_type_changed(_idx: int) -> void:
+	# PLACEHOLDER: Replace label text with actual illustration per type
+	var type_id: int = type_selector.get_selected_id()
+	type_illustration_label.text = TYPE_ILLUSTRATION_LABELS.get(type_id, "Company Illustration")
 
 
 func _populate_type_selector() -> void:
@@ -85,6 +101,8 @@ func _on_start() -> void:
 
 	GameState.new_game(config)
 	EventEngine.load_events("res://src/data/events.json")
+	ProductData.load_feature_catalog("res://src/data/features.json")
+	HeadlineEngine.load_headlines("res://src/data/headlines.json")
 	GameState.market.competitors = CompetitorAI.generate_starting_competitors(6, GameState.company.type)
 	GameState.save_game(GameState.current_slot)
 

@@ -76,8 +76,8 @@ func _ready() -> void:
 	stats_label.text = "%s survived %s\n\nFinal cash: $%s\nPeak users: %s\nTeam size: %d\nFeatures shipped: %d" % [
 		GameState.company.company_name if GameState.company else "Your Company",
 		time_text,
-		_format_money(GameState.company.cash if GameState.company else 0.0),
-		_format_number(_peak_users()),
+		SceneLoader.format_money(GameState.company.cash if GameState.company else 0.0),
+		SceneLoader.format_number(_peak_users()),
 		GameState.employees.size(),
 		GameState.product.feature_count() if GameState.product else 0,
 	]
@@ -167,17 +167,3 @@ func _peak_users() -> int:
 	return peak
 
 
-static func _format_money(amount: float) -> String:
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount
-
-
-static func _format_number(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	elif n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)

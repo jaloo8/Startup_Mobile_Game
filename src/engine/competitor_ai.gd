@@ -1,8 +1,6 @@
 class_name CompetitorAI
 extends RefCounted
-## Loads competitor companies from a moddable JSON file and simulates
-## their growth each quarter. Filters by industry so competitors are
-## relevant to the player's company type.
+## Loads competitors from JSON and simulates their growth each quarter.
 
 const BASE_USER_GROWTH_PER_QUARTER := 50
 const COMPETITORS_PATH := "res://src/data/competitors.json"
@@ -36,12 +34,13 @@ static func _load_pool() -> void:
 		_pool = _fallback_pool()
 		return
 
+	var text := file.get_as_text()
+	file = null
 	var json := JSON.new()
-	if json.parse(file.get_as_text()) != OK:
+	if json.parse(text) != OK:
 		push_error("CompetitorAI: JSON parse error — %s" % json.get_error_message())
 		_pool = _fallback_pool()
 		return
-	file = null
 
 	var data: Dictionary = json.data if json.data is Dictionary else {}
 	var entries: Array = data.get("competitors", [])
@@ -76,9 +75,9 @@ static func generate_starting_competitors(count: int, company_type: CompanyData.
 	var others: Array[Dictionary] = []
 
 	for entry in _pool:
-		if entry["focus"] == player_focus:
+		if entry.get("focus", "") == player_focus:
 			same_industry.append(entry)
-		elif entry["size"] == "enterprise":
+		elif entry.get("size", "startup") == "enterprise":
 			enterprises.append(entry)
 		else:
 			others.append(entry)
@@ -104,24 +103,28 @@ static func generate_starting_competitors(count: int, company_type: CompanyData.
 		for entry in pool_arr:
 			if picked.size() >= count:
 				break
-			if used_names.has(entry["name"]):
+			if used_names.has(entry.get("name", "")):
 				continue
 			if target <= 0:
 				break
 			picked.append(_make_competitor(entry))
-			used_names[entry["name"]] = true
+			used_names[entry.get("name", "")] = true
 			target -= 1
 
 	while picked.size() < count:
 		var all_remaining := same_industry + enterprises + others
 		all_remaining.shuffle()
+		var added_this_pass := false
 		for entry in all_remaining:
 			if picked.size() >= count:
 				break
-			if used_names.has(entry["name"]):
+			if used_names.has(entry.get("name", "")):
 				continue
 			picked.append(_make_competitor(entry))
-			used_names[entry["name"]] = true
+			used_names[entry.get("name", "")] = true
+			added_this_pass = true
+		if not added_this_pass:
+			break
 
 	return picked
 
@@ -131,13 +134,13 @@ static func _make_competitor(entry: Dictionary) -> Dictionary:
 	var preset: Dictionary = SIZE_PRESETS.get(size_key, SIZE_PRESETS["startup"])
 
 	return {
-		"name": entry["name"],
+		"name": entry.get("name", "Unknown"),
 		"tagline": entry.get("tagline", ""),
 		"focus": entry.get("focus", ""),
-		"users": randi_range(preset["users_min"], preset["users_max"]),
-		"funding": randi_range(preset["funding_min"], preset["funding_max"]),
-		"product_quality": randi_range(preset["quality_min"], preset["quality_max"]),
-		"growth_rate": randf_range(preset["growth_min"], preset["growth_max"]),
+		"users": randi_range(int(preset.get("users_min", 100)), int(preset.get("users_max", 1000))),
+		"funding": randi_range(int(preset.get("funding_min", 0)), int(preset.get("funding_max", 100000))),
+		"product_quality": randi_range(int(preset.get("quality_min", 30)), int(preset.get("quality_max", 70))),
+		"growth_rate": randf_range(float(preset.get("growth_min", 0.01)), float(preset.get("growth_max", 0.1))),
 	}
 
 

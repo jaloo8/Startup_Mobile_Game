@@ -1,6 +1,5 @@
 extends Control
-## Main gameplay screen — the hub each quarter.
-## Player navigates to People/Product/Finance from here, then advances.
+## Main gameplay screen.
 
 @onready var quarter_label: Label = %QuarterLabel
 @onready var company_label: Label = %CompanyLabel
@@ -21,12 +20,21 @@ extends Control
 @onready var event_popup: EventPopup = %EventPopup
 @onready var report_panel: PanelContainer = %ReportPanel
 @onready var report_body: Label = %ReportBody
+@onready var headline_label: Label = %HeadlineLabel
 @onready var economy_label: Label = %EconomyLabel
 @onready var energy_label: Label = %EnergyLabel
+@onready var key_metric_title: Label = %KeyMetricTitle
+@onready var key_metric_label: Label = %KeyMetricLabel
+@onready var ticker_strip: Label = %TickerStrip
 
 const MAX_VISIBLE_EVENTS := 10
+const HEADLINE_ROTATE_SECONDS := 4.0
 
 var _pending_events: Array[EventData] = []
+var _headlines: Array[String] = []
+var _headline_index: int = 0
+var _headline_timer: Timer
+var _prev_valuation: float = 0.0
 
 
 func _ready() -> void:
@@ -47,6 +55,12 @@ func _ready() -> void:
 	GameState.game_over.connect(_on_game_over)
 	GameState.game_won.connect(_on_game_won)
 	GameState.event_triggered.connect(_on_event)
+	GameState.save_error.connect(_on_save_error)
+
+	_headline_timer = Timer.new()
+	_headline_timer.wait_time = HEADLINE_ROTATE_SECONDS
+	_headline_timer.timeout.connect(_rotate_headline)
+	add_child(_headline_timer)
 
 	_refresh(GameState.current_quarter)
 	Analytics.track_screen("dashboard")
@@ -57,10 +71,12 @@ func _wire_glossary_button(btn: Button, glossary_key: String) -> void:
 
 
 func _exit_tree() -> void:
+	_headline_timer.stop()
 	_safe_disconnect(GameState.quarter_advanced, _refresh)
 	_safe_disconnect(GameState.game_over, _on_game_over)
 	_safe_disconnect(GameState.game_won, _on_game_won)
 	_safe_disconnect(GameState.event_triggered, _on_event)
+	_safe_disconnect(GameState.save_error, _on_save_error)
 
 
 func _refresh(_q: int) -> void:
@@ -68,11 +84,11 @@ func _refresh(_q: int) -> void:
 		return
 	quarter_label.text = "Year %d, Q%d" % [GameState.current_year, GameState.current_quarter]
 	company_label.text = "%s — %s" % [GameState.company.company_name, GameState.company.type_name()]
-	cash_label.text = "$%s" % format_money(GameState.company.cash)
-	users_label.text = "%s users" % format_number(GameState.product.users)
+	cash_label.text = "$%s" % SceneLoader.format_money(GameState.company.cash)
+	users_label.text = "%s users" % SceneLoader.format_number(GameState.product.users)
 	employees_label.text = "%d / %d" % [GameState.employees.size(), GameState.company.office_capacity()]
-	revenue_label.text = "$%s" % format_money(GameState.financials.revenue)
-	burn_label.text = "$%s" % format_money(GameState.financials.burn_rate)
+	revenue_label.text = "$%s" % SceneLoader.format_money(GameState.financials.revenue)
+	burn_label.text = "$%s" % SceneLoader.format_money(GameState.financials.burn_rate)
 
 	var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
 	if rw == INF:
@@ -86,9 +102,93 @@ func _refresh(_q: int) -> void:
 	else:
 		runway_label.text = "~%d quarters" % roundi(rw)
 
+	_refresh_headlines()
+	_refresh_ticker_strip()
+	_refresh_key_metric()
 	_refresh_economy()
 	_refresh_energy()
 	_refresh_team()
+
+
+func _refresh_headlines() -> void:
+	_headlines = HeadlineEngine.generate_headlines(GameState, 5)
+	_headline_index = 0
+	_headline_timer.stop()
+	if _headlines.is_empty():
+		headline_label.visible = false
+		return
+	headline_label.visible = true
+	headline_label.modulate.a = 1.0
+	headline_label.text = _headlines[0]
+	if _headlines.size() > 1:
+		_headline_timer.start()
+
+
+func _rotate_headline() -> void:
+	if _headlines.is_empty():
+		return
+	var tw := create_tween()
+	tw.tween_property(headline_label, "modulate:a", 0.0, 0.3)
+	tw.tween_callback(func():
+		_headline_index = (_headline_index + 1) % _headlines.size()
+		headline_label.text = _headlines[_headline_index]
+	)
+	tw.tween_property(headline_label, "modulate:a", 1.0, 0.3)
+
+
+func _refresh_ticker_strip() -> void:
+	if GameState.company == null:
+		ticker_strip.visible = false
+		return
+	var val: float = GameState.company.valuation
+	var parts: Array[String] = []
+	parts.append("$%s  %s" % [GameState.company.company_name.to_upper().replace(" ", ""), SceneLoader.format_money(val)])
+	if _prev_valuation > 0.0 and val != _prev_valuation:
+		var pct: float = ((val - _prev_valuation) / _prev_valuation) * 100.0
+		if pct > 0:
+			parts[0] += "  ▲%.1f%%" % pct
+		else:
+			parts[0] += "  ▼%.1f%%" % absf(pct)
+	_prev_valuation = val
+
+	match GameState.market.economy_state:
+		MarketData.EconomyState.BULL:
+			parts.append("MKTS ▲")
+		MarketData.EconomyState.BEAR:
+			parts.append("MKTS ▼")
+		_:
+			parts.append("MKTS —")
+
+	if GameState.financials.revenue > 0:
+		parts.append("REV %s" % SceneLoader.format_money(GameState.financials.revenue))
+
+	ticker_strip.text = "    ".join(parts)
+	ticker_strip.visible = true
+
+
+func _refresh_key_metric() -> void:
+	var p: ProductData = GameState.product
+	match GameState.company.type:
+		CompanyData.CompanyType.SAAS:
+			key_metric_title.text = "MRR"
+			var mrr: float = GameState.financials.revenue / 3.0
+			key_metric_label.text = "$%s" % SceneLoader.format_money(mrr)
+		CompanyData.CompanyType.CONSUMER:
+			key_metric_title.text = "DAU / MAU"
+			var mau: int = maxi(1, p.users)
+			var ratio: float = float(p.dau) / float(mau)
+			key_metric_label.text = "%.0f%%" % (ratio * 100)
+		CompanyData.CompanyType.MARKETPLACE:
+			key_metric_title.text = "GMV / Q"
+			var gmv: float = p.users * 50.0 * 3.0
+			key_metric_label.text = "$%s" % SceneLoader.format_money(gmv)
+		CompanyData.CompanyType.DEV_TOOLS:
+			key_metric_title.text = "API Calls / Q"
+			var calls: float = p.users * 1000.0 * 3.0
+			key_metric_label.text = "%s" % SceneLoader.format_number(roundi(calls))
+		_:
+			key_metric_title.text = "Valuation"
+			key_metric_label.text = "$%s" % SceneLoader.format_money(GameState.company.valuation)
 
 
 func _refresh_economy() -> void:
@@ -131,13 +231,16 @@ func _on_event(event: EventData) -> void:
 
 
 func _on_advance() -> void:
-	_free_children(event_log_container)
+	advance_btn.disabled = true
+	SceneLoader.free_children(event_log_container)
 	_pending_events.clear()
 	Analytics.track_quarter_advanced(GameState.current_year, GameState.current_quarter)
 	GameState.advance_quarter()
 	Analytics.track_revenue(GameState.financials.revenue)
 
 	_show_quarterly_report()
+
+	AdManager.show_ad("interstitial_quarter_end")
 
 	if not _pending_events.is_empty():
 		advance_btn.disabled = true
@@ -181,7 +284,7 @@ func _on_game_won(win_type: String) -> void:
 
 
 func _refresh_team() -> void:
-	_free_children(team_container)
+	SceneLoader.free_children(team_container)
 
 	if GameState.employees.is_empty():
 		var lbl := Label.new()
@@ -235,26 +338,24 @@ func _on_market() -> void:
 	SceneLoader.goto_scene("res://src/ui/market/market_leaderboard.tscn")
 
 
+func _on_save_error(message: String) -> void:
+	_headline_timer.stop()
+	headline_label.text = message
+	headline_label.modulate.a = 1.0
+	headline_label.visible = true
+	headline_label.add_theme_color_override("font_color", Color(0.95, 0.4, 0.3))
+	var restore_tween := create_tween()
+	restore_tween.tween_interval(4.0)
+	restore_tween.tween_callback(func():
+		headline_label.remove_theme_color_override("font_color")
+		_refresh_headlines()
+	)
+
+
 func _on_menu() -> void:
 	if not GameState.current_slot.is_empty():
 		GameState.save_game(GameState.current_slot)
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
-
-
-static func format_money(amount: float) -> String:
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount
-
-
-static func format_number(n: int) -> String:
-	if n >= 1_000_000:
-		return "%.1fM" % (n / 1_000_000.0)
-	elif n >= 1_000:
-		return "%.1fK" % (n / 1_000.0)
-	return str(n)
 
 
 func _safe_disconnect(sig: Signal, callable: Callable) -> void:
@@ -262,7 +363,3 @@ func _safe_disconnect(sig: Signal, callable: Callable) -> void:
 		sig.disconnect(callable)
 
 
-static func _free_children(node: Node) -> void:
-	for child in node.get_children():
-		node.remove_child(child)
-		child.queue_free()

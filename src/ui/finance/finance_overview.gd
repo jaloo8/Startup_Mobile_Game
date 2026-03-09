@@ -1,6 +1,5 @@
 extends Control
-## Finance overview — costs breakdown, revenue, runway, equity.
-## Glossary-aware labels help newcomers understand financial terms.
+## Finance screen — costs, revenue, runway, equity.
 
 @onready var cash_value: Label = %CashValue
 @onready var revenue_value: Label = %RevenueValue
@@ -45,11 +44,11 @@ func _refresh() -> void:
 	if GameState.company == null:
 		return
 
-	cash_value.text = "$%s" % _fmt_money(GameState.company.cash)
-	revenue_value.text = "$%s / quarter" % _fmt_money(GameState.financials.revenue)
-	burn_value.text = "$%s / quarter" % _fmt_money(GameState.financials.burn_rate)
+	cash_value.text = "$%s" % SceneLoader.format_money(GameState.company.cash)
+	revenue_value.text = "$%s / quarter" % SceneLoader.format_money(GameState.financials.revenue)
+	burn_value.text = "$%s / quarter" % SceneLoader.format_money(GameState.financials.burn_rate)
 	equity_value.text = "%.1f%%" % GameState.company.equity_owned
-	valuation_value.text = "$%s" % _fmt_money(GameState.company.valuation)
+	valuation_value.text = "$%s" % SceneLoader.format_money(GameState.company.valuation)
 
 	var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
 	if rw == INF:
@@ -65,9 +64,9 @@ func _refresh() -> void:
 		runway_value.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
 
 	var costs: Dictionary = GameState.financials.costs_breakdown
-	salary_cost.text = "$%s" % _fmt_money(costs.get("salaries", 0.0))
-	infra_cost.text = "$%s" % _fmt_money(costs.get("infrastructure", 0.0))
-	office_cost.text = "$%s" % _fmt_money(costs.get("office", 0.0))
+	salary_cost.text = "$%s" % SceneLoader.format_money(costs.get("salaries", 0.0))
+	infra_cost.text = "$%s" % SceneLoader.format_money(costs.get("infrastructure", 0.0))
+	office_cost.text = "$%s" % SceneLoader.format_money(costs.get("office", 0.0))
 
 	if GameState.financials.funding_rounds.is_empty():
 		board_label.visible = false
@@ -136,8 +135,8 @@ func _on_fundraise() -> void:
 	offer_label.text = "%s%s\n\n%s Round\n\nOffering $%s at a $%s pre-money valuation.\n\nYou'd give up %.1f%% of the company.%s" % [
 		header, tier_label,
 		o["round"],
-		_fmt_money(o["amount"]),
-		_fmt_money(o["valuation"]),
+		SceneLoader.format_money(o["amount"]),
+		SceneLoader.format_money(o["valuation"]),
 		o["dilution"],
 		board_note,
 	]
@@ -172,9 +171,3 @@ func _on_back() -> void:
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 
-static func _fmt_money(amount: float) -> String:
-	if absf(amount) >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif absf(amount) >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount

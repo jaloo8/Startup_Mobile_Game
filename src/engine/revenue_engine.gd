@@ -3,16 +3,19 @@ extends RefCounted
 ## Calculates quarterly revenue based on company type and product metrics.
 
 static func calculate(company: CompanyData, product: ProductData) -> float:
+	var base: float
 	match company.type:
 		CompanyData.CompanyType.SAAS:
-			return _saas_revenue(product)
+			base = _saas_revenue(product)
 		CompanyData.CompanyType.CONSUMER:
-			return _consumer_revenue(product)
+			base = _consumer_revenue(product)
 		CompanyData.CompanyType.MARKETPLACE:
-			return _marketplace_revenue(product)
+			base = _marketplace_revenue(product)
 		CompanyData.CompanyType.DEV_TOOLS:
-			return _devtools_revenue(product)
-	return 0.0
+			base = _devtools_revenue(product)
+		_:
+			base = 0.0
+	return maxf(0.0, base * product.revenue_mult)
 
 
 static func _saas_revenue(product: ProductData) -> float:

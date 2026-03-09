@@ -257,12 +257,12 @@ Do these in order. Each one should be playable before starting the next.
   - **Time/resource cost:** Senior interviewers tied up for a quarter tick can't do their normal work output that quarter (opportunity cost)
   - **Culture fit detection:** Only interviewers with high culture-fit themselves can reliably assess a candidate's culture fit — otherwise it shows as "???"
   - **Interview feedback flavor text:** Each interviewer gives a short written assessment that reflects their own biases and accuracy
-- [ ] **Specific features to build** — Pick from feature list instead of just accumulating progress
+- [x] **Specific features to build** — Player chooses from a company-type-specific feature tree (10 features per type) with prerequisites, costs, and gameplay effects
 - [x] **Market shifts** — Economy state transitions (bull/neutral/bear), affects user growth, churn, fundraising, and valuation; indicator on dashboard
-- [ ] **News ticker** — 150+ headline templates shown each quarter
+- [x] **News ticker** — 67 contextual headline templates shown on dashboard each quarter, filtered by economy/users/company
 - [ ] **Employee bios** — 200+ bio templates with personality tags
 - [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
-- [ ] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools with unique mechanics
+- [x] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools each have unique growth curves, churn patterns, key metrics, feature trees (10 features each), and event filtering
 - [x] **Win conditions** — IPO ($100M+ ARR & 100K users), acquisition (accept event), sustainable (4Q profit after Y3), unicorn ($1B val) + victory screen
 - [x] **CEO background & skills** — 4 founder archetypes (Engineer/Finance/Recruiter/Hustler) with stats affecting gameplay:
   - **Engineer** — Can personally contribute to product (features, bugs, infra). Weaker at fundraising and BD. Interviews are decent for technical roles, weaker for business roles
@@ -293,6 +293,25 @@ Do these in order. Each one should be playable before starting the next.
   - Successful poaches weaken the competitor and trigger retaliatory events
   - Non-compete clauses: some execs can't work in the same focus area for 1-2 quarters after joining
 
+- [ ] **Acqui-hire / Big company poaches you** — Mid-to-late game, large companies can approach your startup:
+  - Triggered by milestone thresholds (user count, revenue, product quality) and some randomness
+  - Big tech parodies (Goople, Mapple, Amacon, etc.) offer to buy your company or recruit you personally
+  - Player choices: accept the deal (game ends with an acquisition ending), negotiate for more, or reject to keep building
+  - Rejection can boost reputation ("turned down a Goople offer") and trigger press coverage
+  - If you accept, payout depends on your metrics — could be a small talent grab or a massive buyout
+  - Acqui-hire offers tend to be lower but come earlier; full acquisition offers come when you're bigger
+  - Some offers come with strings: your team has to relocate, or you lose the company name, or key employees refuse to transfer
+  - Risk: if you reject too many times, the big company may invest in a competitor instead
+
+- [ ] **News agency feature pieces** — Parody news outlets can do profiles on your company:
+  - Triggered at reputation/user milestones or after noteworthy events (big funding round, product launch, scandal)
+  - Outlets like "Bloomburg Tech", "TekCrunch", "The Informant" approach you for an interview
+  - Player chooses how to respond: enthusiastic, cautious, or decline
+  - Positive coverage boosts reputation and can attract better job candidates, investors, and users
+  - Bad coverage (if you're struggling or a scandal breaks) hurts reputation — and you can't stop them from publishing
+  - Rare: a deep investigative piece from "The Informant" can expose internal problems (high tech debt, low morale) for a big reputation hit
+  - Follow-up: reader comments / social media reactions shown as extra headline variants after the piece runs
+
 - [ ] **Stock market (post-IPO endgame)** — After IPO win condition, the game continues with a live stock price:
   - Stock price fluctuates each quarter based on revenue growth, user growth, profitability, economy state, and random market sentiment
   - Competitor stocks also visible (if they've IPO'd) for context
@@ -301,6 +320,14 @@ Do these in order. Each one should be playable before starting the next.
   - New post-IPO win conditions: reach a target market cap, join a stock index (parody S&P 500), or become the most valuable company in your sector
   - Analyst ratings (buy/hold/sell) shown each quarter with brief commentary
   - Quarterly earnings calls: choose how to present results (optimistic spin vs. honest vs. sandbagging) — affects stock price and board sentiment
+- [ ] **World & foreign policy events** — Global events that ripple into your business:
+  - Geopolitical shifts: trade wars, sanctions, tariffs — affect supply chains, hiring pools, and market sentiment
+  - Regulatory changes: data privacy laws (GDPR-style), antitrust rulings, crypto regulation — force product pivots or compliance costs
+  - Economic policy: interest rate changes, stimulus packages, currency fluctuations — affect VC funding availability and burn rate pressure
+  - Global crises: pandemics, supply chain disruptions, energy price spikes — can hurt or help depending on your company type (remote work tools thrive in a pandemic, hardware startups suffer from chip shortages)
+  - Headlines reflect these shifts on the news ticker, and some trigger special events with choices
+  - Economy state (BULL/BEAR/NEUTRAL) influenced by accumulation of world events, not just random rolls
+
 - [ ] **Corporate Ventures program (mid-to-late game)** — Unlocks at $100M+ valuation or after Series B:
   - Start a CVC arm — allocate a quarterly budget from company cash to invest in AI-generated mini-startups
   - Each startup has a name, sector, team quality, product idea, and growth trajectory

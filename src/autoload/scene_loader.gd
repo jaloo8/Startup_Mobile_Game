@@ -1,7 +1,5 @@
 extends Node
-## Autoload singleton for scene management on mobile.
-## Preloads core scenes, caches them, and handles transitions
-## without blocking the main thread.
+## Loads and caches scenes for fast transitions.
 
 signal scene_changed(scene_path: String)
 
@@ -59,3 +57,25 @@ func _switch_scene(path: String) -> void:
 	tree.root.add_child(new_scene)
 	tree.current_scene = new_scene
 	scene_changed.emit(path)
+
+
+static func free_children(node: Node) -> void:
+	for child in node.get_children():
+		node.remove_child(child)
+		child.queue_free()
+
+
+static func format_money(amount: float) -> String:
+	if absf(amount) >= 1_000_000:
+		return "%.1fM" % (amount / 1_000_000.0)
+	elif absf(amount) >= 1_000:
+		return "%.0fK" % (amount / 1_000.0)
+	return "%.0f" % amount
+
+
+static func format_number(n: int) -> String:
+	if n >= 1_000_000:
+		return "%.1fM" % (n / 1_000_000.0)
+	elif n >= 1_000:
+		return "%.1fK" % (n / 1_000.0)
+	return str(n)

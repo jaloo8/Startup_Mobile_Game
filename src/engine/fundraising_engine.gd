@@ -1,8 +1,6 @@
 class_name FundraisingEngine
 extends RefCounted
-## Generates VC offers based on company metrics and named VC firms
-## loaded from a moddable JSON. Each firm has industry preferences
-## and a prestige tier that affects deal quality and difficulty.
+## Generates VC funding offers from company metrics and JSON firms data.
 
 enum Round { PRE_SEED, SEED, SERIES_A, SERIES_B, GROWTH }
 
@@ -65,11 +63,12 @@ static func _load_firms() -> void:
 	if file == null:
 		return
 
+	var text := file.get_as_text()
+	file = null
 	var json := JSON.new()
-	if json.parse(file.get_as_text()) != OK:
+	if json.parse(text) != OK:
 		push_error("FundraisingEngine: JSON parse error — %s" % json.get_error_message())
 		return
-	file = null
 
 	var data: Dictionary = json.data if json.data is Dictionary else {}
 	for entry in data.get("firms", []):
@@ -182,7 +181,7 @@ static func accept_offer(state: Node, offer: Dictionary) -> void:
 		"quarter": state.current_quarter,
 		"year": state.current_year,
 		"event_id": "fundraise_closed",
-		"title": "Closed %s with %s — raised $%s" % [offer["round"], offer.get("firm_name", "investors"), _fmt_money(offer["amount"])],
+		"title": "Closed %s with %s — raised $%s" % [offer["round"], offer.get("firm_name", "investors"), SceneLoader.format_money(offer["amount"])],
 	})
 
 
@@ -211,11 +210,14 @@ static func _pick_firm(state: Node, round_type: Round, quality: float) -> Dictio
 
 		scored.append({"firm": firm, "score": score})
 
-	scored.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["score"] > b["score"])
+	if scored.is_empty():
+		return {"name": "Angel Investors", "tier": "emerging", "preferred_focus": []}
+
+	scored.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.get("score", 0.0) > b.get("score", 0.0))
 
 	var top_count := mini(5, scored.size())
-	var pick: Dictionary = scored[randi_range(0, top_count - 1)]
-	return pick["firm"]
+	var pick: Dictionary = scored[randi_range(0, maxi(0, top_count - 1))]
+	return pick.get("firm", {"name": "Angel Investors", "tier": "emerging", "preferred_focus": []})
 
 
 static func _rejection_reason(tier: String, _quality: float) -> String:
@@ -237,9 +239,3 @@ static func _company_strength(state: Node) -> float:
 	return clampf(score, 0.0, 1.0)
 
 
-static func _fmt_money(amount: float) -> String:
-	if amount >= 1_000_000:
-		return "%.1fM" % (amount / 1_000_000)
-	elif amount >= 1_000:
-		return "%.0fK" % (amount / 1_000)
-	return "%.0f" % amount

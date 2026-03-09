@@ -208,5 +208,30 @@
     "term": "Company Valuation",
     "short": "What your company is estimated to be worth",
     "tip": "Valuation updates each quarter based on revenue, users, growth rate, team size, and market conditions. SaaS companies are valued on revenue multiples. Consumer companies on per-user value. Fundraising sets a floor."
+  },
+  "mrr": {
+    "term": "MRR (Monthly Recurring Revenue)",
+    "short": "How much subscription revenue comes in each month",
+    "tip": "MRR is the heartbeat of a SaaS business. It's your quarterly revenue divided by 3. Investors love predictable, recurring revenue — it's the main driver of SaaS valuations."
+  },
+  "dau_mau": {
+    "term": "DAU/MAU Ratio",
+    "short": "Daily active users as a percentage of monthly users",
+    "tip": "Measures how often users come back. A 50%+ ratio means users open the app almost every day — that's exceptional. Below 20% means most users are dormant. Social media apps typically aim for 40%+."
+  },
+  "gmv": {
+    "term": "GMV (Gross Merchandise Volume)",
+    "short": "Total value of goods sold through your marketplace",
+    "tip": "GMV is the total transaction volume — not your revenue. Your actual revenue is the cut you take (the 'take rate'). A marketplace with $1M GMV and a 10% take rate earns $100K."
+  },
+  "api_calls": {
+    "term": "API Calls",
+    "short": "How many times developers hit your API per quarter",
+    "tip": "For developer tools, API calls measure real usage. More calls mean deeper integration into customers' tech stacks, making them less likely to switch. Usage-based pricing ties revenue directly to this metric."
+  },
+  "feature_tree": {
+    "term": "Feature Tree",
+    "short": "The set of features you can build, specific to your company type",
+    "tip": "Each company type has its own feature tree with 10 features. Some require prerequisites — for example, you need a User Dashboard before you can build Analytics. Each feature has a build cost and gameplay effects like reduced churn or increased revenue."
   }
 }
