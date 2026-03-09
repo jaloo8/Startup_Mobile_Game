@@ -260,6 +260,16 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Specific features to build** — Player chooses from a company-type-specific feature tree (10 features per type) with prerequisites, costs, and gameplay effects
 - [x] **Market shifts** — Economy state transitions (bull/neutral/bear), affects user growth, churn, fundraising, and valuation; indicator on dashboard
 - [x] **News ticker** — 67 contextual headline templates shown on dashboard each quarter, filtered by economy/users/company
+- [ ] **Product niche / what you're building** — Within each company type, choose a specific product:
+  - **SaaS:** CRM, Project Management, HR Platform, Analytics Tool, Accounting, Email Marketing, Helpdesk, etc.
+  - **Consumer:** Social Media, Dating App, Photo/Video, Music Streaming, Fitness Tracker, Messaging, Mobile Game, Utility App, etc.
+  - **Marketplace:** E-commerce, Gig Economy, Food Delivery, Real Estate, Freelancer Platform, Rental, etc.
+  - **Dev Tools:** IDE/Editor, CI/CD, Cloud Hosting, Monitoring, API Gateway, Database-as-a-Service, etc.
+  - Each niche gets: a short flavor description, niche-specific competitors, tailored events, a starting user acquisition strategy, and unique headline templates
+  - Niches within the same company type share the core growth curves and feature trees but get bonus modifiers (e.g., mobile games have spikier user growth but higher churn; CRMs grow slow but retain well)
+  - Some niches are easier than others — utility apps are simpler to launch, while competing in OS/cloud is brutal but has massive upside
+  - Future DLC types (AI, Gaming, Hardware, Platform/OS) each get their own niche lists
+  - Modders can add custom niches via JSON
 - [ ] **Employee bios** — 200+ bio templates with personality tags
 - [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
 - [x] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools each have unique growth curves, churn patterns, key metrics, feature trees (10 features each), and event filtering
