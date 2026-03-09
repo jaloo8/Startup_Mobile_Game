@@ -156,7 +156,7 @@ static func _calculate_user_growth(state: Node) -> void:
 
 	state.product.users = maxi(0, state.product.users + total_new - total_churn)
 
-	var dau_ratio := 0.3 - state.product.bugs * 0.002 + state.product.dau_bonus
+	var dau_ratio: float = 0.3 - state.product.bugs * 0.002 + state.product.dau_bonus
 	match state.company.type:
 		CompanyData.CompanyType.CONSUMER:
 			dau_ratio += 0.1
