@@ -14,7 +14,7 @@ and multiple text variations for replay variety.
 {
   "id": "unique_snake_case_id",
   "title": "Short Title (2-4 words)",
-  "category": "people | product | money | market | legal",
+  "category": "people | product | money | market | culture | legal",
   "stage": "early | growth | late | any",
   "company_types": ["saas", "consumer", "marketplace", "devtools"],
   "trigger_conditions": {

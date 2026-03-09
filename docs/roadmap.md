@@ -238,19 +238,19 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Product metrics** — Feature shipping, bugs, tech debt, stability, UX score, churn rate affected by work
 - [x] **Basic finances** — Burn rate (salaries + infra + office), revenue (4 models), cash, runway display
 - [x] **Game over** — Bankruptcy and dead product conditions
-- [x] **Events (10)** — 10 narrative events with template variables, variations, weighted selection, cooldowns
+- [x] **Events (10 initial)** — 10 narrative events with template variables, variations, weighted selection, cooldowns (now expanded to 41)
 - [x] **All 4 revenue models** — SaaS, Consumer, Marketplace, Dev Tools each calculate differently
 - [x] **Competitors** — 4 AI companies that grow users, improve products, raise funding
 - [x] **Save/load** — Threaded auto-save, JSON serialization, continue from main menu
 - [x] **Scene management** — Preloaded scene cache, deferred transitions, signal cleanup (mobile-optimized)
 - [x] **Template engine** — {variable} substitution in event text with per-event variations (Classic Mode / Tier 1)
 
-**Phase 2 — Systems Depth (TODO):**
+**Phase 2 — Systems Depth (IN PROGRESS):**
 - [ ] **Employee sorting/filtering** — Sort and filter employees by role, skill level, morale, assignment on the People screen
-- [ ] **Fundraising** — VC meetings, term sheets, dilution calc, board seats
-- [ ] **Events (40 more)** — Expand to 50+ with 3-5 variations each (use AI batch generation, hand-edit)
-- [ ] **Event resolution UI** — Player must resolve events (choose options) before advancing quarter
-- [ ] **Hiring pipeline** — Post job → wait → candidates with hidden stats → interview → offer/reject
+- [x] **Fundraising** — VC meetings, term sheets, dilution calc, board seats, named VC firms with industry preferences
+- [x] **Events (41 total)** — 41 events across 5 categories (people, product, money, market, culture) with 2-3 variations each
+- [x] **Event resolution UI** — Modal popup with choices, effects applied, outcome text with variations
+- [x] **Hiring pipeline** — Post job ($5K) → candidates with hidden stats → interview to reveal → offer/reject, runway warnings
 - [ ] **Deep interviews system** — Assign a team member to conduct the interview instead of free-peek:
   - **Who interviews matters:** VP has high accuracy at reading candidates but costs the most time/resources; Director is solid but less accurate; Manager is average; Engineer is cheap but quality depends on their people skill stat
   - **Interviewer skill affects reveal:** High people-skill interviewer reveals true stats more accurately; low people-skill may misjudge (show inflated or deflated stats with a margin of error)
@@ -261,10 +261,10 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Market shifts** — Economy state changes (bull/bear), affects fundraising and hiring
 - [ ] **News ticker** — 150+ headline templates shown each quarter
 - [ ] **Employee bios** — 200+ bio templates with personality tags
-- [ ] **Quarterly report** — Narrative summary of what happened each quarter
+- [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
 - [ ] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools with unique mechanics
-- [ ] **Win conditions** — IPO ($100M+ ARR), acquisition, sustainable business (4Q profit), unicorn ($1B val)
-- [ ] **CEO background & skills** — Player picks a founder archetype at game start that gives stat bonuses/penalties:
+- [x] **Win conditions** — IPO ($100M+ ARR & 100K users), acquisition (accept event), sustainable (4Q profit after Y3), unicorn ($1B val) + victory screen
+- [x] **CEO background & skills** — 4 founder archetypes (Engineer/Finance/Recruiter/Hustler) with stats affecting gameplay:
   - **Engineer** — Can personally contribute to product (features, bugs, infra). Weaker at fundraising and BD. Interviews are decent for technical roles, weaker for business roles
   - **Finance** — Better fundraising outcomes (higher valuations, lower dilution). Better at managing burn rate (cost events have smaller penalties). Weaker at product decisions
   - **Recruiter/People** — Best interviewer in the company. Hiring pipeline moves faster, better culture-fit reads. Can spot flight-risk employees early. Weaker at product and finance

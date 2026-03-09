@@ -168,5 +168,25 @@
     "term": "R&D",
     "short": "Research and improve UX",
     "tip": "R&D improves your product's user experience score. Better UX means users enjoy your product more, stay longer, and recommend it to others."
+  },
+  "unicorn": {
+    "term": "Unicorn",
+    "short": "A startup valued at $1 Billion or more",
+    "tip": "The mythical creature of the startup world. Reaching a $1B valuation puts you in rare company — fewer than 1% of startups ever get here. One of the ways to win the game."
+  },
+  "acqui_hire": {
+    "term": "Acqui-Hire",
+    "short": "Getting bought for your team, not your product",
+    "tip": "When a bigger company buys your startup mainly to hire your engineering team. The product usually gets shut down. It's a soft landing — not a home run, but not a failure either."
+  },
+  "profit_streak": {
+    "term": "Profit Streak",
+    "short": "Consecutive profitable quarters",
+    "tip": "The number of quarters in a row where your revenue exceeded your burn rate. Hit 4 consecutive profitable quarters after Year 3 and you've built a sustainable business — that's a win."
+  },
+  "founder_background": {
+    "term": "Founder Background",
+    "short": "Your CEO's professional background",
+    "tip": "Your chosen background gives stat bonuses that affect gameplay. Engineers build better products. Finance founders stretch cash further. Recruiters keep teams happier. Hustlers grow users faster."
   }
 }
