@@ -19,13 +19,17 @@ static func process_quarter(state: Node) -> void:
 	_update_product_metrics(state)
 	_calculate_user_growth(state)
 	_calculate_revenue(state)
+	_update_valuation(state)
 	_calculate_costs(state)
 	_update_cash(state)
 	_run_competitor_ai(state)
+	_update_economy(state)
 	_roll_events(state)
 	_update_employee_morale(state)
 	_process_employee_turnover(state)
 	_grow_employee_skills(state)
+	_update_founder_energy(state)
+	_update_board_patience(state)
 	_clamp_all_state(state)
 
 
@@ -90,7 +94,22 @@ static func _calculate_user_growth(state: Node) -> void:
 	var reputation_pull := ceili(base_new * reputation_bonus * biz_bonus)
 	var total_new := base_new + growth_from_existing + reputation_pull
 
-	var churn_count := ceili(state.product.users * state.product.churn_rate)
+	var econ_growth_mult: float
+	var econ_churn_mult: float
+	match state.market.economy_state:
+		MarketData.EconomyState.BULL:
+			econ_growth_mult = 1.2
+			econ_churn_mult = 0.8
+		MarketData.EconomyState.BEAR:
+			econ_growth_mult = 0.7
+			econ_churn_mult = 1.3
+		_:
+			econ_growth_mult = 1.0
+			econ_churn_mult = 1.0
+
+	total_new = ceili(total_new * econ_growth_mult)
+
+	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult)
 	var bug_churn := ceili(state.product.bugs * 0.5)
 	var total_churn := churn_count + bug_churn
 
@@ -100,6 +119,10 @@ static func _calculate_user_growth(state: Node) -> void:
 
 static func _calculate_revenue(state: Node) -> void:
 	state.financials.revenue = RevenueEngine.calculate(state.company, state.product)
+
+
+static func _update_valuation(state: Node) -> void:
+	state.company.valuation = ValuationEngine.estimate(state)
 
 
 static func _calculate_costs(state: Node) -> void:
@@ -124,6 +147,41 @@ static func _update_cash(state: Node) -> void:
 
 static func _run_competitor_ai(state: Node) -> void:
 	CompetitorAI.step(state.market)
+
+
+static func _update_economy(state: Node) -> void:
+	if randf() > 0.12:
+		return
+
+	var old_state: MarketData.EconomyState = state.market.economy_state
+	var direction := randi_range(-1, 1)
+	var new_val := clampi(int(old_state) + direction, 0, 2)
+	var new_state: MarketData.EconomyState = new_val as MarketData.EconomyState
+
+	if new_state == old_state:
+		return
+
+	state.market.economy_state = new_state
+	var label: String
+	match new_state:
+		MarketData.EconomyState.BULL:
+			label = "Bull market — investors are optimistic, valuations rising"
+		MarketData.EconomyState.NEUTRAL:
+			if old_state == MarketData.EconomyState.BULL:
+				label = "Markets cooling off — back to normal conditions"
+			else:
+				label = "Economy stabilizing — worst may be over"
+		MarketData.EconomyState.BEAR:
+			label = "Bear market — funding dries up, growth slows across the sector"
+		_:
+			label = "Economic shift"
+
+	state.append_event_log({
+		"quarter": state.current_quarter,
+		"year": state.current_year,
+		"event_id": "economy_shift",
+		"title": label,
+	})
 
 
 static func _roll_events(state: Node) -> void:
@@ -175,6 +233,71 @@ static func _process_employee_turnover(state: Node) -> void:
 static func _grow_employee_skills(state: Node) -> void:
 	for emp: EmployeeData in state.employees:
 		emp.try_grow_skill()
+
+
+static func _update_founder_energy(state: Node) -> void:
+	var delta: int = 0
+
+	var rw: float = state.financials.runway_quarters(state.company.cash)
+	if rw < 2.0 and rw != INF:
+		delta -= 8
+	elif rw < 4.0 and rw != INF:
+		delta -= 3
+
+	var quitters_this_q: int = 0
+	for entry: Dictionary in state.event_log:
+		if entry.get("quarter") == state.current_quarter and entry.get("year") == state.current_year:
+			if entry.get("event_id") == "employee_quit":
+				quitters_this_q += 1
+	delta -= quitters_this_q * 4
+
+	if state.employees.is_empty() and state.total_quarters_elapsed() > 1:
+		delta -= 5
+
+	if state.financials.revenue > state.financials.burn_rate:
+		delta += 6
+
+	var avg_morale: float = 0.0
+	if not state.employees.is_empty():
+		for emp: EmployeeData in state.employees:
+			avg_morale += emp.morale
+		avg_morale /= state.employees.size()
+		if avg_morale >= 70:
+			delta += 3
+		elif avg_morale < 40:
+			delta -= 3
+
+	if state.employees.size() <= 5 and state.employees.size() > 0 and avg_morale >= 60:
+		delta += 2
+
+	state.founder_energy = clampi(state.founder_energy + delta, 0, 100)
+
+
+static func _update_board_patience(state: Node) -> void:
+	if state.financials.funding_rounds.is_empty():
+		return
+
+	var history: Array[Dictionary] = state.history
+	if history.size() < 2:
+		return
+
+	var curr: Dictionary = history[-1]
+	var prev: Dictionary = history[-2]
+
+	var users_grew: bool = curr.get("users", 0) > prev.get("users", 0)
+	var rev_grew: bool = curr.get("revenue", 0.0) > prev.get("revenue", 0.0)
+	var shipped: bool = state.product.feature_count() > 0
+
+	if users_grew or rev_grew or shipped:
+		state.board_patience = mini(state.board_patience + 1, 6)
+	else:
+		state.board_patience -= 1
+		state.append_event_log({
+			"quarter": state.current_quarter,
+			"year": state.current_year,
+			"event_id": "board_warning",
+			"title": "Your board is concerned about lack of growth",
+		})
 
 
 static func _clamp_all_state(state: Node) -> void:

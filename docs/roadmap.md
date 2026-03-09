@@ -246,7 +246,7 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Template engine** — {variable} substitution in event text with per-event variations (Classic Mode / Tier 1)
 
 **Phase 2 — Systems Depth (IN PROGRESS):**
-- [ ] **Employee sorting/filtering** — Sort and filter employees by role, skill level, morale, assignment on the People screen
+- [x] **Employee sorting/filtering** — Sort and filter employees by name, skill, morale, salary, assignment on the People screen
 - [x] **Fundraising** — VC meetings, term sheets, dilution calc, board seats, named VC firms with industry preferences
 - [x] **Events (41 total)** — 41 events across 5 categories (people, product, money, market, culture) with 2-3 variations each
 - [x] **Event resolution UI** — Modal popup with choices, effects applied, outcome text with variations
@@ -258,7 +258,7 @@ Do these in order. Each one should be playable before starting the next.
   - **Culture fit detection:** Only interviewers with high culture-fit themselves can reliably assess a candidate's culture fit — otherwise it shows as "???"
   - **Interview feedback flavor text:** Each interviewer gives a short written assessment that reflects their own biases and accuracy
 - [ ] **Specific features to build** — Pick from feature list instead of just accumulating progress
-- [ ] **Market shifts** — Economy state changes (bull/bear), affects fundraising and hiring
+- [x] **Market shifts** — Economy state transitions (bull/neutral/bear), affects user growth, churn, fundraising, and valuation; indicator on dashboard
 - [ ] **News ticker** — 150+ headline templates shown each quarter
 - [ ] **Employee bios** — 200+ bio templates with personality tags
 - [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
@@ -273,8 +273,8 @@ Do these in order. Each one should be playable before starting the next.
   - **God Mode** — Unlockable after first win (or cheat code). All stats maxed. For fun/sandbox, excluded from leaderboard/achievements
   - CEO has their own stats (technical, finance, people, business — each 1-10) that affect event outcomes, interview quality, VC negotiations, and product contributions
   - CEO can "level up" skills slowly through choices (picking the finance option in events nudges finance skill up)
-- [ ] **Founder burnout** — CEO morale as a loss condition (ties into CEO having their own stress/energy meter)
-- [ ] **Board takeover** — Miss VC targets repeatedly → game over
+- [x] **Founder burnout** — Founder energy (0-100) drains from stress, recovers from wins; burnout at zero = game over; displayed on dashboard
+- [x] **Board takeover** — Board patience tracked for funded companies; miss growth targets → patience drops; zero patience = replaced as CEO; displayed on finance screen
 - [ ] **Employee personalities** — Each employee has 1-2 personality traits (e.g., Perfectionist, Team Player, Lone Wolf, Mentor, Ambitious, Laid-back) that affect:
   - How they interact with other employees (conflicts, synergies)
   - Their response to events (a Perfectionist hates shipping buggy features, an Ambitious employee wants promotions faster)
@@ -292,6 +292,25 @@ Do these in order. Each one should be playable before starting the next.
   - Probability of getting caught scales with target's seniority and competitor's size
   - Successful poaches weaken the competitor and trigger retaliatory events
   - Non-compete clauses: some execs can't work in the same focus area for 1-2 quarters after joining
+
+- [ ] **Stock market (post-IPO endgame)** — After IPO win condition, the game continues with a live stock price:
+  - Stock price fluctuates each quarter based on revenue growth, user growth, profitability, economy state, and random market sentiment
+  - Competitor stocks also visible (if they've IPO'd) for context
+  - **Player actions:** Stock buybacks (spend cash to boost price/EPS), secondary share offerings (dilute to raise more cash), stock splits (cosmetic milestone), dividend announcements (reward shareholders, boosts sentiment)
+  - Stock crashes possible from bad quarters, scandals (events), or bear markets
+  - New post-IPO win conditions: reach a target market cap, join a stock index (parody S&P 500), or become the most valuable company in your sector
+  - Analyst ratings (buy/hold/sell) shown each quarter with brief commentary
+  - Quarterly earnings calls: choose how to present results (optimistic spin vs. honest vs. sandbagging) — affects stock price and board sentiment
+- [ ] **Corporate Ventures program (mid-to-late game)** — Unlocks at $100M+ valuation or after Series B:
+  - Start a CVC arm — allocate a quarterly budget from company cash to invest in AI-generated mini-startups
+  - Each startup has a name, sector, team quality, product idea, and growth trajectory
+  - Player picks which startups to fund (2-4 available per quarter), sets investment amount
+  - Funded startups progress each quarter: some grow, some stall, some fail entirely
+  - Successful portfolio companies can be: acquired (absorb their team + product into your company), taken to exit (cash return on investment, 2-10x), or kept as strategic partners (passive bonuses like user growth, tech, or reputation)
+  - Failed investments are just lost money — the VC life
+  - Portfolio companies in your sector give strategic synergy bonuses (e.g., investing in a data company while you're SaaS improves your product metrics)
+  - Risk: if you over-invest and your core business suffers, the board gets angry (ties into board patience)
+  - Leaderboard tracks your CVC returns alongside your main company performance
 
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource

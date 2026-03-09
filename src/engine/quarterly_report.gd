@@ -13,6 +13,15 @@ static func generate(state: Node) -> Array[String]:
 	bullets.append(_team_line(state, history))
 	bullets.append(_product_line(state))
 	bullets.append(_user_line(state, history))
+	bullets.append(_economy_line(state))
+
+	var energy_line := _energy_line(state)
+	if not energy_line.is_empty():
+		bullets.append(energy_line)
+
+	var board_line := _board_line(state)
+	if not board_line.is_empty():
+		bullets.append(board_line)
 
 	return bullets
 
@@ -109,6 +118,38 @@ static func _fmt(amount: float) -> String:
 	elif absf(amount) >= 1_000:
 		return "%.0fK" % (amount / 1_000)
 	return "%.0f" % amount
+
+
+static func _economy_line(state: Node) -> String:
+	match state.market.economy_state:
+		MarketData.EconomyState.BULL:
+			return "Markets are hot — investors and users are more open right now"
+		MarketData.EconomyState.BEAR:
+			return "Markets are rough — growth is harder and VCs are cautious"
+		_:
+			return "The market is steady — no strong tailwinds or headwinds"
+
+
+static func _energy_line(state: Node) -> String:
+	var e: int = state.founder_energy
+	if e < 20:
+		return "You're burning out — one more bad quarter and you might have to walk away"
+	elif e < 40:
+		return "The stress is mounting. You need a win soon"
+	return ""
+
+
+static func _board_line(state: Node) -> String:
+	var bp: int = state.board_patience
+	if bp > 4 or state.financials.funding_rounds.is_empty():
+		return ""
+	if bp <= 1:
+		return "Your board is furious — they're discussing replacing you as CEO"
+	if bp <= 2:
+		return "Investors are losing patience — you need to show results"
+	if bp <= 3:
+		return "Your board expects better numbers next quarter"
+	return ""
 
 
 static func _fmt_int(n: int) -> String:

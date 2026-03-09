@@ -188,5 +188,25 @@
     "term": "Founder Background",
     "short": "Your CEO's professional background",
     "tip": "Your chosen background gives stat bonuses that affect gameplay. Engineers build better products. Finance founders stretch cash further. Recruiters keep teams happier. Hustlers grow users faster."
+  },
+  "founder_energy": {
+    "term": "Founder Energy",
+    "short": "How close you are to burning out",
+    "tip": "Running a startup takes a personal toll. Low cash, quitting employees, and working alone drain your energy. Profitable quarters and a happy team help you recharge. Hit zero and you burn out — game over."
+  },
+  "board_patience": {
+    "term": "Board Patience",
+    "short": "How happy your investors are with your progress",
+    "tip": "After raising VC money, your board expects growth. Miss targets for too long and they'll replace you as CEO. Grow users, revenue, or ship features to keep them satisfied. Bootstrapped companies don't have this problem."
+  },
+  "economy_state": {
+    "term": "Market Conditions",
+    "short": "Bull, neutral, or bear economy",
+    "tip": "The broader economy shifts every few quarters. Bull markets make fundraising easier and users grow faster. Bear markets mean tighter budgets, slower growth, and cautious investors. You can't control it — just adapt."
+  },
+  "company_valuation": {
+    "term": "Company Valuation",
+    "short": "What your company is estimated to be worth",
+    "tip": "Valuation updates each quarter based on revenue, users, growth rate, team size, and market conditions. SaaS companies are valued on revenue multiples. Consumer companies on per-user value. Fundraising sets a floor."
   }
 }

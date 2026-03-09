@@ -31,6 +31,8 @@ var is_game_active: bool = false
 var current_slot: String = ""
 var angel_bailout_used: bool = false
 var profit_streak: int = 0
+var founder_energy: int = 100
+var board_patience: int = 4
 var _milestones_hit: Array[String] = []
 
 const SAVE_DIR := "user://saves/"
@@ -80,6 +82,8 @@ func new_game(config: Dictionary) -> void:
 	_milestones_hit.clear()
 	angel_bailout_used = false
 	profit_streak = 0
+	founder_energy = 100
+	board_patience = 4
 
 	difficulty = config.get("difficulty", "normal")
 	starting_scenario = config.get("scenario", "garage")
@@ -188,6 +192,16 @@ func _check_end_conditions() -> void:
 	if profit_streak >= 4 and total_quarters_elapsed() >= 12:
 		is_game_active = false
 		game_won.emit("sustainable")
+		return
+
+	if founder_energy <= 0:
+		is_game_active = false
+		game_over.emit("founder_burnout")
+		return
+
+	if not financials.funding_rounds.is_empty() and board_patience <= 0:
+		is_game_active = false
+		game_over.emit("board_takeover")
 		return
 
 	if company.cash <= 0 and financials.revenue < financials.burn_rate:
@@ -375,6 +389,8 @@ func _serialize() -> Dictionary:
 		"milestones_hit": _milestones_hit,
 		"angel_bailout_used": angel_bailout_used,
 		"profit_streak": profit_streak,
+		"founder_energy": founder_energy,
+		"board_patience": board_patience,
 	}
 
 
@@ -448,6 +464,8 @@ func _deserialize(data: Dictionary) -> bool:
 	_milestones_hit.assign(data.get("milestones_hit", []))
 	angel_bailout_used = data.get("angel_bailout_used", false)
 	profit_streak = data.get("profit_streak", 0)
+	founder_energy = data.get("founder_energy", 100)
+	board_patience = data.get("board_patience", 4)
 
 	is_game_active = true
 	return true
@@ -520,6 +538,8 @@ func _clear_run_state() -> void:
 	_milestones_hit.clear()
 	angel_bailout_used = false
 	profit_streak = 0
+	founder_energy = 100
+	board_patience = 4
 	current_quarter = 1
 	current_year = 1
 	is_game_active = false

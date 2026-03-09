@@ -7,11 +7,24 @@ extends Control
 @onready var capacity_label: Label = %CapacityLabel
 @onready var candidate_container: VBoxContainer = %CandidateContainer
 @onready var candidate_panel: PanelContainer = %CandidatePanel
+@onready var sort_row: HBoxContainer = %SortRow
 
 var _candidates: Array[EmployeeData] = []
 var _interviewed: Dictionary = {}
 var _card_style: StyleBoxFlat
 var _assign_target: EmployeeData
+
+enum SortKey { NAME, SKILL, MORALE, SALARY, ASSIGNMENT }
+var _current_sort: SortKey = SortKey.NAME
+var _sort_ascending: bool = true
+
+const SORT_LABELS := {
+	SortKey.NAME: "Name",
+	SortKey.SKILL: "Skill",
+	SortKey.MORALE: "Morale",
+	SortKey.SALARY: "Salary",
+	SortKey.ASSIGNMENT: "Focus",
+}
 
 const POSTING_FEE := 5_000.0
 
@@ -29,6 +42,7 @@ func _ready() -> void:
 	hire_btn.pressed.connect(_on_hire_pressed)
 	back_btn.pressed.connect(_on_back)
 	candidate_panel.visible = false
+	_build_sort_buttons()
 	_update_hire_button()
 	_refresh_list()
 	Analytics.track_screen("people")
@@ -59,6 +73,62 @@ func _update_hire_button() -> void:
 	hire_btn.modulate = Color(1, 1, 1, 1)
 
 
+func _build_sort_buttons() -> void:
+	for key in SortKey.values():
+		var btn := Button.new()
+		btn.text = SORT_LABELS[key]
+		btn.custom_minimum_size = Vector2(56, 28)
+		btn.add_theme_font_size_override("font_size", 11)
+		btn.pressed.connect(_on_sort_pressed.bind(key))
+		sort_row.add_child(btn)
+	_highlight_sort_button()
+
+
+func _on_sort_pressed(key: SortKey) -> void:
+	if _current_sort == key:
+		_sort_ascending = not _sort_ascending
+	else:
+		_current_sort = key
+		_sort_ascending = true
+	_highlight_sort_button()
+	_refresh_list()
+
+
+func _highlight_sort_button() -> void:
+	var idx := 0
+	for child in sort_row.get_children():
+		if child is Button:
+			var key: SortKey = SortKey.values()[idx]
+			if key == _current_sort:
+				child.modulate = Color(0.4, 0.85, 1.0)
+				child.text = SORT_LABELS[key] + (" ↑" if _sort_ascending else " ↓")
+			else:
+				child.modulate = Color(1, 1, 1, 0.7)
+				child.text = SORT_LABELS[key]
+			idx += 1
+
+
+func _sorted_employees() -> Array[EmployeeData]:
+	var arr: Array[EmployeeData] = []
+	arr.assign(GameState.employees.duplicate())
+	arr.sort_custom(func(a: EmployeeData, b: EmployeeData) -> bool:
+		var result: bool
+		match _current_sort:
+			SortKey.SKILL:
+				result = a.skill > b.skill
+			SortKey.MORALE:
+				result = a.morale < b.morale
+			SortKey.SALARY:
+				result = a.salary_per_quarter > b.salary_per_quarter
+			SortKey.ASSIGNMENT:
+				result = int(a.assignment) < int(b.assignment)
+			_:
+				result = a.employee_name.naturalnocasecmp_to(b.employee_name) < 0
+		return result if _sort_ascending else not result
+	)
+	return arr
+
+
 func _refresh_list() -> void:
 	_free_children(list_container)
 
@@ -75,7 +145,7 @@ func _refresh_list() -> void:
 		list_container.add_child(empty_label)
 		return
 
-	for emp in GameState.employees:
+	for emp in _sorted_employees():
 		list_container.add_child(_create_employee_card(emp))
 
 

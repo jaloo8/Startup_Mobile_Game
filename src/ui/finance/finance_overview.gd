@@ -13,6 +13,7 @@ extends Control
 @onready var infra_cost: Label = %InfraCost
 @onready var office_cost: Label = %OfficeCost
 
+@onready var board_label: Label = %BoardLabel
 @onready var back_btn: Button = %BackButton
 @onready var fundraise_btn: Button = %FundraiseButton
 @onready var offer_panel: PanelContainer = %OfferPanel
@@ -67,6 +68,24 @@ func _refresh() -> void:
 	salary_cost.text = "$%s" % _fmt_money(costs.get("salaries", 0.0))
 	infra_cost.text = "$%s" % _fmt_money(costs.get("infrastructure", 0.0))
 	office_cost.text = "$%s" % _fmt_money(costs.get("office", 0.0))
+
+	if GameState.financials.funding_rounds.is_empty():
+		board_label.visible = false
+	else:
+		board_label.visible = true
+		var bp: int = GameState.board_patience
+		if bp >= 5:
+			board_label.text = "Board: Satisfied"
+			board_label.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
+		elif bp >= 3:
+			board_label.text = "Board: Watching closely"
+			board_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
+		elif bp >= 2:
+			board_label.text = "Board: Impatient"
+			board_label.add_theme_color_override("font_color", Color(0.95, 0.5, 0.2))
+		else:
+			board_label.text = "Board: Furious — your position is at risk"
+			board_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
 
 
 func _wire_glossary(btn: Button, key: String) -> void:

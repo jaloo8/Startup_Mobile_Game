@@ -21,6 +21,8 @@ extends Control
 @onready var event_popup: EventPopup = %EventPopup
 @onready var report_panel: PanelContainer = %ReportPanel
 @onready var report_body: Label = %ReportBody
+@onready var economy_label: Label = %EconomyLabel
+@onready var energy_label: Label = %EnergyLabel
 
 const MAX_VISIBLE_EVENTS := 10
 
@@ -84,7 +86,35 @@ func _refresh(_q: int) -> void:
 	else:
 		runway_label.text = "~%d quarters" % roundi(rw)
 
+	_refresh_economy()
+	_refresh_energy()
 	_refresh_team()
+
+
+func _refresh_economy() -> void:
+	match GameState.market.economy_state:
+		MarketData.EconomyState.BULL:
+			economy_label.text = "Market: Bull"
+		MarketData.EconomyState.BEAR:
+			economy_label.text = "Market: Bear"
+		_:
+			economy_label.text = "Market: Neutral"
+
+
+func _refresh_energy() -> void:
+	var e: int = GameState.founder_energy
+	var desc: String
+	if e >= 80:
+		desc = "Fresh"
+	elif e >= 60:
+		desc = "Steady"
+	elif e >= 40:
+		desc = "Tired"
+	elif e >= 20:
+		desc = "Exhausted"
+	else:
+		desc = "Burning out!"
+	energy_label.text = "Energy: %d%% (%s)" % [e, desc]
 
 
 func _on_event(event: EventData) -> void:
