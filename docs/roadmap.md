@@ -270,6 +270,16 @@ Do these in order. Each one should be playable before starting the next.
   - Some niches are easier than others — utility apps are simpler to launch, while competing in OS/cloud is brutal but has massive upside
   - Future DLC types (AI, Gaming, Hardware, Platform/OS) each get their own niche lists
   - Modders can add custom niches via JSON
+- [ ] **Early game economy revamp ($20K start)** — Starting cash should feel tight but survivable, like a real bootstrapped founder:
+  - Start with $20K (savings, side hustle money, or a small friends & family round)
+  - **Office tiers:** Mom's basement / garage (free, capacity 3-4), co-working space ($500-1K/quarter, capacity 6-8), small office ($3-5K/quarter, capacity 15), real office ($10K+/quarter, capacity 30+)
+  - Starting in the garage costs nothing — upgrade when you can afford it
+  - **Hiring types:** Full-time employees (salary + benefits, loyal, expensive), contractors (hourly/project, cheaper short-term, no loyalty, can leave anytime), interns (almost free, low output, sometimes surprise you)
+  - Early game you can only afford 1-2 contractors or interns — full-time hires come after first revenue or funding
+  - **Core expenses only:** Rent, salaries/contractor fees, infrastructure (servers, tools — scales with users), and one-time costs from events (legal, equipment)
+  - No hidden "operating costs" that drain cash for no reason — every dollar should be traceable
+  - First few quarters should feel like stretching every dollar: do you hire help or buy better tools? Pay for marketing or grind organically?
+  - Angel investor / VC cash injection as a lifeline if you're about to run out, but at a steep equity cost
 - [ ] **Employee bios** — 200+ bio templates with personality tags
 - [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
 - [x] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools each have unique growth curves, churn patterns, key metrics, feature trees (10 features each), and event filtering
