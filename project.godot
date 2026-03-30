@@ -17,6 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Venture"
 run/main_scene="res://src/ui/main_menu/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
+config/icon="res://assets/app_icon.png"
 
 [autoload]
 
