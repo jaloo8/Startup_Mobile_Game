@@ -9,13 +9,13 @@ extends Control
 @onready var stat_preview: Label = %StatPreview
 @onready var start_btn: Button = %StartButton
 @onready var back_btn: Button = %BackButton
-@onready var type_illustration_label: Label = %TypeIllustrationLabel
+@onready var type_illustration: TextureRect = %TypeIllustration
 
-const TYPE_ILLUSTRATION_LABELS := {
-	CompanyData.CompanyType.SAAS: "SaaS — Cloud dashboard illustration",
-	CompanyData.CompanyType.CONSUMER: "Consumer — Phone app illustration",
-	CompanyData.CompanyType.MARKETPLACE: "Marketplace — Shopping illustration",
-	CompanyData.CompanyType.DEV_TOOLS: "Dev Tools — Terminal illustration",
+const TYPE_ILLUSTRATION_PATHS := {
+	CompanyData.CompanyType.SAAS:        "res://assets/illustrations/company_type_saas.png",
+	CompanyData.CompanyType.CONSUMER:    "res://assets/illustrations/company_type_consumer.png",
+	CompanyData.CompanyType.MARKETPLACE: "res://assets/illustrations/company_type_marketplace.png",
+	CompanyData.CompanyType.DEV_TOOLS:   "res://assets/illustrations/company_type_devtools.png",
 }
 
 # Difficulty plain-English descriptions shown below the selector
@@ -45,8 +45,24 @@ func _ready() -> void:
 	_build_difficulty_desc_label()
 
 	_on_background_changed(0)
-	_on_type_changed(0)
-	_on_difficulty_changed(1)  # default is Normal
+	_on_type_changed(1)         # Consumer App is the default (index 1)
+	_on_difficulty_changed(1)   # Normal is the default
+
+
+func _load_type_illustration(type_id: int) -> void:
+	if type_illustration == null:
+		return
+	var path: String = TYPE_ILLUSTRATION_PATHS.get(type_id, "")
+	if path.is_empty() or not ResourceLoader.exists(path):
+		type_illustration.texture = null
+		return
+	# Load asynchronously so the UI doesn't hitch on slower devices
+	var tex := load(path) as Texture2D
+	type_illustration.texture = tex
+	# Fade in for a polished feel
+	type_illustration.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(type_illustration, "modulate:a", 1.0, 0.25)
 
 
 func _build_type_hint_label() -> void:
@@ -73,8 +89,7 @@ func _build_difficulty_desc_label() -> void:
 
 func _on_type_changed(_idx: int) -> void:
 	var type_id: int = type_selector.get_selected_id()
-	# PLACEHOLDER: Replace label text with actual illustration per type
-	type_illustration_label.text = TYPE_ILLUSTRATION_LABELS.get(type_id, "Company Illustration")
+	_load_type_illustration(type_id)
 
 	if _type_hint_label == null:
 		return

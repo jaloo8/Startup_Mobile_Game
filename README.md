@@ -72,6 +72,9 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Employee avatars** — 8 expressive Pixar-inspired 3D cartoon characters, each with a distinct look and personality. Displayed on candidate cards, team lists, and the new hire badge. Hashed deterministically per employee name so the same character always gets the same face.
+- **Employee ID badge** — Pop-in modal shown immediately after a hire; displays the avatar, name, title, key stats (Skill / Morale / Speed), employee number, and hire date before flowing into the assignment prompt. Animated spring scale-in for gratification.
+- **Visual asset set** — 4 office banners (garage → co-working → small office → HQ), 4 product mockup illustrations (one per company type), 5 assignment-category icons (Features / Bugs / Tech Debt / Infra / R&D), and app icon — all integrated into the dashboard, product, people, and new-game screens.
 - **Specialty system** — Employee specialties now drive real productivity. Mobile/Design excel at Consumer App features, Backend at SaaS/Dev Tools, DevOps at Infra, etc. Multipliers range 0.9×–1.4× and surface as "⚡ Great fit / ✓ Good fit" badges on hire and team cards.
 - **Feature build speed** — Progress multiplier increased 3× (0.15 → 0.5). First features now complete in 1–3 quarters with a small team.
 - **Feature ETA** — Product screen shows estimated quarters to completion, how many engineers are on it, and a specialty-fit summary that updates live.

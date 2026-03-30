@@ -299,7 +299,11 @@ Fit badges ("⚡ Great fit", "✓ Good fit") appear on both candidate cards and 
 2. Receive 3 candidates with partially revealed stats; specialty-fit badge shown immediately
 3. Interview to reveal full stats (Skill, Speed, Morale, Growth)
 4. Optionally **negotiate salary (−15%)** — one chance; low-culture-fit candidates may walk
-5. Hire → assignment prompt appears immediately so new hires don't sit idle
+5. Hire → **Employee ID badge** pops in (spring animation): avatar, name, title, Skill/Morale/Speed, employee number, hire date — a moment of gratification before the assignment prompt
+6. Assignment prompt appears immediately so new hires don't sit idle
+
+**Employee avatars:**
+8 Pixar-inspired 3D cartoon portraits, each a distinct character (varied ethnicity, age, style). Selected deterministically from the employee's name hash so the same name always maps to the same face. Displayed on candidate cards, team rows, and the hire badge.
 
 **Key decisions:**
 - Hire the expensive senior who ships immediately, or the cheap junior with high growth potential?

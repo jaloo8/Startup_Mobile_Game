@@ -1,6 +1,7 @@
 extends Control
 ## Product overview screen — see product health and feature list.
 
+@onready var product_mockup: TextureRect = %ProductMockup
 @onready var features_label: Label = %FeaturesLabel
 @onready var tech_debt_bar: ProgressBar = %TechDebtBar
 @onready var bugs_label: Label = %BugsLabel
@@ -17,6 +18,13 @@ extends Control
 @onready var picker_container: VBoxContainer = %FeaturePickerContainer
 
 const MAX_VISIBLE_FEATURES := 50
+
+const PRODUCT_MOCKUP_PATHS := {
+	CompanyData.CompanyType.CONSUMER:    "res://assets/illustrations/product_consumer.png",
+	CompanyData.CompanyType.SAAS:        "res://assets/illustrations/product_saas.png",
+	CompanyData.CompanyType.MARKETPLACE: "res://assets/illustrations/product_marketplace.png",
+	CompanyData.CompanyType.DEV_TOOLS:   "res://assets/illustrations/product_devtools.png",
+}
 
 # Dynamically created ETA + team info label below the build bar
 var _eta_label: Label
@@ -35,6 +43,7 @@ func _ready() -> void:
 
 	_build_eta_label()
 	_build_celebration_panel()
+	_load_product_mockup()
 
 	GameState.feature_shipped.connect(_on_feature_shipped)
 	_refresh()
@@ -44,6 +53,17 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if GameState.feature_shipped.is_connected(_on_feature_shipped):
 		GameState.feature_shipped.disconnect(_on_feature_shipped)
+
+
+func _load_product_mockup() -> void:
+	if product_mockup == null or GameState.company == null:
+		return
+	var path: String = PRODUCT_MOCKUP_PATHS.get(GameState.company.type, "")
+	if path.is_empty():
+		return
+	var tex: Texture2D = ResourceLoader.load(path) as Texture2D
+	if tex:
+		product_mockup.texture = tex
 
 
 func _build_eta_label() -> void:

@@ -261,6 +261,8 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Nav tabs to top** — People / Product / Finances / Market row repositioned to top of dashboard in `_ready()`
 - [x] **Valuation-based event pacing** — Max 1 event/quarter under $500K valuation, 2 under $2M, 3 above; event context now includes `valuation`, `features_shipped`, `revenue`
 - [x] **New game UX** — Consumer App default + "★ Recommended" badge; plain-English descriptions per company type and difficulty; difficulty description updates live
+- [x] **Employee hire badge** — Pop-in "Welcome to the Team" modal immediately after hiring; shows avatar, name, title, Skill/Morale/Speed stats, employee number, and hire date; spring scale-in animation; transitions to assignment prompt
+- [x] **Visual asset set** — 8 Pixar-inspired employee avatars (deterministic hash assignment), 4 office banners (garage → co-working → small office → HQ), 4 product mockup illustrations per company type, 5 assignment-category icons, app icon; all loaded dynamically and displayed on relevant screens
 - [ ] **Deep interviews system** — Assign a team member to conduct the interview instead of free-peek:
   - **Who interviews matters:** VP has high accuracy at reading candidates but costs the most time/resources; Director is solid but less accurate; Manager is average; Engineer is cheap but quality depends on their people skill stat
   - **Interviewer skill affects reveal:** High people-skill interviewer reveals true stats more accurately; low people-skill may misjudge (show inflated or deflated stats with a margin of error)
@@ -376,7 +378,7 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Difficulty tuning** — Balance sandbox/normal/hardcore across 10+ test runs
 - [ ] **Tutorial** — Guided first quarter
 - [ ] **Sound effects** — Minimal UI sounds (optional)
-- [ ] **Visual office/garage scene** — Animated character sprites for employees in the workspace (garage → office → campus progression)
+- [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
 - [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
 
 **Phase 4 — Content & Replayability (TODO):**

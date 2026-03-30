@@ -29,6 +29,15 @@ const SORT_LABELS := {
 
 const POSTING_FEE := 5_000.0
 
+const AVATAR_COUNT := 8
+const ASSIGNMENT_ICON_PATHS := {
+	EmployeeData.Assignment.FEATURES:  "res://assets/icons/assign_features.png",
+	EmployeeData.Assignment.BUGS:      "res://assets/icons/assign_bugs.png",
+	EmployeeData.Assignment.TECH_DEBT: "res://assets/icons/assign_techdebt.png",
+	EmployeeData.Assignment.INFRA:     "res://assets/icons/assign_infra.png",
+	EmployeeData.Assignment.RND:       "res://assets/icons/assign_rnd.png",
+}
+
 const ASSIGNMENT_DESCRIPTIONS := {
 	EmployeeData.Assignment.FEATURES: "Build new product features.\nMore features attract users.",
 	EmployeeData.Assignment.BUGS: "Squash bugs.\nFewer bugs means less churn.",
@@ -158,6 +167,28 @@ func _refresh_list() -> void:
 		list_container.add_child(_create_employee_card(emp))
 
 
+static func _avatar_texture(employee_name: String) -> Texture2D:
+	var idx: int = (hash(employee_name) % AVATAR_COUNT) + 1
+	return ResourceLoader.load("res://assets/avatars/avatar_%d.png" % idx) as Texture2D
+
+
+static func _make_avatar_rect(employee_name: String, size: int = 48) -> TextureRect:
+	var rect := TextureRect.new()
+	rect.custom_minimum_size = Vector2(size, size)
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	rect.clip_contents = true
+	rect.texture = _avatar_texture(employee_name)
+	return rect
+
+
+static func _assign_icon_texture(assignment: EmployeeData.Assignment) -> Texture2D:
+	var path: String = ASSIGNMENT_ICON_PATHS.get(assignment, "")
+	if path.is_empty():
+		return null
+	return ResourceLoader.load(path) as Texture2D
+
+
 func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _card_style)
@@ -166,10 +197,12 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 4)
 	panel.add_child(vbox)
 
-	# Title row: name + specialty fit badge for the current assignment
+	# Title row: avatar + name + specialty fit badge for the current assignment
 	var title_row := HBoxContainer.new()
-	title_row.add_theme_constant_override("separation", 8)
+	title_row.add_theme_constant_override("separation", 10)
 	vbox.add_child(title_row)
+
+	title_row.add_child(_make_avatar_rect(emp.employee_name, 44))
 
 	var name_label := Label.new()
 	name_label.text = "%s — %s" % [emp.employee_name, emp.display_title()]
@@ -226,6 +259,10 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 		btn.toggle_mode = true
 		btn.button_pressed = (emp.assignment == a_key)
 		btn.add_theme_font_size_override("font_size", 11)
+		var icon_tex := _assign_icon_texture(a_key)
+		if icon_tex:
+			btn.icon = icon_tex
+			btn.add_theme_constant_override("icon_max_width", 18)
 		if emp.assignment == a_key:
 			btn.modulate = Color(0.4, 0.8, 1.0)
 		btn.pressed.connect(_on_assign_direct.bind(emp, a_key))
@@ -315,10 +352,12 @@ func _refresh_candidates() -> void:
 		vbox.add_theme_constant_override("separation", 4)
 		card.add_child(vbox)
 
-		# Candidate title row with specialty fit hint for Features work
+		# Candidate title row with avatar + specialty fit hint for Features work
 		var cand_title_row := HBoxContainer.new()
-		cand_title_row.add_theme_constant_override("separation", 8)
+		cand_title_row.add_theme_constant_override("separation", 10)
 		vbox.add_child(cand_title_row)
+
+		cand_title_row.add_child(_make_avatar_rect(candidate.employee_name, 40))
 
 		var name_lbl := Label.new()
 		name_lbl.text = "%s — %s" % [candidate.employee_name, candidate.display_title()]
@@ -535,9 +574,204 @@ func _on_hire_candidate(candidate: EmployeeData) -> void:
 		candidate_panel.visible = not _candidates.is_empty()
 		_refresh_candidates()
 		_assign_target = candidate
-		_show_assign_prompt(candidate)
 		_update_hire_button()
 		_refresh_list()
+		_show_hire_badge(candidate)
+
+
+func _show_hire_badge(emp: EmployeeData) -> void:
+	# Dim overlay
+	var overlay := ColorRect.new()
+	overlay.name = "BadgeOverlay"
+	overlay.color = Color(0, 0, 0, 0.75)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+
+	# Badge card
+	var card := PanelContainer.new()
+	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	card.offset_left  = -160
+	card.offset_right  = 160
+	card.offset_top   = -240
+	card.offset_bottom = 240
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = Color(0.11, 0.12, 0.17)
+	card_style.set_corner_radius_all(16)
+	card_style.border_color = Color(0.35, 0.65, 1.0, 0.6)
+	card_style.border_width_left   = 2
+	card_style.border_width_right  = 2
+	card_style.border_width_top    = 2
+	card_style.border_width_bottom = 2
+	card_style.content_margin_left   = 0
+	card_style.content_margin_right  = 0
+	card_style.content_margin_top    = 0
+	card_style.content_margin_bottom = 0
+	card.add_theme_stylebox_override("panel", card_style)
+	overlay.add_child(card)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 0)
+	card.add_child(vbox)
+
+	# Coloured top strip
+	var top_strip := PanelContainer.new()
+	top_strip.custom_minimum_size = Vector2(0, 48)
+	var strip_style := StyleBoxFlat.new()
+	strip_style.bg_color = Color(0.22, 0.47, 0.82)
+	strip_style.corner_radius_top_left  = 14
+	strip_style.corner_radius_top_right = 14
+	strip_style.content_margin_left  = 16
+	strip_style.content_margin_right = 16
+	strip_style.content_margin_top   = 8
+	strip_style.content_margin_bottom = 8
+	top_strip.add_theme_stylebox_override("panel", strip_style)
+	vbox.add_child(top_strip)
+
+	var strip_hbox := HBoxContainer.new()
+	strip_hbox.alignment = BoxContainer.ALIGNMENT_SPACE_BETWEEN
+	top_strip.add_child(strip_hbox)
+
+	var company_lbl := Label.new()
+	company_lbl.text = GameState.company.company_name if GameState.company else "Venture"
+	company_lbl.add_theme_font_size_override("font_size", 13)
+	company_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.9))
+	strip_hbox.add_child(company_lbl)
+
+	var badge_tag := Label.new()
+	badge_tag.text = "EMPLOYEE"
+	badge_tag.add_theme_font_size_override("font_size", 10)
+	badge_tag.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
+	strip_hbox.add_child(badge_tag)
+
+	# Body padding
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 8)
+	body.set("theme_override_constants/margin_left", 20)
+	body.set("theme_override_constants/margin_right", 20)
+	var body_margin := MarginContainer.new()
+	body_margin.add_theme_constant_override("margin_left",   20)
+	body_margin.add_theme_constant_override("margin_right",  20)
+	body_margin.add_theme_constant_override("margin_top",    16)
+	body_margin.add_theme_constant_override("margin_bottom", 16)
+	body_margin.add_child(body)
+	vbox.add_child(body_margin)
+
+	# Avatar — centred
+	var avatar_center := CenterContainer.new()
+	body.add_child(avatar_center)
+	var avatar_rect := _make_avatar_rect(emp.employee_name, 80)
+	# Circular clip via a rounded StyleBox on a Panel behind the TextureRect
+	var av_panel := PanelContainer.new()
+	var av_style := StyleBoxFlat.new()
+	av_style.bg_color = Color(0.2, 0.2, 0.28)
+	av_style.set_corner_radius_all(40)
+	av_style.border_color = Color(0.35, 0.65, 1.0, 0.7)
+	av_style.border_width_left   = 3
+	av_style.border_width_right  = 3
+	av_style.border_width_top    = 3
+	av_style.border_width_bottom = 3
+	av_style.content_margin_left   = 4
+	av_style.content_margin_right  = 4
+	av_style.content_margin_top    = 4
+	av_style.content_margin_bottom = 4
+	av_panel.add_theme_stylebox_override("panel", av_style)
+	av_panel.add_child(avatar_rect)
+	avatar_center.add_child(av_panel)
+
+	# "NEW HIRE" glow label
+	var new_hire_lbl := Label.new()
+	new_hire_lbl.text = "✦  WELCOME TO THE TEAM  ✦"
+	new_hire_lbl.add_theme_font_size_override("font_size", 11)
+	new_hire_lbl.add_theme_color_override("font_color", Color(0.45, 0.78, 1.0))
+	new_hire_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(new_hire_lbl)
+
+	# Name
+	var name_lbl := Label.new()
+	name_lbl.text = emp.employee_name
+	name_lbl.add_theme_font_size_override("font_size", 20)
+	name_lbl.add_theme_color_override("font_color", Color(0.95, 0.95, 1.0))
+	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(name_lbl)
+
+	# Title
+	var title_lbl := Label.new()
+	title_lbl.text = emp.display_title()
+	title_lbl.add_theme_font_size_override("font_size", 13)
+	title_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.85))
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(title_lbl)
+
+	# Divider
+	var sep := HSeparator.new()
+	sep.modulate = Color(1, 1, 1, 0.12)
+	body.add_child(sep)
+
+	# Stats row
+	var stats_row := HBoxContainer.new()
+	stats_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	stats_row.add_theme_constant_override("separation", 20)
+	body.add_child(stats_row)
+	_badge_stat(stats_row, "Skill",   emp.skill)
+	_badge_stat(stats_row, "Morale",  emp.morale)
+	_badge_stat(stats_row, "Speed",   emp.speed)
+
+	# Employee number + hire date
+	var meta_lbl := Label.new()
+	meta_lbl.text = "EMP #%03d  •  Q%d Y%d" % [
+		GameState.employees.size(),
+		GameState.current_quarter,
+		GameState.current_year,
+	]
+	meta_lbl.add_theme_font_size_override("font_size", 10)
+	meta_lbl.add_theme_color_override("font_color", Color(0.45, 0.45, 0.52))
+	meta_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(meta_lbl)
+
+	# Assign button
+	var assign_btn := Button.new()
+	assign_btn.text = "Assign to work  →"
+	assign_btn.custom_minimum_size = Vector2(0, 44)
+	assign_btn.add_theme_font_size_override("font_size", 14)
+	assign_btn.pressed.connect(func() -> void:
+		overlay.queue_free()
+		_show_assign_prompt(emp)
+	)
+	body.add_child(assign_btn)
+
+	# Pop-in animation
+	card.scale = Vector2(0.7, 0.7)
+	card.pivot_offset = Vector2(160, 240)
+	var tw := create_tween()
+	tw.set_ease(Tween.EASE_OUT)
+	tw.set_trans(Tween.TRANS_BACK)
+	tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.3)
+
+
+static func _badge_stat(parent: HBoxContainer, label: String, value: int) -> void:
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 2)
+	parent.add_child(col)
+
+	var val_lbl := Label.new()
+	val_lbl.text = str(value)
+	val_lbl.add_theme_font_size_override("font_size", 18)
+	val_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if value >= 70:
+		val_lbl.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
+	elif value >= 40:
+		val_lbl.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
+	else:
+		val_lbl.add_theme_color_override("font_color", Color(0.9, 0.35, 0.35))
+	col.add_child(val_lbl)
+
+	var key_lbl := Label.new()
+	key_lbl.text = label
+	key_lbl.add_theme_font_size_override("font_size", 10)
+	key_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.58))
+	key_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(key_lbl)
 
 
 func _show_assign_prompt(emp: EmployeeData) -> void:
@@ -568,17 +802,29 @@ func _show_assign_prompt(emp: EmployeeData) -> void:
 	vbox.add_theme_constant_override("separation", 10)
 	panel.add_child(vbox)
 
+	var header_row := HBoxContainer.new()
+	header_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	header_row.add_theme_constant_override("separation", 12)
+	vbox.add_child(header_row)
+
+	var prompt_avatar := _make_avatar_rect(emp.employee_name, 56)
+	header_row.add_child(prompt_avatar)
+
 	var title := Label.new()
-	title.text = "Where should %s focus?" % emp.employee_name
+	title.text = "Where should\n%s focus?" % emp.employee_name
 	title.add_theme_font_size_override("font_size", 18)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(title)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	header_row.add_child(title)
 
 	for a_key in ASSIGNMENT_DESCRIPTIONS:
 		var btn := Button.new()
 		btn.text = "%s\n%s" % [EmployeeData.ASSIGNMENT_NAMES[a_key], ASSIGNMENT_DESCRIPTIONS[a_key]]
 		btn.custom_minimum_size = Vector2(0, 50)
 		btn.add_theme_font_size_override("font_size", 13)
+		var prompt_icon := _assign_icon_texture(a_key)
+		if prompt_icon:
+			btn.icon = prompt_icon
+			btn.add_theme_constant_override("icon_max_width", 24)
 		btn.pressed.connect(_on_assign_from_prompt.bind(emp, a_key, overlay))
 		vbox.add_child(btn)
 

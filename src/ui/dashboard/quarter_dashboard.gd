@@ -3,6 +3,7 @@ extends Control
 
 @onready var quarter_label: Label = %QuarterLabel
 @onready var company_label: Label = %CompanyLabel
+@onready var office_banner: TextureRect = %OfficeBanner
 @onready var cash_label: Label = %CashLabel
 @onready var users_label: Label = %UsersLabel
 @onready var runway_label: Label = %RunwayLabel
@@ -29,6 +30,13 @@ extends Control
 
 const MAX_VISIBLE_EVENTS := 10
 const HEADLINE_ROTATE_SECONDS := 4.0
+
+const OFFICE_BANNER_PATHS := [
+	"res://assets/office/office_0_garage.png",
+	"res://assets/office/office_1_coworking.png",
+	"res://assets/office/office_2_small.png",
+	"res://assets/office/office_3_hq.png",
+]
 
 var _pending_events: Array[EventData] = []
 var _headlines: Array[String] = []
@@ -179,6 +187,7 @@ func _refresh(_q: int) -> void:
 	_refresh_economy()
 	_refresh_energy()
 	_refresh_team()
+	_refresh_office_banner()
 
 
 func _refresh_deltas() -> void:
@@ -407,6 +416,17 @@ func _on_game_won(win_type: String) -> void:
 	SceneLoader.goto_scene("res://src/ui/victory/victory_screen.tscn")
 
 
+func _refresh_office_banner() -> void:
+	if office_banner == null or GameState.company == null:
+		return
+	var level: int = clampi(GameState.company.office_level, 0, OFFICE_BANNER_PATHS.size() - 1)
+	var path: String = OFFICE_BANNER_PATHS[level]
+	if office_banner.texture == null or not office_banner.texture.resource_path.ends_with(OFFICE_BANNER_PATHS[level].get_file()):
+		var tex: Texture2D = ResourceLoader.load(path) as Texture2D
+		if tex:
+			office_banner.texture = tex
+
+
 func _refresh_team() -> void:
 	SceneLoader.free_children(team_container)
 
@@ -419,10 +439,26 @@ func _refresh_team() -> void:
 		return
 
 	for emp: EmployeeData in GameState.employees:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		team_container.add_child(row)
+
+		var avatar := TextureRect.new()
+		avatar.custom_minimum_size = Vector2(32, 32)
+		avatar.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		avatar.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		avatar.clip_contents = true
+		var avatar_idx: int = (hash(emp.employee_name) % 8) + 1
+		var avatar_tex: Texture2D = ResourceLoader.load("res://assets/avatars/avatar_%d.png" % avatar_idx)
+		if avatar_tex:
+			avatar.texture = avatar_tex
+		row.add_child(avatar)
+
 		var lbl := Label.new()
 		var assign_name: String = EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned")
 		lbl.text = "%s — %s · %s" % [emp.employee_name, emp.display_title(), assign_name]
 		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var morale_color: Color
 		if emp.morale >= 70:
 			morale_color = Color(0.55, 0.8, 0.55)
@@ -431,7 +467,7 @@ func _refresh_team() -> void:
 		else:
 			morale_color = Color(0.9, 0.4, 0.35)
 		lbl.add_theme_color_override("font_color", morale_color)
-		team_container.add_child(lbl)
+		row.add_child(lbl)
 
 
 func _show_quarterly_report() -> void:
