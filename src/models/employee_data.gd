@@ -66,6 +66,79 @@ func work_output() -> float:
 	return maxf(0.0, base * morale_mult * stress_penalty)
 
 
+## Returns a productivity multiplier based on how well this employee's specialty
+## matches the given assignment and company type.
+## 1.35 = great fit, 1.2 = good fit, 1.0 = neutral, 0.9 = poor fit.
+static func specialty_mult(spec: Specialty, assign: Assignment, company_type: int) -> float:
+	match assign:
+		Assignment.FEATURES:
+			# Each company type rewards different specialists on feature work.
+			match company_type:
+				0:  # SAAS
+					match spec:
+						Specialty.BACKEND: return 1.35
+						Specialty.FRONTEND: return 1.2
+						Specialty.DESIGN: return 1.15
+						_: return 1.0
+				1:  # CONSUMER
+					match spec:
+						Specialty.MOBILE: return 1.35
+						Specialty.DESIGN: return 1.25
+						Specialty.FRONTEND: return 1.2
+						Specialty.BACKEND: return 1.0
+						_: return 0.9
+				2:  # MARKETPLACE
+					match spec:
+						Specialty.BACKEND: return 1.3
+						Specialty.FRONTEND: return 1.2
+						Specialty.MOBILE: return 1.15
+						Specialty.DESIGN: return 1.1
+						_: return 1.0
+				3:  # DEV_TOOLS
+					match spec:
+						Specialty.BACKEND: return 1.4
+						Specialty.DEVOPS: return 1.25
+						Specialty.DATA_ML: return 1.15
+						Specialty.FRONTEND: return 1.1
+						_: return 1.0
+			return 1.0
+		Assignment.BUGS:
+			match spec:
+				Specialty.BACKEND: return 1.3
+				Specialty.DEVOPS: return 1.2
+				Specialty.FRONTEND: return 1.1
+				_: return 1.0
+		Assignment.TECH_DEBT:
+			match spec:
+				Specialty.BACKEND: return 1.3
+				Specialty.DEVOPS: return 1.2
+				_: return 1.0
+		Assignment.INFRA:
+			match spec:
+				Specialty.DEVOPS: return 1.4
+				Specialty.BACKEND: return 1.2
+				_: return 1.0
+		Assignment.RND:
+			match spec:
+				Specialty.DATA_ML: return 1.35
+				Specialty.DESIGN: return 1.3
+				Specialty.BACKEND: return 1.1
+				_: return 1.0
+	return 1.0
+
+
+## Human-readable label for how good the specialty match is (for UI display).
+static func specialty_match_label(spec: Specialty, assign: Assignment, company_type: int) -> String:
+	var m := specialty_mult(spec, assign, company_type)
+	if m >= 1.3:
+		return "Great fit"
+	elif m >= 1.15:
+		return "Good fit"
+	elif m < 1.0:
+		return "Off-specialty"
+	return ""
+
+
 func quit_probability() -> float:
 	var m := clampi(morale, 0, 100)
 	if m > 60:

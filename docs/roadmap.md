@@ -251,6 +251,16 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Events (41 total)** — 41 events across 5 categories (people, product, money, market, culture) with 2-3 variations each
 - [x] **Event resolution UI** — Modal popup with choices, effects applied, outcome text with variations
 - [x] **Hiring pipeline** — Post job ($5K) → candidates with hidden stats → interview to reveal → offer/reject, runway warnings
+- [x] **Salary negotiation** — One-shot "Negotiate −15%" button per candidate; low-fit candidates may walk if pushed
+- [x] **Specialty match system** — `EmployeeData.specialty_mult()` drives real productivity bonuses (0.9×–1.4×) based on role, assignment, and company type; "⚡ Great fit / ✓ Good fit" badges shown on hire and team cards
+- [x] **Feature build speed tuned** — Progress multiplier increased 3× so features complete in 1–4 quarters with a small team; more people scale linearly
+- [x] **Feature ETA display** — Product screen shows estimated quarters to completion, engineer count, and specialty-fit summary; updates every refresh
+- [x] **Feature shipped celebration** — Colour-coded banner (quality-tinted) fades in on Product screen and Dashboard when a feature ships; `feature_shipped` signal on GameState
+- [x] **Quarter-over-quarter deltas** — Cash, Revenue, Burn Rate show `+/- $X vs last Q` in green/red below each stat
+- [x] **Milestone roadmap** — Visual progress strip on Product screen toward next user count, features-shipped, and revenue targets
+- [x] **Nav tabs to top** — People / Product / Finances / Market row repositioned to top of dashboard in `_ready()`
+- [x] **Valuation-based event pacing** — Max 1 event/quarter under $500K valuation, 2 under $2M, 3 above; event context now includes `valuation`, `features_shipped`, `revenue`
+- [x] **New game UX** — Consumer App default + "★ Recommended" badge; plain-English descriptions per company type and difficulty; difficulty description updates live
 - [ ] **Deep interviews system** — Assign a team member to conduct the interview instead of free-peek:
   - **Who interviews matters:** VP has high accuracy at reading candidates but costs the most time/resources; Director is solid but less accurate; Manager is average; Engineer is cheap but quality depends on their people skill stat
   - **Interviewer skill affects reveal:** High people-skill interviewer reveals true stats more accurately; low people-skill may misjudge (show inflated or deflated stats with a margin of error)

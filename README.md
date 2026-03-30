@@ -70,6 +70,22 @@ startup_mobile_game/
 
 ---
 
+## Recent changes
+
+- **Specialty system** — Employee specialties now drive real productivity. Mobile/Design excel at Consumer App features, Backend at SaaS/Dev Tools, DevOps at Infra, etc. Multipliers range 0.9×–1.4× and surface as "⚡ Great fit / ✓ Good fit" badges on hire and team cards.
+- **Feature build speed** — Progress multiplier increased 3× (0.15 → 0.5). First features now complete in 1–3 quarters with a small team.
+- **Feature ETA** — Product screen shows estimated quarters to completion, how many engineers are on it, and a specialty-fit summary that updates live.
+- **Feature celebration** — A colour-coded banner fades in on both the Product and Dashboard screens when a feature ships.
+- **Quarter deltas** — Cash, Revenue, and Burn Rate now show `+$X / -$X vs last Q` in green/red.
+- **Milestone roadmap** — Product screen shows a visual progress strip toward the next user, features-shipped, and revenue goals.
+- **Nav tabs moved to top** — People / Product / Finances / Market row is now at the top of the dashboard.
+- **Valuation-based event pacing** — Early game gets max 1 event per quarter; scales to 3 as valuation grows past $2M.
+- **Salary negotiation** — New "Negotiate Salary (−15%)" button in the hiring flow; low-fit candidates may walk.
+- **New game UX** — Consumer App is the recommended default (★ badge + description). Each company type and difficulty now shows a plain-English description.
+- **Office-full guidance** — When full, the hire button and a tip card explain exactly how and where to upgrade.
+
+---
+
 ## Development mantras
 
 1. **Playable over perfect.** A working game with placeholder UI beats a beautiful screen with no logic behind it.

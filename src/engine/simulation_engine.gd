@@ -41,7 +41,8 @@ static func _apply_work_output(state: Node) -> void:
 			emp.tenure_quarters += 1
 			continue
 
-		var output: float = emp.work_output() * state.product.dev_speed_multiplier()
+		var spec_mult: float = EmployeeData.specialty_mult(emp.specialty, emp.assignment, state.company.type)
+		var output: float = emp.work_output() * state.product.dev_speed_multiplier() * spec_mult
 		var tech_bonus: float = state.company.founder_stat("technical") * 0.05
 
 		match emp.assignment:
@@ -52,7 +53,7 @@ static func _apply_work_output(state: Node) -> void:
 					if available.is_empty():
 						continue
 				var cost: float = float(target_def.get("cost", ProductData.FEATURE_COST))
-				state.product.feature_progress += output * 0.15
+				state.product.feature_progress += output * 0.5
 				if state.product.feature_progress >= cost:
 					state.product.feature_progress -= cost
 					var quality := clampi(ceili(output * 0.8) + randi_range(-10, 10) + roundi(tech_bonus * 5), 20, 100)

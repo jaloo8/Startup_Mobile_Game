@@ -10,6 +10,8 @@ signal game_won(win_type: String)
 signal event_triggered(event: EventData)
 @warning_ignore("unused_signal")
 signal employee_quit(employee: EmployeeData)
+@warning_ignore("unused_signal")
+signal feature_shipped(feature_name: String, quality: int)
 
 var company: CompanyData
 var employees: Array[EmployeeData] = []
@@ -136,7 +138,13 @@ func advance_quarter() -> void:
 		push_error("GameState: cannot advance — game not initialized")
 		return
 
+	var features_before: int = product.feature_count()
 	SimulationEngine.process_quarter(self)
+
+	# Fire celebration signal if a new feature shipped this quarter
+	if product.feature_count() > features_before:
+		var newest: Dictionary = product.features.back()
+		feature_shipped.emit(newest.get("name", "Feature"), newest.get("quality", 0))
 
 	_take_snapshot()
 	current_quarter += 1

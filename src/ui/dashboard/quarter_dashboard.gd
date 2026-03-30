@@ -36,6 +36,13 @@ var _headline_index: int = 0
 var _headline_timer: Timer
 var _prev_valuation: float = 0.0
 
+# Dynamically created delta labels next to each stat
+var _cash_delta_label: Label
+var _revenue_delta_label: Label
+var _burn_delta_label: Label
+# Feature-shipped celebration shown briefly on the dashboard
+var _feature_banner: Label
+
 
 func _ready() -> void:
 	advance_btn.pressed.connect(_on_advance)
@@ -56,11 +63,16 @@ func _ready() -> void:
 	GameState.game_won.connect(_on_game_won)
 	GameState.event_triggered.connect(_on_event)
 	GameState.save_error.connect(_on_save_error)
+	GameState.feature_shipped.connect(_on_feature_shipped_dashboard)
 
 	_headline_timer = Timer.new()
 	_headline_timer.wait_time = HEADLINE_ROTATE_SECONDS
 	_headline_timer.timeout.connect(_rotate_headline)
 	add_child(_headline_timer)
+
+	_build_delta_labels()
+	_build_feature_banner()
+	_move_nav_to_top()
 
 	_refresh(GameState.current_quarter)
 	Analytics.track_screen("dashboard")
@@ -77,6 +89,64 @@ func _exit_tree() -> void:
 	_safe_disconnect(GameState.game_won, _on_game_won)
 	_safe_disconnect(GameState.event_triggered, _on_event)
 	_safe_disconnect(GameState.save_error, _on_save_error)
+	_safe_disconnect(GameState.feature_shipped, _on_feature_shipped_dashboard)
+
+
+func _build_delta_labels() -> void:
+	# Insert small delta labels (e.g. "+$12K") below the main stat labels.
+	# Each is parented to the same VBoxContainer as its stat value label.
+	_cash_delta_label = _make_delta_label()
+	_revenue_delta_label = _make_delta_label()
+	_burn_delta_label = _make_delta_label()
+	_insert_delta_after(cash_label, _cash_delta_label)
+	_insert_delta_after(revenue_label, _revenue_delta_label)
+	_insert_delta_after(burn_label, _burn_delta_label)
+
+
+func _make_delta_label() -> Label:
+	var lbl := Label.new()
+	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.visible = false
+	return lbl
+
+
+func _insert_delta_after(stat_label: Label, delta_label: Label) -> void:
+	var parent := stat_label.get_parent()
+	if parent == null:
+		return
+	parent.add_child(delta_label)
+	parent.move_child(delta_label, stat_label.get_index() + 1)
+
+
+func _move_nav_to_top() -> void:
+	# Move the navigation row (People / Product / Finances / Market) to sit
+	# right after the header row, so it works like a proper top tab bar.
+	var vbox := people_btn.get_parent().get_parent()  # NavRow -> VBox
+	var nav_row: Node = people_btn.get_parent()       # NavRow itself
+	if vbox == null or nav_row == null:
+		return
+
+	# Insert right after TopRow (index 0) — i.e. at index 1
+	vbox.move_child(nav_row, 1)
+
+	# Also style the nav buttons to look more like tabs
+	for btn: Button in [people_btn, product_btn, finance_btn, market_btn]:
+		btn.custom_minimum_size = Vector2(0, 40)
+		btn.add_theme_font_size_override("font_size", 13)
+
+
+func _build_feature_banner() -> void:
+	# A slim banner near the top of the event log area that shows when a
+	# feature ships (for players who are on the dashboard when it happens).
+	_feature_banner = Label.new()
+	_feature_banner.add_theme_font_size_override("font_size", 13)
+	_feature_banner.add_theme_color_override("font_color", Color(0.4, 0.95, 0.55))
+	_feature_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_feature_banner.visible = false
+	var parent := event_log_container.get_parent()
+	if parent:
+		parent.add_child(_feature_banner)
+		parent.move_child(_feature_banner, event_log_container.get_index())
 
 
 func _refresh(_q: int) -> void:
@@ -87,8 +157,8 @@ func _refresh(_q: int) -> void:
 	cash_label.text = "$%s" % SceneLoader.format_money(GameState.company.cash)
 	users_label.text = "%s users" % SceneLoader.format_number(GameState.product.users)
 	employees_label.text = "%d / %d" % [GameState.employees.size(), GameState.company.office_capacity()]
-	revenue_label.text = "$%s" % SceneLoader.format_money(GameState.financials.revenue)
-	burn_label.text = "$%s" % SceneLoader.format_money(GameState.financials.burn_rate)
+	revenue_label.text = "$%s/qtr" % SceneLoader.format_money(GameState.financials.revenue)
+	burn_label.text = "$%s/qtr" % SceneLoader.format_money(GameState.financials.burn_rate)
 
 	var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
 	if rw == INF:
@@ -102,12 +172,53 @@ func _refresh(_q: int) -> void:
 	else:
 		runway_label.text = "~%d quarters" % roundi(rw)
 
+	_refresh_deltas()
 	_refresh_headlines()
 	_refresh_ticker_strip()
 	_refresh_key_metric()
 	_refresh_economy()
 	_refresh_energy()
 	_refresh_team()
+
+
+func _refresh_deltas() -> void:
+	# Use the last two history snapshots for quarter-over-quarter changes.
+	var hist := GameState.history
+	if hist.size() < 2:
+		if _cash_delta_label:
+			_cash_delta_label.visible = false
+		if _revenue_delta_label:
+			_revenue_delta_label.visible = false
+		if _burn_delta_label:
+			_burn_delta_label.visible = false
+		return
+
+	var prev: Dictionary = hist[-2]
+	var curr: Dictionary = hist[-1]
+
+	_apply_delta(_cash_delta_label,
+		curr.get("cash", 0.0) - prev.get("cash", 0.0), true)
+	_apply_delta(_revenue_delta_label,
+		curr.get("revenue", 0.0) - prev.get("revenue", 0.0), true)
+	_apply_delta(_burn_delta_label,
+		curr.get("burn_rate", 0.0) - prev.get("burn_rate", 0.0), false)
+
+
+func _apply_delta(lbl: Label, delta: float, higher_is_good: bool) -> void:
+	if lbl == null:
+		return
+	if absf(delta) < 1.0:
+		lbl.visible = false
+		return
+	lbl.visible = true
+	var sign_str := "+" if delta >= 0 else ""
+	lbl.text = "%s$%s vs last Q" % [sign_str, SceneLoader.format_money(delta)]
+	var positive: bool = delta > 0
+	var good: bool = positive == higher_is_good
+	if good:
+		lbl.add_theme_color_override("font_color", Color(0.35, 0.85, 0.45))
+	else:
+		lbl.add_theme_color_override("font_color", Color(0.9, 0.4, 0.35))
 
 
 func _refresh_headlines() -> void:
@@ -215,6 +326,19 @@ func _refresh_energy() -> void:
 	else:
 		desc = "Burning out!"
 	energy_label.text = "Energy: %d%% (%s)" % [e, desc]
+
+
+func _on_feature_shipped_dashboard(feature_name: String, quality: int) -> void:
+	if _feature_banner == null:
+		return
+	var q_word := "great" if quality >= 70 else ("decent" if quality >= 45 else "rough")
+	_feature_banner.text = "Feature shipped: %s  (%s quality, %d/100) — check Product for details" % [feature_name, q_word, quality]
+	_feature_banner.modulate.a = 1.0
+	_feature_banner.visible = true
+	var tw := create_tween()
+	tw.tween_interval(5.0)
+	tw.tween_property(_feature_banner, "modulate:a", 0.0, 0.8)
+	tw.tween_callback(func() -> void: _feature_banner.visible = false)
 
 
 func _on_event(event: EventData) -> void:

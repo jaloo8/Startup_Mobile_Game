@@ -11,6 +11,7 @@ extends Control
 
 var _candidates: Array[EmployeeData] = []
 var _interviewed: Dictionary = {}
+var _negotiated: Dictionary = {}   # candidate name -> true if already negotiated
 var _card_style: StyleBoxFlat
 var _assign_target: EmployeeData
 
@@ -58,8 +59,9 @@ func _exit_tree() -> void:
 func _update_hire_button() -> void:
 	if GameState.employees.size() >= GameState.company.office_capacity():
 		hire_btn.disabled = true
-		hire_btn.text = "Office Full — Upgrade to Hire"
+		hire_btn.text = "Office Full — Upgrade in Finances to hire more"
 		hire_btn.modulate = Color(1, 1, 1, 0.5)
+		_show_office_upgrade_hint()
 		return
 
 	if GameState.company.cash < POSTING_FEE:
@@ -74,6 +76,13 @@ func _update_hire_button() -> void:
 
 
 func _build_sort_buttons() -> void:
+	# Add a label before the sort buttons so it's clear they sort the team list
+	var sort_heading := Label.new()
+	sort_heading.text = "Sort your team by:"
+	sort_heading.add_theme_font_size_override("font_size", 11)
+	sort_heading.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
+	sort_row.add_child(sort_heading)
+
 	for key in SortKey.values():
 		var btn := Button.new()
 		btn.text = SORT_LABELS[key]
@@ -157,10 +166,34 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 4)
 	panel.add_child(vbox)
 
+	# Title row: name + specialty fit badge for the current assignment
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(title_row)
+
 	var name_label := Label.new()
 	name_label.text = "%s — %s" % [emp.employee_name, emp.display_title()]
 	name_label.add_theme_font_size_override("font_size", 16)
-	vbox.add_child(name_label)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_row.add_child(name_label)
+
+	# Fit badge only shows when assigned to a work category (not Unassigned)
+	if emp.assignment != EmployeeData.Assignment.UNASSIGNED and GameState.company != null:
+		var match_label: String = EmployeeData.specialty_match_label(
+			emp.specialty, emp.assignment, GameState.company.type)
+		if not match_label.is_empty():
+			var badge := Label.new()
+			if match_label == "Great fit":
+				badge.text = "⚡ Great fit"
+				badge.add_theme_color_override("font_color", Color(0.95, 0.85, 0.2))
+			elif match_label == "Good fit":
+				badge.text = "✓ Good fit"
+				badge.add_theme_color_override("font_color", Color(0.4, 0.85, 0.5))
+			else:
+				badge.text = "Off-specialty"
+				badge.add_theme_color_override("font_color", Color(0.65, 0.55, 0.55))
+			badge.add_theme_font_size_override("font_size", 12)
+			title_row.add_child(badge)
 
 	var stats_row := HBoxContainer.new()
 	stats_row.add_theme_constant_override("separation", 16)
@@ -259,6 +292,7 @@ func _on_hire_pressed() -> void:
 
 	_candidates = HiringEngine.generate_candidates(3, GameState.market)
 	_interviewed.clear()
+	_negotiated.clear()
 	candidate_panel.visible = true
 	_update_hire_button()
 	_refresh_candidates()
@@ -281,10 +315,31 @@ func _refresh_candidates() -> void:
 		vbox.add_theme_constant_override("separation", 4)
 		card.add_child(vbox)
 
+		# Candidate title row with specialty fit hint for Features work
+		var cand_title_row := HBoxContainer.new()
+		cand_title_row.add_theme_constant_override("separation", 8)
+		vbox.add_child(cand_title_row)
+
 		var name_lbl := Label.new()
 		name_lbl.text = "%s — %s" % [candidate.employee_name, candidate.display_title()]
 		name_lbl.add_theme_font_size_override("font_size", 15)
-		vbox.add_child(name_lbl)
+		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cand_title_row.add_child(name_lbl)
+
+		# Show how well they'd fit on Features for this company type
+		if GameState.company != null:
+			var fit_str := EmployeeData.specialty_match_label(
+				candidate.specialty, EmployeeData.Assignment.FEATURES, GameState.company.type)
+			if not fit_str.is_empty():
+				var fit_badge := Label.new()
+				if fit_str == "Great fit":
+					fit_badge.text = "⚡ Great for Features"
+					fit_badge.add_theme_color_override("font_color", Color(0.95, 0.85, 0.2))
+				elif fit_str == "Good fit":
+					fit_badge.text = "✓ Good for Features"
+					fit_badge.add_theme_color_override("font_color", Color(0.4, 0.85, 0.5))
+				fit_badge.add_theme_font_size_override("font_size", 11)
+				cand_title_row.add_child(fit_badge)
 
 		var cost_per_q: float = candidate.salary_per_quarter
 		var runway: float = GameState.financials.runway_quarters(GameState.company.cash)
@@ -331,6 +386,32 @@ func _refresh_candidates() -> void:
 			hidden_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 			vbox.add_child(hidden_lbl)
 
+		# Negotiation row — show if not yet negotiated
+		var already_negotiated: bool = _negotiated.has(candidate.employee_name)
+		if not already_negotiated:
+			var neg_row := HBoxContainer.new()
+			neg_row.add_theme_constant_override("separation", 8)
+			vbox.add_child(neg_row)
+
+			var neg_btn := Button.new()
+			neg_btn.text = "Negotiate Salary (-15%)"
+			neg_btn.custom_minimum_size = Vector2(0, 32)
+			neg_btn.add_theme_font_size_override("font_size", 12)
+			neg_btn.pressed.connect(_on_negotiate_salary.bind(candidate))
+			neg_row.add_child(neg_btn)
+
+			var neg_hint := Label.new()
+			neg_hint.text = "One chance — they may walk"
+			neg_hint.add_theme_font_size_override("font_size", 11)
+			neg_hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
+			neg_row.add_child(neg_hint)
+		else:
+			var neg_done_lbl := Label.new()
+			neg_done_lbl.text = "Salary negotiated"
+			neg_done_lbl.add_theme_font_size_override("font_size", 11)
+			neg_done_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.5))
+			vbox.add_child(neg_done_lbl)
+
 		var btn_row := HBoxContainer.new()
 		btn_row.add_theme_constant_override("separation", 8)
 		vbox.add_child(btn_row)
@@ -363,6 +444,73 @@ func _refresh_candidates() -> void:
 		btn_row.add_child(pass_btn)
 
 		candidate_container.add_child(card)
+
+
+func _show_office_upgrade_hint() -> void:
+	# Remove any existing hint first
+	var existing := list_container.get_node_or_null("OfficeHint")
+	if existing:
+		return  # already showing
+
+	var hint := PanelContainer.new()
+	hint.name = "OfficeHint"
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.18, 0.14, 0.08)
+	style.border_color = Color(0.85, 0.65, 0.2)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 12
+	style.content_margin_right = 12
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	hint.add_theme_stylebox_override("panel", style)
+
+	var lbl := Label.new()
+	lbl.text = "Your %s is full (%d/%d).\nTo hire more people, go to Finances → Office & Logistics to upgrade your workspace." % [
+		GameState.company.office_name(),
+		GameState.employees.size(),
+		GameState.company.office_capacity(),
+	]
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.75, 0.35))
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_child(lbl)
+	list_container.add_child(hint)
+	list_container.move_child(hint, 0)
+
+
+func _on_negotiate_salary(candidate: EmployeeData) -> void:
+	# One-shot negotiation: reduce salary 15%, but low-morale candidates may walk.
+	# Chance they walk scales with how low their culture_fit + morale are.
+	_negotiated[candidate.employee_name] = true
+	var walk_chance: float = remap(float(candidate.culture_fit + candidate.morale), 0.0, 200.0, 0.35, 0.0)
+	walk_chance = clampf(walk_chance, 0.0, 0.35)
+	if randf() < walk_chance:
+		# They walked
+		_candidates.erase(candidate)
+		candidate_panel.visible = not _candidates.is_empty()
+		_refresh_candidates()
+		_show_temp_message("They declined and pulled out of the process.")
+	else:
+		candidate.salary_per_quarter = maxf(1000.0, candidate.salary_per_quarter * 0.85)
+		_refresh_candidates()
+
+
+func _show_temp_message(msg: String) -> void:
+	var lbl := Label.new()
+	lbl.text = msg
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_color_override("font_color", Color(0.9, 0.55, 0.3))
+	candidate_container.add_child(lbl)
+	var tw := create_tween()
+	tw.tween_interval(3.0)
+	tw.tween_callback(func() -> void:
+		if is_instance_valid(lbl):
+			lbl.queue_free()
+	)
 
 
 func _on_ad_reveal(candidate: EmployeeData) -> void:

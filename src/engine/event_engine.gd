@@ -75,7 +75,18 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 	if eligible.is_empty():
 		return []
 
-	var count := randi_range(1, mini(3, eligible.size()))
+	# Fewer events early on (calm start), ramp up as the company grows.
+	# Valuation tiers: < $500K → max 1, < $2M → max 2, $2M+ → max 3
+	var valuation: float = state.company.valuation if state.company != null else 0.0
+	var max_events: int
+	if valuation < 500_000.0:
+		max_events = 1
+	elif valuation < 2_000_000.0:
+		max_events = 2
+	else:
+		max_events = 3
+
+	var count := randi_range(1, mini(max_events, eligible.size()))
 	var picked: Array[EventData] = []
 	var remaining := eligible.duplicate()
 
@@ -151,4 +162,7 @@ static func _build_context(state: Node) -> Dictionary:
 		"bugs": state.product.bugs,
 		"stability": state.product.stability,
 		"company_type": state.company.type,
+		"valuation": state.company.valuation,
+		"features_shipped": state.product.feature_count(),
+		"revenue": state.financials.revenue,
 	}

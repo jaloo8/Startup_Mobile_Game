@@ -278,15 +278,28 @@ This is the heart of the game. Startups are people.
 - **Salary demand** ($) — What they cost per quarter
 - **Morale** (1–100) — Affected by overwork, culture, compensation, events
 - **Culture fit** (1–100) — How well they mesh with team. Low fit = morale drain on everyone
-- **Specialty** (enum) — Frontend, Backend, Mobile, Design, Data/ML, DevOps, Sales, Marketing, Operations
+- **Specialty** (enum) — Frontend, Backend, Mobile, Design, Data/ML, DevOps, Sales, Marketing, Operations. *Specialty now drives a real productivity multiplier (0.9×–1.4×) based on assignment and company type — see `EmployeeData.specialty_mult()`.*
 - **Seniority** (Junior/Mid/Senior/Lead/Principal) — Affects output, salary, and mentorship
 
+**Specialty match multipliers (Features assignment):**
+
+| Company type | Best fit (1.35×) | Good fit (1.2×) | Neutral (1.0×) |
+|---|---|---|---|
+| SaaS B2B | Backend | Frontend, Design | others |
+| Consumer App | Mobile | Design (1.25×), Frontend | others (0.9×) |
+| Marketplace | Backend (1.3×) | Frontend, Mobile (1.15×) | others |
+| Dev Tools | Backend (1.4×) | DevOps (1.25×), Data/ML | others |
+
+Non-Feature assignments: DevOps → Infra (1.4×), Backend → Bugs/Tech Debt (1.3×), Data/ML+Design → R&D (1.3×).
+
+Fit badges ("⚡ Great fit", "✓ Good fit") appear on both candidate cards and team cards so the player always knows who is punching above their stats.
+
 **Hiring flow:**
-1. Post a job listing (costs money, takes 1–4 weeks depending on role/market)
-2. Receive 2–5 candidates with partially revealed stats (you can see resume, not true Skill)
-3. Interview (reveals more stats but costs CEO time)
-4. Make offer — candidate may counter, accept, or reject
-5. Onboarding takes 1–2 weeks (reduced output initially)
+1. Post a job listing ($5K fee)
+2. Receive 3 candidates with partially revealed stats; specialty-fit badge shown immediately
+3. Interview to reveal full stats (Skill, Speed, Morale, Growth)
+4. Optionally **negotiate salary (−15%)** — one chance; low-culture-fit candidates may walk
+5. Hire → assignment prompt appears immediately so new hires don't sit idle
 
 **Key decisions:**
 - Hire the expensive senior who ships immediately, or the cheap junior with high growth potential?
@@ -323,9 +336,11 @@ This allocation is THE core tension. You always want to build features, but negl
 
 **Feature development:**
 - Pick from available features (depends on product type and R&D unlocks)
-- Assign team members — their Skill + Specialty match determines quality and speed
-- Features have estimated time, but can overrun (especially with junior team or high tech debt)
-- Quality depends on: developer skill, designer skill, time allocated, tech debt level
+- Assign team members — their Skill, Speed, Morale, and Specialty match all determine quality and speed
+- Progress scales with team size: 2 engineers complete a feature roughly 2× faster than 1
+- Features have an ETA shown live on the Product screen, including a specialty-fit breakdown
+- Quality depends on: developer skill, designer skill, time allocated, tech debt level, specialty match
+- A celebration banner appears when a feature ships (colour-coded by quality)
 
 **Shipping decisions:**
 - Ship MVP (lower quality, faster to market, more bugs)
