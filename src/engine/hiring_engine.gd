@@ -7,6 +7,7 @@ static func generate_candidates(count: int, _market: MarketData) -> Array[Employ
 	for i in count:
 		var emp := EmployeeData.new()
 		emp.employee_name = _random_name()
+		emp.ensure_uid()
 		emp.seniority = _weighted_seniority()
 		emp.specialty = EmployeeData.Specialty.values().pick_random()
 		emp.skill = _stat_for_seniority(emp.seniority)

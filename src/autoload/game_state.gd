@@ -36,6 +36,8 @@ var profit_streak: int = 0
 var founder_energy: int = 100
 var board_patience: int = 4
 var _milestones_hit: Array[String] = []
+var _achieved_wins: Array[String] = []
+var interviewer_busy_quarters: Dictionary = {}  # employee_uid -> quarters remaining
 
 const SAVE_DIR := "user://saves/"
 const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
@@ -69,6 +71,13 @@ const MAX_EMPLOYEES := 500
 const MAX_SAVE_BYTES := 4 * 1024 * 1024
 const SAVE_BACKUP_SUFFIX := ".bak"
 const SAVE_TMP_SUFFIX := ".tmp"
+# Sustainable win is intentionally later-game to preserve early momentum while
+# extending run length. Feature build speed stays unchanged.
+const SUSTAINABLE_MIN_QUARTERS := 20
+const SUSTAINABLE_PROFIT_STREAK := 6
+const SUSTAINABLE_MIN_USERS := 12_000
+const SUSTAINABLE_MIN_FEATURES := 8
+const SUSTAINABLE_MIN_REVENUE_PER_Q := 250_000.0
 const DIFFICULTY_MULTS := {
 	"sandbox": {"cash_mult": 2.0, "churn_mult": 0.5, "competitor_mult": 0.5},
 	"normal": {"cash_mult": 1.0, "churn_mult": 1.0, "competitor_mult": 1.0},
@@ -77,7 +86,6 @@ const DIFFICULTY_MULTS := {
 
 var _save_thread: Thread
 var _save_mutex: Mutex
-var _save_in_flight: bool = false
 
 
 func _ready() -> void:
@@ -112,6 +120,8 @@ func new_game(config: Dictionary) -> void:
 	fired_one_time_events.clear()
 	pending_events.clear()
 	_milestones_hit.clear()
+	_achieved_wins.clear()
+	interviewer_busy_quarters.clear()
 	angel_bailout_used = false
 	profit_streak = 0
 	founder_energy = 100
@@ -186,15 +196,88 @@ func total_quarters_elapsed() -> int:
 	return (current_year - 1) * 4 + (current_quarter - 1)
 
 
+func has_achieved_win(win_type: String) -> bool:
+	var key := win_type.strip_edges().to_lower()
+	return key in _achieved_wins
+
+
+func register_achieved_win(win_type: String) -> void:
+	var key := win_type.strip_edges().to_lower()
+	if key.is_empty():
+		return
+	if key not in _achieved_wins:
+		_achieved_wins.append(key)
+
+
+func continue_after_victory() -> void:
+	# Allows post-victory sandbox play (same save, same company).
+	if company == null or product == null or financials == null:
+		return
+	is_game_active = true
+	append_event_log({
+		"quarter": current_quarter,
+		"year": current_year,
+		"event_id": "post_victory_continue",
+		"title": "Chose to keep building after victory",
+	})
+
+
 func hire_employee(emp: EmployeeData) -> bool:
 	if employees.size() >= company.office_capacity():
 		return false
+	if emp == null:
+		return false
+	emp.ensure_uid()
+	while _has_employee_uid(emp.employee_uid):
+		emp.employee_uid = EmployeeData._generate_uid()
 	employees.append(emp)
 	return true
 
 
 func fire_employee(emp: EmployeeData) -> void:
+	if emp:
+		interviewer_busy_quarters.erase(emp.employee_uid)
 	employees.erase(emp)
+
+
+func lock_interviewer(employee_uid: String, quarters: int = 1) -> void:
+	var uid := employee_uid.strip_edges()
+	if uid.is_empty():
+		return
+	var q := clampi(quarters, 1, 4)
+	interviewer_busy_quarters[uid] = maxi(interviewer_busy_for(uid), q)
+
+
+func interviewer_busy_for(employee_uid: String) -> int:
+	var uid := employee_uid.strip_edges()
+	if uid.is_empty():
+		return 0
+	return maxi(0, int(interviewer_busy_quarters.get(uid, 0)))
+
+
+func is_interviewer_busy(employee_uid: String) -> bool:
+	return interviewer_busy_for(employee_uid) > 0
+
+
+func consume_interviewer_busy_quarter(employee_uid: String) -> void:
+	var uid := employee_uid.strip_edges()
+	if uid.is_empty():
+		return
+	var left := interviewer_busy_for(uid)
+	if left <= 0:
+		return
+	left -= 1
+	if left <= 0:
+		interviewer_busy_quarters.erase(uid)
+	else:
+		interviewer_busy_quarters[uid] = left
+
+
+func _has_employee_uid(uid: String) -> bool:
+	for emp in employees:
+		if emp.employee_uid == uid:
+			return true
+	return false
 
 
 func _take_snapshot() -> void:
@@ -218,18 +301,16 @@ func _check_end_conditions() -> void:
 	else:
 		profit_streak = 0
 
+	var elapsed_q: int = total_quarters_elapsed()
 	var arr: float = financials.revenue * 4.0
-	if arr >= 100_000_000 and product.users >= 100_000:
-		is_game_active = false
-		game_won.emit("ipo")
+	if arr >= 100_000_000 and product.users >= 100_000 and not has_achieved_win("ipo"):
+		_emit_victory("ipo")
 		return
-	if company.valuation >= 1_000_000_000:
-		is_game_active = false
-		game_won.emit("unicorn")
+	if company.valuation >= 1_000_000_000 and not has_achieved_win("unicorn"):
+		_emit_victory("unicorn")
 		return
-	if profit_streak >= 4 and total_quarters_elapsed() >= 12:
-		is_game_active = false
-		game_won.emit("sustainable")
+	if _meets_sustainable_victory(elapsed_q) and not has_achieved_win("sustainable"):
+		_emit_victory("sustainable")
 		return
 
 	if founder_energy <= 0:
@@ -245,9 +326,31 @@ func _check_end_conditions() -> void:
 	if company.cash <= 0 and financials.revenue < financials.burn_rate:
 		is_game_active = false
 		game_over.emit("bankruptcy")
-	elif product.users <= 0 and total_quarters_elapsed() > 12:
+	elif product.users <= 0 and elapsed_q > 12:
 		is_game_active = false
 		game_over.emit("dead_product")
+
+
+func _meets_sustainable_victory(elapsed_q: int) -> bool:
+	if elapsed_q < SUSTAINABLE_MIN_QUARTERS:
+		return false
+	if profit_streak < SUSTAINABLE_PROFIT_STREAK:
+		return false
+	if product.users < SUSTAINABLE_MIN_USERS:
+		return false
+	if product.feature_count() < SUSTAINABLE_MIN_FEATURES:
+		return false
+	if financials.revenue < SUSTAINABLE_MIN_REVENUE_PER_Q:
+		return false
+	return true
+
+
+func _emit_victory(win_type: String) -> void:
+	if has_achieved_win(win_type):
+		return
+	register_achieved_win(win_type)
+	is_game_active = false
+	game_won.emit(win_type)
 
 
 const MILESTONES := {
@@ -302,22 +405,18 @@ func save_game_async(slot_name: String) -> void:
 		push_error("GameState: invalid slot name: %s" % slot_name)
 		return
 
+	# Reliability first: always flush the previous write before starting a new one,
+	# so we never drop the latest autosave.
+	if _save_thread and _save_thread.is_started():
+		_save_thread.wait_to_finish()
+
 	_save_mutex.lock()
-	if _save_in_flight:
-		# Coalesce autosaves while one is already writing.
-		_save_mutex.unlock()
-		return
 	var data := _serialize()
 	if data.is_empty():
 		_save_mutex.unlock()
 		push_warning("GameState: async save skipped — game state not initialized")
 		return
-	_save_in_flight = true
 	_save_mutex.unlock()
-
-	# Join previous completed thread object before spinning up a new one.
-	if _save_thread and _save_thread.is_started():
-		_save_thread.wait_to_finish()
 
 	_save_thread = Thread.new()
 	_save_thread.start(_threaded_save.bind(slot_name, data))
@@ -326,16 +425,10 @@ func save_game_async(slot_name: String) -> void:
 func _threaded_save(slot_name: String, data: Dictionary) -> void:
 	if slot_name not in SLOT_NAMES:
 		push_error("GameState: invalid slot name: %s" % slot_name)
-		_save_mutex.lock()
-		_save_in_flight = false
-		_save_mutex.unlock()
 		return
 	var ok := _atomic_write(_slot_path(slot_name), data)
 	if not ok:
 		push_warning("GameState: async save failed for slot %s" % slot_name)
-	_save_mutex.lock()
-	_save_in_flight = false
-	_save_mutex.unlock()
 
 
 func save_game(slot_name: String) -> bool:
@@ -520,8 +613,10 @@ func _serialize() -> Dictionary:
 
 	var emp_list: Array[Dictionary] = []
 	for emp in employees:
+		emp.ensure_uid()
 		emp_list.append({
 			"name": emp.employee_name,
+			"uid": emp.employee_uid,
 			"specialty": emp.specialty,
 			"seniority": emp.seniority,
 			"skill": emp.skill,
@@ -584,6 +679,8 @@ func _serialize() -> Dictionary:
 		"event_log": event_log.duplicate(true),
 		"fired_events": fired_one_time_events.duplicate(),
 		"milestones_hit": _milestones_hit.duplicate(),
+		"achieved_wins": _achieved_wins.duplicate(),
+		"interviewer_busy_quarters": interviewer_busy_quarters.duplicate(true),
 		"angel_bailout_used": angel_bailout_used,
 		"profit_streak": profit_streak,
 		"founder_energy": founder_energy,
@@ -648,6 +745,8 @@ func _deserialize(data: Dictionary) -> bool:
 			continue
 		var emp := EmployeeData.new()
 		emp.employee_name = ed.get("name", "")
+		emp.employee_uid = str(ed.get("uid", ""))
+		emp.ensure_uid()
 		emp.specialty = ed.get("specialty", 0)
 		emp.seniority = ed.get("seniority", 0)
 		emp.skill = ed.get("skill", 50)
@@ -669,6 +768,8 @@ func _deserialize(data: Dictionary) -> bool:
 	event_log.assign(_dict_array(data.get("event_log", [])))
 	fired_one_time_events.assign(_string_array(data.get("fired_events", [])))
 	_milestones_hit.assign(_string_array(data.get("milestones_hit", [])))
+	_achieved_wins.assign(_string_array(data.get("achieved_wins", [])))
+	interviewer_busy_quarters = _safe_dict(data.get("interviewer_busy_quarters", {}))
 	angel_bailout_used = data.get("angel_bailout_used", false)
 	profit_streak = data.get("profit_streak", 0)
 	founder_energy = data.get("founder_energy", 100)
@@ -727,12 +828,17 @@ func _clamp_deserialized_values() -> void:
 	if event_log.size() > MAX_EVENT_LOG_SIZE:
 		event_log = event_log.slice(-MAX_EVENT_LOG_SIZE)
 
+	var seen_uids: Dictionary = {}
 	for emp in employees:
 		emp.employee_name = str(emp.employee_name).strip_edges()
 		if emp.employee_name.is_empty():
 			emp.employee_name = "Employee"
 		elif emp.employee_name.length() > 64:
 			emp.employee_name = emp.employee_name.substr(0, 64)
+		emp.ensure_uid()
+		while seen_uids.has(emp.employee_uid):
+			emp.employee_uid = EmployeeData._generate_uid()
+		seen_uids[emp.employee_uid] = true
 		emp.specialty = clampi(emp.specialty, 0, 8)
 		emp.seniority = clampi(emp.seniority, 0, 4)
 		emp.assignment = clampi(emp.assignment, 0, 5) as EmployeeData.Assignment
@@ -743,6 +849,24 @@ func _clamp_deserialized_values() -> void:
 		emp.stress = clampi(emp.stress, 0, 100)
 		emp.culture_fit = clampi(emp.culture_fit, 0, 100)
 		emp.salary_per_quarter = clampf(emp.salary_per_quarter, 0.0, 1_000_000.0)
+
+	var cleaned_busy: Dictionary = {}
+	for uid_raw in interviewer_busy_quarters.keys():
+		var uid := str(uid_raw).strip_edges()
+		if uid.is_empty() or not seen_uids.has(uid):
+			continue
+		var q := clampi(int(interviewer_busy_quarters.get(uid_raw, 0)), 0, 4)
+		if q > 0:
+			cleaned_busy[uid] = q
+	interviewer_busy_quarters = cleaned_busy
+
+	var dedup_wins: Dictionary = {}
+	var valid_wins := ["ipo", "unicorn", "sustainable", "acquisition"]
+	for w in _achieved_wins:
+		var key := str(w).strip_edges().to_lower()
+		if key in valid_wins:
+			dedup_wins[key] = true
+	_achieved_wins.assign(_string_array(dedup_wins.keys()))
 
 
 # --- Slot Management ---
@@ -821,6 +945,8 @@ func _clear_run_state() -> void:
 	fired_one_time_events.clear()
 	pending_events.clear()
 	_milestones_hit.clear()
+	_achieved_wins.clear()
+	interviewer_busy_quarters.clear()
 	angel_bailout_used = false
 	profit_streak = 0
 	founder_energy = 100

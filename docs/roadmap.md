@@ -263,12 +263,12 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **New game UX** — Consumer App default + "★ Recommended" badge; plain-English descriptions per company type and difficulty; difficulty description updates live
 - [x] **Employee hire badge** — Pop-in "Welcome to the Team" modal immediately after hiring; shows avatar, name, title, Skill/Morale/Speed stats, employee number, and hire date; spring scale-in animation; transitions to assignment prompt
 - [x] **Visual asset set** — 8 Pixar-inspired employee avatars (deterministic hash assignment), 4 office banners (garage → co-working → small office → HQ), 4 product mockup illustrations per company type, 5 assignment-category icons, app icon; all loaded dynamically and displayed on relevant screens
-- [ ] **Deep interviews system** — Assign a team member to conduct the interview instead of free-peek:
-  - **Who interviews matters:** VP has high accuracy at reading candidates but costs the most time/resources; Director is solid but less accurate; Manager is average; Engineer is cheap but quality depends on their people skill stat
-  - **Interviewer skill affects reveal:** High people-skill interviewer reveals true stats more accurately; low people-skill may misjudge (show inflated or deflated stats with a margin of error)
-  - **Time/resource cost:** Senior interviewers tied up for a quarter tick can't do their normal work output that quarter (opportunity cost)
-  - **Culture fit detection:** Only interviewers with high culture-fit themselves can reliably assess a candidate's culture fit — otherwise it shows as "???"
-  - **Interview feedback flavor text:** Each interviewer gives a short written assessment that reflects their own biases and accuracy
+- [x] **Deep interviews system** — Candidate interviews now require picking an interviewer (Founder / VP / Director / Manager / Engineer tiers):
+  - **Who interviews matters:** Higher-tier interviewers provide better read accuracy but cost more and can be tied up for 1-2 quarters
+  - **Interviewer skill affects reveal:** Estimated stats include error margins based on interviewer quality
+  - **Time/resource cost:** Interviewer lock consumes their work output during lock quarters (opportunity cost in simulation)
+  - **Culture fit detection:** Culture estimate shows as `???` unless interviewer people-skill is strong enough
+  - **Interview feedback flavor text:** Cards include a short natural-language recommendation with confidence level
 - [x] **Specific features to build** — Player chooses from a company-type-specific feature tree (10 features per type) with prerequisites, costs, and gameplay effects
 - [x] **Market shifts** — Economy state transitions (bull/neutral/bear), affects user growth, churn, fundraising, and valuation; indicator on dashboard
 - [x] **News ticker** — 67 contextual headline templates shown on dashboard each quarter, filtered by economy/users/company
@@ -295,7 +295,7 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Employee bios** — 200+ bio templates with personality tags
 - [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
 - [x] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools each have unique growth curves, churn patterns, key metrics, feature trees (10 features each), and event filtering
-- [x] **Win conditions** — IPO ($100M+ ARR & 100K users), acquisition (accept event), sustainable (4Q profit after Y3), unicorn ($1B val) + victory screen
+- [x] **Win conditions** — IPO ($100M+ ARR & 100K users), acquisition (accept event), sustainable (6Q profit + scale checks after Y5), unicorn ($1B val) + victory screen
 - [x] **CEO background & skills** — 4 founder archetypes (Engineer/Finance/Recruiter/Hustler) with stats affecting gameplay:
   - **Engineer** — Can personally contribute to product (features, bugs, infra). Weaker at fundraising and BD. Interviews are decent for technical roles, weaker for business roles
   - **Finance** — Better fundraising outcomes (higher valuations, lower dilution). Better at managing burn rate (cost events have smaller penalties). Weaker at product decisions

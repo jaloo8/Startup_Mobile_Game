@@ -7,6 +7,7 @@ enum Assignment { FEATURES, BUGS, TECH_DEBT, INFRA, RND, UNASSIGNED }
 enum GrowthPotential { LOW, MEDIUM, HIGH }
 
 @export var employee_name: String = ""
+@export var employee_uid: String = ""
 @export var specialty: Specialty = Specialty.BACKEND
 @export var seniority: Seniority = Seniority.JUNIOR
 @export var skill: int = 50
@@ -161,7 +162,18 @@ func display_title() -> String:
 	return "%s %s" % [SENIORITY_NAMES.get(seniority, ""), SPECIALTY_NAMES.get(specialty, "")]
 
 
+## Ensures this employee has a stable unique ID for save/load identity.
+func ensure_uid() -> void:
+	if employee_uid.strip_edges().is_empty():
+		employee_uid = _generate_uid()
+
+
+static func _generate_uid() -> String:
+	return "%d-%d-%d" % [Time.get_unix_time_from_system(), randi(), randi()]
+
+
 func clamp_all() -> void:
+	ensure_uid()
 	skill = clampi(skill, 0, 100)
 	speed = clampi(speed, 0, 100)
 	morale = clampi(morale, 0, 100)

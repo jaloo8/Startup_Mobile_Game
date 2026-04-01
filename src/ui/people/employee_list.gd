@@ -10,8 +10,8 @@ extends Control
 @onready var sort_row: HBoxContainer = %SortRow
 
 var _candidates: Array[EmployeeData] = []
-var _interviewed: Dictionary = {}
-var _negotiated: Dictionary = {}   # candidate name -> true if already negotiated
+var _interview_reports: Dictionary = {}  # candidate_key -> interview report
+var _negotiated: Dictionary = {}         # candidate_key -> true if already negotiated
 var _card_style: StyleBoxFlat
 var _assign_target: EmployeeData
 
@@ -28,6 +28,26 @@ const SORT_LABELS := {
 }
 
 const POSTING_FEE := 5_000.0
+const CULTURE_READ_THRESHOLD := 70
+const INTERVIEW_ROLE_VP := "VP"
+const INTERVIEW_ROLE_DIRECTOR := "Director"
+const INTERVIEW_ROLE_MANAGER := "Manager"
+const INTERVIEW_ROLE_ENGINEER := "Engineer"
+const INTERVIEW_ROLE_FOUNDER := "Founder"
+const INTERVIEW_COST_BY_ROLE := {
+	INTERVIEW_ROLE_FOUNDER: 1_500.0,
+	INTERVIEW_ROLE_VP: 6_000.0,
+	INTERVIEW_ROLE_DIRECTOR: 3_500.0,
+	INTERVIEW_ROLE_MANAGER: 2_000.0,
+	INTERVIEW_ROLE_ENGINEER: 750.0,
+}
+const INTERVIEW_LOCK_BY_ROLE := {
+	INTERVIEW_ROLE_FOUNDER: 0,  # founder has energy cost, no assignment lock
+	INTERVIEW_ROLE_VP: 2,
+	INTERVIEW_ROLE_DIRECTOR: 1,
+	INTERVIEW_ROLE_MANAGER: 1,
+	INTERVIEW_ROLE_ENGINEER: 1,
+}
 
 const AVATAR_COUNT := 8
 const ASSIGNMENT_ICON_PATHS := {
@@ -60,7 +80,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	_candidates.clear()
-	_interviewed.clear()
+	_interview_reports.clear()
 	_card_style = null
 	_assign_target = null
 
@@ -210,6 +230,14 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(name_label)
 
+	var busy_q := GameState.interviewer_busy_for(emp.employee_uid)
+	if busy_q > 0:
+		var busy_badge := Label.new()
+		busy_badge.text = "Interviewing (%dQ left)" % busy_q
+		busy_badge.add_theme_font_size_override("font_size", 11)
+		busy_badge.add_theme_color_override("font_color", Color(0.95, 0.72, 0.35))
+		title_row.add_child(busy_badge)
+
 	# Fit badge only shows when assigned to a work category (not Unassigned)
 	if emp.assignment != EmployeeData.Assignment.UNASSIGNED and GameState.company != null:
 		var match_label: String = EmployeeData.specialty_match_label(
@@ -328,7 +356,7 @@ func _on_hire_pressed() -> void:
 	})
 
 	_candidates = HiringEngine.generate_candidates(3, GameState.market)
-	_interviewed.clear()
+	_interview_reports.clear()
 	_negotiated.clear()
 	candidate_panel.visible = true
 	_update_hire_button()
@@ -399,34 +427,59 @@ func _refresh_candidates() -> void:
 			warn_lbl.add_theme_color_override("font_color", Color(0.95, 0.6, 0.2))
 			vbox.add_child(warn_lbl)
 
-		var interviewed: bool = _interviewed.has(candidate.employee_name)
+		var ckey: int = _candidate_key(candidate)
+		var report: Dictionary = _safe_dict(_interview_reports.get(ckey, {}))
+		var interviewed: bool = not report.is_empty()
 		if interviewed:
 			var stats_row := HBoxContainer.new()
 			stats_row.add_theme_constant_override("separation", 16)
 			vbox.add_child(stats_row)
-			_add_stat(stats_row, "Skill", candidate.skill)
-			_add_stat(stats_row, "Speed", candidate.speed)
-			_add_stat(stats_row, "Morale", candidate.morale)
+			_add_stat(stats_row, "Skill", int(report.get("skill", candidate.skill)))
+			_add_stat(stats_row, "Speed", int(report.get("speed", candidate.speed)))
+			_add_stat(stats_row, "Morale", int(report.get("morale", candidate.morale)))
+
+			var culture_estimate: int = int(report.get("culture_fit", -1))
+			var culture_lbl := Label.new()
+			if culture_estimate < 0:
+				culture_lbl.text = "Culture fit: ??? (interviewer not confident)"
+				culture_lbl.add_theme_color_override("font_color", Color(0.66, 0.58, 0.42))
+			else:
+				culture_lbl.text = "Culture fit estimate: %d" % culture_estimate
+				culture_lbl.add_theme_color_override("font_color", Color(0.56, 0.74, 0.90))
+			culture_lbl.add_theme_font_size_override("font_size", 12)
+			vbox.add_child(culture_lbl)
 
 			var growth_lbl := Label.new()
-			var growth_text: String
-			match candidate.growth_potential:
-				EmployeeData.GrowthPotential.HIGH: growth_text = "High growth potential"
-				EmployeeData.GrowthPotential.MEDIUM: growth_text = "Moderate growth potential"
-				_: growth_text = "Limited growth potential"
-			growth_lbl.text = growth_text
+			growth_lbl.text = str(report.get("growth_text", "Growth potential estimate unavailable"))
 			growth_lbl.add_theme_font_size_override("font_size", 12)
 			growth_lbl.add_theme_color_override("font_color", Color(0.55, 0.75, 0.9))
 			vbox.add_child(growth_lbl)
+
+			var meta_lbl := Label.new()
+			meta_lbl.text = "Interviewed by %s (%s) — %s" % [
+				report.get("interviewer_name", "Unknown"),
+				report.get("interviewer_role", "Interviewer"),
+				report.get("confidence", "Unknown confidence"),
+			]
+			meta_lbl.add_theme_font_size_override("font_size", 11)
+			meta_lbl.add_theme_color_override("font_color", Color(0.62, 0.64, 0.72))
+			vbox.add_child(meta_lbl)
+
+			var feedback_lbl := Label.new()
+			feedback_lbl.text = str(report.get("feedback", ""))
+			feedback_lbl.add_theme_font_size_override("font_size", 11)
+			feedback_lbl.add_theme_color_override("font_color", Color(0.78, 0.80, 0.88))
+			feedback_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			vbox.add_child(feedback_lbl)
 		else:
 			var hidden_lbl := Label.new()
-			hidden_lbl.text = "Interview to learn more about this candidate"
+			hidden_lbl.text = "Run an interview to estimate their stats and fit."
 			hidden_lbl.add_theme_font_size_override("font_size", 12)
 			hidden_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 			vbox.add_child(hidden_lbl)
 
 		# Negotiation row — show if not yet negotiated
-		var already_negotiated: bool = _negotiated.has(candidate.employee_name)
+		var already_negotiated: bool = _negotiated.has(ckey)
 		if not already_negotiated:
 			var neg_row := HBoxContainer.new()
 			neg_row.add_theme_constant_override("separation", 8)
@@ -457,8 +510,8 @@ func _refresh_candidates() -> void:
 
 		if not interviewed:
 			var interview_btn := Button.new()
-			interview_btn.text = "Interview"
-			interview_btn.custom_minimum_size = Vector2(90, 36)
+			interview_btn.text = "Interview Team…"
+			interview_btn.custom_minimum_size = Vector2(130, 36)
 			interview_btn.pressed.connect(_on_interview.bind(candidate))
 			btn_row.add_child(interview_btn)
 
@@ -524,11 +577,12 @@ func _show_office_upgrade_hint() -> void:
 func _on_negotiate_salary(candidate: EmployeeData) -> void:
 	# One-shot negotiation: reduce salary 15%, but low-morale candidates may walk.
 	# Chance they walk scales with how low their culture_fit + morale are.
-	_negotiated[candidate.employee_name] = true
+	_negotiated[_candidate_key(candidate)] = true
 	var walk_chance: float = remap(float(candidate.culture_fit + candidate.morale), 0.0, 200.0, 0.35, 0.0)
 	walk_chance = clampf(walk_chance, 0.0, 0.35)
 	if randf() < walk_chance:
 		# They walked
+		_interview_reports.erase(_candidate_key(candidate))
 		_candidates.erase(candidate)
 		candidate_panel.visible = not _candidates.is_empty()
 		_refresh_candidates()
@@ -553,23 +607,345 @@ func _show_temp_message(msg: String) -> void:
 
 
 func _on_ad_reveal(candidate: EmployeeData) -> void:
+	var ckey := _candidate_key(candidate)
+	if _interview_reports.has(ckey):
+		return
 	if AdManager.show_ad("rewarded_reveal_stats"):
-		_interviewed[candidate.employee_name] = true
+		_interview_reports[ckey] = _quick_peek_report(candidate)
 		_refresh_candidates()
 
 
 func _on_interview(candidate: EmployeeData) -> void:
-	_interviewed[candidate.employee_name] = true
+	if _interview_reports.has(_candidate_key(candidate)):
+		return
+	_show_interviewer_picker(candidate)
+
+
+static func _candidate_key(candidate: EmployeeData) -> int:
+	return candidate.get_instance_id()
+
+
+static func _safe_dict(value) -> Dictionary:
+	return value if value is Dictionary else {}
+
+
+func _interviewer_role(emp: EmployeeData) -> String:
+	match emp.seniority:
+		EmployeeData.Seniority.PRINCIPAL:
+			return INTERVIEW_ROLE_VP
+		EmployeeData.Seniority.LEAD:
+			return INTERVIEW_ROLE_DIRECTOR
+		EmployeeData.Seniority.SENIOR:
+			return INTERVIEW_ROLE_MANAGER
+		_:
+			return INTERVIEW_ROLE_ENGINEER
+
+
+func _interviewer_people_skill(emp: EmployeeData) -> int:
+	var seniority_bonus := 0
+	match emp.seniority:
+		EmployeeData.Seniority.PRINCIPAL: seniority_bonus = 12
+		EmployeeData.Seniority.LEAD: seniority_bonus = 8
+		EmployeeData.Seniority.SENIOR: seniority_bonus = 4
+		EmployeeData.Seniority.JUNIOR: seniority_bonus = -4
+	var estimate := roundi(emp.culture_fit * 0.45 + emp.morale * 0.35 + emp.skill * 0.20) + seniority_bonus
+	return clampi(estimate, 1, 100)
+
+
+func _interview_accuracy(role: String, people_skill: int) -> float:
+	match role:
+		INTERVIEW_ROLE_VP:
+			return 0.88 + float(people_skill - 50) * 0.001
+		INTERVIEW_ROLE_DIRECTOR:
+			return 0.80 + float(people_skill - 50) * 0.0012
+		INTERVIEW_ROLE_MANAGER:
+			return 0.72 + float(people_skill - 50) * 0.0014
+		INTERVIEW_ROLE_FOUNDER:
+			return 0.58 + float(people_skill) * 0.0032
+		_:
+			# Engineers are cheaper but quality depends heavily on people skill.
+			return 0.50 + float(people_skill) * 0.0030
+
+
+func _confidence_label(accuracy: float) -> String:
+	if accuracy >= 0.86:
+		return "High confidence"
+	if accuracy >= 0.74:
+		return "Moderate confidence"
+	return "Low confidence"
+
+
+func _fuzzy_stat(actual: int, margin: int) -> int:
+	return clampi(actual + randi_range(-margin, margin), 0, 100)
+
+
+func _growth_text(value: int) -> String:
+	match value:
+		EmployeeData.GrowthPotential.HIGH:
+			return "High growth potential"
+		EmployeeData.GrowthPotential.MEDIUM:
+			return "Moderate growth potential"
+		_:
+			return "Limited growth potential"
+
+
+func _estimate_growth_text(actual: int, accuracy: float) -> String:
+	var shown := actual
+	if randf() > accuracy:
+		shown += (1 if randf() < 0.5 else -1)
+	shown = clampi(shown, EmployeeData.GrowthPotential.LOW, EmployeeData.GrowthPotential.HIGH)
+	return _growth_text(shown)
+
+
+func _feedback_text(role: String, skill: int, speed: int, morale: int, culture_fit: int) -> String:
+	var role_bias := ""
+	match role:
+		INTERVIEW_ROLE_VP:
+			role_bias = "Leans toward strategic ownership and leadership potential."
+		INTERVIEW_ROLE_DIRECTOR:
+			role_bias = "Leans toward execution reliability and cross-team delivery."
+		INTERVIEW_ROLE_MANAGER:
+			role_bias = "Leans toward day-to-day consistency and coachability."
+		INTERVIEW_ROLE_ENGINEER:
+			role_bias = "Leans toward technical signal more than soft-skill nuance."
+		_:
+			role_bias = "Founder gut check."
+
+	var verdict := ""
+	if skill >= 75 and speed >= 70 and morale >= 65:
+		verdict = "Strong near-term hire."
+	elif skill >= 60 and morale >= 55:
+		verdict = "Solid hire with manageable risk."
+	else:
+		verdict = "Higher-risk hire; needs support and tighter onboarding."
+
+	if culture_fit < 0:
+		return "%s %s Culture fit remains unclear." % [verdict, role_bias]
+	if culture_fit >= 70:
+		return "%s %s Culture alignment looks good." % [verdict, role_bias]
+	return "%s %s Culture alignment may need attention." % [verdict, role_bias]
+
+
+func _quick_peek_report(candidate: EmployeeData) -> Dictionary:
+	var accuracy := 0.52
+	var margin := maxi(12, roundi((1.0 - accuracy) * 32.0))
+	var shown_skill := _fuzzy_stat(candidate.skill, margin)
+	var shown_speed := _fuzzy_stat(candidate.speed, margin)
+	var shown_morale := _fuzzy_stat(candidate.morale, margin)
+	return {
+		"interviewer_name": "Quick Peek",
+		"interviewer_role": "Ad Snapshot",
+		"confidence": _confidence_label(accuracy),
+		"skill": shown_skill,
+		"speed": shown_speed,
+		"morale": shown_morale,
+		"culture_fit": -1,
+		"growth_text": _estimate_growth_text(candidate.growth_potential, accuracy),
+		"feedback": "Fast signal only — treat this as directional, not definitive.",
+	}
+
+
+func _show_interviewer_picker(candidate: EmployeeData) -> void:
+	var existing := get_node_or_null("InterviewOverlay")
+	if existing:
+		existing.queue_free()
+
+	var overlay := ColorRect.new()
+	overlay.name = "InterviewOverlay"
+	overlay.color = Color(0, 0, 0, 0.72)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
+
+	var panel := PanelContainer.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.offset_left = -300
+	panel.offset_right = 300
+	panel.offset_top = -250
+	panel.offset_bottom = 250
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.10, 0.10, 0.15)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 16
+	style.content_margin_right = 16
+	style.content_margin_top = 16
+	style.content_margin_bottom = 16
+	panel.add_theme_stylebox_override("panel", style)
+	overlay.add_child(panel)
+
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 10)
+	panel.add_child(root)
+
+	var title := Label.new()
+	title.text = "Choose an interviewer for %s" % candidate.employee_name
+	title.add_theme_font_size_override("font_size", 18)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(title)
+
+	var subtitle := Label.new()
+	subtitle.text = "Better interviewers give cleaner reads, but tie up team capacity."
+	subtitle.add_theme_font_size_override("font_size", 12)
+	subtitle.add_theme_color_override("font_color", Color(0.62, 0.64, 0.72))
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root.add_child(subtitle)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 300)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root.add_child(scroll)
+
+	var options := VBoxContainer.new()
+	options.add_theme_constant_override("separation", 6)
+	scroll.add_child(options)
+
+	# Founder option (always available, no output lock, founder energy hit).
+	var founder_people := clampi(GameState.company.founder_stat("people") * 10, 1, 100)
+	var founder_accuracy := clampf(_interview_accuracy(INTERVIEW_ROLE_FOUNDER, founder_people), 0.40, 0.95)
+	_add_interviewer_option(
+		options, overlay, candidate,
+		"Founder", INTERVIEW_ROLE_FOUNDER, founder_people, founder_accuracy,
+		INTERVIEW_COST_BY_ROLE[INTERVIEW_ROLE_FOUNDER],
+		INTERVIEW_LOCK_BY_ROLE[INTERVIEW_ROLE_FOUNDER],
+		""
+	)
+
+	for emp in GameState.employees:
+		emp.ensure_uid()
+		var role := _interviewer_role(emp)
+		var people_skill := _interviewer_people_skill(emp)
+		var accuracy := clampf(_interview_accuracy(role, people_skill), 0.40, 0.95)
+		_add_interviewer_option(
+			options, overlay, candidate,
+			emp.employee_name, role, people_skill, accuracy,
+			INTERVIEW_COST_BY_ROLE.get(role, 1000.0),
+			INTERVIEW_LOCK_BY_ROLE.get(role, 1),
+			emp.employee_uid
+		)
+
+	var cancel_btn := Button.new()
+	cancel_btn.text = "Cancel"
+	cancel_btn.custom_minimum_size = Vector2(0, 38)
+	cancel_btn.pressed.connect(func() -> void: overlay.queue_free())
+	root.add_child(cancel_btn)
+
+
+func _add_interviewer_option(
+	container: VBoxContainer,
+	overlay: Control,
+	candidate: EmployeeData,
+	interviewer_name: String,
+	role: String,
+	people_skill: int,
+	accuracy: float,
+	cost: float,
+	lock_quarters: int,
+	employee_uid: String
+) -> void:
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(0, 52)
+
+	var cost_k := snapped(cost / 1000.0, 0.1)
+	var info := "%s — %s | %s | Cost: $%sK" % [
+		interviewer_name, role, _confidence_label(accuracy), str(cost_k),
+	]
+	if lock_quarters > 0:
+		info += " | Busy: %dQ" % lock_quarters
+	btn.text = info
+	btn.add_theme_font_size_override("font_size", 12)
+
+	var busy_q := 0
+	if not employee_uid.is_empty():
+		busy_q = GameState.interviewer_busy_for(employee_uid)
+	if busy_q > 0:
+		btn.disabled = true
+		btn.text = "%s — unavailable (%dQ left)" % [interviewer_name, busy_q]
+	elif GameState.company.cash < cost:
+		btn.disabled = true
+		btn.text = "%s — not enough cash (needs $%sK)" % [interviewer_name, str(cost_k)]
+	else:
+		btn.pressed.connect(func() -> void:
+			_complete_interview(
+				candidate, interviewer_name, role, people_skill, accuracy,
+				cost, lock_quarters, employee_uid
+			)
+			overlay.queue_free()
+		)
+
+	container.add_child(btn)
+
+
+func _complete_interview(
+	candidate: EmployeeData,
+	interviewer_name: String,
+	role: String,
+	people_skill: int,
+	accuracy: float,
+	cost: float,
+	lock_quarters: int,
+	employee_uid: String
+) -> void:
+	var ckey := _candidate_key(candidate)
+	if _interview_reports.has(ckey):
+		return
+	if GameState.company.cash < cost:
+		_show_temp_message("Not enough cash to run that interview.")
+		return
+
+	GameState.company.cash -= cost
+	if not employee_uid.is_empty() and lock_quarters > 0:
+		GameState.lock_interviewer(employee_uid, lock_quarters)
+	if role == INTERVIEW_ROLE_FOUNDER:
+		GameState.founder_energy = maxi(0, GameState.founder_energy - 4)
+
+	var margin := maxi(3, roundi((1.0 - accuracy) * 28.0))
+	var shown_skill := _fuzzy_stat(candidate.skill, margin)
+	var shown_speed := _fuzzy_stat(candidate.speed, margin)
+	var shown_morale := _fuzzy_stat(candidate.morale, margin)
+
+	var culture_estimate := -1
+	if people_skill >= CULTURE_READ_THRESHOLD:
+		culture_estimate = _fuzzy_stat(candidate.culture_fit, maxi(3, margin - 2))
+
+	_interview_reports[ckey] = {
+		"interviewer_name": interviewer_name,
+		"interviewer_role": role,
+		"confidence": _confidence_label(accuracy),
+		"skill": shown_skill,
+		"speed": shown_speed,
+		"morale": shown_morale,
+		"culture_fit": culture_estimate,
+		"growth_text": _estimate_growth_text(candidate.growth_potential, accuracy),
+		"feedback": _feedback_text(role, shown_skill, shown_speed, shown_morale, culture_estimate),
+	}
+
+	GameState.append_event_log({
+		"quarter": GameState.current_quarter,
+		"year": GameState.current_year,
+		"event_id": "deep_interview",
+		"title": "Interviewed %s with %s" % [candidate.employee_name, interviewer_name],
+	})
 	Analytics.track_interview()
+	_update_hire_button()
 	_refresh_candidates()
+	_refresh_list()
+
+	var note := "Interview complete."
+	if lock_quarters > 0 and not employee_uid.is_empty():
+		note += " %s is tied up for %d quarter%s." % [interviewer_name, lock_quarters, "s" if lock_quarters > 1 else ""]
+	_show_temp_message(note)
 
 
 func _on_hire_candidate(candidate: EmployeeData) -> void:
+	var ckey := _candidate_key(candidate)
 	if GameState.hire_employee(candidate):
 		Analytics.track_hire(
 			EmployeeData.SPECIALTY_NAMES.get(candidate.specialty, "unknown"),
 			EmployeeData.SENIORITY_NAMES.get(candidate.seniority, "unknown"),
 		)
+		_interview_reports.erase(ckey)
+		_negotiated.erase(ckey)
 		_candidates.erase(candidate)
 		candidate_panel.visible = not _candidates.is_empty()
 		_refresh_candidates()
@@ -837,6 +1213,9 @@ func _on_assign_from_prompt(emp: EmployeeData, assignment: EmployeeData.Assignme
 
 
 func _on_pass_candidate(candidate: EmployeeData) -> void:
+	var ckey := _candidate_key(candidate)
+	_interview_reports.erase(ckey)
+	_negotiated.erase(ckey)
 	_candidates.erase(candidate)
 	candidate_panel.visible = not _candidates.is_empty()
 	_refresh_candidates()

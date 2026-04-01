@@ -5,6 +5,7 @@ extends Control
 @onready var win_subtitle: Label = %WinSubtitle
 @onready var stats_label: Label = %StatsLabel
 @onready var timeline_container: VBoxContainer = %TimelineContainer
+@onready var continue_btn: Button = %ContinueButton
 @onready var menu_btn: Button = %MenuButton
 @onready var new_game_btn: Button = %NewGameButton
 
@@ -33,6 +34,7 @@ const WIN_DATA := {
 
 
 func _ready() -> void:
+	continue_btn.pressed.connect(_on_continue)
 	menu_btn.pressed.connect(_on_menu)
 	new_game_btn.pressed.connect(_on_new_game)
 	Analytics.track_screen("victory")
@@ -101,6 +103,11 @@ func _build_timeline() -> void:
 
 func _on_menu() -> void:
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+
+
+func _on_continue() -> void:
+	GameState.continue_after_victory()
+	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 
 func _on_new_game() -> void:

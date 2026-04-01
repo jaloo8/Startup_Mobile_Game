@@ -74,6 +74,8 @@ startup_mobile_game/
 
 - **First-run tutorial system** — Added a lightweight 5-step guided overlay (`TutorialManager`) that introduces cash/runway, hiring, and quarter advance flow; supports skip, auto-step triggers, and replay from Settings.
 - **Free vs paid flow** — Added a free-tier lock at end of Year 2 (8 quarters) with a full-game paywall overlay in `AdManager`; desktop/dev unlock path is active now, mobile IAP provider callbacks are stubbed for StoreKit/Google Play wiring.
+- **Deep interviews** — Candidate interviews now require choosing an interviewer (Founder/VP/Director/Manager/Engineer tiers), with confidence-based stat estimates, culture-fit uncertainty when interviewer people-skill is weak, and opportunity-cost locks that can sideline interviewers for upcoming quarters.
+- **Longer-run pacing** — Sustainable victory now requires longer proof (6 profitable quarters + scale checks after Year 5), while feature build speed stays fast; victory screen now includes a "Keep Building" path for post-victory sandbox continuation.
 - **Save/security hardening** — Save files now write through temp + checksum wrapper + `.bak` backup recovery; loader enforces checksum and falls back to backup on corruption/deserialize failures.
 - **Settings storage hardening** — `settings.json` now writes atomically with size limits and backup fallback to prevent data loss from interrupted writes.
 - **Employee avatars** — 8 expressive Pixar-inspired 3D cartoon characters, each with a distinct look and personality. Displayed on candidate cards, team lists, and the new hire badge. Hashed deterministically per employee name so the same character always gets the same face.

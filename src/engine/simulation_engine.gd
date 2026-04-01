@@ -37,6 +37,13 @@ static func _apply_work_output(state: Node) -> void:
 		return
 
 	for emp: EmployeeData in state.employees:
+		# Employees assigned as interviewers are unavailable for normal work output
+		# this quarter (opportunity cost of deeper interview process).
+		if state.is_interviewer_busy(emp.employee_uid):
+			state.consume_interviewer_busy_quarter(emp.employee_uid)
+			emp.tenure_quarters += 1
+			continue
+
 		if emp.assignment == EmployeeData.Assignment.UNASSIGNED:
 			emp.tenure_quarters += 1
 			continue
@@ -138,6 +145,16 @@ static func _calculate_user_growth(state: Node) -> void:
 
 	total_new = ceili(total_new * econ_growth_mult)
 
+	# Growth naturally gets harder at scale; early game remains fast.
+	# This stretches run length without making first features feel slower.
+	if state.product.users > 25_000:
+		var maturity_mult := remap(float(state.product.users), 25_000.0, 500_000.0, 1.0, 0.62)
+		total_new = ceili(total_new * clampf(maturity_mult, 0.55, 1.0))
+		# Great product quality/stability helps beat maturity headwinds.
+		var expansion_quality := clampf((state.product.ux_score / 100.0) * (state.product.stability / 100.0), 0.4, 1.0)
+		var expansion_bonus := ceili(feature_pull * 3.0 * expansion_quality)
+		total_new += expansion_bonus
+
 	var type_churn_mult := 1.0
 	match state.company.type:
 		CompanyData.CompanyType.SAAS:
@@ -154,6 +171,9 @@ static func _calculate_user_growth(state: Node) -> void:
 	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult)
 	var bug_churn := ceili(state.product.bugs * 0.5)
 	var total_churn := churn_count + bug_churn
+	if state.product.users > 50_000 and state.product.ux_score < 60:
+		# Retention discipline matters more as audience size grows.
+		total_churn += ceili(state.product.users * 0.003)
 
 	state.product.users = maxi(0, state.product.users + total_new - total_churn)
 

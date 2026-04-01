@@ -426,6 +426,7 @@ func _on_game_over(reason: String) -> void:
 
 
 func _on_game_won(win_type: String) -> void:
+	GameState.register_achieved_win(win_type)
 	GameState.set_meta("win_type", win_type)
 	SceneLoader.goto_scene("res://src/ui/victory/victory_screen.tscn")
 

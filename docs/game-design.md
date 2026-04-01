@@ -297,7 +297,9 @@ Fit badges ("⚡ Great fit", "✓ Good fit") appear on both candidate cards and 
 **Hiring flow:**
 1. Post a job listing ($5K fee)
 2. Receive 3 candidates with partially revealed stats; specialty-fit badge shown immediately
-3. Interview to reveal full stats (Skill, Speed, Morale, Growth)
+3. Pick an interviewer (Founder/VP/Director/Manager/Engineer) — reveal estimated stats with confidence level
+   - Higher-tier interviewers cost more and may be tied up for 1-2 quarters (opportunity cost)
+   - Low interviewer people-skill may show culture fit as `???`
 4. Optionally **negotiate salary (−15%)** — one chance; low-culture-fit candidates may walk
 5. Hire → **Employee ID badge** pops in (spring animation): avatar, name, title, Skill/Morale/Speed, employee number, hire date — a moment of gratification before the assignment prompt
 6. Assignment prompt appears immediately so new hires don't sit idle
@@ -448,7 +450,7 @@ MARKET EVENTS:
 **Win conditions (player chooses goal at start or it emerges):**
 - **IPO** — Reach $100M+ ARR with profitability. The big exit.
 - **Acquisition** — Accept a buyout offer. Score based on valuation.
-- **Sustainable Business** — Reach profitability and maintain for 4 consecutive quarters. The indie dream.
+- **Sustainable Business** — Reach profitability and maintain for 6 consecutive quarters after Year 5, while meeting minimum scale checks. The indie dream.
 - **Unicorn** — Reach $1B valuation (even if not profitable). The VC dream.
 
 **Loss conditions:**
