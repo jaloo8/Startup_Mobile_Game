@@ -14,6 +14,12 @@ enum FounderBackground { ENGINEER, FINANCE, RECRUITER, HUSTLER }
 @export var reputation: int = 50
 @export var founder_background: FounderBackground = FounderBackground.ENGINEER
 @export var founder_stats: Dictionary = {"technical": 5, "finance": 5, "people": 5, "business": 5}
+@export var niche_id: String = ""
+@export var niche_name: String = ""
+@export var niche_desc: String = ""
+@export var niche_growth_mult: float = 1.0
+@export var niche_churn_mult: float = 1.0
+@export var niche_revenue_mult: float = 1.0
 
 const OFFICE_CAPACITY := {0: 4, 1: 10, 2: 25, 3: 60}
 const OFFICE_NAMES := {0: "Garage", 1: "Small Office", 2: "Mid-Size Office", 3: "HQ"}
@@ -24,6 +30,15 @@ const TYPE_NAMES := {
 	CompanyType.MARKETPLACE: "Marketplace",
 	CompanyType.DEV_TOOLS: "Dev Tools",
 }
+
+const NICHES_PATH := "res://src/data/niches.json"
+const DEFAULT_NICHE_MODIFIERS := {
+	"growth_mult": 1.0,
+	"churn_mult": 1.0,
+	"revenue_mult": 1.0,
+}
+
+static var _niche_catalog: Dictionary = {}
 
 const FOUNDER_ARCHETYPES := {
 	FounderBackground.ENGINEER: {
@@ -56,6 +71,74 @@ const FOUNDER_BACKGROUND_NAMES := {
 }
 
 
+static func _safe_array(value) -> Array:
+	return value if value is Array else []
+
+
+static func _safe_dict(value) -> Dictionary:
+	return value if value is Dictionary else {}
+
+
+static func _type_key(company_type: int) -> String:
+	match company_type:
+		CompanyType.SAAS:
+			return "saas"
+		CompanyType.CONSUMER:
+			return "consumer"
+		CompanyType.MARKETPLACE:
+			return "marketplace"
+		CompanyType.DEV_TOOLS:
+			return "dev_tools"
+		_:
+			return "consumer"
+
+
+static func load_niche_catalog(path: String = NICHES_PATH) -> void:
+	if not _niche_catalog.is_empty():
+		return
+	if not FileAccess.file_exists(path):
+		push_warning("CompanyData: niches file missing: %s" % path)
+		_niche_catalog = {}
+		return
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		push_warning("CompanyData: could not open niches file: %s" % path)
+		_niche_catalog = {}
+		return
+	var text := f.get_as_text()
+	f = null
+	var json := JSON.new()
+	if json.parse(text) != OK or not (json.data is Dictionary):
+		push_warning("CompanyData: invalid niches JSON: %s" % path)
+		_niche_catalog = {}
+		return
+	_niche_catalog = json.data
+
+
+static func niches_for_type(company_type: int) -> Array[Dictionary]:
+	if _niche_catalog.is_empty():
+		load_niche_catalog()
+	var key := _type_key(company_type)
+	var out: Array[Dictionary] = []
+	for row in _safe_array(_niche_catalog.get(key, [])):
+		if row is Dictionary:
+			out.append(row)
+	return out
+
+
+static func niche_by_id(company_type: int, requested_id: String) -> Dictionary:
+	var rows := niches_for_type(company_type)
+	if rows.is_empty():
+		return {}
+	var req := requested_id.strip_edges()
+	if req.is_empty():
+		return rows[0]
+	for row in rows:
+		if str(row.get("id", "")) == req:
+			return row
+	return rows[0]
+
+
 func founder_stat(key: String) -> int:
 	return int(founder_stats.get(key, 5))
 
@@ -72,8 +155,40 @@ func type_name() -> String:
 	return TYPE_NAMES.get(type, "Unknown")
 
 
+func type_name_with_niche() -> String:
+	if niche_name.strip_edges().is_empty():
+		return type_name()
+	return "%s (%s)" % [type_name(), niche_name]
+
+
+func apply_niche(requested_id: String) -> void:
+	var chosen := niche_by_id(type, requested_id)
+	if chosen.is_empty():
+		niche_id = ""
+		niche_name = ""
+		niche_desc = ""
+		niche_growth_mult = 1.0
+		niche_churn_mult = 1.0
+		niche_revenue_mult = 1.0
+		return
+
+	niche_id = str(chosen.get("id", "")).strip_edges()
+	niche_name = str(chosen.get("name", "")).strip_edges()
+	niche_desc = str(chosen.get("description", "")).strip_edges()
+	var mods := _safe_dict(chosen.get("modifiers", {}))
+	niche_growth_mult = float(mods.get("growth_mult", DEFAULT_NICHE_MODIFIERS["growth_mult"]))
+	niche_churn_mult = float(mods.get("churn_mult", DEFAULT_NICHE_MODIFIERS["churn_mult"]))
+	niche_revenue_mult = float(mods.get("revenue_mult", DEFAULT_NICHE_MODIFIERS["revenue_mult"]))
+
+
 func clamp_all() -> void:
 	reputation = clampi(reputation, 0, 100)
 	equity_owned = clampf(equity_owned, 0.0, 100.0)
 	office_level = clampi(office_level, 0, 3)
 	cash = maxf(cash, -1_000_000.0)  # allow some debt, but cap it
+	niche_id = niche_id.strip_edges()
+	niche_name = niche_name.strip_edges()
+	niche_desc = niche_desc.strip_edges()
+	niche_growth_mult = clampf(niche_growth_mult, 0.5, 2.0)
+	niche_churn_mult = clampf(niche_churn_mult, 0.5, 2.0)
+	niche_revenue_mult = clampf(niche_revenue_mult, 0.5, 2.0)

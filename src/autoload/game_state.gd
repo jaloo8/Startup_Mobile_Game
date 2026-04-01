@@ -152,6 +152,8 @@ func new_game(config: Dictionary) -> void:
 	company = CompanyData.new()
 	company.company_name = config.get("name", "My Startup")
 	company.type = config.get("type", CompanyData.CompanyType.SAAS)
+	CompanyData.load_niche_catalog()
+	company.apply_niche(str(config.get("niche_id", "")))
 
 	var bg_key: int = config.get("founder_background", CompanyData.FounderBackground.ENGINEER)
 	company.founder_background = bg_key as CompanyData.FounderBackground
@@ -277,7 +279,9 @@ func hire_employee(emp: EmployeeData) -> bool:
 	emp.ensure_uid()
 	while _has_employee_uid(emp.employee_uid):
 		emp.employee_uid = EmployeeData._generate_uid()
+	emp.clamp_all()
 	employees.append(emp)
+	emp.record_quarter_snapshot(current_year, current_quarter)
 	return true
 
 
@@ -327,6 +331,25 @@ func _has_employee_uid(uid: String) -> bool:
 	return false
 
 
+func get_employee_by_uid(uid: String) -> EmployeeData:
+	var clean := uid.strip_edges()
+	if clean.is_empty():
+		return null
+	for emp in employees:
+		if emp.employee_uid == clean:
+			return emp
+	return null
+
+
+func average_team_morale() -> float:
+	if employees.is_empty():
+		return 0.0
+	var total := 0.0
+	for emp: EmployeeData in employees:
+		total += emp.morale
+	return total / float(employees.size())
+
+
 func _take_snapshot() -> void:
 	history.append({
 		"quarter": current_quarter,
@@ -337,6 +360,8 @@ func _take_snapshot() -> void:
 		"revenue": financials.revenue,
 		"burn_rate": financials.burn_rate,
 		"tech_debt": product.tech_debt,
+		"valuation": company.valuation,
+		"avg_morale": average_team_morale(),
 	})
 	if history.size() > MAX_HISTORY_SIZE:
 		history = history.slice(-MAX_HISTORY_SIZE)
@@ -684,6 +709,9 @@ func _serialize() -> Dictionary:
 			"culture_fit": emp.culture_fit,
 			"tenure": emp.tenure_quarters,
 			"assignment": emp.assignment,
+			"employment_type": emp.employment_type,
+			"personality": emp.personality,
+			"quarter_history": emp.quarter_history.duplicate(true),
 		})
 
 	return {
@@ -698,6 +726,12 @@ func _serialize() -> Dictionary:
 			"reputation": company.reputation,
 			"founder_background": company.founder_background,
 			"founder_stats": company.founder_stats.duplicate(true),
+			"niche_id": company.niche_id,
+			"niche_name": company.niche_name,
+			"niche_desc": company.niche_desc,
+			"niche_growth_mult": company.niche_growth_mult,
+			"niche_churn_mult": company.niche_churn_mult,
+			"niche_revenue_mult": company.niche_revenue_mult,
 		},
 		"product": {
 			"features": product.features.duplicate(),
@@ -763,6 +797,15 @@ func _deserialize(data: Dictionary) -> bool:
 	company.founder_stats = _safe_dict(cd.get("founder_stats", {"technical": 5, "finance": 5, "people": 5, "business": 5}))
 	if company.founder_stats.is_empty():
 		company.founder_stats = {"technical": 5, "finance": 5, "people": 5, "business": 5}
+	company.niche_id = str(cd.get("niche_id", ""))
+	company.niche_name = str(cd.get("niche_name", ""))
+	company.niche_desc = str(cd.get("niche_desc", ""))
+	company.niche_growth_mult = float(cd.get("niche_growth_mult", 1.0))
+	company.niche_churn_mult = float(cd.get("niche_churn_mult", 1.0))
+	company.niche_revenue_mult = float(cd.get("niche_revenue_mult", 1.0))
+	if company.niche_name.strip_edges().is_empty() and not company.niche_id.strip_edges().is_empty():
+		CompanyData.load_niche_catalog()
+		company.apply_niche(company.niche_id)
 
 	product = ProductData.new()
 	var pd: Dictionary = _safe_dict(data.get("product", {}))
@@ -814,6 +857,9 @@ func _deserialize(data: Dictionary) -> bool:
 		emp.culture_fit = ed.get("culture_fit", 50)
 		emp.tenure_quarters = ed.get("tenure", 0)
 		emp.assignment = ed.get("assignment", EmployeeData.Assignment.UNASSIGNED)
+		emp.employment_type = ed.get("employment_type", EmployeeData.EmploymentType.FULL_TIME)
+		emp.personality = ed.get("personality", EmployeeData.Personality.STEADY)
+		emp.quarter_history.assign(_dict_array(ed.get("quarter_history", [])))
 		employees.append(emp)
 
 	current_quarter = data.get("quarter", 1)
@@ -850,6 +896,12 @@ func _clamp_deserialized_values() -> void:
 	company.equity_owned = clampf(company.equity_owned, 0.0, 100.0)
 	company.reputation = clampi(company.reputation, 0, 100)
 	company.office_level = clampi(company.office_level, 0, 10)
+	company.niche_id = company.niche_id.strip_edges()
+	company.niche_name = company.niche_name.strip_edges()
+	company.niche_desc = company.niche_desc.strip_edges()
+	company.niche_growth_mult = clampf(company.niche_growth_mult, 0.5, 2.0)
+	company.niche_churn_mult = clampf(company.niche_churn_mult, 0.5, 2.0)
+	company.niche_revenue_mult = clampf(company.niche_revenue_mult, 0.5, 2.0)
 	for stat_key in ["technical", "finance", "people", "business"]:
 		company.founder_stats[stat_key] = clampi(int(company.founder_stats.get(stat_key, 5)), 1, 10)
 
@@ -906,6 +958,11 @@ func _clamp_deserialized_values() -> void:
 		emp.stress = clampi(emp.stress, 0, 100)
 		emp.culture_fit = clampi(emp.culture_fit, 0, 100)
 		emp.salary_per_quarter = clampf(emp.salary_per_quarter, 0.0, 1_000_000.0)
+		emp.employment_type = clampi(emp.employment_type, 0, 2) as EmployeeData.EmploymentType
+		emp.personality = clampi(emp.personality, 0, 5) as EmployeeData.Personality
+		if emp.quarter_history.size() > 36:
+			emp.quarter_history = emp.quarter_history.slice(-36)
+		emp.clamp_all()
 
 	var cleaned_busy: Dictionary = {}
 	for uid_raw in interviewer_busy_quarters.keys():

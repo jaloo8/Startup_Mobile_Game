@@ -16,6 +16,7 @@ extends Control
 @onready var pick_btn: Button = %PickFeatureButton
 @onready var picker_panel: PanelContainer = %FeaturePickerPanel
 @onready var picker_container: VBoxContainer = %FeaturePickerContainer
+@onready var visual_hook_layer: Control = %VisualHookLayer
 
 const MAX_VISIBLE_FEATURES := 50
 
@@ -501,6 +502,8 @@ func _on_feature_shipped(feature_name: String, quality: int) -> void:
 	if _celebration_panel == null:
 		return
 
+	_play_visual_hook_flash()
+
 	var quality_word: String
 	var quality_color: Color
 	if quality >= 80:
@@ -540,6 +543,23 @@ func _on_feature_shipped(feature_name: String, quality: int) -> void:
 	tw.tween_callback(func() -> void: _celebration_panel.visible = false)
 
 	_refresh()
+
+
+func _play_visual_hook_flash() -> void:
+	# Temporary visual hook: art teams can replace this with authored VFX nodes.
+	if visual_hook_layer == null:
+		return
+	var flash := ColorRect.new()
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.color = Color(0.35, 0.62, 0.95, 0.22)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	visual_hook_layer.add_child(flash)
+	var tw := create_tween()
+	tw.tween_property(flash, "modulate:a", 0.0, 0.22)
+	tw.finished.connect(func() -> void:
+		if is_instance_valid(flash):
+			flash.queue_free()
+	)
 
 
 func _on_pick_feature() -> void:

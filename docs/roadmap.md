@@ -272,7 +272,7 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Specific features to build** — Player chooses from a company-type-specific feature tree (10 features per type) with prerequisites, costs, and gameplay effects
 - [x] **Market shifts** — Economy state transitions (bull/neutral/bear), affects user growth, churn, fundraising, and valuation; indicator on dashboard
 - [x] **News ticker** — 67 contextual headline templates shown on dashboard each quarter, filtered by economy/users/company
-- [ ] **Product niche / what you're building** — Within each company type, choose a specific product:
+- [~] **Product niche / what you're building** — New game now supports JSON-driven niche selection per company type (`niches.json`) with growth/churn/revenue modifiers and default recommendations; niche-specific competitors/events/headline weighting are still pending:
   - **SaaS:** CRM, Project Management, HR Platform, Analytics Tool, Accounting, Email Marketing, Helpdesk, etc.
   - **Consumer:** Social Media, Dating App, Photo/Video, Music Streaming, Fitness Tracker, Messaging, Mobile Game, Utility App, etc.
   - **Marketplace:** E-commerce, Gig Economy, Food Delivery, Real Estate, Freelancer Platform, Rental, etc.
@@ -282,7 +282,7 @@ Do these in order. Each one should be playable before starting the next.
   - Some niches are easier than others — utility apps are simpler to launch, while competing in OS/cloud is brutal but has massive upside
   - Future DLC types (AI, Gaming, Hardware, Platform/OS) each get their own niche lists
   - Modders can add custom niches via JSON
-- [ ] **Early game economy revamp ($20K start)** — Starting cash should feel tight but survivable, like a real bootstrapped founder:
+- [~] **Early game economy revamp ($20K start)** — Hiring pipeline now includes full-time/contractor/intern employment types with different cost/output/retention dynamics; full expense-system rebalance and office-economy pass still pending:
   - Start with $20K (savings, side hustle money, or a small friends & family round)
   - **Office tiers:** Mom's basement / garage (free, capacity 3-4), co-working space ($500-1K/quarter, capacity 6-8), small office ($3-5K/quarter, capacity 15), real office ($10K+/quarter, capacity 30+)
   - Starting in the garage costs nothing — upgrade when you can afford it
@@ -307,7 +307,7 @@ Do these in order. Each one should be playable before starting the next.
   - CEO can "level up" skills slowly through choices (picking the finance option in events nudges finance skill up)
 - [x] **Founder burnout** — Founder energy (0-100) drains from stress, recovers from wins; burnout at zero = game over; displayed on dashboard
 - [x] **Board takeover** — Board patience tracked for funded companies; miss growth targets → patience drops; zero patience = replaced as CEO; displayed on finance screen
-- [ ] **Employee personalities** — Each employee has 1-2 personality traits (e.g., Perfectionist, Team Player, Lone Wolf, Mentor, Ambitious, Laid-back) that affect:
+- [~] **Employee personalities** — Each employee now has one trait (Steady/Ambitious/Perfectionist/Team Player/Mentor/Adaptable) that affects output, morale dynamics, and growth behavior; deeper interpersonal/event interactions are still pending:
   - How they interact with other employees (conflicts, synergies)
   - Their response to events (a Perfectionist hates shipping buggy features, an Ambitious employee wants promotions faster)
   - Interview accuracy (a good read depends on interviewer personality matching)
@@ -373,16 +373,16 @@ Do these in order. Each one should be playable before starting the next.
 
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
-- [~] **Charts and graphs** — Finance screen now includes a lightweight 3-line quarter trend chart (cash/revenue/users, normalized, last 12 quarters); broader analytics views (morale and deeper drill-downs) still pending
-- [ ] **Employee detail view** — History, development arc, full stats
-- [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; full 10+ run balance validation still pending
+- [~] **Charts and graphs** — Finance screen now includes two lightweight trend panels (cash/revenue/users and valuation/team/morale, normalized, last 12 quarters); deeper drill-down analytics are still pending
+- [x] **Employee detail view** — Added dedicated employee profile screen with history timeline + trajectory chart + role/trait metadata
+- [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; added `docs/difficulty-playtest-matrix.md` for structured 12-run validation, but full empirical pass is still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
 - [ ] **Sound effects** — Minimal UI sounds (optional)
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
 - [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
 - [x] **Persistence hardening** — Save files now use checksum-enforced wrapper + strict validation + `.bak` fallback recovery; corrupted primary save auto-recovers from backup when available
 - [x] **Storage safety limits** — Size limits for save/settings payloads and clamp/sanitize pass during deserialize to guard against malformed or tampered data
-- [~] **Free vs paid foundation** — Free-tier gate at end of Year 2 + paywall overlay + premium flags wired; mobile StoreKit/Google Play purchase callbacks still need implementation
+- [~] **Free vs paid foundation** — Free-tier gate + paywall + premium flags + restore path + save-slot entitlement gating are wired; final store plugin QA on physical iOS/Android builds is still pending
 
 #### Animation Roadmap (Now → Soon → Later)
 

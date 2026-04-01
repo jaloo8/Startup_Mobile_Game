@@ -1,0 +1,131 @@
+{
+	"saas": [
+		{
+			"id": "vertical_crm",
+			"name": "Vertical CRM",
+			"description": "Industry-specific customer workflows with higher willingness to pay.",
+			"modifiers": {
+				"growth_mult": 0.96,
+				"churn_mult": 0.90,
+				"revenue_mult": 1.10
+			}
+		},
+		{
+			"id": "workflow_automation",
+			"name": "Workflow Automation",
+			"description": "Operational tooling with broad demand and steady adoption.",
+			"modifiers": {
+				"growth_mult": 1.03,
+				"churn_mult": 0.97,
+				"revenue_mult": 1.02
+			}
+		},
+		{
+			"id": "compliance_ops",
+			"name": "Compliance Ops",
+			"description": "Regulated markets with strong retention but longer sales cycles.",
+			"modifiers": {
+				"growth_mult": 0.92,
+				"churn_mult": 0.86,
+				"revenue_mult": 1.14
+			}
+		}
+	],
+	"consumer": [
+		{
+			"id": "streaming_service",
+			"name": "Streaming Service",
+			"description": "Broad-audience content app with familiar product expectations.",
+			"recommended": true,
+			"modifiers": {
+				"growth_mult": 1.10,
+				"churn_mult": 1.04,
+				"revenue_mult": 0.97
+			}
+		},
+		{
+			"id": "fitness_companion",
+			"name": "Fitness Companion",
+			"description": "Habit-driven consumer app with moderate retention and upsell potential.",
+			"modifiers": {
+				"growth_mult": 1.02,
+				"churn_mult": 0.96,
+				"revenue_mult": 1.04
+			}
+		},
+		{
+			"id": "local_discovery",
+			"name": "Local Discovery",
+			"description": "Neighborhood recommendations and events with strong network effects.",
+			"modifiers": {
+				"growth_mult": 1.07,
+				"churn_mult": 1.00,
+				"revenue_mult": 0.99
+			}
+		}
+	],
+	"marketplace": [
+		{
+			"id": "home_services",
+			"name": "Home Services",
+			"description": "Supply-constrained marketplace where trust drives repeat usage.",
+			"modifiers": {
+				"growth_mult": 0.98,
+				"churn_mult": 0.94,
+				"revenue_mult": 1.06
+			}
+		},
+		{
+			"id": "resale_goods",
+			"name": "Resale Goods",
+			"description": "Peer-to-peer listings with viral loops and seasonal demand swings.",
+			"modifiers": {
+				"growth_mult": 1.06,
+				"churn_mult": 1.02,
+				"revenue_mult": 1.00
+			}
+		},
+		{
+			"id": "food_delivery_hub",
+			"name": "Food Delivery Hub",
+			"description": "High-frequency local demand with tighter margin economics.",
+			"modifiers": {
+				"growth_mult": 1.08,
+				"churn_mult": 1.06,
+				"revenue_mult": 0.95
+			}
+		}
+	],
+	"dev_tools": [
+		{
+			"id": "api_observability",
+			"name": "API Observability",
+			"description": "Reliability tooling with sticky usage in engineering teams.",
+			"modifiers": {
+				"growth_mult": 0.97,
+				"churn_mult": 0.90,
+				"revenue_mult": 1.10
+			}
+		},
+		{
+			"id": "ci_automation",
+			"name": "CI Automation",
+			"description": "Build and deploy acceleration with broad developer adoption.",
+			"modifiers": {
+				"growth_mult": 1.04,
+				"churn_mult": 0.96,
+				"revenue_mult": 1.03
+			}
+		},
+		{
+			"id": "cloud_cost_tools",
+			"name": "Cloud Cost Tools",
+			"description": "Cost visibility and optimization products with clear ROI messaging.",
+			"modifiers": {
+				"growth_mult": 0.95,
+				"churn_mult": 0.92,
+				"revenue_mult": 1.12
+			}
+		}
+	]
+}

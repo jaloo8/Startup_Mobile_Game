@@ -9,18 +9,30 @@ extends Node
 signal ad_shown(slot: String)
 signal ad_reward_granted(slot: String)
 signal premium_unlocked   # emitted after successful purchase or dev unlock
+signal purchase_failed(message: String)
 
 var _last_interstitial_quarter: int = -10
 var _ad_sdk_available: bool = false
 var _paywall_canvas: CanvasLayer = null  # nil when paywall not shown
+var _iap_provider: Object = null
+var _purchase_in_flight := false
+var _restore_in_flight := false
+var _pending_purchase_unlock: Callable = Callable()
+var _pending_purchase_cancel: Callable = Callable()
+var _pending_restore_ok: Callable = Callable()
+var _pending_restore_fail: Callable = Callable()
 
 const INTERSTITIAL_COOLDOWN_QUARTERS := 3
 ## Quarters of free gameplay before the paywall triggers (8 = end of Year 2).
 const FREE_QUARTER_LIMIT := 8
+const FREE_SAVE_SLOT_LIMIT := 2
+const PREMIUM_SAVE_SLOT_LIMIT := 5
+const PREMIUM_UNLOCK_PRODUCT_ID := "venture.full_game_unlock"
 
 
 func _ready() -> void:
 	_ad_sdk_available = _detect_ad_sdk()
+	_setup_iap_provider()
 
 
 func is_premium() -> bool:
@@ -30,9 +42,19 @@ func is_premium() -> bool:
 func is_ads_enabled() -> bool:
 	if is_premium():
 		return false
-	if OS.has_feature("pc") or OS.has_feature("macos") or OS.has_feature("windows") or OS.has_feature("linux"):
+	if _is_desktop_platform():
 		return false
 	return true
+
+
+func max_save_slots() -> int:
+	if is_premium() or _is_desktop_platform():
+		return PREMIUM_SAVE_SLOT_LIMIT
+	return FREE_SAVE_SLOT_LIMIT
+
+
+static func _is_desktop_platform() -> bool:
+	return OS.has_feature("pc") or OS.has_feature("macos") or OS.has_feature("windows") or OS.has_feature("linux")
 
 
 func is_ad_available(slot: String) -> bool:
@@ -103,6 +125,158 @@ static func _detect_ad_sdk() -> bool:
 	return false
 
 
+func _setup_iap_provider() -> void:
+	_iap_provider = null
+	# iOS native bridge (StoreKit plugin commonly registered as "InAppStore")
+	if Engine.has_singleton("InAppStore"):
+		_iap_provider = Engine.get_singleton("InAppStore")
+	# Android native bridge (common singleton name in billing plugins)
+	elif Engine.has_singleton("GodotGooglePlayBilling"):
+		_iap_provider = Engine.get_singleton("GodotGooglePlayBilling")
+	if _iap_provider == null:
+		return
+	_wire_iap_signal("purchase_success", Callable(self, "_on_iap_purchase_success"))
+	_wire_iap_signal("purchase_failed", Callable(self, "_on_iap_purchase_failed"))
+	_wire_iap_signal("purchase_error", Callable(self, "_on_iap_purchase_failed"))
+	_wire_iap_signal("purchase_cancelled", Callable(self, "_on_iap_purchase_cancelled"))
+	_wire_iap_signal("purchases_restored", Callable(self, "_on_iap_restore_success"))
+	_wire_iap_signal("restore_success", Callable(self, "_on_iap_restore_success"))
+	_wire_iap_signal("restore_failed", Callable(self, "_on_iap_restore_failed"))
+
+
+func _wire_iap_signal(signal_name: String, callable: Callable) -> void:
+	if _iap_provider == null:
+		return
+	if not _iap_provider.has_signal(signal_name):
+		return
+	if not _iap_provider.is_connected(signal_name, callable):
+		_iap_provider.connect(signal_name, callable)
+
+
+func _try_iap_call(candidates: Array[String], args: Array = []) -> bool:
+	if _iap_provider == null:
+		return false
+	for method_name in candidates:
+		if _iap_provider.has_method(method_name):
+			_iap_provider.callv(method_name, args)
+			return true
+	return false
+
+
+func purchase_full_game(on_unlock: Callable = Callable(), on_cancel: Callable = Callable()) -> void:
+	if is_premium():
+		if on_unlock.is_valid():
+			on_unlock.call()
+		return
+	if _purchase_in_flight:
+		return
+	_pending_purchase_unlock = on_unlock
+	_pending_purchase_cancel = on_cancel
+
+	# Desktop unlock remains immediate for local development convenience.
+	if _is_desktop_platform():
+		_complete_premium_unlock()
+		return
+
+	_purchase_in_flight = true
+	var started := _try_iap_call(
+		["purchase", "purchase_product", "buy", "purchase_item"],
+		[PREMIUM_UNLOCK_PRODUCT_ID]
+	)
+	if not started:
+		_fail_purchase("In-app purchase bridge is unavailable on this build.")
+
+
+func restore_purchases(on_restored: Callable = Callable(), on_failed: Callable = Callable()) -> void:
+	if is_premium():
+		if on_restored.is_valid():
+			on_restored.call()
+		return
+	if _restore_in_flight:
+		return
+	_pending_restore_ok = on_restored
+	_pending_restore_fail = on_failed
+
+	if _is_desktop_platform():
+		_complete_premium_unlock()
+		return
+
+	_restore_in_flight = true
+	var started := _try_iap_call(
+		["restore_purchases", "restore", "restore_transactions"],
+		[]
+	)
+	if not started:
+		_restore_in_flight = false
+		_emit_restore_failed("Restore is not available on this build.")
+
+
+func _complete_premium_unlock() -> void:
+	_purchase_in_flight = false
+	_restore_in_flight = false
+	Analytics.set_premium(true)
+	_dismiss_paywall()
+	premium_unlocked.emit()
+
+	var unlock_cb := _pending_purchase_unlock
+	var restore_cb := _pending_restore_ok
+	_pending_purchase_unlock = Callable()
+	_pending_purchase_cancel = Callable()
+	_pending_restore_ok = Callable()
+	_pending_restore_fail = Callable()
+
+	if unlock_cb.is_valid():
+		unlock_cb.call()
+	if restore_cb.is_valid():
+		restore_cb.call()
+
+
+func _fail_purchase(message: String) -> void:
+	_purchase_in_flight = false
+	_emit_purchase_failed(message)
+	var cancel_cb := _pending_purchase_cancel
+	_pending_purchase_unlock = Callable()
+	_pending_purchase_cancel = Callable()
+	if cancel_cb.is_valid():
+		cancel_cb.call()
+
+
+func _emit_purchase_failed(message: String) -> void:
+	push_warning("AdManager: purchase failed: %s" % message)
+	purchase_failed.emit(message)
+
+
+func _emit_restore_failed(message: String) -> void:
+	_restore_in_flight = false
+	push_warning("AdManager: restore failed: %s" % message)
+	purchase_failed.emit(message)
+	if _pending_restore_fail.is_valid():
+		_pending_restore_fail.call()
+	_pending_restore_ok = Callable()
+	_pending_restore_fail = Callable()
+
+
+func _on_iap_purchase_success(_a = null, _b = null, _c = null) -> void:
+	_complete_premium_unlock()
+
+
+func _on_iap_purchase_failed(_a = null, _b = null, _c = null) -> void:
+	_fail_purchase("Store declined the purchase.")
+
+
+func _on_iap_purchase_cancelled(_a = null, _b = null, _c = null) -> void:
+	_fail_purchase("Purchase canceled.")
+
+
+func _on_iap_restore_success(_a = null, _b = null, _c = null) -> void:
+	_complete_premium_unlock()
+
+
+func _on_iap_restore_failed(_a = null, _b = null, _c = null) -> void:
+	_restore_in_flight = false
+	_emit_restore_failed("No eligible purchase found to restore.")
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Free-tier gate
 # ─────────────────────────────────────────────────────────────────────────────
@@ -113,7 +287,7 @@ func is_game_locked() -> bool:
 	if is_premium():
 		return false
 	# Desktop builds are always unlocked (dev / TestFlight convenience).
-	if OS.has_feature("pc") or OS.has_feature("macos") or OS.has_feature("windows") or OS.has_feature("linux"):
+	if _is_desktop_platform():
 		return false
 	return GameState.total_quarters_elapsed() >= FREE_QUARTER_LIMIT
 
@@ -142,20 +316,7 @@ func _dismiss_paywall() -> void:
 
 
 func _do_purchase(on_unlock: Callable) -> void:
-	# On desktop / dev builds unlock immediately so development stays friction-free.
-	if OS.has_feature("pc") or OS.has_feature("macos") or OS.has_feature("windows") or OS.has_feature("linux"):
-		Analytics.set_premium(true)
-		_dismiss_paywall()
-		premium_unlocked.emit()
-		if on_unlock.is_valid():
-			on_unlock.call()
-		return
-
-	# Mobile — call the platform IAP.
-	# TODO: hook up StoreKit (iOS) or Google Play Billing (Android).
-	# On success: Analytics.set_premium(true), _dismiss_paywall(), premium_unlocked.emit(), on_unlock.call()
-	# On failure / cancel: just _dismiss_paywall() or show an error.
-	push_warning("AdManager: IAP not yet wired — purchase ignored on this platform.")
+	purchase_full_game(on_unlock, Callable())
 
 
 func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
@@ -212,7 +373,7 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 
 	# What you get
 	var perks_lbl := Label.new()
-	perks_lbl.text = "✓  Play until IPO or acquisition\n✓  All company types unlocked\n✓  No ads — ever"
+	perks_lbl.text = "✓  Play until IPO or acquisition\n✓  Full save slots unlocked\n✓  No ads — ever"
 	perks_lbl.add_theme_font_size_override("font_size", 13)
 	perks_lbl.add_theme_color_override("font_color", Color(0.45, 0.85, 0.55))
 	perks_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -239,10 +400,41 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 	buy_p.bg_color = buy_n.bg_color.darkened(0.12)
 	buy_btn.add_theme_stylebox_override("pressed", buy_p)
 	buy_btn.add_theme_stylebox_override("focus", buy_n)
-	buy_btn.pressed.connect(func() -> void: _do_purchase(on_unlock))
+	buy_btn.pressed.connect(func() -> void:
+		_do_purchase(on_unlock)
+	)
 	vbox.add_child(buy_btn)
 
-	# Restore / Cancel
+	var restore_btn := Button.new()
+	restore_btn.text = "Restore Purchase"
+	restore_btn.add_theme_font_size_override("font_size", 12)
+	restore_btn.add_theme_color_override("font_color", Color(0.72, 0.80, 0.95))
+	var restore_style := StyleBoxFlat.new()
+	restore_style.bg_color = Color(0.16, 0.20, 0.32)
+	restore_style.set_corner_radius_all(8)
+	restore_style.set_content_margin_all(10.0)
+	restore_btn.add_theme_stylebox_override("normal", restore_style)
+	restore_btn.add_theme_stylebox_override("hover", restore_style)
+	restore_btn.add_theme_stylebox_override("pressed", restore_style)
+	restore_btn.pressed.connect(func() -> void:
+		var restored_cb := func() -> void:
+			if on_unlock.is_valid():
+				on_unlock.call()
+		var failed_cb := func() -> void:
+			_emit_purchase_failed("No purchase found to restore.")
+		restore_purchases(restored_cb, failed_cb)
+	)
+	vbox.add_child(restore_btn)
+
+	var note_lbl := Label.new()
+	note_lbl.text = "Purchases are processed by Apple App Store / Google Play."
+	note_lbl.add_theme_font_size_override("font_size", 11)
+	note_lbl.add_theme_color_override("font_color", Color(0.55, 0.58, 0.7))
+	note_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	note_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(note_lbl)
+
+	# Cancel
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Maybe Later"
 	cancel_btn.add_theme_font_size_override("font_size", 12)

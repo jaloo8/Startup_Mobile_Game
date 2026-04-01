@@ -276,9 +276,19 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 
 	var salary_label := Label.new()
 	salary_label.text = "$%sK/yr" % str(snapped(emp.salary_per_quarter * 4 / 1000.0, 0.1))
+	if emp.employment_type == EmployeeData.EmploymentType.CONTRACTOR:
+		salary_label.text = "Contract: $%sK/quarter" % str(snapped(emp.salary_per_quarter / 1000.0, 0.1))
+	elif emp.employment_type == EmployeeData.EmploymentType.INTERN:
+		salary_label.text = "Intern stipend: $%sK/quarter" % str(snapped(emp.salary_per_quarter / 1000.0, 0.1))
 	salary_label.add_theme_font_size_override("font_size", 13)
 	salary_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 	vbox.add_child(salary_label)
+
+	var profile_lbl := Label.new()
+	profile_lbl.text = "%s · %s" % [emp.employment_label(), emp.personality_label()]
+	profile_lbl.add_theme_font_size_override("font_size", 12)
+	profile_lbl.add_theme_color_override("font_color", Color(0.58, 0.66, 0.82))
+	vbox.add_child(profile_lbl)
 
 	var assign_row := HBoxContainer.new()
 	assign_row.add_theme_constant_override("separation", 6)
@@ -317,6 +327,12 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	fire_btn.pressed.connect(_on_fire.bind(emp))
 	action_row.add_child(fire_btn)
 
+	var detail_btn := Button.new()
+	detail_btn.text = "Details"
+	detail_btn.custom_minimum_size = Vector2(74, 30)
+	detail_btn.pressed.connect(_on_view_details.bind(emp))
+	action_row.add_child(detail_btn)
+
 	return panel
 
 
@@ -331,6 +347,13 @@ func _on_fire(emp: EmployeeData) -> void:
 	GameState.fire_employee(emp)
 	_update_hire_button()
 	_refresh_list()
+
+
+func _on_view_details(emp: EmployeeData) -> void:
+	if emp == null:
+		return
+	GameState.set_meta("employee_detail_uid", emp.employee_uid)
+	SceneLoader.goto_scene("res://src/ui/people/employee_detail.tscn")
 
 
 func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
@@ -366,7 +389,7 @@ func _on_hire_pressed() -> void:
 		"title": "Posted a job listing — $%sK" % str(snapped(POSTING_FEE / 1000.0, 0.1)),
 	})
 
-	_candidates = HiringEngine.generate_candidates(3, GameState.market)
+	_candidates = HiringEngine.generate_candidates(3, GameState.market, GameState)
 	_interview_reports.clear()
 	_negotiated.clear()
 	candidate_panel.visible = true
@@ -421,15 +444,22 @@ func _refresh_candidates() -> void:
 
 		var cost_per_q: float = candidate.salary_per_quarter
 		var runway: float = GameState.financials.runway_quarters(GameState.company.cash)
-		var salary_text := "Asking $%sK/yr ($%sK/quarter)" % [
-			str(snapped(cost_per_q * 4 / 1000.0, 0.1)),
-			str(snapped(cost_per_q / 1000.0, 0.1)),
-		]
+		var salary_text := "Asking $%sK/yr ($%sK/quarter)" % [str(snapped(cost_per_q * 4 / 1000.0, 0.1)), str(snapped(cost_per_q / 1000.0, 0.1))]
+		if candidate.employment_type == EmployeeData.EmploymentType.CONTRACTOR:
+			salary_text = "Contract rate $%sK/quarter (flex headcount)" % str(snapped(cost_per_q / 1000.0, 0.1))
+		elif candidate.employment_type == EmployeeData.EmploymentType.INTERN:
+			salary_text = "Intern stipend $%sK/quarter (high growth upside)" % str(snapped(cost_per_q / 1000.0, 0.1))
 		var salary_lbl := Label.new()
 		salary_lbl.text = salary_text
 		salary_lbl.add_theme_font_size_override("font_size", 13)
 		salary_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 		vbox.add_child(salary_lbl)
+
+		var profile_line := Label.new()
+		profile_line.text = "%s · %s" % [candidate.employment_label(), candidate.personality_label()]
+		profile_line.add_theme_font_size_override("font_size", 12)
+		profile_line.add_theme_color_override("font_color", Color(0.58, 0.66, 0.82))
+		vbox.add_child(profile_line)
 
 		if runway != INF and runway < 4.0:
 			var warn_lbl := Label.new()
@@ -1236,11 +1266,19 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 
 	# Title
 	var title_lbl := Label.new()
-	title_lbl.text = emp.display_title()
+	title_lbl.text = "%s · %s" % [emp.display_title(), emp.employment_label()]
 	title_lbl.add_theme_font_size_override("font_size", 13)
 	title_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.85))
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_child(title_lbl)
+
+	var trait_lbl := Label.new()
+	trait_lbl.text = "%s — %s" % [emp.personality_label(), emp.personality_effect_hint()]
+	trait_lbl.add_theme_font_size_override("font_size", 11)
+	trait_lbl.add_theme_color_override("font_color", Color(0.58, 0.74, 0.92))
+	trait_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	trait_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.add_child(trait_lbl)
 
 	# Divider
 	var sep := HSeparator.new()

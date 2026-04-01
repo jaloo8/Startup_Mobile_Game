@@ -81,6 +81,7 @@ static func process_quarter(state: Node) -> void:
 	_update_employee_morale(state)
 	_process_employee_turnover(state)
 	_grow_employee_skills(state)
+	_record_employee_history(state)
 	_update_founder_energy(state)
 	_update_board_patience(state)
 	_clamp_all_state(state)
@@ -203,6 +204,7 @@ static func _calculate_user_growth(state: Node) -> void:
 			econ_churn_mult = 1.0
 
 	total_new = ceili(total_new * econ_growth_mult)
+	total_new = ceili(total_new * clampf(state.company.niche_growth_mult, 0.6, 1.6))
 
 	# Growth naturally gets harder at scale; early game stays punchy.
 	# Per-type thresholds keep each company archetype on a believable trajectory.
@@ -237,7 +239,8 @@ static func _calculate_user_growth(state: Node) -> void:
 	if state.has_method("difficulty_mult"):
 		difficulty_churn_mult = clampf(float(state.difficulty_mult("churn_mult")), 0.4, 2.0)
 
-	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult * difficulty_churn_mult)
+	var niche_churn_mult := clampf(state.company.niche_churn_mult, 0.6, 1.6)
+	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult * difficulty_churn_mult * niche_churn_mult)
 	var bug_churn := ceili(state.product.bugs * 0.5)
 	var total_churn := churn_count + bug_churn
 	var late_churn_users := int(balance.get("late_churn_users", 50_000))
@@ -356,6 +359,16 @@ static func _update_employee_morale(state: Node) -> void:
 
 		if emp.assignment != EmployeeData.Assignment.UNASSIGNED:
 			emp.stress += randi_range(1, 5)
+		if emp.employment_type == EmployeeData.EmploymentType.CONTRACTOR:
+			emp.stress += 1
+		if emp.employment_type == EmployeeData.EmploymentType.INTERN:
+			emp.morale += 1
+		if emp.personality == EmployeeData.Personality.AMBITIOUS and emp.morale < 50:
+			emp.morale -= 2
+		elif emp.personality == EmployeeData.Personality.TEAM_PLAYER:
+			emp.morale += 1
+		elif emp.personality == EmployeeData.Personality.PERFECTIONIST and state.product.bugs > 15:
+			emp.morale -= 2
 		emp.stress = maxi(0, emp.stress - randi_range(2, 5))
 
 
@@ -375,8 +388,22 @@ static func _process_employee_turnover(state: Node) -> void:
 
 
 static func _grow_employee_skills(state: Node) -> void:
+	var mentor_count := 0
+	for emp: EmployeeData in state.employees:
+		if emp.personality == EmployeeData.Personality.MENTOR:
+			mentor_count += 1
+
 	for emp: EmployeeData in state.employees:
 		emp.try_grow_skill()
+		if mentor_count > 0 and emp.seniority <= EmployeeData.Seniority.MID and emp.assignment != EmployeeData.Assignment.UNASSIGNED:
+			var bonus_chance := clampf(mentor_count * 0.06, 0.0, 0.20)
+			if randf() < bonus_chance:
+				emp.skill = mini(100, emp.skill + 1)
+
+
+static func _record_employee_history(state: Node) -> void:
+	for emp: EmployeeData in state.employees:
+		emp.record_quarter_snapshot(state.current_year, state.current_quarter)
 
 
 static func _update_founder_energy(state: Node) -> void:

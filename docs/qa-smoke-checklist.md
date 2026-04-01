@@ -158,6 +158,8 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 9.8 | Office capacity enforced | Cannot hire beyond office_capacity | `game_state.gd` → `hire_employee()` |
 | 9.9 | Employee unique IDs (UIDs) are stable | UID persists across save/load | `src/models/employee_data.gd` → `ensure_uid()` |
 | 9.10 | No duplicate UIDs in employee list | Dedup on hire and deserialize | `game_state.gd` → `_has_employee_uid()` |
+| 9.11 | Employment type + personality visible | Team/candidate cards show type + trait labels | `employee_list.gd`, `employee_data.gd` |
+| 9.12 | Employee detail screen opens and renders history | `Details` button opens profile with trajectory chart + history rows | `employee_list.gd` → `_on_view_details()`, `employee_detail.gd` |
 
 ---
 
@@ -193,6 +195,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 11.8 | Angel bailout available at $0 cash | One-time rescue, steep equity cost | `game_state.gd` → `angel_bailout_used` |
 | 11.9 | Cost breakdown is transparent | Salaries + infra traceable | `simulation_engine.gd`, `financials_data.gd` |
 | 11.10 | Finance trend chart renders and updates | Cash/Revenue/Users lines draw from history (last 12 quarters) | `src/ui/finance/finance_overview.gd` → `_refresh_trend_chart()`, `src/ui/components/trend_chart.gd` |
+| 11.11 | Finance health chart renders and updates | Valuation/Team/Morale lines draw from history/live state | `finance_overview.gd` → `_refresh_health_trend_chart()`, `game_state.gd` → `_take_snapshot()` |
 
 ---
 
@@ -263,6 +266,8 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 16.6 | After unlock: "✓ Full Game — Unlocked" | Green checkmark replaces button | `settings_screen.gd` → `_refresh_premium_row()` |
 | 16.7 | Ad interstitial cooldown respected | Minimum 3 quarters between interstitials | `ad_manager.gd` → `INTERSTITIAL_COOLDOWN_QUARTERS` |
 | 16.8 | Rewarded ad for stat reveal works | Triggers quick-peek interview report | `ad_manager.gd`, `employee_list.gd` → `_on_ad_reveal()` |
+| 16.9 | Restore purchases path works | Restore button attempts recovery and unlocks if entitlement exists | `ad_manager.gd` → `restore_purchases()`, `settings_screen.gd` |
+| 16.10 | Free save-slot gating enforced on mobile | Slots above free limit show locked premium cards | `save_slots.gd` → `_is_slot_unlocked()`, `ad_manager.gd` → `max_save_slots()` |
 
 ---
 
@@ -392,7 +397,8 @@ These tests require deploying to a device or emulator, not just the editor.
 | 24.4 | `glossary.json` has all referenced terms | Every `show_term()` call has a matching key | `src/data/glossary.json`, `glossary.gd` |
 | 24.5 | `vcs.json` loads for fundraising | VC firms initialized correctly | `src/data/vcs.json`, `fundraising_engine.gd` |
 | 24.6 | `competitors.json` loads for all types | Rivals initialized per company type | `src/data/competitors.json`, `competitor_ai.gd` |
-| 24.7 | `names.json` exists (future use) | Name pools available | `src/data/names.json` |
+| 24.7 | `niches.json` loads for all company types | New game niche picker and modifiers are valid | `src/data/niches.json`, `company_data.gd`, `tools/backend_smoke.py` |
+| 24.8 | `names.json` exists (future use) | Name pools available | `src/data/names.json` |
 
 ---
 

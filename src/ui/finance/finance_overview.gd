@@ -9,6 +9,8 @@ extends Control
 @onready var valuation_value: Label = %ValuationValue
 @onready var trend_chart: Control = %TrendChart
 @onready var trend_meta: Label = %TrendMeta
+@onready var health_trend_chart: Control = %HealthTrendChart
+@onready var health_trend_meta: Label = %HealthTrendMeta
 
 @onready var salary_cost: Label = %SalaryCost
 @onready var infra_cost: Label = %InfraCost
@@ -70,6 +72,7 @@ func _refresh() -> void:
 	infra_cost.text = "$%s" % SceneLoader.format_money(costs.get("infrastructure", 0.0))
 	office_cost.text = "$%s" % SceneLoader.format_money(costs.get("office", 0.0))
 	_refresh_trend_chart()
+	_refresh_health_trend_chart()
 
 	if GameState.financials.funding_rounds.is_empty():
 		board_label.visible = false
@@ -94,10 +97,7 @@ func _wire_glossary(btn: Button, key: String) -> void:
 	btn.pressed.connect(Glossary.show_term.bind(key))
 
 
-func _refresh_trend_chart() -> void:
-	if trend_chart == null:
-		return
-
+func _trend_points(limit: int = 12) -> Array[Dictionary]:
 	var points: Array[Dictionary] = []
 	for item in GameState.history:
 		if item is Dictionary:
@@ -109,6 +109,9 @@ func _refresh_trend_chart() -> void:
 		"cash": GameState.company.cash,
 		"revenue": GameState.financials.revenue,
 		"users": GameState.product.users,
+		"valuation": GameState.company.valuation,
+		"employees": GameState.employees.size(),
+		"avg_morale": GameState.average_team_morale(),
 	}
 	if points.is_empty():
 		points.append(live_point)
@@ -118,12 +121,22 @@ func _refresh_trend_chart() -> void:
 			and int(last.get("year", -1)) == GameState.current_year
 		var same_values := is_equal_approx(float(last.get("cash", -1.0)), GameState.company.cash) \
 			and is_equal_approx(float(last.get("revenue", -1.0)), GameState.financials.revenue) \
-			and int(last.get("users", -1)) == GameState.product.users
+			and int(last.get("users", -1)) == GameState.product.users \
+			and is_equal_approx(float(last.get("valuation", -1.0)), GameState.company.valuation) \
+			and int(last.get("employees", -1)) == GameState.employees.size() \
+			and is_equal_approx(float(last.get("avg_morale", -1.0)), GameState.average_team_morale())
 		if not (same_period and same_values):
 			points.append(live_point)
 
-	if points.size() > 12:
-		points = points.slice(-12)
+	if points.size() > limit:
+		points = points.slice(-limit)
+	return points
+
+
+func _refresh_trend_chart() -> void:
+	if trend_chart == null:
+		return
+	var points := _trend_points(12)
 
 	var cash_series: Array[float] = []
 	var revenue_series: Array[float] = []
@@ -139,6 +152,27 @@ func _refresh_trend_chart() -> void:
 	if trend_meta:
 		var n := points.size()
 		trend_meta.text = "Last %d quarter%s (normalized per metric)" % [n, "s" if n != 1 else ""]
+
+
+func _refresh_health_trend_chart() -> void:
+	if health_trend_chart == null:
+		return
+	var points := _trend_points(12)
+
+	var valuation_series: Array[float] = []
+	var team_series: Array[float] = []
+	var morale_series: Array[float] = []
+	for p in points:
+		valuation_series.append(float(p.get("valuation", GameState.company.valuation)))
+		team_series.append(float(p.get("employees", GameState.employees.size())))
+		morale_series.append(float(p.get("avg_morale", GameState.average_team_morale())))
+
+	if health_trend_chart.has_method("set_series"):
+		health_trend_chart.set_series(valuation_series, team_series, morale_series)
+
+	if health_trend_meta:
+		var n := points.size()
+		health_trend_meta.text = "Last %d quarter%s (valuation / team / morale)" % [n, "s" if n != 1 else ""]
 
 
 func _on_fundraise() -> void:

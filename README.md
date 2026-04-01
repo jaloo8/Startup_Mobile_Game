@@ -13,7 +13,7 @@ Built with **Godot 4.3** (GDScript). Targets iOS and Android first, with Steam/d
 | **Engine** | Godot 4.3 (Forward Plus) |
 | **Language** | GDScript |
 | **Platforms** | iOS, Android, Steam (future) |
-| **Price** | $4.99 base (Software path) + $2.99 DLC packs |
+| **Price** | Free through Year 2, then $2.99 full unlock (mobile) |
 | **Session** | 10–20 min (one quarter per session) |
 | **Run length** | 20–40 quarters (5–10 startup years) |
 | **Architecture** | Autoload singletons, Resource-based data model |
@@ -67,11 +67,18 @@ startup_mobile_game/
 - **Game design** — [`docs/game-design.md`](docs/game-design.md) — Full GDD: vision, core loop, all game systems, data model, simulation engine, balance guidelines
 - **Roadmap** — [`docs/roadmap.md`](docs/roadmap.md) — Development phases, priority checklist, workflow tips
 - **Monetization** — [`docs/monetization.md`](docs/monetization.md) — DLC strategy, pricing, release cadence, technical architecture for expansion packs
+- **Difficulty playtest matrix** — [`docs/difficulty-playtest-matrix.md`](docs/difficulty-playtest-matrix.md) — Manual run capture template for 12-run balance validation (all types x all difficulties)
 
 ---
 
 ## Recent changes
 
+- **IAP + entitlement wiring pass** — `AdManager` now includes mobile purchase/restore bridge hooks (StoreKit / Google Play singleton detection, callback wiring, restore path) plus save-slot entitlement enforcement (`2` free slots vs `5` premium slots) in the save screen.
+- **Employee detail view shipped** — Added a dedicated People detail screen with role/profile metadata, trajectory chart (Skill/Morale/Stress), and quarter history log; employee cards now include a `Details` action.
+- **Niche system (P1)** — New game now includes per-company-type niche selection via `src/data/niches.json`; niche modifiers (growth/churn/revenue) are applied in simulation and revenue engines.
+- **Early economy hiring revamp** — Candidate generation now includes employment type (full-time/contractor/intern) and one personality trait, with meaningful differences in compensation, retention risk, and development behavior.
+- **Finance chart expansion** — Finance dashboard now includes a second trend panel (valuation/team size/avg morale), backed by richer history snapshots.
+- **Visual hook layer pass** — Added lightweight placeholder FX hooks for quarter transitions and product feature-ship flashes so art/animation drops can plug in without gameplay rewrites.
 - **Interview tuning + readability pass** — Interview costs and lock durations now scale by company stage (early/growth/late) and difficulty to reduce early cash pressure without flattening late-game decisions; interviewer picker now uses compact visual chips (cost/lock/confidence) plus explicit disabled-state hints.
 - **Gameplay pacing tuning (type-aware)** — Late-stage growth headwinds and retention pressure are now tuned per company type, and sustainable-win scale checks are now type-specific for fairer timing across SaaS, Consumer, Marketplace, and Dev Tools runs.
 - **Difficulty pass (backend)** — Difficulty now affects more than starting cash: churn pressure, competitor growth, fundraising thresholds/offer sizes, and event pressure are all tuned through `DIFFICULTY_MULTS` to better separate Sandbox/Normal/Hardcore.
@@ -79,7 +86,7 @@ startup_mobile_game/
 - **Save stability fix** — `feature_progress` serialization now writes as a numeric value (not a duplicated container call), preventing save-time variant errors in quarter autosaves.
 - **Automated backend smoke runner** — Added `tools/backend_smoke.py` to validate core JSON content integrity and feature-ID wiring (including product visual preset IDs) without needing the Godot runtime.
 - **First-run tutorial system** — Added a lightweight 5-step guided overlay (`TutorialManager`) that introduces cash/runway, hiring, and quarter advance flow; supports skip, auto-step triggers, and replay from Settings.
-- **Free vs paid flow** — Added a free-tier lock at end of Year 2 (8 quarters) with a full-game paywall overlay in `AdManager`; desktop/dev unlock path is active now, mobile IAP provider callbacks are stubbed for StoreKit/Google Play wiring.
+- **Free vs paid flow** — Added a free-tier lock at end of Year 2 (8 quarters), premium paywall overlay, restore-purchases path, and save-slot entitlements; desktop/dev unlock path remains instant for local testing.
 - **Deep interviews** — Candidate interviews now require choosing an interviewer (Founder/VP/Director/Manager/Engineer tiers), with confidence-based stat estimates, culture-fit uncertainty when interviewer people-skill is weak, and opportunity-cost locks that can sideline interviewers for upcoming quarters.
 - **Longer-run pacing** — Sustainable victory now requires longer proof (6 profitable quarters + scale checks after Year 5), while feature build speed stays fast; victory screen now includes a "Keep Building" path for post-victory sandbox continuation.
 - **Save/security hardening** — Save files now write through temp + checksum wrapper + `.bak` backup recovery; loader enforces checksum and falls back to backup on corruption/deserialize failures.
@@ -101,15 +108,19 @@ startup_mobile_game/
 
 ---
 
-## Development mantras
+## Development mantra
 
-1. **Playable over perfect.** A working game with placeholder UI beats a beautiful screen with no logic behind it.
-2. **One system at a time.** Don't build the fundraising system until hiring works.
-3. **Decisions over numbers.** If a screen shows stats but doesn't ask the player to DECIDE something, it's not gameplay.
-4. **Every quarter should have tension.** If a quarter passes with nothing interesting happening, add more events.
-5. **Steal from PGM3.** Its UI patterns, session structure, and "just one more season" hooks are your north star.
-6. **Your life is content.** Every frustrating thing about working in tech is a potential game event.
-7. **Ship in 3 months.** Not 6. Not 12. Scope to what one person can build in 13 weeks with AI assistance. Cut ruthlessly.
+**Make the next quarter feel clear, rewarding, and worth coming back for.**
+
+Supporting principles:
+
+1. **Clarity before complexity.** If a player cannot explain what happened and why, simplify the mechanic or the UI.
+2. **Reward effort quickly.** Every 1-2 quarters should show visible progress (feature shipped, team growth, or financial momentum).
+3. **Small slices, fully done.** Finish vertical slices end-to-end (logic, UI, save/load, edge cases) before expanding scope.
+4. **Decisions, not dashboards.** Stats should drive a choice; if they do not change behavior, cut or rework them.
+5. **Balance with evidence.** Tune from repeated runs and logs, not gut feel from one session.
+6. **Protect trust.** Stable saves, predictable rules, and natural UX text matter more than flashy extras.
+7. **Polish where players feel it.** Focus polish on onboarding, quarter advance feedback, and hire/product moments first.
 
 ---
 

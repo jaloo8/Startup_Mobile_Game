@@ -15,7 +15,8 @@ static func calculate(company: CompanyData, product: ProductData) -> float:
 			base = _devtools_revenue(product)
 		_:
 			base = 0.0
-	return maxf(0.0, base * product.revenue_mult)
+	var niche_mult := clampf(company.niche_revenue_mult, 0.6, 1.6)
+	return maxf(0.0, base * product.revenue_mult * niche_mult)
 
 
 static func _saas_revenue(product: ProductData) -> float:

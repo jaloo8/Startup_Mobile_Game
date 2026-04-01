@@ -2,6 +2,8 @@ extends Control
 
 @onready var name_input: LineEdit = %CompanyNameInput
 @onready var type_selector: OptionButton = %TypeSelector
+@onready var niche_selector: OptionButton = %NicheSelector
+@onready var niche_desc: Label = %NicheDesc
 @onready var difficulty_selector: OptionButton = %DifficultySelector
 @onready var scenario_selector: OptionButton = %ScenarioSelector
 @onready var background_selector: OptionButton = %BackgroundSelector
@@ -31,6 +33,7 @@ var _difficulty_desc_label: Label
 
 
 func _ready() -> void:
+	CompanyData.load_niche_catalog()
 	_populate_type_selector()
 	_populate_difficulty_selector()
 	_populate_scenario_selector()
@@ -39,6 +42,7 @@ func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	background_selector.item_selected.connect(_on_background_changed)
 	type_selector.item_selected.connect(_on_type_changed)
+	niche_selector.item_selected.connect(_on_niche_changed)
 	difficulty_selector.item_selected.connect(_on_difficulty_changed)
 
 	_build_type_hint_label()
@@ -46,6 +50,7 @@ func _ready() -> void:
 
 	_on_background_changed(0)
 	_on_type_changed(1)         # Consumer App is the default (index 1)
+	_on_niche_changed(0)
 	_on_difficulty_changed(1)   # Normal is the default
 
 
@@ -90,6 +95,7 @@ func _build_difficulty_desc_label() -> void:
 func _on_type_changed(_idx: int) -> void:
 	var type_id: int = type_selector.get_selected_id()
 	_load_type_illustration(type_id)
+	_populate_niche_selector(type_id)
 
 	if _type_hint_label == null:
 		return
@@ -108,6 +114,58 @@ func _on_type_changed(_idx: int) -> void:
 			_type_hint_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
 		_:
 			_type_hint_label.text = ""
+
+
+func _populate_niche_selector(type_id: int) -> void:
+	if niche_selector == null:
+		return
+	var previous_id := niche_selector.get_selected_id()
+	niche_selector.clear()
+	var rows := CompanyData.niches_for_type(type_id)
+	if rows.is_empty():
+		niche_selector.add_item("General", 0)
+		niche_desc.text = "Default niche with balanced modifiers."
+		return
+
+	var fallback_idx := 0
+	var preferred_idx := -1
+	for i in rows.size():
+		var row: Dictionary = rows[i]
+		var label := str(row.get("name", "Unknown Niche"))
+		var row_id := str(row.get("id", ""))
+		if bool(row.get("recommended", false)):
+			label += "  ★"
+			fallback_idx = i
+		niche_selector.add_item(label, i)
+		niche_selector.set_item_metadata(i, row_id)
+		if previous_id == i:
+			preferred_idx = i
+
+	if preferred_idx >= 0:
+		niche_selector.select(preferred_idx)
+	else:
+		niche_selector.select(fallback_idx)
+	_on_niche_changed(niche_selector.selected)
+
+
+func _on_niche_changed(_idx: int) -> void:
+	var type_id := type_selector.get_selected_id()
+	var rows := CompanyData.niches_for_type(type_id)
+	if rows.is_empty():
+		niche_desc.text = "Default niche with balanced modifiers."
+		return
+	var safe_idx := clampi(niche_selector.selected, 0, rows.size() - 1)
+	var row: Dictionary = rows[safe_idx]
+	var mods: Dictionary = row.get("modifiers", {})
+	var growth_pct := roundi((float(mods.get("growth_mult", 1.0)) - 1.0) * 100.0)
+	var churn_pct := roundi((float(mods.get("churn_mult", 1.0)) - 1.0) * 100.0)
+	var revenue_pct := roundi((float(mods.get("revenue_mult", 1.0)) - 1.0) * 100.0)
+	niche_desc.text = "%s\nGrowth %+d%% · Churn %+d%% · Revenue %+d%%" % [
+		str(row.get("description", "")),
+		growth_pct,
+		churn_pct,
+		revenue_pct,
+	]
 
 
 func _on_difficulty_changed(idx: int) -> void:
@@ -170,10 +228,16 @@ func _on_start() -> void:
 	var scen_idx := clampi(scenario_selector.selected, 0, scenarios.size() - 1)
 
 	var bg_id: int = background_selector.get_selected_id()
+	var niche_id := ""
+	if niche_selector != null:
+		var meta = niche_selector.get_item_metadata(niche_selector.selected)
+		if meta != null:
+			niche_id = str(meta)
 
 	var config := {
 		"name": name_input.text.strip_edges() if not name_input.text.strip_edges().is_empty() else "My Startup",
 		"type": type_selector.get_selected_id(),
+		"niche_id": niche_id,
 		"difficulty": difficulties[diff_idx],
 		"scenario": scenarios[scen_idx],
 		"founder_background": bg_id,

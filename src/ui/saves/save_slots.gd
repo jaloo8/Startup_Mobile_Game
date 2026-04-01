@@ -26,8 +26,12 @@ func _refresh() -> void:
 	_confirm_slot = ""
 
 	var saves := GameState.list_saves()
-	for save_info in saves:
-		if save_info.get("exists", false):
+	for i in saves.size():
+		var save_info: Dictionary = saves[i]
+		var slot_name: String = str(save_info.get("slot", ""))
+		if not _is_slot_unlocked(slot_name):
+			slot_container.add_child(_create_locked_slot(save_info))
+		elif save_info.get("exists", false):
 			slot_container.add_child(_create_occupied_slot(save_info))
 		else:
 			slot_container.add_child(_create_empty_slot(save_info))
@@ -118,16 +122,68 @@ func _create_empty_slot(_info: Dictionary) -> PanelContainer:
 	return panel
 
 
+func _create_locked_slot(info: Dictionary) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _empty_style)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+	panel.add_child(vbox)
+
+	var slot_name: String = str(info.get("slot", "slot_0"))
+	var slot_idx := _slot_index(slot_name)
+	var title := Label.new()
+	title.text = "Premium Slot %d" % slot_idx
+	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_color_override("font_color", Color(0.86, 0.76, 0.42))
+	vbox.add_child(title)
+
+	var desc := Label.new()
+	if info.get("exists", false):
+		desc.text = "Saved run in this slot is locked in free mode.\nUnlock full game to access it."
+	else:
+		desc.text = "Unlock full game to use this additional save slot."
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.add_theme_font_size_override("font_size", 12)
+	desc.add_theme_color_override("font_color", Color(0.58, 0.58, 0.64))
+	vbox.add_child(desc)
+
+	var unlock_btn := Button.new()
+	unlock_btn.text = "Unlock Full Game"
+	unlock_btn.custom_minimum_size = Vector2(140, 36)
+	unlock_btn.pressed.connect(func() -> void:
+		AdManager.show_paywall(
+			func() -> void: _refresh(),
+			Callable()
+		)
+	)
+	vbox.add_child(unlock_btn)
+	return panel
+
+
 func _on_load(slot_name: String) -> void:
+	if not _is_slot_unlocked(slot_name):
+		AdManager.show_paywall(
+			func() -> void: _refresh(),
+			Callable()
+		)
+		return
 	GameState.current_slot = slot_name
 	if GameState.load_game(slot_name):
 		EventEngine.load_events("res://src/data/events.json")
 		ProductData.load_feature_catalog("res://src/data/features.json")
+		CompanyData.load_niche_catalog()
 		HeadlineEngine.load_headlines("res://src/data/headlines.json")
 		SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 
 func _on_new_game(slot_name: String) -> void:
+	if not _is_slot_unlocked(slot_name):
+		AdManager.show_paywall(
+			func() -> void: _refresh(),
+			Callable()
+		)
+		return
 	GameState.current_slot = slot_name
 	SceneLoader.goto_scene("res://src/ui/setup/new_game.tscn")
 
@@ -155,3 +211,16 @@ static func _make_style(bg: Color) -> StyleBoxFlat:
 	s.content_margin_top = 12
 	s.content_margin_bottom = 12
 	return s
+
+
+func _is_slot_unlocked(slot_name: String) -> bool:
+	if AdManager.is_premium():
+		return true
+	return _slot_index(slot_name) <= AdManager.max_save_slots()
+
+
+static func _slot_index(slot_name: String) -> int:
+	var parts := slot_name.split("_")
+	if parts.size() < 2:
+		return 999
+	return maxi(1, int(parts[1]))

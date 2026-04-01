@@ -166,6 +166,24 @@ func _build_premium_section() -> void:
 		)
 		row.add_child(unlock_btn)
 
+		var restore_btn := Button.new()
+		restore_btn.text = "Restore"
+		restore_btn.add_theme_font_size_override("font_size", 13)
+		var rs := StyleBoxFlat.new()
+		rs.bg_color = Color(0.14, 0.18, 0.30)
+		rs.set_corner_radius_all(9)
+		rs.set_content_margin_all(10.0)
+		restore_btn.add_theme_stylebox_override("normal", rs)
+		restore_btn.add_theme_stylebox_override("hover", rs)
+		restore_btn.add_theme_stylebox_override("pressed", rs)
+		restore_btn.pressed.connect(func() -> void:
+			AdManager.restore_purchases(
+				func() -> void: _refresh_premium_row(),
+				Callable()
+			)
+		)
+		row.add_child(restore_btn)
+
 	# Replay tutorial button
 	var sep2 := HSeparator.new()
 	sep2.add_theme_color_override("color", Color(0.18, 0.20, 0.30, 0.5))

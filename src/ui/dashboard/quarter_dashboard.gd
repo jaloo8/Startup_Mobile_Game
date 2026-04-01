@@ -27,6 +27,7 @@ extends Control
 @onready var key_metric_title: Label = %KeyMetricTitle
 @onready var key_metric_label: Label = %KeyMetricLabel
 @onready var ticker_strip: Label = %TickerStrip
+@onready var quarter_transition_tint: ColorRect = %QuarterTransitionTint
 
 const MAX_VISIBLE_EVENTS := 10
 const HEADLINE_ROTATE_SECONDS := 4.0
@@ -146,6 +147,21 @@ func _move_nav_to_top() -> void:
 		btn.add_theme_font_size_override("font_size", 13)
 
 
+func _play_quarter_transition_placeholder() -> void:
+	# Visual hook layer for future bespoke quarter transition art.
+	if quarter_transition_tint == null:
+		return
+	quarter_transition_tint.visible = true
+	quarter_transition_tint.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(quarter_transition_tint, "modulate:a", 0.26, 0.10)
+	tw.tween_property(quarter_transition_tint, "modulate:a", 0.0, 0.22)
+	tw.finished.connect(func() -> void:
+		if quarter_transition_tint:
+			quarter_transition_tint.visible = false
+	)
+
+
 func _build_feature_banner() -> void:
 	# A slim banner near the top of the event log area that shows when a
 	# feature ships (for players who are on the dashboard when it happens).
@@ -164,7 +180,7 @@ func _refresh(_q: int) -> void:
 	if GameState.company == null:
 		return
 	quarter_label.text = "Year %d, Q%d" % [GameState.current_year, GameState.current_quarter]
-	company_label.text = "%s — %s" % [GameState.company.company_name, GameState.company.type_name()]
+	company_label.text = "%s — %s" % [GameState.company.company_name, GameState.company.type_name_with_niche()]
 	cash_label.text = "$%s" % SceneLoader.format_money(GameState.company.cash)
 	users_label.text = "%s users" % SceneLoader.format_number(GameState.product.users)
 	employees_label.text = "%d / %d" % [GameState.employees.size(), GameState.company.office_capacity()]
@@ -379,6 +395,7 @@ func _on_advance() -> void:
 		return
 
 	advance_btn.disabled = true
+	_play_quarter_transition_placeholder()
 	SceneLoader.free_children(event_log_container)
 	_pending_events.clear()
 	Analytics.track_quarter_advanced(GameState.current_year, GameState.current_quarter)

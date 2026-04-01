@@ -158,6 +158,48 @@ custom_minimum_size = Vector2(0, 170)
 size_flags_horizontal = 3
 script = ExtResource("3")
 
+[node name="HealthTrendHeader" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "Company Health Trends"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+
+[node name="HealthTrendMeta" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Last 12 quarters"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.55, 0.58, 0.7, 1)
+
+[node name="HealthTrendLegend" type="HBoxContainer" parent="ScrollContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ValuationTrendLegend" type="Label" parent="ScrollContainer/MarginContainer/VBox/HealthTrendLegend"]
+layout_mode = 2
+text = "Valuation"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.33, 0.8, 0.52, 1)
+
+[node name="TeamTrendLegend" type="Label" parent="ScrollContainer/MarginContainer/VBox/HealthTrendLegend"]
+layout_mode = 2
+text = "Team Size"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.37, 0.63, 0.95, 1)
+
+[node name="MoraleTrendLegend" type="Label" parent="ScrollContainer/MarginContainer/VBox/HealthTrendLegend"]
+layout_mode = 2
+text = "Avg Morale"
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.96, 0.74, 0.31, 1)
+
+[node name="HealthTrendChart" type="Control" parent="ScrollContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 170)
+size_flags_horizontal = 3
+script = ExtResource("3")
+
 [node name="Sep2" type="HSeparator" parent="ScrollContainer/MarginContainer/VBox"]
 layout_mode = 2
 

@@ -2,23 +2,99 @@ class_name HiringEngine
 extends RefCounted
 ## Generates candidates and handles the hiring pipeline.
 
-static func generate_candidates(count: int, _market: MarketData) -> Array[EmployeeData]:
+static func generate_candidates(count: int, _market: MarketData, state: Node = null) -> Array[EmployeeData]:
 	var candidates: Array[EmployeeData] = []
 	for i in count:
 		var emp := EmployeeData.new()
 		emp.employee_name = _random_name()
 		emp.ensure_uid()
+		emp.employment_type = _weighted_employment_type(state)
 		emp.seniority = _weighted_seniority()
 		emp.specialty = EmployeeData.Specialty.values().pick_random()
 		emp.skill = _stat_for_seniority(emp.seniority)
 		emp.speed = _stat_for_seniority(emp.seniority)
+		if emp.employment_type == EmployeeData.EmploymentType.INTERN:
+			emp.seniority = EmployeeData.Seniority.JUNIOR
+			emp.skill = randi_range(18, 42)
+			emp.speed = randi_range(25, 52)
+		elif emp.employment_type == EmployeeData.EmploymentType.CONTRACTOR:
+			emp.skill = clampi(emp.skill + randi_range(-4, 6), 15, 100)
+			emp.speed = clampi(emp.speed + randi_range(0, 8), 15, 100)
 		emp.growth_potential = EmployeeData.GrowthPotential.values().pick_random()
+		emp.personality = _weighted_personality()
 		emp.culture_fit = randi_range(30, 90)
 		emp.morale = randi_range(60, 90)
 		var salary_range: Vector2 = EmployeeData.SALARY_RANGES[emp.seniority]
-		emp.salary_per_quarter = randf_range(salary_range.x, salary_range.y)
+		emp.salary_per_quarter = _salary_for_candidate(salary_range, emp.employment_type, state)
 		candidates.append(emp)
 	return candidates
+
+
+static func _weighted_employment_type(state: Node = null) -> EmployeeData.EmploymentType:
+	var elapsed_q := 0
+	var cash := 150_000.0
+	if state != null:
+		if state.has_method("total_quarters_elapsed"):
+			elapsed_q = int(state.total_quarters_elapsed())
+		if state.get("company") != null:
+			cash = float(state.company.cash)
+
+	var full_time_share := 0.55
+	var contractor_share := 0.30
+	var intern_share := 0.15
+
+	# Early game: lower commitment hiring keeps first-year economics survivable.
+	if elapsed_q <= 8 and cash < 300_000.0:
+		full_time_share = 0.25
+		contractor_share = 0.55
+		intern_share = 0.20
+	# Late game: mature orgs lean more full-time.
+	elif elapsed_q >= 20 or cash > 1_500_000.0:
+		full_time_share = 0.72
+		contractor_share = 0.18
+		intern_share = 0.10
+
+	var roll := randf()
+	if roll < full_time_share:
+		return EmployeeData.EmploymentType.FULL_TIME
+	if roll < full_time_share + contractor_share:
+		return EmployeeData.EmploymentType.CONTRACTOR
+	return EmployeeData.EmploymentType.INTERN
+
+
+static func _salary_for_candidate(salary_range: Vector2, employment_type: EmployeeData.EmploymentType, state: Node = null) -> float:
+	var base := randf_range(salary_range.x, salary_range.y)
+	match employment_type:
+		EmployeeData.EmploymentType.CONTRACTOR:
+			base *= randf_range(0.58, 0.84)
+		EmployeeData.EmploymentType.INTERN:
+			base *= randf_range(0.28, 0.44)
+		_:
+			pass
+
+	# Tiny difficulty coupling: hardcore market is slightly tighter on comp.
+	if state != null and state.get("difficulty") != null:
+		if String(state.difficulty) == "hardcore":
+			base *= 0.96
+		elif String(state.difficulty) == "sandbox":
+			base *= 1.03
+
+	return maxf(2_500.0, base)
+
+
+static func _weighted_personality() -> EmployeeData.Personality:
+	var roll := randf()
+	if roll < 0.20:
+		return EmployeeData.Personality.STEADY
+	elif roll < 0.36:
+		return EmployeeData.Personality.AMBITIOUS
+	elif roll < 0.52:
+		return EmployeeData.Personality.PERFECTIONIST
+	elif roll < 0.70:
+		return EmployeeData.Personality.TEAM_PLAYER
+	elif roll < 0.84:
+		return EmployeeData.Personality.MENTOR
+	return EmployeeData.Personality.ADAPTABLE
 
 
 static func _weighted_seniority() -> EmployeeData.Seniority:

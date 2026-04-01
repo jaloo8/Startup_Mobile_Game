@@ -12,7 +12,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, Iterable, List, Set, Tuple
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,6 +45,7 @@ KNOWN_EFFECT_KEYS = {
     "reputation_bonus",
     "dau_bonus",
 }
+KNOWN_NICHE_MOD_KEYS = {"growth_mult", "churn_mult", "revenue_mult"}
 
 
 def _load_json(path: Path) -> object:
@@ -340,6 +341,66 @@ def validate_competitors(data: object) -> List[str]:
     return errors
 
 
+def validate_niches(data: object) -> List[str]:
+    errors: List[str] = []
+    if not isinstance(data, dict):
+        return ["niches.json root must be an object"]
+
+    keys = set(data.keys())
+    missing_types = FEATURE_TYPES - keys
+    if missing_types:
+        errors.append(f"niches.json missing company types: {sorted(missing_types)}")
+
+    for ctype in FEATURE_TYPES:
+        rows = data.get(ctype, [])
+        if not isinstance(rows, list):
+            errors.append(f"niches.{ctype} must be an array")
+            continue
+        if not rows:
+            errors.append(f"niches.{ctype} must not be empty")
+            continue
+
+        ids_seen: Set[str] = set()
+        for idx, row in enumerate(rows):
+            pfx = f"niches.{ctype}[{idx}]"
+            if not isinstance(row, dict):
+                errors.append(f"{pfx} must be an object")
+                continue
+
+            nid = row.get("id", "")
+            if not isinstance(nid, str) or not nid.strip():
+                errors.append(f"{pfx}.id must be a non-empty string")
+            elif nid in ids_seen:
+                errors.append(f"duplicate niche id in {ctype}: {nid}")
+            else:
+                ids_seen.add(nid)
+
+            name = row.get("name", "")
+            if not isinstance(name, str) or not name.strip():
+                errors.append(f"{pfx}.name must be a non-empty string")
+
+            desc = row.get("description", "")
+            if not isinstance(desc, str) or not desc.strip():
+                errors.append(f"{pfx}.description must be a non-empty string")
+
+            recommended = row.get("recommended", None)
+            if recommended is not None and not isinstance(recommended, bool):
+                errors.append(f"{pfx}.recommended must be true/false when present")
+
+            mods = row.get("modifiers", {})
+            if not isinstance(mods, dict):
+                errors.append(f"{pfx}.modifiers must be an object")
+                continue
+            unknown_mods = set(mods.keys()) - KNOWN_NICHE_MOD_KEYS
+            if unknown_mods:
+                errors.append(f"{pfx}.modifiers has unknown keys: {sorted(unknown_mods)}")
+            for key, value in mods.items():
+                if not isinstance(value, (int, float)) or float(value) <= 0.0:
+                    errors.append(f"{pfx}.modifiers.{key} must be a number > 0")
+
+    return errors
+
+
 def _extract_visual_preset_ids(source: str) -> Set[str]:
     marker = "const VISUAL_PRESET_FEATURES := {"
     start = source.find(marker)
@@ -400,6 +461,52 @@ def validate_difficulty_contracts() -> List[str]:
     for key in required_mult_keys:
         if f'"{key}"' not in gs:
             errors.append(f"DIFFICULTY_MULTS missing key '{key}' in game_state.gd")
+    blocks: Dict[str, Dict[str, float]] = {}
+    for difficulty in ("sandbox", "normal", "hardcore"):
+        m = re.search(rf'"{difficulty}"\s*:\s*\{{(.*?)\}}', gs, flags=re.DOTALL)
+        if not m:
+            continue
+        raw = m.group(1)
+        pairs = re.findall(r'"([a-z_]+)"\s*:\s*(-?\d+(?:\.\d+)?)', raw)
+        blocks[difficulty] = {k: float(v) for k, v in pairs}
+
+    def _get(diff: str, key: str) -> Optional[float]:
+        if diff not in blocks:
+            return None
+        return blocks[diff].get(key)
+
+    # Sanity checks for balance shape (easiest -> hardest).
+    cash_triplet = (_get("sandbox", "cash_mult"), _get("normal", "cash_mult"), _get("hardcore", "cash_mult"))
+    if all(v is not None for v in cash_triplet):
+        a, b, c = cash_triplet
+        if not (a > b > c):
+            errors.append("cash_mult should decrease from sandbox > normal > hardcore")
+
+    churn_triplet = (_get("sandbox", "churn_mult"), _get("normal", "churn_mult"), _get("hardcore", "churn_mult"))
+    if all(v is not None for v in churn_triplet):
+        a, b, c = churn_triplet
+        if not (a < b < c):
+            errors.append("churn_mult should increase from sandbox < normal < hardcore")
+
+    competitor_triplet = (
+        _get("sandbox", "competitor_mult"),
+        _get("normal", "competitor_mult"),
+        _get("hardcore", "competitor_mult"),
+    )
+    if all(v is not None for v in competitor_triplet):
+        a, b, c = competitor_triplet
+        if not (a <= b <= c):
+            errors.append("competitor_mult should not be easier on harder difficulties")
+
+    event_triplet = (
+        _get("sandbox", "event_pressure_mult"),
+        _get("normal", "event_pressure_mult"),
+        _get("hardcore", "event_pressure_mult"),
+    )
+    if all(v is not None for v in event_triplet):
+        a, b, c = event_triplet
+        if not (a <= b <= c):
+            errors.append("event_pressure_mult should increase from sandbox to hardcore")
 
     if not FUNDRAISING_PATH.exists():
         errors.append(f"missing file: {FUNDRAISING_PATH.relative_to(ROOT)}")
@@ -430,6 +537,7 @@ def main() -> int:
         "glossary": DATA_DIR / "glossary.json",
         "vcs": DATA_DIR / "vcs.json",
         "competitors": DATA_DIR / "competitors.json",
+        "niches": DATA_DIR / "niches.json",
     }
     for p in paths.values():
         _require_file(p, errors)
@@ -445,6 +553,7 @@ def main() -> int:
         glossary_data = _load_json(paths["glossary"])
         vcs_data = _load_json(paths["vcs"])
         competitors_data = _load_json(paths["competitors"])
+        niches_data = _load_json(paths["niches"])
     except Exception as exc:
         print(f"[FAIL] JSON load error: {exc}")
         return 1
@@ -456,6 +565,7 @@ def main() -> int:
     errors.extend(validate_glossary(glossary_data))
     errors.extend(validate_vcs(vcs_data))
     errors.extend(validate_competitors(competitors_data))
+    errors.extend(validate_niches(niches_data))
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
 
@@ -467,7 +577,10 @@ def main() -> int:
         return 1
 
     print("Backend smoke check PASSED")
-    print("Validated: features/events/headlines/glossary/vcs/competitors + visual presets + difficulty wiring")
+    print(
+        "Validated: features/events/headlines/glossary/vcs/competitors/niches "
+        "+ visual presets + difficulty wiring"
+    )
     return 0
 
 

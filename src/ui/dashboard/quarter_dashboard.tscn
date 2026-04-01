@@ -22,6 +22,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.08, 0.08, 0.12, 1)
 
+[node name="TransitionFxLayer" type="CanvasLayer" parent="."]
+layer = 40
+
+[node name="QuarterTransitionTint" type="ColorRect" parent="TransitionFxLayer"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+color = Color(0.02, 0.05, 0.12, 0.95)
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
