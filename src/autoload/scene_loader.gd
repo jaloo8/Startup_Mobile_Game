@@ -30,6 +30,8 @@ func _preload_all() -> void:
 			var scene := ResourceLoader.load(path, "PackedScene") as PackedScene
 			if scene:
 				_cache[path] = scene
+			else:
+				push_warning("SceneLoader: could not preload '%s' — check path and dependencies" % path)
 
 
 func goto_scene(path: String) -> void:
@@ -46,14 +48,19 @@ func _switch_scene(path: String) -> void:
 			_cache[path] = packed
 
 	if packed == null:
-		push_error("SceneLoader: failed to load %s" % path)
+		push_error("SceneLoader: failed to load '%s' — scene file missing or corrupt" % path)
+		return
+
+	# Instantiate before touching the tree; if this throws, the current scene survives.
+	var new_scene := packed.instantiate()
+	if new_scene == null:
+		push_error("SceneLoader: instantiate() returned null for '%s'" % path)
 		return
 
 	var tree := get_tree()
 	if tree.current_scene:
 		tree.current_scene.queue_free()
 
-	var new_scene := packed.instantiate()
 	tree.root.add_child(new_scene)
 	tree.current_scene = new_scene
 	scene_changed.emit(path)
