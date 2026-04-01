@@ -48,6 +48,17 @@ const INTERVIEW_LOCK_BY_ROLE := {
 	INTERVIEW_ROLE_MANAGER: 1,
 	INTERVIEW_ROLE_ENGINEER: 1,
 }
+const INTERVIEW_EARLY_QUARTER_MAX := 8
+const INTERVIEW_LATE_QUARTER_MIN := 24
+const INTERVIEW_LATE_VALUATION := 250_000_000.0
+const INTERVIEW_COST_MULT_EARLY := 0.72
+const INTERVIEW_COST_MULT_MID := 1.0
+const INTERVIEW_COST_MULT_LATE := 1.22
+const INTERVIEW_COST_DIFF_MULT := {
+	"sandbox": 0.90,
+	"normal": 1.00,
+	"hardcore": 1.10,
+}
 
 const AVATAR_COUNT := 8
 const ASSIGNMENT_ICON_PATHS := {
@@ -629,6 +640,87 @@ static func _safe_dict(value) -> Dictionary:
 	return value if value is Dictionary else {}
 
 
+func _interview_stage() -> String:
+	var elapsed_q := GameState.total_quarters_elapsed()
+	if elapsed_q <= INTERVIEW_EARLY_QUARTER_MAX and GameState.company.cash < 250_000.0:
+		return "early"
+	if elapsed_q >= INTERVIEW_LATE_QUARTER_MIN or GameState.company.valuation >= INTERVIEW_LATE_VALUATION:
+		return "late"
+	return "mid"
+
+
+func _interview_stage_cost_mult() -> float:
+	match _interview_stage():
+		"early":
+			return INTERVIEW_COST_MULT_EARLY
+		"late":
+			return INTERVIEW_COST_MULT_LATE
+		_:
+			return INTERVIEW_COST_MULT_MID
+
+
+func _effective_interview_cost(role: String) -> float:
+	var base_cost := float(INTERVIEW_COST_BY_ROLE.get(role, 1000.0))
+	var difficulty_mult := float(INTERVIEW_COST_DIFF_MULT.get(GameState.difficulty, 1.0))
+	var tuned := base_cost * _interview_stage_cost_mult() * difficulty_mult
+	return maxf(250.0, snapped(tuned, 50.0))
+
+
+func _effective_interview_lock(role: String) -> int:
+	var base_lock := int(INTERVIEW_LOCK_BY_ROLE.get(role, 1))
+	if base_lock <= 0:
+		return 0
+	var stage := _interview_stage()
+	if stage == "early":
+		return maxi(0, base_lock - 1)
+	if stage == "late" and (role == INTERVIEW_ROLE_VP or role == INTERVIEW_ROLE_DIRECTOR):
+		return mini(3, base_lock + 1)
+	return base_lock
+
+
+func _interview_stage_hint() -> String:
+	var stage := _interview_stage()
+	var mult := snapped(_interview_stage_cost_mult() * 100.0, 1.0)
+	match stage:
+		"early":
+			return "Early-stage hiring market: interview costs are discounted (%s%%)." % str(mult)
+		"late":
+			return "Late-stage hiring market: interview costs and senior lock time are higher (%s%%)." % str(mult)
+		_:
+			return "Growth-stage hiring market: standard interview costs (%s%%)." % str(mult)
+
+
+static func _cost_k(cost: float) -> String:
+	return str(snapped(cost / 1000.0, 0.1))
+
+
+func _confidence_chip_color(accuracy: float) -> Color:
+	if accuracy >= 0.86:
+		return Color(0.20, 0.46, 0.30)
+	if accuracy >= 0.74:
+		return Color(0.45, 0.37, 0.15)
+	return Color(0.45, 0.22, 0.20)
+
+
+func _chip(text: String, bg_color: Color, fg_color: Color = Color(0.95, 0.97, 1.0)) -> PanelContainer:
+	var chip := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg_color
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 3
+	style.content_margin_bottom = 3
+	chip.add_theme_stylebox_override("panel", style)
+
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", fg_color)
+	chip.add_child(lbl)
+	return chip
+
+
 func _interviewer_role(emp: EmployeeData) -> String:
 	match emp.seniority:
 		EmployeeData.Seniority.PRINCIPAL:
@@ -784,12 +876,20 @@ func _show_interviewer_picker(candidate: EmployeeData) -> void:
 	root.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "Better interviewers give cleaner reads, but tie up team capacity."
+	subtitle.text = "Better interviewers give cleaner reads, but can tie up team capacity."
 	subtitle.add_theme_font_size_override("font_size", 12)
 	subtitle.add_theme_color_override("font_color", Color(0.62, 0.64, 0.72))
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(subtitle)
+
+	var stage_lbl := Label.new()
+	stage_lbl.text = _interview_stage_hint()
+	stage_lbl.add_theme_font_size_override("font_size", 11)
+	stage_lbl.add_theme_color_override("font_color", Color(0.56, 0.74, 0.90))
+	stage_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	stage_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root.add_child(stage_lbl)
 
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(0, 300)
@@ -803,11 +903,13 @@ func _show_interviewer_picker(candidate: EmployeeData) -> void:
 	# Founder option (always available, no output lock, founder energy hit).
 	var founder_people := clampi(GameState.company.founder_stat("people") * 10, 1, 100)
 	var founder_accuracy := clampf(_interview_accuracy(INTERVIEW_ROLE_FOUNDER, founder_people), 0.40, 0.95)
+	var founder_cost := _effective_interview_cost(INTERVIEW_ROLE_FOUNDER)
+	var founder_lock := _effective_interview_lock(INTERVIEW_ROLE_FOUNDER)
 	_add_interviewer_option(
 		options, overlay, candidate,
 		"Founder", INTERVIEW_ROLE_FOUNDER, founder_people, founder_accuracy,
-		INTERVIEW_COST_BY_ROLE[INTERVIEW_ROLE_FOUNDER],
-		INTERVIEW_LOCK_BY_ROLE[INTERVIEW_ROLE_FOUNDER],
+		founder_cost,
+		founder_lock,
 		""
 	)
 
@@ -816,11 +918,13 @@ func _show_interviewer_picker(candidate: EmployeeData) -> void:
 		var role := _interviewer_role(emp)
 		var people_skill := _interviewer_people_skill(emp)
 		var accuracy := clampf(_interview_accuracy(role, people_skill), 0.40, 0.95)
+		var role_cost := _effective_interview_cost(role)
+		var role_lock := _effective_interview_lock(role)
 		_add_interviewer_option(
 			options, overlay, candidate,
 			emp.employee_name, role, people_skill, accuracy,
-			INTERVIEW_COST_BY_ROLE.get(role, 1000.0),
-			INTERVIEW_LOCK_BY_ROLE.get(role, 1),
+			role_cost,
+			role_lock,
 			emp.employee_uid
 		)
 
@@ -843,37 +947,96 @@ func _add_interviewer_option(
 	lock_quarters: int,
 	employee_uid: String
 ) -> void:
-	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(0, 52)
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = Color(0.12, 0.14, 0.21, 0.96)
+	card_style.set_corner_radius_all(10)
+	card_style.border_width_left = 1
+	card_style.border_width_right = 1
+	card_style.border_width_top = 1
+	card_style.border_width_bottom = 1
+	card_style.border_color = Color(0.26, 0.30, 0.46, 0.65)
+	card_style.content_margin_left = 10
+	card_style.content_margin_right = 10
+	card_style.content_margin_top = 8
+	card_style.content_margin_bottom = 8
+	card.add_theme_stylebox_override("panel", card_style)
+	container.add_child(card)
 
-	var cost_k := snapped(cost / 1000.0, 0.1)
-	var info := "%s — %s | %s | Cost: $%sK" % [
-		interviewer_name, role, _confidence_label(accuracy), str(cost_k),
-	]
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 6)
+	card.add_child(body)
+
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 8)
+	body.add_child(title_row)
+
+	var name_lbl := Label.new()
+	name_lbl.text = "%s — %s" % [interviewer_name, role]
+	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.add_theme_font_size_override("font_size", 13)
+	name_lbl.add_theme_color_override("font_color", Color(0.93, 0.95, 1.0))
+	title_row.add_child(name_lbl)
+
+	var read_lbl := Label.new()
+	read_lbl.text = "People read %d" % people_skill
+	read_lbl.add_theme_font_size_override("font_size", 11)
+	read_lbl.add_theme_color_override("font_color", Color(0.62, 0.74, 0.92))
+	title_row.add_child(read_lbl)
+
+	var chips_row := HBoxContainer.new()
+	chips_row.add_theme_constant_override("separation", 6)
+	body.add_child(chips_row)
+
+	chips_row.add_child(_chip("Cost $%sK" % _cost_k(cost), Color(0.20, 0.36, 0.66)))
 	if lock_quarters > 0:
-		info += " | Busy: %dQ" % lock_quarters
-	btn.text = info
-	btn.add_theme_font_size_override("font_size", 12)
+		chips_row.add_child(_chip("Lock %dQ" % lock_quarters, Color(0.34, 0.28, 0.58)))
+	else:
+		chips_row.add_child(_chip("No lock", Color(0.22, 0.42, 0.44)))
+	chips_row.add_child(_chip(_confidence_label(accuracy), _confidence_chip_color(accuracy)))
+
+	var hint_lbl := Label.new()
+	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint_lbl.add_theme_font_size_override("font_size", 11)
+	body.add_child(hint_lbl)
+
+	var run_btn := Button.new()
+	run_btn.text = "Run interview"
+	run_btn.custom_minimum_size = Vector2(0, 34)
+	body.add_child(run_btn)
 
 	var busy_q := 0
 	if not employee_uid.is_empty():
 		busy_q = GameState.interviewer_busy_for(employee_uid)
 	if busy_q > 0:
-		btn.disabled = true
-		btn.text = "%s — unavailable (%dQ left)" % [interviewer_name, busy_q]
+		run_btn.disabled = true
+		run_btn.text = "Unavailable"
+		hint_lbl.text = "Unavailable: currently interviewing (%dQ left)." % busy_q
+		hint_lbl.add_theme_color_override("font_color", Color(0.95, 0.72, 0.35))
 	elif GameState.company.cash < cost:
-		btn.disabled = true
-		btn.text = "%s — not enough cash (needs $%sK)" % [interviewer_name, str(cost_k)]
+		run_btn.disabled = true
+		run_btn.text = "Not enough cash"
+		var shortage := maxf(0.0, cost - GameState.company.cash)
+		hint_lbl.text = "Need $%sK more cash to run this interview." % _cost_k(shortage)
+		hint_lbl.add_theme_color_override("font_color", Color(0.92, 0.48, 0.45))
 	else:
-		btn.pressed.connect(func() -> void:
+		var lock_note := "No assignment lock."
+		if role == INTERVIEW_ROLE_FOUNDER:
+			lock_note = "Founder energy -4."
+		elif lock_quarters > 0:
+			lock_note = "%s unavailable for %d quarter%s after this interview." % [
+				interviewer_name, lock_quarters, "s" if lock_quarters > 1 else ""
+			]
+		hint_lbl.text = "%s %s" % [_confidence_label(accuracy), lock_note]
+		hint_lbl.add_theme_color_override("font_color", Color(0.64, 0.67, 0.77))
+		run_btn.pressed.connect(func() -> void:
 			_complete_interview(
 				candidate, interviewer_name, role, people_skill, accuracy,
 				cost, lock_quarters, employee_uid
 			)
 			overlay.queue_free()
 		)
-
-	container.add_child(btn)
 
 
 func _complete_interview(

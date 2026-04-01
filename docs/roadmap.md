@@ -373,7 +373,7 @@ Do these in order. Each one should be playable before starting the next.
 
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
-- [ ] **Charts and graphs** — Revenue over time, user growth, morale trends
+- [~] **Charts and graphs** — Finance screen now includes a lightweight 3-line quarter trend chart (cash/revenue/users, normalized, last 12 quarters); broader analytics views (morale and deeper drill-downs) still pending
 - [ ] **Employee detail view** — History, development arc, full stats
 - [ ] **Difficulty tuning** — Balance sandbox/normal/hardcore across 10+ test runs
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings

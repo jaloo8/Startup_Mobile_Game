@@ -7,6 +7,8 @@ extends Control
 @onready var runway_value: Label = %RunwayValue
 @onready var equity_value: Label = %EquityValue
 @onready var valuation_value: Label = %ValuationValue
+@onready var trend_chart: Control = %TrendChart
+@onready var trend_meta: Label = %TrendMeta
 
 @onready var salary_cost: Label = %SalaryCost
 @onready var infra_cost: Label = %InfraCost
@@ -67,6 +69,7 @@ func _refresh() -> void:
 	salary_cost.text = "$%s" % SceneLoader.format_money(costs.get("salaries", 0.0))
 	infra_cost.text = "$%s" % SceneLoader.format_money(costs.get("infrastructure", 0.0))
 	office_cost.text = "$%s" % SceneLoader.format_money(costs.get("office", 0.0))
+	_refresh_trend_chart()
 
 	if GameState.financials.funding_rounds.is_empty():
 		board_label.visible = false
@@ -89,6 +92,53 @@ func _refresh() -> void:
 
 func _wire_glossary(btn: Button, key: String) -> void:
 	btn.pressed.connect(Glossary.show_term.bind(key))
+
+
+func _refresh_trend_chart() -> void:
+	if trend_chart == null:
+		return
+
+	var points: Array[Dictionary] = []
+	for item in GameState.history:
+		if item is Dictionary:
+			points.append(item)
+
+	var live_point := {
+		"quarter": GameState.current_quarter,
+		"year": GameState.current_year,
+		"cash": GameState.company.cash,
+		"revenue": GameState.financials.revenue,
+		"users": GameState.product.users,
+	}
+	if points.is_empty():
+		points.append(live_point)
+	else:
+		var last: Dictionary = points[-1]
+		var same_period := int(last.get("quarter", -1)) == GameState.current_quarter \
+			and int(last.get("year", -1)) == GameState.current_year
+		var same_values := is_equal_approx(float(last.get("cash", -1.0)), GameState.company.cash) \
+			and is_equal_approx(float(last.get("revenue", -1.0)), GameState.financials.revenue) \
+			and int(last.get("users", -1)) == GameState.product.users
+		if not (same_period and same_values):
+			points.append(live_point)
+
+	if points.size() > 12:
+		points = points.slice(-12)
+
+	var cash_series: Array[float] = []
+	var revenue_series: Array[float] = []
+	var users_series: Array[float] = []
+	for p in points:
+		cash_series.append(float(p.get("cash", 0.0)))
+		revenue_series.append(float(p.get("revenue", 0.0)))
+		users_series.append(float(p.get("users", 0.0)))
+
+	if trend_chart.has_method("set_series"):
+		trend_chart.set_series(cash_series, revenue_series, users_series)
+
+	if trend_meta:
+		var n := points.size()
+		trend_meta.text = "Last %d quarter%s (normalized per metric)" % [n, "s" if n != 1 else ""]
 
 
 func _on_fundraise() -> void:

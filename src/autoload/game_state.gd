@@ -75,9 +75,33 @@ const SAVE_TMP_SUFFIX := ".tmp"
 # extending run length. Feature build speed stays unchanged.
 const SUSTAINABLE_MIN_QUARTERS := 20
 const SUSTAINABLE_PROFIT_STREAK := 6
-const SUSTAINABLE_MIN_USERS := 12_000
-const SUSTAINABLE_MIN_FEATURES := 8
-const SUSTAINABLE_MIN_REVENUE_PER_Q := 250_000.0
+const SUSTAINABLE_DEFAULT_REQUIREMENTS := {
+	"users": 12_000,
+	"features": 8,
+	"revenue_per_q": 250_000.0,
+}
+const SUSTAINABLE_REQUIREMENTS_BY_TYPE := {
+	CompanyData.CompanyType.SAAS: {
+		"users": 10_000,
+		"features": 8,
+		"revenue_per_q": 220_000.0,
+	},
+	CompanyData.CompanyType.CONSUMER: {
+		"users": 16_000,
+		"features": 9,
+		"revenue_per_q": 240_000.0,
+	},
+	CompanyData.CompanyType.MARKETPLACE: {
+		"users": 14_000,
+		"features": 8,
+		"revenue_per_q": 260_000.0,
+	},
+	CompanyData.CompanyType.DEV_TOOLS: {
+		"users": 9_000,
+		"features": 8,
+		"revenue_per_q": 210_000.0,
+	},
+}
 const DIFFICULTY_MULTS := {
 	"sandbox": {"cash_mult": 2.0, "churn_mult": 0.5, "competitor_mult": 0.5},
 	"normal": {"cash_mult": 1.0, "churn_mult": 1.0, "competitor_mult": 1.0},
@@ -331,16 +355,25 @@ func _check_end_conditions() -> void:
 		game_over.emit("dead_product")
 
 
+static func _sustainable_requirements(company_type: int) -> Dictionary:
+	var req := SUSTAINABLE_REQUIREMENTS_BY_TYPE.get(company_type, SUSTAINABLE_DEFAULT_REQUIREMENTS)
+	return req if req is Dictionary else SUSTAINABLE_DEFAULT_REQUIREMENTS
+
+
 func _meets_sustainable_victory(elapsed_q: int) -> bool:
 	if elapsed_q < SUSTAINABLE_MIN_QUARTERS:
 		return false
 	if profit_streak < SUSTAINABLE_PROFIT_STREAK:
 		return false
-	if product.users < SUSTAINABLE_MIN_USERS:
+	var req := _sustainable_requirements(company.type)
+	var min_users := int(req.get("users", SUSTAINABLE_DEFAULT_REQUIREMENTS["users"]))
+	var min_features := int(req.get("features", SUSTAINABLE_DEFAULT_REQUIREMENTS["features"]))
+	var min_revenue := float(req.get("revenue_per_q", SUSTAINABLE_DEFAULT_REQUIREMENTS["revenue_per_q"]))
+	if product.users < min_users:
 		return false
-	if product.feature_count() < SUSTAINABLE_MIN_FEATURES:
+	if product.feature_count() < min_features:
 		return false
-	if financials.revenue < SUSTAINABLE_MIN_REVENUE_PER_Q:
+	if financials.revenue < min_revenue:
 		return false
 	return true
 
@@ -652,7 +685,7 @@ func _serialize() -> Dictionary:
 			"users": product.users,
 			"dau": product.dau,
 			"churn_rate": product.churn_rate,
-			"feature_progress": product.feature_progress.duplicate(true),
+			"feature_progress": product.feature_progress,
 			"target_feature_id": product.target_feature_id,
 			"revenue_mult": product.revenue_mult,
 			"user_growth_flat_bonus": product.user_growth_flat_bonus,
@@ -718,7 +751,7 @@ func _deserialize(data: Dictionary) -> bool:
 	product.users = pd.get("users", 0)
 	product.dau = pd.get("dau", 0)
 	product.churn_rate = pd.get("churn_rate", 0.05)
-	product.feature_progress = pd.get("feature_progress", 0.0)
+	product.feature_progress = float(pd.get("feature_progress", 0.0))
 	product.target_feature_id = pd.get("target_feature_id", "")
 	product.revenue_mult = pd.get("revenue_mult", 1.0)
 	product.user_growth_flat_bonus = pd.get("user_growth_flat_bonus", 0)
@@ -804,6 +837,7 @@ func _clamp_deserialized_values() -> void:
 	product.users = clampi(product.users, 0, 1_000_000_000)
 	product.dau = clampi(product.dau, 0, product.users)
 	product.churn_rate = clampf(product.churn_rate, 0.0, 1.0)
+	product.feature_progress = clampf(product.feature_progress, 0.0, 1e9)
 	product.revenue_mult = clampf(product.revenue_mult, 0.01, 100.0)
 	product.dau_bonus = clampf(product.dau_bonus, 0.0, 1.0)
 

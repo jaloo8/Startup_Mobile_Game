@@ -192,6 +192,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 11.7 | Board patience decreases on missed targets | Eventually triggers takeover | `game_state.gd` → `_check_end_conditions()` |
 | 11.8 | Angel bailout available at $0 cash | One-time rescue, steep equity cost | `game_state.gd` → `angel_bailout_used` |
 | 11.9 | Cost breakdown is transparent | Salaries + infra traceable | `simulation_engine.gd`, `financials_data.gd` |
+| 11.10 | Finance trend chart renders and updates | Cash/Revenue/Users lines draw from history (last 12 quarters) | `src/ui/finance/finance_overview.gd` → `_refresh_trend_chart()`, `src/ui/components/trend_chart.gd` |
 
 ---
 

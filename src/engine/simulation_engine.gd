@@ -5,6 +5,60 @@ extends RefCounted
 const BASE_ORGANIC_USERS_PER_QUARTER := 10
 const MARKETING_USER_MULT := 0.5
 
+const DEFAULT_GROWTH_BALANCE := {
+	"maturity_start_users": 25_000.0,
+	"maturity_full_users": 500_000.0,
+	"maturity_target_mult": 0.62,
+	"maturity_floor_mult": 0.55,
+	"expansion_bonus_mult": 3.0,
+	"late_churn_users": 50_000,
+	"late_churn_ux_threshold": 60,
+	"late_churn_penalty_rate": 0.003,
+}
+
+const GROWTH_BALANCE_BY_TYPE := {
+	CompanyData.CompanyType.SAAS: {
+		"maturity_start_users": 35_000.0,
+		"maturity_full_users": 480_000.0,
+		"maturity_target_mult": 0.70,
+		"maturity_floor_mult": 0.60,
+		"expansion_bonus_mult": 3.4,
+		"late_churn_users": 90_000,
+		"late_churn_ux_threshold": 55,
+		"late_churn_penalty_rate": 0.0018,
+	},
+	CompanyData.CompanyType.CONSUMER: {
+		"maturity_start_users": 22_000.0,
+		"maturity_full_users": 420_000.0,
+		"maturity_target_mult": 0.60,
+		"maturity_floor_mult": 0.52,
+		"expansion_bonus_mult": 3.0,
+		"late_churn_users": 45_000,
+		"late_churn_ux_threshold": 62,
+		"late_churn_penalty_rate": 0.0035,
+	},
+	CompanyData.CompanyType.MARKETPLACE: {
+		"maturity_start_users": 30_000.0,
+		"maturity_full_users": 500_000.0,
+		"maturity_target_mult": 0.64,
+		"maturity_floor_mult": 0.56,
+		"expansion_bonus_mult": 3.5,
+		"late_churn_users": 70_000,
+		"late_churn_ux_threshold": 58,
+		"late_churn_penalty_rate": 0.0025,
+	},
+	CompanyData.CompanyType.DEV_TOOLS: {
+		"maturity_start_users": 26_000.0,
+		"maturity_full_users": 380_000.0,
+		"maturity_target_mult": 0.67,
+		"maturity_floor_mult": 0.58,
+		"expansion_bonus_mult": 3.1,
+		"late_churn_users": 55_000,
+		"late_churn_ux_threshold": 60,
+		"late_churn_penalty_rate": 0.0028,
+	},
+}
+
 static var _feature_names := [
 	"User Dashboard", "Search", "Notifications", "Analytics",
 	"API v2", "Mobile View", "Export", "Integrations",
@@ -30,6 +84,11 @@ static func process_quarter(state: Node) -> void:
 	_update_founder_energy(state)
 	_update_board_patience(state)
 	_clamp_all_state(state)
+
+
+static func _growth_balance(company_type: int) -> Dictionary:
+	var cfg := GROWTH_BALANCE_BY_TYPE.get(company_type, DEFAULT_GROWTH_BALANCE)
+	return cfg if cfg is Dictionary else DEFAULT_GROWTH_BALANCE
 
 
 static func _apply_work_output(state: Node) -> void:
@@ -145,14 +204,20 @@ static func _calculate_user_growth(state: Node) -> void:
 
 	total_new = ceili(total_new * econ_growth_mult)
 
-	# Growth naturally gets harder at scale; early game remains fast.
-	# This stretches run length without making first features feel slower.
-	if state.product.users > 25_000:
-		var maturity_mult := remap(float(state.product.users), 25_000.0, 500_000.0, 1.0, 0.62)
-		total_new = ceili(total_new * clampf(maturity_mult, 0.55, 1.0))
+	# Growth naturally gets harder at scale; early game stays punchy.
+	# Per-type thresholds keep each company archetype on a believable trajectory.
+	var balance := _growth_balance(state.company.type)
+	var maturity_start := float(balance.get("maturity_start_users", 25_000.0))
+	var maturity_full := maxf(maturity_start + 1.0, float(balance.get("maturity_full_users", 500_000.0)))
+	var maturity_target_mult := float(balance.get("maturity_target_mult", 0.62))
+	var maturity_floor := float(balance.get("maturity_floor_mult", 0.55))
+	var expansion_bonus_mult := float(balance.get("expansion_bonus_mult", 3.0))
+	if state.product.users > maturity_start:
+		var maturity_mult := remap(float(state.product.users), maturity_start, maturity_full, 1.0, maturity_target_mult)
+		total_new = ceili(total_new * clampf(maturity_mult, maturity_floor, 1.0))
 		# Great product quality/stability helps beat maturity headwinds.
 		var expansion_quality := clampf((state.product.ux_score / 100.0) * (state.product.stability / 100.0), 0.4, 1.0)
-		var expansion_bonus := ceili(feature_pull * 3.0 * expansion_quality)
+		var expansion_bonus := ceili(feature_pull * expansion_bonus_mult * expansion_quality)
 		total_new += expansion_bonus
 
 	var type_churn_mult := 1.0
@@ -168,12 +233,19 @@ static func _calculate_user_growth(state: Node) -> void:
 		CompanyData.CompanyType.DEV_TOOLS:
 			type_churn_mult = 0.9
 
-	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult)
+	var difficulty_churn_mult := 1.0
+	if state.has_method("difficulty_mult"):
+		difficulty_churn_mult = clampf(float(state.difficulty_mult("churn_mult")), 0.4, 2.0)
+
+	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult * difficulty_churn_mult)
 	var bug_churn := ceili(state.product.bugs * 0.5)
 	var total_churn := churn_count + bug_churn
-	if state.product.users > 50_000 and state.product.ux_score < 60:
+	var late_churn_users := int(balance.get("late_churn_users", 50_000))
+	var late_churn_ux := int(balance.get("late_churn_ux_threshold", 60))
+	var late_churn_rate := float(balance.get("late_churn_penalty_rate", 0.003))
+	if state.product.users > late_churn_users and state.product.ux_score < late_churn_ux:
 		# Retention discipline matters more as audience size grows.
-		total_churn += ceili(state.product.users * 0.003)
+		total_churn += ceili(state.product.users * late_churn_rate)
 
 	state.product.users = maxi(0, state.product.users + total_new - total_churn)
 
@@ -215,7 +287,10 @@ static func _update_cash(state: Node) -> void:
 
 
 static func _run_competitor_ai(state: Node) -> void:
-	CompetitorAI.step(state.market)
+	var growth_mult := 1.0
+	if state.has_method("difficulty_mult"):
+		growth_mult = clampf(float(state.difficulty_mult("competitor_mult")), 0.5, 2.5)
+	CompetitorAI.step(state.market, growth_mult)
 
 
 static func _update_economy(state: Node) -> void:

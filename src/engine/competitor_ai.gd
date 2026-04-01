@@ -144,14 +144,17 @@ static func _make_competitor(entry: Dictionary) -> Dictionary:
 	}
 
 
-static func step(market: MarketData) -> void:
+static func step(market: MarketData, growth_mult: float = 1.0) -> void:
+	growth_mult = clampf(growth_mult, 0.5, 2.5)
 	for i in market.competitors.size():
 		var comp: Dictionary = market.competitors[i]
 		var growth_rate: float = comp.get("growth_rate", 0.05)
 		var current_users: int = comp.get("users", 0)
 
-		var organic := ceili(current_users * growth_rate)
-		var base := randi_range(int(BASE_USER_GROWTH_PER_QUARTER / 2), BASE_USER_GROWTH_PER_QUARTER)
+		var organic := ceili(current_users * growth_rate * growth_mult)
+		var base_min := maxi(1, ceili((BASE_USER_GROWTH_PER_QUARTER / 2.0) * growth_mult))
+		var base_max := maxi(base_min, ceili(BASE_USER_GROWTH_PER_QUARTER * growth_mult))
+		var base := randi_range(base_min, base_max)
 		comp["users"] = current_users + organic + base
 
 		comp["product_quality"] = mini(100, comp.get("product_quality", 50) + randi_range(0, 3))

@@ -72,6 +72,10 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Interview tuning + readability pass** — Interview costs and lock durations now scale by company stage (early/growth/late) and difficulty to reduce early cash pressure without flattening late-game decisions; interviewer picker now uses compact visual chips (cost/lock/confidence) plus explicit disabled-state hints.
+- **Gameplay pacing tuning (type-aware)** — Late-stage growth headwinds and retention pressure are now tuned per company type, and sustainable-win scale checks are now type-specific for fairer timing across SaaS, Consumer, Marketplace, and Dev Tools runs.
+- **Finance trend chart** — Finances screen now includes a lightweight trend chart for cash, revenue, and users (last 12 quarters, normalized per metric) to make long-run momentum easier to read.
+- **Save stability fix** — `feature_progress` serialization now writes as a numeric value (not a duplicated container call), preventing save-time variant errors in quarter autosaves.
 - **First-run tutorial system** — Added a lightweight 5-step guided overlay (`TutorialManager`) that introduces cash/runway, hiring, and quarter advance flow; supports skip, auto-step triggers, and replay from Settings.
 - **Free vs paid flow** — Added a free-tier lock at end of Year 2 (8 quarters) with a full-game paywall overlay in `AdManager`; desktop/dev unlock path is active now, mobile IAP provider callbacks are stubbed for StoreKit/Google Play wiring.
 - **Deep interviews** — Candidate interviews now require choosing an interviewer (Founder/VP/Director/Manager/Engineer tiers), with confidence-based stat estimates, culture-fit uncertainty when interviewer people-skill is weak, and opportunity-cost locks that can sideline interviewers for upcoming quarters.
