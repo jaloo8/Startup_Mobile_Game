@@ -26,8 +26,14 @@ func _refresh() -> void:
 	_confirm_slot = ""
 
 	var saves := GameState.list_saves()
-	for i in saves.size():
-		var save_info: Dictionary = saves[i]
+	if saves.is_empty():
+		for idx in range(1, 6):
+			saves.append({
+				"slot": "slot_%d" % idx,
+				"exists": false,
+			})
+	for raw_info in saves:
+		var save_info: Dictionary = raw_info if raw_info is Dictionary else {}
 		var slot_name: String = str(save_info.get("slot", ""))
 		if not _is_slot_unlocked(slot_name):
 			slot_container.add_child(_create_locked_slot(save_info))
@@ -35,6 +41,11 @@ func _refresh() -> void:
 			slot_container.add_child(_create_occupied_slot(save_info))
 		else:
 			slot_container.add_child(_create_empty_slot(save_info))
+
+	# Safety fallback: if save listing fails for any reason, still show one entry
+	# so players are never blocked from starting a new run.
+	if slot_container.get_child_count() == 0:
+		slot_container.add_child(_create_empty_slot({"slot": "slot_1"}))
 
 
 func _create_occupied_slot(info: Dictionary) -> PanelContainer:
@@ -152,7 +163,7 @@ func _create_locked_slot(info: Dictionary) -> PanelContainer:
 	unlock_btn.text = "Unlock Full Game"
 	unlock_btn.custom_minimum_size = Vector2(140, 36)
 	unlock_btn.pressed.connect(func() -> void:
-		AdManager.show_paywall(
+		_show_unlock_paywall(
 			func() -> void: _refresh(),
 			Callable()
 		)
@@ -163,7 +174,7 @@ func _create_locked_slot(info: Dictionary) -> PanelContainer:
 
 func _on_load(slot_name: String) -> void:
 	if not _is_slot_unlocked(slot_name):
-		AdManager.show_paywall(
+		_show_unlock_paywall(
 			func() -> void: _refresh(),
 			Callable()
 		)
@@ -179,7 +190,7 @@ func _on_load(slot_name: String) -> void:
 
 func _on_new_game(slot_name: String) -> void:
 	if not _is_slot_unlocked(slot_name):
-		AdManager.show_paywall(
+		_show_unlock_paywall(
 			func() -> void: _refresh(),
 			Callable()
 		)
@@ -214,9 +225,9 @@ static func _make_style(bg: Color) -> StyleBoxFlat:
 
 
 func _is_slot_unlocked(slot_name: String) -> bool:
-	if AdManager.is_premium():
+	if _is_premium_safe():
 		return true
-	return _slot_index(slot_name) <= AdManager.max_save_slots()
+	return _slot_index(slot_name) <= _max_save_slots()
 
 
 static func _slot_index(slot_name: String) -> int:
@@ -224,3 +235,35 @@ static func _slot_index(slot_name: String) -> int:
 	if parts.size() < 2:
 		return 999
 	return maxi(1, int(parts[1]))
+
+
+func _ad_manager() -> Node:
+	return get_node_or_null("/root/AdManager")
+
+
+func _is_premium_safe() -> bool:
+	var mgr := _ad_manager()
+	if mgr == null:
+		return false
+	if not mgr.has_method("is_premium"):
+		return false
+	return bool(mgr.call("is_premium"))
+
+
+func _max_save_slots() -> int:
+	var mgr := _ad_manager()
+	if mgr == null:
+		return 5
+	if not mgr.has_method("max_save_slots"):
+		return 5
+	return clampi(int(mgr.call("max_save_slots")), 1, 5)
+
+
+func _show_unlock_paywall(on_unlock: Callable = Callable(), on_cancel: Callable = Callable()) -> void:
+	var mgr := _ad_manager()
+	if mgr and mgr.has_method("show_paywall"):
+		mgr.call("show_paywall", on_unlock, on_cancel)
+	else:
+		# Safe fallback: don't hard-block the player if paywall manager is unavailable.
+		if on_unlock.is_valid():
+			on_unlock.call()

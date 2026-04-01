@@ -28,18 +28,27 @@ const FREE_QUARTER_LIMIT := 8
 const FREE_SAVE_SLOT_LIMIT := 2
 const PREMIUM_SAVE_SLOT_LIMIT := 5
 const PREMIUM_UNLOCK_PRODUCT_ID := "venture.full_game_unlock"
+# Temporary gameplay-first mode: disable monetization/purchase flows.
+const MONETIZATION_TEMP_DISABLED := true
 
 
 func _ready() -> void:
+	if MONETIZATION_TEMP_DISABLED:
+		_ad_sdk_available = false
+		return
 	_ad_sdk_available = _detect_ad_sdk()
 	_setup_iap_provider()
 
 
 func is_premium() -> bool:
+	if MONETIZATION_TEMP_DISABLED:
+		return true
 	return Analytics.is_premium()
 
 
 func is_ads_enabled() -> bool:
+	if MONETIZATION_TEMP_DISABLED:
+		return false
 	if is_premium():
 		return false
 	if _is_desktop_platform():
@@ -48,6 +57,8 @@ func is_ads_enabled() -> bool:
 
 
 func max_save_slots() -> int:
+	if MONETIZATION_TEMP_DISABLED:
+		return PREMIUM_SAVE_SLOT_LIMIT
 	if is_premium() or _is_desktop_platform():
 		return PREMIUM_SAVE_SLOT_LIMIT
 	return FREE_SAVE_SLOT_LIMIT
@@ -58,6 +69,8 @@ static func _is_desktop_platform() -> bool:
 
 
 func is_ad_available(slot: String) -> bool:
+	if MONETIZATION_TEMP_DISABLED:
+		return false
 	if not is_ads_enabled():
 		return false
 
@@ -72,6 +85,8 @@ func is_ad_available(slot: String) -> bool:
 
 
 func show_ad(slot: String) -> bool:
+	if MONETIZATION_TEMP_DISABLED:
+		return false
 	if not is_ad_available(slot):
 		return false
 
@@ -126,6 +141,8 @@ static func _detect_ad_sdk() -> bool:
 
 
 func _setup_iap_provider() -> void:
+	if MONETIZATION_TEMP_DISABLED:
+		return
 	_iap_provider = null
 	# iOS native bridge (StoreKit plugin commonly registered as "InAppStore")
 	if Engine.has_singleton("InAppStore"):
@@ -164,6 +181,10 @@ func _try_iap_call(candidates: Array[String], args: Array = []) -> bool:
 
 
 func purchase_full_game(on_unlock: Callable = Callable(), on_cancel: Callable = Callable()) -> void:
+	if MONETIZATION_TEMP_DISABLED:
+		if on_unlock.is_valid():
+			on_unlock.call()
+		return
 	if is_premium():
 		if on_unlock.is_valid():
 			on_unlock.call()
@@ -188,6 +209,10 @@ func purchase_full_game(on_unlock: Callable = Callable(), on_cancel: Callable = 
 
 
 func restore_purchases(on_restored: Callable = Callable(), on_failed: Callable = Callable()) -> void:
+	if MONETIZATION_TEMP_DISABLED:
+		if on_restored.is_valid():
+			on_restored.call()
+		return
 	if is_premium():
 		if on_restored.is_valid():
 			on_restored.call()
@@ -284,6 +309,8 @@ func _on_iap_restore_failed(_a = null, _b = null, _c = null) -> void:
 ## Returns true when the player has used up their free quarters and must pay
 ## to keep playing.  Always false for premium players and on desktop dev builds.
 func is_game_locked() -> bool:
+	if MONETIZATION_TEMP_DISABLED:
+		return false
 	if is_premium():
 		return false
 	# Desktop builds are always unlocked (dev / TestFlight convenience).
@@ -295,6 +322,10 @@ func is_game_locked() -> bool:
 ## Shows the paywall overlay.  `on_unlock` is called (with no args) if the
 ## player successfully unlocks; `on_cancel` is called if they dismiss.
 func show_paywall(on_unlock: Callable = Callable(), on_cancel: Callable = Callable()) -> void:
+	if MONETIZATION_TEMP_DISABLED:
+		if on_unlock.is_valid():
+			on_unlock.call()
+		return
 	if _paywall_canvas and is_instance_valid(_paywall_canvas):
 		return  # already visible
 	_paywall_canvas = _build_paywall(on_unlock, on_cancel)
@@ -417,11 +448,14 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 	restore_btn.add_theme_stylebox_override("hover", restore_style)
 	restore_btn.add_theme_stylebox_override("pressed", restore_style)
 	restore_btn.pressed.connect(func() -> void:
-		var restored_cb := func() -> void:
+		var restored_cb: Callable = func() -> void:
 			if on_unlock.is_valid():
 				on_unlock.call()
-		var failed_cb := func() -> void:
+		var failed_cb: Callable = func() -> void:
 			_emit_purchase_failed("No purchase found to restore.")
+			_dismiss_paywall()
+			if on_cancel.is_valid():
+				on_cancel.call()
 		restore_purchases(restored_cb, failed_cb)
 	)
 	vbox.add_child(restore_btn)

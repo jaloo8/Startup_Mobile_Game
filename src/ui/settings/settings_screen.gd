@@ -34,7 +34,7 @@ func _ready() -> void:
 	privacy_panel.visible = false
 	version_label.text = "Venture v0.1.0"
 
-	if Analytics.is_premium():
+	if AdManager.is_premium():
 		analytics_header.text = "Analytics"
 		analytics_row.visible = false
 		analytics_toggle.visible = false
@@ -134,7 +134,7 @@ func _build_premium_section() -> void:
 	parent.add_child(row)
 	_premium_row = row
 
-	if Analytics.is_premium():
+	if AdManager.is_premium():
 		var icon := Label.new()
 		icon.text = "✓  Full Game — Unlocked"
 		icon.add_theme_font_size_override("font_size", 14)
