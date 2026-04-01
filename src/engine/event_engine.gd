@@ -85,6 +85,15 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 		max_events = 2
 	else:
 		max_events = 3
+	var pressure_mult := 1.0
+	if state.has_method("difficulty_mult"):
+		pressure_mult = clampf(float(state.difficulty_mult("event_pressure_mult")), 0.7, 1.5)
+	# Use floor/ceil instead of round so multipliers always have a visible effect.
+	# Example: 2 * 0.85 should stay at 1 in sandbox, while 2 * 1.2 should become 3.
+	if pressure_mult < 1.0:
+		max_events = maxi(1, floori(max_events * pressure_mult))
+	elif pressure_mult > 1.0:
+		max_events = mini(4, ceili(max_events * pressure_mult))
 
 	var count := randi_range(1, mini(max_events, eligible.size()))
 	var picked: Array[EventData] = []

@@ -400,11 +400,12 @@ These tests require deploying to a device or emulator, not just the editor.
 
 After any code change:
 
-1. **Lint check** — `ReadLints` on all modified `.gd` files
-2. **★ items** — Marked with ★ above: new game, dashboard, advance quarter, events, hiring, employee list, product, finances, navigation, edge cases (~15 min)
-3. **Section 17** — Save/load round-trip if persistence code changed
-4. **Relevant section** — If you changed a specific system, run its full section
-5. **Section 23** — On-device pass before any release build
+1. **Backend smoke script** — run `python3 tools/backend_smoke.py` (fast structural/data checks)
+2. **Lint check** — `ReadLints` on all modified `.gd` files
+3. **★ items** — Marked with ★ above: new game, dashboard, advance quarter, events, hiring, employee list, product, finances, navigation, edge cases (~15 min)
+4. **Section 17** — Save/load round-trip if persistence code changed
+5. **Relevant section** — If you changed a specific system, run its full section
+6. **Section 23** — On-device pass before any release build
 
 Full checklist: ~35 minutes in-editor, plus ~15 minutes on-device for Section 23.
 

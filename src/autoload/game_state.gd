@@ -102,10 +102,33 @@ const SUSTAINABLE_REQUIREMENTS_BY_TYPE := {
 		"revenue_per_q": 210_000.0,
 	},
 }
+# Centralized difficulty knobs consumed by simulation, fundraising, and events.
+# Keep these in one place so balancing passes stay predictable.
 const DIFFICULTY_MULTS := {
-	"sandbox": {"cash_mult": 2.0, "churn_mult": 0.5, "competitor_mult": 0.5},
-	"normal": {"cash_mult": 1.0, "churn_mult": 1.0, "competitor_mult": 1.0},
-	"hardcore": {"cash_mult": 0.6, "churn_mult": 1.5, "competitor_mult": 1.5},
+	"sandbox": {
+		"cash_mult": 2.0,
+		"churn_mult": 0.5,
+		"competitor_mult": 0.5,
+		"fundraise_amount_mult": 1.12,
+		"fundraise_threshold_shift": -0.05,
+		"event_pressure_mult": 0.85,
+	},
+	"normal": {
+		"cash_mult": 1.0,
+		"churn_mult": 1.0,
+		"competitor_mult": 1.0,
+		"fundraise_amount_mult": 1.0,
+		"fundraise_threshold_shift": 0.0,
+		"event_pressure_mult": 1.0,
+	},
+	"hardcore": {
+		"cash_mult": 0.6,
+		"churn_mult": 1.5,
+		"competitor_mult": 1.5,
+		"fundraise_amount_mult": 0.90,
+		"fundraise_threshold_shift": 0.06,
+		"event_pressure_mult": 1.20,
+	},
 }
 
 var _save_thread: Thread

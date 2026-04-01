@@ -116,11 +116,19 @@ static func generate_offer(state: Node) -> Dictionary:
 	var round_info: Dictionary = ROUND_RANGES[round_type]
 	var round_name: String = ROUND_NAMES[round_type]
 	var quality_signal: float = _company_strength(state)
+	var amount_mult := 1.0
+	var threshold_shift := 0.0
+	if state.has_method("difficulty_mult"):
+		# Difficulty hooks:
+		# - amount mult scales check size up/down.
+		# - threshold shift makes fundraising acceptance easier/harder.
+		amount_mult = clampf(float(state.difficulty_mult("fundraise_amount_mult")), 0.7, 1.3)
+		threshold_shift = clampf(float(state.difficulty_mult("fundraise_threshold_shift")), -0.15, 0.15)
 
 	var firm: Dictionary = _pick_firm(state, round_type, quality_signal)
 	var tier: String = firm.get("tier", "mid")
 
-	var threshold: float = TIER_THRESHOLDS.get(tier, 0.25)
+	var threshold: float = clampf(float(TIER_THRESHOLDS.get(tier, 0.25)) + threshold_shift, 0.05, 0.95)
 	if quality_signal < threshold:
 		return {
 			"rejected": true,
@@ -140,11 +148,12 @@ static func generate_offer(state: Node) -> Dictionary:
 	effective_max = maxf(effective_min, effective_max)
 
 	var amount: float = lerpf(effective_min, effective_max, clampf(quality_signal, 0.0, 1.0))
+	amount *= amount_mult
 	amount = snappedf(amount, 10_000)
 
 	var val_bonus: float = TIER_VALUATION_BONUS.get(tier, 1.0)
 	var valuation: float = amount * round_info["val_mult"] * val_bonus
-	valuation *= lerpf(0.8, 1.3, quality_signal)
+	valuation *= lerpf(0.8, 1.3, quality_signal) * lerpf(0.94, 1.06, amount_mult)
 	valuation = snappedf(valuation, 50_000)
 
 	var dilution: float = (amount / (valuation + amount)) * 100.0

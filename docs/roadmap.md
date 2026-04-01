@@ -375,7 +375,7 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
 - [~] **Charts and graphs** — Finance screen now includes a lightweight 3-line quarter trend chart (cash/revenue/users, normalized, last 12 quarters); broader analytics views (morale and deeper drill-downs) still pending
 - [ ] **Employee detail view** — History, development arc, full stats
-- [ ] **Difficulty tuning** — Balance sandbox/normal/hardcore across 10+ test runs
+- [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; full 10+ run balance validation still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
 - [ ] **Sound effects** — Minimal UI sounds (optional)
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
