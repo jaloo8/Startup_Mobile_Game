@@ -243,6 +243,9 @@ func _on_start() -> void:
 		"founder_background": bg_id,
 	}
 
+	if GameState.current_slot.is_empty():
+		GameState.current_slot = "slot_1"
+
 	GameState.new_game(config)
 	EventEngine.load_events("res://src/data/events.json")
 	ProductData.load_feature_catalog("res://src/data/features.json")
@@ -259,4 +262,5 @@ func _on_start() -> void:
 
 
 func _on_back() -> void:
-	SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")
+	# Temporary gameplay-first flow: return to main menu instead of save slots.
+	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
