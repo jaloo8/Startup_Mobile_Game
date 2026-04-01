@@ -376,10 +376,29 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Charts and graphs** — Revenue over time, user growth, morale trends
 - [ ] **Employee detail view** — History, development arc, full stats
 - [ ] **Difficulty tuning** — Balance sandbox/normal/hardcore across 10+ test runs
-- [ ] **Tutorial** — Guided first quarter
+- [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
 - [ ] **Sound effects** — Minimal UI sounds (optional)
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
 - [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
+- [x] **Persistence hardening** — Save files now use checksum-enforced wrapper + strict validation + `.bak` fallback recovery; corrupted primary save auto-recovers from backup when available
+- [x] **Storage safety limits** — Size limits for save/settings payloads and clamp/sanitize pass during deserialize to guard against malformed or tampered data
+- [~] **Free vs paid foundation** — Free-tier gate at end of Year 2 + paywall overlay + premium flags wired; mobile StoreKit/Google Play purchase callbacks still need implementation
+
+#### Animation Roadmap (Now → Soon → Later)
+
+**Now (done):**
+- [x] **Tween-based product visual animations** — Ken Burns slow zoom (1.0→1.06, 13-second loop) on revealed feed & recommendation thumbnails; skeleton shimmer sweep on in-progress/preview cards (white strip loops left→right inside the clip boundary, killed on feature ship); phase-offset scale pulses on story bubbles (each bubble breathes 1.0→1.10 on its own 2.6-second cycle with 0.5s stagger). No new assets required — all driven by Godot's Tween system on static PNGs.
+- [x] **Consumer streaming art pack** — 12 original generated images (brand badge, profile avatar, 3 feed thumbnails, 3 "For You" rec thumbnails, 4 story tiles) integrated into the live product visual via `_img_card()`, `_img_bubble()`, `_img_icon()` helpers with graceful solid-color fallbacks.
+
+**Soon (next sprint):**
+- [ ] **Kenney character sprite integration** — Download the free [Kenney Character Pack](https://kenney.nl/assets/toon-characters-1) (CC0, no attribution required). Wire up `AnimatedSprite2D` nodes for idle/walk/sit cycles. Display employees as animated sprites at their desks in the office scene, matching their current assignment (Features = typing, Bugs = looking worried, R&D = reading). Office scene upgrades (garage → co-working → HQ) swap the background banner and add more desk slots.
+- [ ] **Quarterly advance transition animation** — Short screen-wipe or card-flip when the player hits "Advance Quarter"; data updates play underneath so the transition feels smooth rather than a hard cut.
+- [ ] **Feature-ship confetti burst** — Particle system (`GPUParticles2D`) on the Product screen that fires when a feature ships; uses the feature's quality color so green is a clean ship and red is a stressful one.
+
+**Later (post-alpha):**
+- [ ] **Custom sprite art** — Commission or generate a consistent character sprite sheet once the game design is locked and company types are final. Replace the Kenney placeholders. Art style should match the Pixar-inspired employee avatars already in the hire badge.
+- [ ] **AnimationPlayer sequences** — Richer multi-step office scenes: employees look up and react to events, celebrate shipped features, droop during low morale, etc. Requires the custom sprite sheets above.
+- [ ] **Animated product mockup (beyond Tweens)** — For a future "showcase mode" trailer, pre-render the product visual transitions as a short video clip to embed in App Store screenshots.
 
 **Phase 4 — Content & Replayability (TODO):**
 - [ ] **Silicon Valley (show) character pack** — Parody versions of the show's cast as recruitable/encounter-able characters, each with specific skills and personalities that match their TV counterparts:

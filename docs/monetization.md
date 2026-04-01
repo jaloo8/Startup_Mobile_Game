@@ -8,8 +8,9 @@ Players choose how they want to play. Both options fund development.
 
 ### Free-to-Play (Ad-Supported)
 
-The full base game, free to download. Ads appear at natural break points
-so they don't interrupt gameplay flow.
+Current implementation: free tier is playable through **Year 2** (8 quarters),
+then prompts for full-game unlock. Ads appear at natural break points so they
+don't interrupt gameplay flow.
 
 **Ad placements (non-intrusive, thematic where possible):**
 - **Between quarters** — After hitting "Advance Quarter" and before results show.
@@ -20,26 +21,25 @@ so they don't interrupt gameplay flow.
   small in-game perk, not a dark pattern.
 
 **What F2P players get:**
-- Full Software path (all 4 company types)
-- All core systems (people, product, money, events, competitors)
-- All difficulty modes and starting scenarios
-- All win conditions
-- Limited to 1 save slot (premium gets 3)
+- Full Software path onboarding and core systems through Year 2
+- All foundational loops (people, product, money, events, competitors)
+- First-run tutorial and guided progression
+- Current build uses the same save-slot count as premium (5) until entitlement-based slot limits are added
 
 **What F2P players don't get:**
+- Year 3+ progression (locked behind full unlock)
 - Ad-free experience
 - DLC paths (locked behind purchase, same as premium)
-- Multiple save slots
-- Scenario packs (free players get "Modern Day" only)
 
-**Upgrade path:** A single "Remove Ads — $4.99" IAP converts F2P to premium.
-Same price as buying premium outright. No penalty for trying free first.
+**Upgrade path (current UI):** A single "Unlock Full Game — $2.99" purchase.
+Desktop/dev unlock path is active; mobile purchase callbacks are scaffolded and
+still need StoreKit/Google Play billing integration.
 
-### Premium — $4.99 (iOS / Android / Steam)
+### Premium — $2.99 (current target)
 
 - No ads, ever
-- 3 save slots
-- All scenario packs
+- Full run length (beyond Year 2)
+- Current build: 5 save slots (shared with free until slot entitlements ship)
 - Software Path: 4 company types
 - Full core engine
 - All difficulty modes, starting scenarios, win conditions

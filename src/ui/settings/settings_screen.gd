@@ -1,5 +1,5 @@
 extends Control
-## Settings screen — analytics toggle, privacy policy, game info.
+## Settings screen — analytics toggle, privacy policy, premium status, game info.
 
 @onready var back_btn: Button = %BackButton
 @onready var analytics_toggle: CheckButton = %AnalyticsToggle
@@ -16,6 +16,10 @@ extends Control
 @onready var age_gate_panel: PanelContainer = %AgeGatePanel
 @onready var age_confirm_btn: Button = %AgeConfirmButton
 @onready var age_deny_btn: Button = %AgeDenyButton
+
+# Dynamically created premium + tutorial controls.
+var _premium_row: Control
+var _tutorial_btn: Button
 
 
 func _ready() -> void:
@@ -51,6 +55,8 @@ func _ready() -> void:
 			age_gate_panel.visible = false
 			consent_banner.visible = false
 
+	_build_premium_section()
+	AdManager.premium_unlocked.connect(_on_premium_unlocked)
 	Analytics.track_screen("settings")
 
 
@@ -106,3 +112,102 @@ func _on_dismiss_banner() -> void:
 
 func _on_back() -> void:
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Premium section (injected programmatically below the version label)
+# ─────────────────────────────────────────────────────────────────────────────
+
+func _build_premium_section() -> void:
+	# Find the VBoxContainer that holds version_label and append after it.
+	var parent := version_label.get_parent()
+	if parent == null:
+		return
+
+	var sep := HSeparator.new()
+	sep.add_theme_color_override("color", Color(0.18, 0.20, 0.30, 0.7))
+	parent.add_child(sep)
+
+	# Premium status / buy row
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	parent.add_child(row)
+	_premium_row = row
+
+	if Analytics.is_premium():
+		var icon := Label.new()
+		icon.text = "✓  Full Game — Unlocked"
+		icon.add_theme_font_size_override("font_size", 14)
+		icon.add_theme_color_override("font_color", Color(0.38, 0.88, 0.52))
+		row.add_child(icon)
+	else:
+		var unlock_btn := Button.new()
+		unlock_btn.text = "Unlock Full Game — $2.99"
+		unlock_btn.add_theme_font_size_override("font_size", 14)
+		unlock_btn.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		var sn := StyleBoxFlat.new()
+		sn.bg_color = Color(0.18, 0.44, 0.88)
+		sn.set_corner_radius_all(9)
+		sn.set_content_margin_all(12.0)
+		unlock_btn.add_theme_stylebox_override("normal", sn)
+		var sh := sn.duplicate() as StyleBoxFlat
+		sh.bg_color = sn.bg_color.lightened(0.10)
+		unlock_btn.add_theme_stylebox_override("hover", sh)
+		var sp := sn.duplicate() as StyleBoxFlat
+		sp.bg_color = sn.bg_color.darkened(0.12)
+		unlock_btn.add_theme_stylebox_override("pressed", sp)
+		unlock_btn.add_theme_stylebox_override("focus", sn)
+		unlock_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		unlock_btn.pressed.connect(func() -> void:
+			AdManager.show_paywall(
+				func() -> void: _refresh_premium_row(),
+				Callable()
+			)
+		)
+		row.add_child(unlock_btn)
+
+	# Replay tutorial button
+	var sep2 := HSeparator.new()
+	sep2.add_theme_color_override("color", Color(0.18, 0.20, 0.30, 0.5))
+	parent.add_child(sep2)
+
+	var tut_btn := Button.new()
+	tut_btn.text = "Replay Tutorial"
+	tut_btn.add_theme_font_size_override("font_size", 13)
+	tut_btn.add_theme_color_override("font_color", Color(0.55, 0.58, 0.72))
+	var tb_style := StyleBoxFlat.new()
+	tb_style.bg_color = Color(0.12, 0.14, 0.24)
+	tb_style.set_corner_radius_all(7)
+	tb_style.set_content_margin_all(10.0)
+	tut_btn.add_theme_stylebox_override("normal", tb_style)
+	var tb_hover := tb_style.duplicate() as StyleBoxFlat
+	tb_hover.bg_color = tb_style.bg_color.lightened(0.08)
+	tut_btn.add_theme_stylebox_override("hover", tb_hover)
+	tut_btn.add_theme_stylebox_override("pressed", tb_style)
+	tut_btn.add_theme_stylebox_override("focus", tb_style)
+	tut_btn.pressed.connect(_on_replay_tutorial)
+	parent.add_child(tut_btn)
+	_tutorial_btn = tut_btn
+
+
+func _refresh_premium_row() -> void:
+	# Rebuild the premium row to show "Unlocked" after purchase.
+	if _premium_row and is_instance_valid(_premium_row):
+		SceneLoader.free_children(_premium_row)
+		var icon := Label.new()
+		icon.text = "✓  Full Game — Unlocked"
+		icon.add_theme_font_size_override("font_size", 14)
+		icon.add_theme_color_override("font_color", Color(0.38, 0.88, 0.52))
+		_premium_row.add_child(icon)
+
+
+func _on_premium_unlocked() -> void:
+	_refresh_premium_row()
+
+
+func _on_replay_tutorial() -> void:
+	TutorialManager.reset()
+	# Confirmation toast via the button text itself.
+	if _tutorial_btn:
+		_tutorial_btn.text = "Tutorial reset — start a game to see it again"
+		_tutorial_btn.disabled = true

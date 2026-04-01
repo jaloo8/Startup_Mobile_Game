@@ -1,7 +1,7 @@
 extends Control
 ## Product overview screen — see product health and feature list.
 
-@onready var product_mockup: TextureRect = %ProductMockup
+@onready var product_visual: Control = %ProductMockup
 @onready var features_label: Label = %FeaturesLabel
 @onready var tech_debt_bar: ProgressBar = %TechDebtBar
 @onready var bugs_label: Label = %BugsLabel
@@ -19,17 +19,59 @@ extends Control
 
 const MAX_VISIBLE_FEATURES := 50
 
-const PRODUCT_MOCKUP_PATHS := {
-	CompanyData.CompanyType.CONSUMER:    "res://assets/illustrations/product_consumer.png",
-	CompanyData.CompanyType.SAAS:        "res://assets/illustrations/product_saas.png",
-	CompanyData.CompanyType.MARKETPLACE: "res://assets/illustrations/product_marketplace.png",
-	CompanyData.CompanyType.DEV_TOOLS:   "res://assets/illustrations/product_devtools.png",
+const VISUAL_PRESET_LABELS := [
+	"Live run",
+	"Starter shell",
+	"Engagement core",
+	"Monetization",
+	"Fully built",
+]
+const SHOWCASE_PRESET_ORDER := [1, 2, 3, 4]
+const SHOWCASE_STEP_SECONDS := 2.8
+
+const VISUAL_PRESET_FEATURES := {
+	CompanyData.CompanyType.CONSUMER: [
+		[],
+		["profile_pages", "push_notifications"],
+		["profile_pages", "push_notifications", "social_feed", "stories", "recommendations"],
+		["profile_pages", "push_notifications", "social_feed", "stories", "recommendations", "sharing", "offline_mode", "iap", "live_chat", "dark_mode"],
+		["profile_pages", "push_notifications", "social_feed", "stories", "dark_mode", "sharing", "offline_mode", "recommendations", "iap", "live_chat"],
+	],
+	CompanyData.CompanyType.SAAS: [
+		[],
+		["user_dashboard", "billing"],
+		["user_dashboard", "billing", "analytics", "admin_panel", "api_v2", "sso_login"],
+		["user_dashboard", "billing", "analytics", "api_v2", "sso_login", "admin_panel", "integrations", "audit_log", "multi_tenancy", "custom_reports"],
+		["user_dashboard", "billing", "analytics", "api_v2", "sso_login", "admin_panel", "multi_tenancy", "audit_log", "integrations", "custom_reports"],
+	],
+	CompanyData.CompanyType.MARKETPLACE: [
+		[],
+		["seller_onboarding", "categories"],
+		["seller_onboarding", "categories", "search_filters", "ratings", "payment_escrow", "seller_analytics"],
+		["seller_onboarding", "search_filters", "ratings", "payment_escrow", "disputes", "seller_analytics", "promoted_listings", "categories", "delivery_tracking", "referral_program"],
+		["seller_onboarding", "search_filters", "ratings", "payment_escrow", "disputes", "seller_analytics", "promoted_listings", "categories", "delivery_tracking", "referral_program"],
+	],
+	CompanyData.CompanyType.DEV_TOOLS: [
+		[],
+		["cli_tool", "api_docs"],
+		["cli_tool", "sdk", "api_docs", "sandbox", "webhooks", "auth_tokens"],
+		["cli_tool", "sdk", "api_docs", "sandbox", "webhooks", "rate_limiting", "auth_tokens", "usage_dashboard", "plugin_system", "cicd_integration"],
+		["cli_tool", "sdk", "api_docs", "sandbox", "webhooks", "rate_limiting", "auth_tokens", "usage_dashboard", "plugin_system", "cicd_integration"],
+	],
 }
 
 # Dynamically created ETA + team info label below the build bar
 var _eta_label: Label
 # Celebration banner shown when a feature ships
 var _celebration_panel: PanelContainer
+var _visual_preset_panel: PanelContainer
+var _visual_preset_picker: OptionButton
+var _visual_preset_hint: Label
+var _visual_preset_mode: int = 0
+var _showcase_btn: Button
+var _showcase_timer: Timer
+var _showcase_step_idx: int = 0
+var _showcase_enabled: bool = false
 
 
 func _ready() -> void:
@@ -43,7 +85,8 @@ func _ready() -> void:
 
 	_build_eta_label()
 	_build_celebration_panel()
-	_load_product_mockup()
+	_build_visual_preset_controls()
+	_setup_product_visual()
 
 	GameState.feature_shipped.connect(_on_feature_shipped)
 	_refresh()
@@ -53,17 +96,36 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if GameState.feature_shipped.is_connected(_on_feature_shipped):
 		GameState.feature_shipped.disconnect(_on_feature_shipped)
+	if _showcase_timer:
+		_showcase_timer.stop()
 
 
-func _load_product_mockup() -> void:
-	if product_mockup == null or GameState.company == null:
+func _setup_product_visual() -> void:
+	if product_visual == null or GameState.company == null:
 		return
-	var path: String = PRODUCT_MOCKUP_PATHS.get(GameState.company.type, "")
-	if path.is_empty():
+	if product_visual.has_method("setup"):
+		product_visual.setup(GameState.company.type)
+	_refresh_product_visual()
+
+
+func _refresh_product_visual() -> void:
+	if product_visual == null or GameState.product == null:
 		return
-	var tex: Texture2D = ResourceLoader.load(path) as Texture2D
-	if tex:
-		product_mockup.texture = tex
+	var shipped_ids: Array[String] = _effective_visual_features()
+	if product_visual.has_method("refresh"):
+		product_visual.refresh(shipped_ids)
+
+	if product_visual.has_method("set_build_preview"):
+		if _visual_preset_mode != 0:
+			product_visual.set_build_preview("", 0.0)
+			return
+		var target: Dictionary = GameState.product.get_target_feature(GameState.company.type)
+		if target.is_empty():
+			product_visual.set_build_preview("", 0.0)
+		else:
+			var cost: float = maxf(1.0, float(target.get("cost", 100)))
+			var progress_01: float = clampf(GameState.product.feature_progress / cost, 0.0, 1.0)
+			product_visual.set_build_preview(target.get("id", ""), progress_01)
 
 
 func _build_eta_label() -> void:
@@ -111,6 +173,176 @@ func _build_celebration_panel() -> void:
 		root_parent.move_child(_celebration_panel, 0)
 
 
+func _build_visual_preset_controls() -> void:
+	if product_visual == null:
+		return
+
+	_visual_preset_panel = PanelContainer.new()
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.12, 0.13, 0.18, 0.9)
+	panel_style.set_corner_radius_all(8)
+	panel_style.content_margin_left = 10
+	panel_style.content_margin_right = 10
+	panel_style.content_margin_top = 8
+	panel_style.content_margin_bottom = 8
+	_visual_preset_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 3)
+	_visual_preset_panel.add_child(vbox)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	vbox.add_child(row)
+
+	var title := Label.new()
+	title.text = "Visual Preview"
+	title.add_theme_font_size_override("font_size", 12)
+	title.add_theme_color_override("font_color", Color(0.75, 0.82, 0.98))
+	row.add_child(title)
+
+	_visual_preset_picker = OptionButton.new()
+	for label in VISUAL_PRESET_LABELS:
+		_visual_preset_picker.add_item(label)
+	_visual_preset_picker.selected = _visual_preset_mode
+	_visual_preset_picker.item_selected.connect(_on_visual_preset_selected)
+	row.add_child(_visual_preset_picker)
+
+	_showcase_btn = Button.new()
+	_showcase_btn.text = "Showcase ▶"
+	_showcase_btn.custom_minimum_size = Vector2(110, 0)
+	_showcase_btn.pressed.connect(_on_showcase_pressed)
+	row.add_child(_showcase_btn)
+
+	_visual_preset_hint = Label.new()
+	_visual_preset_hint.add_theme_font_size_override("font_size", 10)
+	_visual_preset_hint.add_theme_color_override("font_color", Color(0.55, 0.58, 0.66))
+	_visual_preset_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_visual_preset_hint)
+
+	var parent := product_visual.get_parent()
+	if parent:
+		var idx := product_visual.get_index()
+		parent.add_child(_visual_preset_panel)
+		parent.move_child(_visual_preset_panel, idx + 1)
+
+	_showcase_timer = Timer.new()
+	_showcase_timer.one_shot = false
+	_showcase_timer.wait_time = SHOWCASE_STEP_SECONDS
+	_showcase_timer.timeout.connect(_on_showcase_tick)
+	add_child(_showcase_timer)
+
+	_update_visual_preset_hint()
+
+
+func _on_visual_preset_selected(index: int) -> void:
+	if _showcase_enabled:
+		_stop_showcase_mode()
+	_set_visual_preset_mode(index)
+
+
+func _update_visual_preset_hint() -> void:
+	if _visual_preset_hint == null:
+		return
+	if _showcase_enabled:
+		_visual_preset_hint.text = "Showcase mode: auto-cycling Starter → Engagement → Monetization → Full."
+	elif _visual_preset_mode == 0:
+		_visual_preset_hint.text = "Using your real shipped features. No fake unlocks."
+	else:
+		_visual_preset_hint.text = "Preview mode only. This does not change save data or unlocks."
+
+
+func _set_visual_preset_mode(index: int) -> void:
+	_visual_preset_mode = clampi(index, 0, VISUAL_PRESET_LABELS.size() - 1)
+	if _visual_preset_picker and _visual_preset_picker.selected != _visual_preset_mode:
+		_visual_preset_picker.select(_visual_preset_mode)
+	_update_visual_preset_hint()
+	_animate_visual_rebuild()
+
+
+func _animate_visual_rebuild() -> void:
+	if product_visual == null:
+		_setup_product_visual()
+		return
+	var tw := create_tween()
+	tw.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(product_visual, "modulate:a", 0.0, 0.14)
+	tw.tween_callback(_setup_product_visual)
+	tw.tween_property(product_visual, "modulate:a", 1.0, 0.20)
+
+
+func _on_showcase_pressed() -> void:
+	if _showcase_enabled:
+		_stop_showcase_mode()
+	else:
+		_start_showcase_mode()
+
+
+func _start_showcase_mode() -> void:
+	if _showcase_enabled:
+		return
+	_showcase_enabled = true
+	_showcase_step_idx = 0
+	if _showcase_btn:
+		_showcase_btn.text = "Showcase ■"
+	_apply_showcase_step()
+	if _showcase_timer:
+		_showcase_timer.start()
+	_update_visual_preset_hint()
+
+
+func _stop_showcase_mode() -> void:
+	if not _showcase_enabled:
+		return
+	_showcase_enabled = false
+	if _showcase_timer:
+		_showcase_timer.stop()
+	if _showcase_btn:
+		_showcase_btn.text = "Showcase ▶"
+	_update_visual_preset_hint()
+
+
+func _on_showcase_tick() -> void:
+	_apply_showcase_step()
+
+
+func _apply_showcase_step() -> void:
+	if SHOWCASE_PRESET_ORDER.is_empty():
+		return
+	var i: int = _showcase_step_idx % SHOWCASE_PRESET_ORDER.size()
+	var preset_mode: int = SHOWCASE_PRESET_ORDER[i]
+	_showcase_step_idx += 1
+	_set_visual_preset_mode(preset_mode)
+
+
+func _effective_visual_features() -> Array[String]:
+	var base_ids: Array[String] = []
+	var seen: Dictionary = {}
+
+	if GameState.product:
+		for f: Dictionary in GameState.product.features:
+			var fid := String(f.get("id", ""))
+			if fid.is_empty() or seen.has(fid):
+				continue
+			seen[fid] = true
+			base_ids.append(fid)
+
+	if _visual_preset_mode == 0 or GameState.company == null:
+		return base_ids
+
+	var stage_sets: Array = VISUAL_PRESET_FEATURES.get(GameState.company.type, [])
+	if _visual_preset_mode >= stage_sets.size():
+		return base_ids
+
+	for fid: String in stage_sets[_visual_preset_mode]:
+		if fid.is_empty() or seen.has(fid):
+			continue
+		seen[fid] = true
+		base_ids.append(fid)
+
+	return base_ids
+
+
 func _refresh() -> void:
 	var p: ProductData = GameState.product
 	if p == null or GameState.company == null:
@@ -138,6 +370,7 @@ func _refresh() -> void:
 	churn_label.text = "%.1f%% per quarter" % (p.churn_rate * 100)
 
 	_refresh_build_status()
+	_refresh_product_visual()
 	_refresh_milestone_roadmap()
 	SceneLoader.free_children(feature_list_container)
 

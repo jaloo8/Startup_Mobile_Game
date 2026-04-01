@@ -43,9 +43,32 @@ const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
 
 static func _safe_array(value) -> Array:
 	return value if value is Array else []
+
+
+static func _safe_dict(value) -> Dictionary:
+	return value if value is Dictionary else {}
+
+
+static func _dict_array(value) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for item in _safe_array(value):
+		if item is Dictionary:
+			out.append(item)
+	return out
+
+
+static func _string_array(value) -> Array[String]:
+	var out: Array[String] = []
+	for item in _safe_array(value):
+		out.append(str(item))
+	return out
 const MAX_SLOTS := 5
 const MAX_HISTORY_SIZE := 200
 const MAX_EVENT_LOG_SIZE := 500
+const MAX_EMPLOYEES := 500
+const MAX_SAVE_BYTES := 4 * 1024 * 1024
+const SAVE_BACKUP_SUFFIX := ".bak"
+const SAVE_TMP_SUFFIX := ".tmp"
 const DIFFICULTY_MULTS := {
 	"sandbox": {"cash_mult": 2.0, "churn_mult": 0.5, "competitor_mult": 0.5},
 	"normal": {"cash_mult": 1.0, "churn_mult": 1.0, "competitor_mult": 1.0},
@@ -54,6 +77,7 @@ const DIFFICULTY_MULTS := {
 
 var _save_thread: Thread
 var _save_mutex: Mutex
+var _save_in_flight: bool = false
 
 
 func _ready() -> void:
@@ -274,10 +298,24 @@ func auto_save() -> void:
 
 
 func save_game_async(slot_name: String) -> void:
+	if slot_name not in SLOT_NAMES:
+		push_error("GameState: invalid slot name: %s" % slot_name)
+		return
+
 	_save_mutex.lock()
+	if _save_in_flight:
+		# Coalesce autosaves while one is already writing.
+		_save_mutex.unlock()
+		return
 	var data := _serialize()
+	if data.is_empty():
+		_save_mutex.unlock()
+		push_warning("GameState: async save skipped — game state not initialized")
+		return
+	_save_in_flight = true
 	_save_mutex.unlock()
 
+	# Join previous completed thread object before spinning up a new one.
 	if _save_thread and _save_thread.is_started():
 		_save_thread.wait_to_finish()
 
@@ -288,8 +326,16 @@ func save_game_async(slot_name: String) -> void:
 func _threaded_save(slot_name: String, data: Dictionary) -> void:
 	if slot_name not in SLOT_NAMES:
 		push_error("GameState: invalid slot name: %s" % slot_name)
+		_save_mutex.lock()
+		_save_in_flight = false
+		_save_mutex.unlock()
 		return
-	_atomic_write(SAVE_DIR + slot_name + ".json", data)
+	var ok := _atomic_write(_slot_path(slot_name), data)
+	if not ok:
+		push_warning("GameState: async save failed for slot %s" % slot_name)
+	_save_mutex.lock()
+	_save_in_flight = false
+	_save_mutex.unlock()
 
 
 func save_game(slot_name: String) -> bool:
@@ -300,19 +346,59 @@ func save_game(slot_name: String) -> bool:
 	if data.is_empty():
 		save_error.emit("Could not save — game state not initialized")
 		return false
-	var ok := _atomic_write(SAVE_DIR + slot_name + ".json", data)
+	var ok := _atomic_write(_slot_path(slot_name), data)
 	if not ok:
 		save_error.emit("Save failed — please check your device storage")
 	return ok
 
 
+static func _slot_path(slot_name: String) -> String:
+	return SAVE_DIR + slot_name + ".json"
+
+
+static func _backup_path(path: String) -> String:
+	return path + SAVE_BACKUP_SUFFIX
+
+
+static func _tmp_path(path: String) -> String:
+	return path + SAVE_TMP_SUFFIX
+
+
+static func _copy_file(src_path: String, dst_path: String) -> bool:
+	if not FileAccess.file_exists(src_path):
+		return false
+	var src := FileAccess.open(src_path, FileAccess.READ)
+	if src == null:
+		return false
+	var size: int = src.get_length()
+	if size <= 0 or size > MAX_SAVE_BYTES:
+		src = null
+		return false
+	var bytes := src.get_buffer(size)
+	src = null
+	var dst := FileAccess.open(dst_path, FileAccess.WRITE)
+	if dst == null:
+		return false
+	dst.store_buffer(bytes)
+	dst = null
+	return true
+
+
 static func _atomic_write(path: String, data: Dictionary) -> bool:
 	var payload_text := JSON.stringify(data, "\t")
 	var checksum := payload_text.sha256_text()
-	var wrapper := {"_checksum": checksum, "data": data}
+	var wrapper := {
+		"_schema": 1,
+		"_saved_at_unix": Time.get_unix_time_from_system(),
+		"_checksum": checksum,
+		"data": data,
+	}
 	var json_text := JSON.stringify(wrapper, "\t")
+	if json_text.length() > MAX_SAVE_BYTES:
+		push_error("GameState: save payload too large (%d bytes)" % json_text.length())
+		return false
 
-	var tmp_path := path + ".tmp"
+	var tmp_path := _tmp_path(path)
 	var file := FileAccess.open(tmp_path, FileAccess.WRITE)
 	if file == null:
 		push_error("GameState: failed to write temp save: %s" % tmp_path)
@@ -320,15 +406,69 @@ static func _atomic_write(path: String, data: Dictionary) -> bool:
 	file.store_string(json_text)
 	file = null
 
-	var dir := DirAccess.open(SAVE_DIR)
-	if dir == null:
-		push_error("GameState: cannot access save directory")
-		return false
-	var err := dir.rename(tmp_path, path)
+	# Roll the previous save into a .bak snapshot first (best effort).
+	if FileAccess.file_exists(path):
+		var bak_path := _backup_path(path)
+		var bak_tmp := _tmp_path(bak_path)
+		if _copy_file(path, bak_tmp):
+			if FileAccess.file_exists(bak_path):
+				DirAccess.remove_absolute(bak_path)
+			var bak_err := DirAccess.rename_absolute(bak_tmp, bak_path)
+			if bak_err != OK:
+				DirAccess.remove_absolute(bak_tmp)
+				push_warning("GameState: could not refresh backup (%d)" % bak_err)
+		else:
+			push_warning("GameState: could not snapshot previous save to backup")
+
+	# Move temp file into place.
+	var err := DirAccess.rename_absolute(tmp_path, path)
+	if err == ERR_ALREADY_EXISTS:
+		DirAccess.remove_absolute(path)
+		err = DirAccess.rename_absolute(tmp_path, path)
 	if err != OK:
 		push_error("GameState: rename failed (%d) %s -> %s" % [err, tmp_path, path])
+		DirAccess.remove_absolute(tmp_path)
 		return false
 	return true
+
+
+## Reads and validates a save payload from disk.
+## Returns {} for any invalid/corrupt/tampered payload.
+static func _read_save_data(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_warning("GameState: failed to open save file: %s" % path)
+		return {}
+	var byte_len: int = file.get_length()
+	if byte_len <= 0 or byte_len > MAX_SAVE_BYTES:
+		file = null
+		push_warning("GameState: save file rejected by size policy (%d bytes)" % byte_len)
+		return {}
+	var text := file.get_as_text()
+	file = null
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		push_warning("GameState: failed to parse save file: %s" % path)
+		return {}
+	var raw := _safe_dict(json.data)
+	if raw.is_empty() and not (json.data is Dictionary):
+		push_warning("GameState: save root is not a dictionary: %s" % path)
+		return {}
+
+	if raw.has("_checksum") and raw.has("data"):
+		var payload := _safe_dict(raw.get("data", {}))
+		if payload.is_empty() and not (raw.get("data") is Dictionary):
+			push_warning("GameState: save payload is not a dictionary: %s" % path)
+			return {}
+		var stored_checksum: String = str(raw.get("_checksum", ""))
+		var expected := JSON.stringify(payload, "\t").sha256_text()
+		if stored_checksum != expected:
+			push_warning("GameState: checksum mismatch: %s" % path)
+			return {}
+		return payload
+	return raw
 
 
 func load_game(slot_name: String) -> bool:
@@ -336,44 +476,41 @@ func load_game(slot_name: String) -> bool:
 		push_error("GameState: invalid slot name: %s" % slot_name)
 		return false
 
-	var path := SAVE_DIR + slot_name + ".json"
-	if not FileAccess.file_exists(path):
-		push_warning("GameState: save file not found: %s" % path)
+	var path := _slot_path(slot_name)
+	# Prefer primary save; fall back to backup if needed.
+	var game_data := _read_save_data(path)
+	var used_backup := false
+	if game_data.is_empty():
+		var bak_path := _backup_path(path)
+		game_data = _read_save_data(bak_path)
+		used_backup = not game_data.is_empty()
+
+	if game_data.is_empty():
+		save_error.emit("Load failed — save is missing or corrupted")
+		push_error("GameState: no valid save data found for slot: %s" % slot_name)
 		return false
 
-	var file := FileAccess.open(path, FileAccess.READ)
-	if file == null:
-		push_error("GameState: failed to open save file: %s" % path)
+	if not _deserialize(game_data):
+		if not used_backup:
+			var fallback := _read_save_data(_backup_path(path))
+			if not fallback.is_empty() and _deserialize(fallback):
+				push_warning("GameState: recovered slot %s via backup after deserialize failure" % slot_name)
+				_atomic_write(path, fallback)
+				return true
+		save_error.emit("Load failed — save format is invalid")
 		return false
 
-	var text := file.get_as_text()
-	file = null
-
-	var json := JSON.new()
-	if json.parse(text) != OK:
-		push_error("GameState: failed to parse save file")
-		return false
-
-	if not json.data is Dictionary:
-		push_error("GameState: save file is not a dictionary")
-		return false
-
-	var raw: Dictionary = json.data
-	var game_data: Dictionary
-	if raw.has("_checksum") and raw.has("data"):
-		var stored_checksum: String = str(raw.get("_checksum", ""))
-		game_data = raw.get("data", {})
-		var expected := JSON.stringify(game_data, "\t").sha256_text()
-		if stored_checksum != expected:
-			push_warning("GameState: save checksum mismatch — file may be tampered")
-	else:
-		game_data = raw
-
-	return _deserialize(game_data)
+	if used_backup:
+		push_warning("GameState: recovered slot %s from backup file" % slot_name)
+		_atomic_write(path, game_data)
+	return true
 
 
 func has_save(slot_name: String) -> bool:
-	return FileAccess.file_exists(SAVE_DIR + slot_name + ".json")
+	if slot_name not in SLOT_NAMES:
+		return false
+	var path := _slot_path(slot_name)
+	return FileAccess.file_exists(path) or FileAccess.file_exists(_backup_path(path))
 
 
 func _serialize() -> Dictionary:
@@ -409,10 +546,10 @@ func _serialize() -> Dictionary:
 			"office_level": company.office_level,
 			"reputation": company.reputation,
 			"founder_background": company.founder_background,
-			"founder_stats": company.founder_stats,
+			"founder_stats": company.founder_stats.duplicate(true),
 		},
 		"product": {
-			"features": product.features,
+			"features": product.features.duplicate(),
 			"tech_debt": product.tech_debt,
 			"bugs": product.bugs,
 			"stability": product.stability,
@@ -420,7 +557,7 @@ func _serialize() -> Dictionary:
 			"users": product.users,
 			"dau": product.dau,
 			"churn_rate": product.churn_rate,
-			"feature_progress": product.feature_progress,
+			"feature_progress": product.feature_progress.duplicate(true),
 			"target_feature_id": product.target_feature_id,
 			"revenue_mult": product.revenue_mult,
 			"user_growth_flat_bonus": product.user_growth_flat_bonus,
@@ -429,12 +566,12 @@ func _serialize() -> Dictionary:
 		"financials": {
 			"revenue": financials.revenue,
 			"burn_rate": financials.burn_rate,
-			"costs": financials.costs_breakdown,
-			"funding_rounds": financials.funding_rounds,
-			"investors": financials.investors,
+			"costs": financials.costs_breakdown.duplicate(true),
+			"funding_rounds": financials.funding_rounds.duplicate(true),
+			"investors": financials.investors.duplicate(true),
 		},
 		"market": {
-			"competitors": market.competitors,
+			"competitors": market.competitors.duplicate(true),
 			"trend": market.market_trend,
 			"economy": market.economy_state,
 		},
@@ -443,10 +580,10 @@ func _serialize() -> Dictionary:
 		"year": current_year,
 		"difficulty": difficulty,
 		"scenario": starting_scenario,
-		"history": history,
-		"event_log": event_log,
-		"fired_events": fired_one_time_events,
-		"milestones_hit": _milestones_hit,
+		"history": history.duplicate(true),
+		"event_log": event_log.duplicate(true),
+		"fired_events": fired_one_time_events.duplicate(),
+		"milestones_hit": _milestones_hit.duplicate(),
 		"angel_bailout_used": angel_bailout_used,
 		"profit_streak": profit_streak,
 		"founder_energy": founder_energy,
@@ -455,12 +592,13 @@ func _serialize() -> Dictionary:
 
 
 func _deserialize(data: Dictionary) -> bool:
-	if data.get("version", 0) != 1:
+	var version := int(data.get("version", 0))
+	if version != 1:
 		push_error("GameState: unsupported save version")
 		return false
 
 	company = CompanyData.new()
-	var cd: Dictionary = data.get("company", {})
+	var cd: Dictionary = _safe_dict(data.get("company", {}))
 	company.company_name = cd.get("name", "")
 	company.type = cd.get("type", 0)
 	company.cash = cd.get("cash", 0.0)
@@ -469,10 +607,12 @@ func _deserialize(data: Dictionary) -> bool:
 	company.office_level = cd.get("office_level", 0)
 	company.reputation = cd.get("reputation", 50)
 	company.founder_background = cd.get("founder_background", 0) as CompanyData.FounderBackground
-	company.founder_stats = cd.get("founder_stats", {"technical": 5, "finance": 5, "people": 5, "business": 5})
+	company.founder_stats = _safe_dict(cd.get("founder_stats", {"technical": 5, "finance": 5, "people": 5, "business": 5}))
+	if company.founder_stats.is_empty():
+		company.founder_stats = {"technical": 5, "finance": 5, "people": 5, "business": 5}
 
 	product = ProductData.new()
-	var pd: Dictionary = data.get("product", {})
+	var pd: Dictionary = _safe_dict(data.get("product", {}))
 	product.features.assign(_safe_array(pd.get("features", [])))
 	product.tech_debt = pd.get("tech_debt", 0)
 	product.bugs = pd.get("bugs", 0)
@@ -488,21 +628,24 @@ func _deserialize(data: Dictionary) -> bool:
 	product.dau_bonus = pd.get("dau_bonus", 0.0)
 
 	financials = FinancialsData.new()
-	var fd: Dictionary = data.get("financials", {})
+	var fd: Dictionary = _safe_dict(data.get("financials", {}))
 	financials.revenue = fd.get("revenue", 0.0)
 	financials.burn_rate = fd.get("burn_rate", 0.0)
-	financials.costs_breakdown = fd.get("costs", {})
+	financials.costs_breakdown = _safe_dict(fd.get("costs", {}))
 	financials.funding_rounds.assign(_safe_array(fd.get("funding_rounds", [])))
 	financials.investors.assign(_safe_array(fd.get("investors", [])))
 
 	market = MarketData.new()
-	var md: Dictionary = data.get("market", {})
+	var md: Dictionary = _safe_dict(data.get("market", {}))
 	market.competitors.assign(_safe_array(md.get("competitors", [])))
 	market.market_trend = md.get("trend", 0)
 	market.economy_state = md.get("economy", 0)
 
 	employees.clear()
-	for ed: Dictionary in _safe_array(data.get("employees", [])):
+	for raw_emp in _safe_array(data.get("employees", [])):
+		var ed: Dictionary = _safe_dict(raw_emp)
+		if ed.is_empty():
+			continue
 		var emp := EmployeeData.new()
 		emp.employee_name = ed.get("name", "")
 		emp.specialty = ed.get("specialty", 0)
@@ -522,10 +665,10 @@ func _deserialize(data: Dictionary) -> bool:
 	current_year = data.get("year", 1)
 	difficulty = data.get("difficulty", "normal")
 	starting_scenario = data.get("scenario", "garage")
-	history.assign(_safe_array(data.get("history", [])))
-	event_log.assign(_safe_array(data.get("event_log", [])))
-	fired_one_time_events.assign(_safe_array(data.get("fired_events", [])))
-	_milestones_hit.assign(_safe_array(data.get("milestones_hit", [])))
+	history.assign(_dict_array(data.get("history", [])))
+	event_log.assign(_dict_array(data.get("event_log", [])))
+	fired_one_time_events.assign(_string_array(data.get("fired_events", [])))
+	_milestones_hit.assign(_string_array(data.get("milestones_hit", [])))
 	angel_bailout_used = data.get("angel_bailout_used", false)
 	profit_streak = data.get("profit_streak", 0)
 	founder_energy = data.get("founder_energy", 100)
@@ -537,6 +680,12 @@ func _deserialize(data: Dictionary) -> bool:
 
 
 func _clamp_deserialized_values() -> void:
+	company.company_name = str(company.company_name).strip_edges()
+	if company.company_name.is_empty():
+		company.company_name = "My Startup"
+	elif company.company_name.length() > 64:
+		company.company_name = company.company_name.substr(0, 64)
+
 	company.type = clampi(company.type, 0, 3)
 	company.founder_background = clampi(company.founder_background, 0, 3) as CompanyData.FounderBackground
 	company.cash = clampf(company.cash, -1_000_000.0, 1e12)
@@ -544,6 +693,8 @@ func _clamp_deserialized_values() -> void:
 	company.equity_owned = clampf(company.equity_owned, 0.0, 100.0)
 	company.reputation = clampi(company.reputation, 0, 100)
 	company.office_level = clampi(company.office_level, 0, 10)
+	for stat_key in ["technical", "finance", "people", "business"]:
+		company.founder_stats[stat_key] = clampi(int(company.founder_stats.get(stat_key, 5)), 1, 10)
 
 	product.tech_debt = clampi(product.tech_debt, 0, 100)
 	product.bugs = maxi(0, product.bugs)
@@ -558,13 +709,30 @@ func _clamp_deserialized_values() -> void:
 	financials.revenue = maxf(0.0, financials.revenue)
 	financials.burn_rate = maxf(0.0, financials.burn_rate)
 
+	current_quarter = clampi(current_quarter, 1, 4)
+	current_year = maxi(1, current_year)
+	if not DIFFICULTY_MULTS.has(difficulty):
+		difficulty = "normal"
+
 	founder_energy = clampi(founder_energy, 0, 200)
 	board_patience = clampi(board_patience, 0, 20)
 	profit_streak = maxi(0, profit_streak)
 
 	market.economy_state = clampi(market.economy_state, 0, 2)
 
+	if employees.size() > MAX_EMPLOYEES:
+		employees = employees.slice(0, MAX_EMPLOYEES)
+	if history.size() > MAX_HISTORY_SIZE:
+		history = history.slice(-MAX_HISTORY_SIZE)
+	if event_log.size() > MAX_EVENT_LOG_SIZE:
+		event_log = event_log.slice(-MAX_EVENT_LOG_SIZE)
+
 	for emp in employees:
+		emp.employee_name = str(emp.employee_name).strip_edges()
+		if emp.employee_name.is_empty():
+			emp.employee_name = "Employee"
+		elif emp.employee_name.length() > 64:
+			emp.employee_name = emp.employee_name.substr(0, 64)
 		emp.specialty = clampi(emp.specialty, 0, 8)
 		emp.seniority = clampi(emp.seniority, 0, 4)
 		emp.assignment = clampi(emp.assignment, 0, 5) as EmployeeData.Assignment
@@ -589,28 +757,26 @@ func list_saves() -> Array[Dictionary]:
 
 
 func peek_save(slot_name: String) -> Dictionary:
-	var path := SAVE_DIR + slot_name + ".json"
-	if not FileAccess.file_exists(path):
+	if slot_name not in SLOT_NAMES:
 		return {"exists": false}
 
-	var file := FileAccess.open(path, FileAccess.READ)
-	if file == null:
+	var path := _slot_path(slot_name)
+	var data := _read_save_data(path)
+	var from_backup := false
+	if data.is_empty():
+		data = _read_save_data(_backup_path(path))
+		from_backup = not data.is_empty()
+	if data.is_empty():
 		return {"exists": false}
 
-	var text := file.get_as_text()
-	file = null
-	var json := JSON.new()
-	if json.parse(text) != OK:
-		return {"exists": false}
-
-	var raw: Dictionary = json.data if json.data is Dictionary else {}
-	var data: Dictionary = raw.get("data", raw) if raw.has("_checksum") else raw
-	var cd: Dictionary = data.get("company", {})
-	var pd: Dictionary = data.get("product", {})
-	var fd: Dictionary = data.get("financials", {})
+	var cd: Dictionary = _safe_dict(data.get("company", {}))
+	var pd: Dictionary = _safe_dict(data.get("product", {}))
+	var fd: Dictionary = _safe_dict(data.get("financials", {}))
+	var emp_count := _safe_array(data.get("employees", [])).size()
 
 	return {
 		"exists": true,
+		"from_backup": from_backup,
 		"company_name": cd.get("name", "Unknown"),
 		"company_type": cd.get("type", 0),
 		"cash": cd.get("cash", 0.0),
@@ -619,7 +785,7 @@ func peek_save(slot_name: String) -> Dictionary:
 		"year": data.get("year", 1),
 		"difficulty": data.get("difficulty", "normal"),
 		"revenue": fd.get("revenue", 0.0),
-		"employees": data.get("employees", []).size(),
+		"employees": emp_count,
 	}
 
 
@@ -627,12 +793,18 @@ func delete_save(slot_name: String) -> void:
 	if slot_name not in SLOT_NAMES:
 		push_error("GameState: invalid slot name for delete: %s" % slot_name)
 		return
-	var path := SAVE_DIR + slot_name + ".json"
+	var path := _slot_path(slot_name)
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
-	var tmp_path := path + ".tmp"
+	var tmp_path := _tmp_path(path)
 	if FileAccess.file_exists(tmp_path):
 		DirAccess.remove_absolute(tmp_path)
+	var bak_path := _backup_path(path)
+	if FileAccess.file_exists(bak_path):
+		DirAccess.remove_absolute(bak_path)
+	var bak_tmp_path := _tmp_path(bak_path)
+	if FileAccess.file_exists(bak_tmp_path):
+		DirAccess.remove_absolute(bak_tmp_path)
 	if current_slot == slot_name:
 		current_slot = ""
 		_clear_run_state()

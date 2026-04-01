@@ -85,6 +85,9 @@ func _ready() -> void:
 	_refresh(GameState.current_quarter)
 	Analytics.track_screen("dashboard")
 
+	# Start tutorial on first run (deferred so all nodes are fully laid out).
+	TutorialManager.start_if_needed.call_deferred()
+
 
 func _wire_glossary_button(btn: Button, glossary_key: String) -> void:
 	btn.pressed.connect(Glossary.show_term.bind(glossary_key))
@@ -364,6 +367,17 @@ func _on_event(event: EventData) -> void:
 
 
 func _on_advance() -> void:
+	# Free-tier gate: after FREE_QUARTER_LIMIT quarters the player must unlock.
+	if AdManager.is_game_locked():
+		AdManager.show_paywall(
+			# on_unlock: re-enable the button so the player can continue immediately.
+			func() -> void: advance_btn.disabled = false,
+			# on_cancel: just re-enable the button so they can try again later.
+			func() -> void: advance_btn.disabled = false,
+		)
+		advance_btn.disabled = true
+		return
+
 	advance_btn.disabled = true
 	SceneLoader.free_children(event_log_container)
 	_pending_events.clear()

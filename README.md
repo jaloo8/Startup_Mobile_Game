@@ -72,6 +72,10 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **First-run tutorial system** — Added a lightweight 5-step guided overlay (`TutorialManager`) that introduces cash/runway, hiring, and quarter advance flow; supports skip, auto-step triggers, and replay from Settings.
+- **Free vs paid flow** — Added a free-tier lock at end of Year 2 (8 quarters) with a full-game paywall overlay in `AdManager`; desktop/dev unlock path is active now, mobile IAP provider callbacks are stubbed for StoreKit/Google Play wiring.
+- **Save/security hardening** — Save files now write through temp + checksum wrapper + `.bak` backup recovery; loader enforces checksum and falls back to backup on corruption/deserialize failures.
+- **Settings storage hardening** — `settings.json` now writes atomically with size limits and backup fallback to prevent data loss from interrupted writes.
 - **Employee avatars** — 8 expressive Pixar-inspired 3D cartoon characters, each with a distinct look and personality. Displayed on candidate cards, team lists, and the new hire badge. Hashed deterministically per employee name so the same character always gets the same face.
 - **Employee ID badge** — Pop-in modal shown immediately after a hire; displays the avatar, name, title, key stats (Skill / Morale / Speed), employee number, and hire date before flowing into the assignment prompt. Animated spring scale-in for gratification.
 - **Visual asset set** — 4 office banners (garage → co-working → small office → HQ), 4 product mockup illustrations (one per company type), 5 assignment-category icons (Features / Bugs / Tech Debt / Infra / R&D), and app icon — all integrated into the dashboard, product, people, and new-game screens.

@@ -2,6 +2,9 @@ extends Node
 ## Analytics — routes to GameAnalytics when available, does nothing otherwise.
 
 const SETTINGS_PATH := "user://settings.json"
+const SETTINGS_TMP_PATH := "user://settings.json.tmp"
+const SETTINGS_BAK_PATH := "user://settings.json.bak"
+const MAX_SETTINGS_BYTES := 256 * 1024
 const GA_BUILD_VERSION := "0.1.0"
 
 var _ga = null
@@ -20,7 +23,6 @@ func _ready() -> void:
 		_ga.configureBuild(GA_BUILD_VERSION)
 		_ga.configureAvailableResourceCurrencies(["cash"])
 		_ga.configureAvailableResourceItemTypes(["revenue", "fundraising", "milestone", "salary", "infra", "hiring", "office", "angel"])
-		var platform := OS.get_name()
 		var game_key: String = _settings.get("ga_game_key", "")
 		var secret_key: String = _settings.get("ga_secret_key", "")
 		if not game_key.is_empty() and not secret_key.is_empty():
@@ -38,13 +40,12 @@ func _notification(what: int) -> void:
 
 
 func _load_settings() -> void:
-	if FileAccess.file_exists(SETTINGS_PATH):
-		var file := FileAccess.open(SETTINGS_PATH, FileAccess.READ)
-		if file:
-			var json := JSON.new()
-			if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
-				_settings = json.data
-			file = null
+	_settings = _read_settings_file(SETTINGS_PATH)
+	if _settings.is_empty() and FileAccess.file_exists(SETTINGS_BAK_PATH):
+		_settings = _read_settings_file(SETTINGS_BAK_PATH)
+		if not _settings.is_empty():
+			# Heal primary settings from backup automatically.
+			_atomic_write_settings(_settings)
 
 	_is_premium = _settings.get("is_premium", false)
 
@@ -59,10 +60,65 @@ func _load_settings() -> void:
 
 
 func _save_settings() -> void:
-	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(_settings, "\t"))
+	if not _atomic_write_settings(_settings):
+		push_warning("Analytics: failed to persist settings")
+
+
+func _read_settings_file(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return {}
+	var size: int = file.get_length()
+	if size <= 0 or size > MAX_SETTINGS_BYTES:
 		file = null
+		push_warning("Analytics: settings rejected by size policy (%d bytes)" % size)
+		return {}
+	var text := file.get_as_text()
+	file = null
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return {}
+	return json.data if json.data is Dictionary else {}
+
+
+func _atomic_write_settings(payload: Dictionary) -> bool:
+	var data := payload.duplicate(true)
+	var text := JSON.stringify(data, "\t")
+	if text.length() > MAX_SETTINGS_BYTES:
+		push_warning("Analytics: settings payload too large")
+		return false
+
+	var tmp := FileAccess.open(SETTINGS_TMP_PATH, FileAccess.WRITE)
+	if tmp == null:
+		return false
+	tmp.store_string(text)
+	tmp = null
+
+	# Keep a backup of the previous known-good settings.
+	if FileAccess.file_exists(SETTINGS_PATH):
+		var in_f := FileAccess.open(SETTINGS_PATH, FileAccess.READ)
+		if in_f:
+			var old_size: int = in_f.get_length()
+			if old_size > 0 and old_size <= MAX_SETTINGS_BYTES:
+				var buf := in_f.get_buffer(old_size)
+				in_f = null
+				var bak := FileAccess.open(SETTINGS_BAK_PATH, FileAccess.WRITE)
+				if bak:
+					bak.store_buffer(buf)
+					bak = null
+			else:
+				in_f = null
+
+	var err := DirAccess.rename_absolute(SETTINGS_TMP_PATH, SETTINGS_PATH)
+	if err == ERR_ALREADY_EXISTS:
+		DirAccess.remove_absolute(SETTINGS_PATH)
+		err = DirAccess.rename_absolute(SETTINGS_TMP_PATH, SETTINGS_PATH)
+	if err != OK:
+		DirAccess.remove_absolute(SETTINGS_TMP_PATH)
+		return false
+	return true
 
 
 func is_consent_given() -> bool:

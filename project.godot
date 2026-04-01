@@ -26,6 +26,7 @@ SceneLoader="*res://src/autoload/scene_loader.gd"
 Glossary="*res://src/autoload/glossary.gd"
 Analytics="*res://src/autoload/analytics.gd"
 AdManager="*res://src/autoload/ad_manager.gd"
+TutorialManager="*res://src/autoload/tutorial_manager.gd"
 
 [display]
 

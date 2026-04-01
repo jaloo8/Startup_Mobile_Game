@@ -11,7 +11,7 @@
 **Core fantasy:** You are the CEO/founder of a tech startup. You make every strategic decision — what to build, who to hire, when to raise money, when to pivot. The game simulates realistic consequences. Some decisions pay off quarters later. Others blow up in your face immediately.
 
 **Target platform:** iOS and Android (Godot 4.3), Steam/desktop future
-**Monetization:** Free (ad-supported) or Premium $4.99 (no ads) + $2.99 DLC packs per path
+**Monetization:** Free (ad-supported, currently gated after Year 2) or Premium $2.99 full-unlock + DLC packs per path
 **Session length:** 10–20 minutes (one "quarter" per session, natural stopping points)
 **Total game length:** 20–40 quarters (5–10 years of startup life per run)
 
@@ -472,7 +472,7 @@ Platforms:      iOS, Android, Steam/desktop (all from one codebase)
 Architecture:   Autoload singletons + Resource-based data model
 Data:           Godot Resources (serializable) + JSON for content
 State:          All game state in a single GameState autoload
-Save system:    Auto-save each quarter, 3 manual save slots (Resource serialization)
+Save system:    Auto-save each quarter, 5 manual save slots with checksum + backup recovery
 UI framework:   Godot Control nodes, custom theme
 ```
 
