@@ -47,6 +47,216 @@ KNOWN_EFFECT_KEYS = {
 }
 KNOWN_NICHE_MOD_KEYS = {"growth_mult", "churn_mult", "revenue_mult"}
 
+UI_BUTTON_SCRIPT_CHECKS = (
+    {
+        "label": "Main menu flow",
+        "path": ROOT / "src" / "ui" / "main_menu" / "main_menu.gd",
+        "required_snippets": [
+            "play_btn.pressed.connect(_on_play)",
+            "settings_btn.pressed.connect(_on_settings)",
+            "quit_btn.pressed.connect(_on_quit)",
+        ],
+        "required_funcs": ["_on_play", "_on_settings", "_on_quit"],
+        "required_any": [
+            [
+                'change_scene_to_file("res://src/ui/setup/new_game.tscn")',
+                'SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")',
+            ]
+        ],
+    },
+    {
+        "label": "Save slots flow",
+        "path": ROOT / "src" / "ui" / "saves" / "save_slots.gd",
+        "required_snippets": [
+            "back_btn.pressed.connect(_on_back)",
+            "load_btn.pressed.connect(_on_load.bind(slot_name))",
+            "new_btn.pressed.connect(_on_new_game.bind(slot_name))",
+            "GameState.load_game(slot_name)",
+            'SceneLoader.goto_scene("res://src/ui/setup/new_game.tscn")',
+        ],
+        "required_funcs": ["_on_back", "_on_load", "_on_new_game", "_on_delete_pressed"],
+    },
+    {
+        "label": "New game start flow",
+        "path": ROOT / "src" / "ui" / "setup" / "new_game.gd",
+        "required_snippets": [
+            "start_btn.pressed.connect(_on_start)",
+            "back_btn.pressed.connect(_on_back)",
+            "GameState.new_game(config)",
+        ],
+        "required_funcs": ["_on_start", "_on_back"],
+        "required_any": [
+            [
+                'change_scene_to_file("res://src/ui/dashboard/quarter_dashboard.tscn")',
+                'SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")',
+            ]
+        ],
+    },
+    {
+        "label": "Dashboard nav + quarter advance",
+        "path": ROOT / "src" / "ui" / "dashboard" / "quarter_dashboard.gd",
+        "required_snippets": [
+            "advance_btn.pressed.connect(_on_advance)",
+            "people_btn.pressed.connect(_on_people)",
+            "product_btn.pressed.connect(_on_product)",
+            "finance_btn.pressed.connect(_on_finance)",
+            "market_btn.pressed.connect(_on_market)",
+            "menu_btn.pressed.connect(_on_menu)",
+            "GameState.advance_quarter()",
+        ],
+        "required_funcs": [
+            "_on_advance",
+            "_on_people",
+            "_on_product",
+            "_on_finance",
+            "_on_market",
+            "_on_menu",
+        ],
+    },
+    {
+        "label": "Product build picker",
+        "path": ROOT / "src" / "ui" / "product" / "product_overview.gd",
+        "required_snippets": [
+            "back_btn.pressed.connect(_on_back)",
+            "pick_btn.pressed.connect(_on_pick_feature)",
+            'btn.text = "Build This"',
+            "btn.pressed.connect(_on_select_feature.bind(fdef))",
+            'GameState.product.target_feature_id = fdef.get("id", "")',
+        ],
+        "required_funcs": ["_on_back", "_on_pick_feature", "_on_select_feature"],
+    },
+    {
+        "label": "Finance actions",
+        "path": ROOT / "src" / "ui" / "finance" / "finance_overview.gd",
+        "required_snippets": [
+            "back_btn.pressed.connect(_on_back)",
+            "fundraise_btn.pressed.connect(_on_fundraise)",
+            "accept_btn.pressed.connect(_on_accept_offer)",
+            "decline_btn.pressed.connect(_on_decline_offer)",
+        ],
+        "required_funcs": ["_on_back", "_on_fundraise", "_on_accept_offer", "_on_decline_offer"],
+    },
+    {
+        "label": "Settings actions",
+        "path": ROOT / "src" / "ui" / "settings" / "settings_screen.gd",
+        "required_snippets": [
+            "back_btn.pressed.connect(_on_back)",
+            "privacy_btn.pressed.connect(_on_privacy)",
+            "close_privacy_btn.pressed.connect(_on_close_privacy)",
+            "unlock_btn.pressed.connect(func() -> void:",
+            "restore_btn.pressed.connect(func() -> void:",
+            "AdManager.show_paywall(",
+            "AdManager.restore_purchases(",
+        ],
+        "required_funcs": ["_on_back", "_on_privacy", "_on_close_privacy", "_on_replay_tutorial"],
+    },
+    {
+        "label": "People screen entry actions",
+        "path": ROOT / "src" / "ui" / "people" / "employee_list.gd",
+        "required_snippets": [
+            "hire_btn.pressed.connect(_on_hire_pressed)",
+            "back_btn.pressed.connect(_on_back)",
+            "detail_btn.pressed.connect(_on_view_details.bind(emp))",
+        ],
+        "required_funcs": ["_on_hire_pressed", "_on_back", "_on_view_details"],
+    },
+    {
+        "label": "Game over actions",
+        "path": ROOT / "src" / "ui" / "game_over" / "game_over_screen.gd",
+        "required_snippets": [
+            "accept_angel_btn.pressed.connect(_on_accept_angel)",
+            "decline_angel_btn.pressed.connect(_on_decline_angel)",
+            "restart_btn.pressed.connect(_on_restart)",
+            "menu_btn.pressed.connect(_on_menu)",
+        ],
+        "required_funcs": ["_on_accept_angel", "_on_decline_angel", "_on_restart", "_on_menu"],
+    },
+    {
+        "label": "Victory actions",
+        "path": ROOT / "src" / "ui" / "victory" / "victory_screen.gd",
+        "required_snippets": [
+            "continue_btn.pressed.connect(_on_continue)",
+            "menu_btn.pressed.connect(_on_menu)",
+            "new_game_btn.pressed.connect(_on_new_game)",
+        ],
+        "required_funcs": ["_on_continue", "_on_menu", "_on_new_game"],
+    },
+    {
+        "label": "Tutorial action button",
+        "path": ROOT / "src" / "autoload" / "tutorial_manager.gd",
+        "required_snippets": [
+            "action_btn.pressed.connect(advance)",
+            "skip_btn.pressed.connect(skip)",
+        ],
+        "required_funcs": ["advance", "skip", "_on_scene_changed", "_on_quarter_advanced"],
+    },
+)
+
+UI_BUTTON_SCENE_CHECKS = (
+    {
+        "label": "Main menu button nodes",
+        "path": ROOT / "src" / "ui" / "main_menu" / "main_menu.tscn",
+        "button_nodes": ["PlayButton", "SettingsButton", "QuitButton"],
+    },
+    {
+        "label": "Save slot button nodes",
+        "path": ROOT / "src" / "ui" / "saves" / "save_slots.tscn",
+        "button_nodes": ["BackButton"],
+    },
+    {
+        "label": "New game button nodes",
+        "path": ROOT / "src" / "ui" / "setup" / "new_game.tscn",
+        "button_nodes": ["StartButton", "BackButton"],
+    },
+    {
+        "label": "Dashboard button nodes",
+        "path": ROOT / "src" / "ui" / "dashboard" / "quarter_dashboard.tscn",
+        "button_nodes": ["AdvanceButton", "PeopleButton", "ProductButton", "FinanceButton", "MarketButton", "MenuButton"],
+    },
+    {
+        "label": "Product button nodes",
+        "path": ROOT / "src" / "ui" / "product" / "product_overview.tscn",
+        "button_nodes": ["BackButton", "PickFeatureButton"],
+    },
+    {
+        "label": "Finance button nodes",
+        "path": ROOT / "src" / "ui" / "finance" / "finance_overview.tscn",
+        "button_nodes": ["BackButton", "FundraiseButton", "AcceptButton", "DeclineButton"],
+    },
+    {
+        "label": "Settings button nodes",
+        "path": ROOT / "src" / "ui" / "settings" / "settings_screen.tscn",
+        "button_nodes": [
+            "BackButton",
+            "PrivacyButton",
+            "ClosePrivacyButton",
+            "DismissBannerButton",
+            "AgeConfirmButton",
+            "AgeDenyButton",
+        ],
+    },
+    {
+        "label": "People button nodes",
+        "path": ROOT / "src" / "ui" / "people" / "employee_list.tscn",
+        "button_nodes": ["BackButton", "HireButton"],
+    },
+    {
+        "label": "Market button nodes",
+        "path": ROOT / "src" / "ui" / "market" / "market_leaderboard.tscn",
+        "button_nodes": ["BackButton"],
+    },
+    {
+        "label": "Game over button nodes",
+        "path": ROOT / "src" / "ui" / "game_over" / "game_over_screen.tscn",
+        "button_nodes": ["AcceptAngelButton", "DeclineAngelButton", "RestartButton", "MenuButton"],
+    },
+    {
+        "label": "Victory button nodes",
+        "path": ROOT / "src" / "ui" / "victory" / "victory_screen.tscn",
+        "button_nodes": ["ContinueButton", "NewGameButton", "MenuButton"],
+    },
+)
+
 
 def _load_json(path: Path) -> object:
     with path.open("r", encoding="utf-8") as f:
@@ -527,6 +737,49 @@ def validate_difficulty_contracts() -> List[str]:
     return errors
 
 
+def validate_button_script_contracts() -> List[str]:
+    errors: List[str] = []
+    for check in UI_BUTTON_SCRIPT_CHECKS:
+        path: Path = check["path"]  # type: ignore[index]
+        label: str = str(check.get("label", "button script check"))  # type: ignore[union-attr]
+        if not path.exists():
+            errors.append(f"missing file: {path.relative_to(ROOT)}")
+            continue
+        src = path.read_text(encoding="utf-8")
+        rel = path.relative_to(ROOT)
+
+        for snippet in check.get("required_snippets", []):  # type: ignore[union-attr]
+            if snippet not in src:
+                errors.append(f"{rel} [{label}] missing snippet: {snippet}")
+
+        for options in check.get("required_any", []):  # type: ignore[union-attr]
+            if not any(opt in src for opt in options):
+                errors.append(f"{rel} [{label}] missing one-of snippets: {options}")
+
+        for func_name in check.get("required_funcs", []):  # type: ignore[union-attr]
+            if re.search(rf"\bfunc\s+{re.escape(func_name)}\s*\(", src) is None:
+                errors.append(f"{rel} [{label}] missing handler function: {func_name}()")
+
+    return errors
+
+
+def validate_button_scene_contracts() -> List[str]:
+    errors: List[str] = []
+    for check in UI_BUTTON_SCENE_CHECKS:
+        path: Path = check["path"]  # type: ignore[index]
+        label: str = str(check.get("label", "button scene check"))  # type: ignore[union-attr]
+        if not path.exists():
+            errors.append(f"missing file: {path.relative_to(ROOT)}")
+            continue
+        src = path.read_text(encoding="utf-8")
+        rel = path.relative_to(ROOT)
+        for node_name in check.get("button_nodes", []):  # type: ignore[union-attr]
+            token = f'[node name="{node_name}" type="Button"'
+            if token not in src:
+                errors.append(f"{rel} [{label}] missing button node: {node_name}")
+    return errors
+
+
 def main() -> int:
     errors: List[str] = []
 
@@ -568,6 +821,8 @@ def main() -> int:
     errors.extend(validate_niches(niches_data))
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
+    errors.extend(validate_button_script_contracts())
+    errors.extend(validate_button_scene_contracts())
 
     if errors:
         print("Backend smoke check FAILED")
@@ -579,7 +834,7 @@ def main() -> int:
     print("Backend smoke check PASSED")
     print(
         "Validated: features/events/headlines/glossary/vcs/competitors/niches "
-        "+ visual presets + difficulty wiring"
+        "+ visual presets + difficulty wiring + UI button wiring contracts"
     )
     return 0
 

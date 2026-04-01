@@ -404,8 +404,12 @@ func _check_end_conditions() -> void:
 
 
 static func _sustainable_requirements(company_type: int) -> Dictionary:
-	var req := SUSTAINABLE_REQUIREMENTS_BY_TYPE.get(company_type, SUSTAINABLE_DEFAULT_REQUIREMENTS)
-	return req if req is Dictionary else SUSTAINABLE_DEFAULT_REQUIREMENTS
+	var req: Dictionary = _safe_dict(
+		SUSTAINABLE_REQUIREMENTS_BY_TYPE.get(company_type, SUSTAINABLE_DEFAULT_REQUIREMENTS)
+	)
+	if req.is_empty():
+		return SUSTAINABLE_DEFAULT_REQUIREMENTS
+	return req
 
 
 func _meets_sustainable_victory(elapsed_q: int) -> bool:

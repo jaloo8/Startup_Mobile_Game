@@ -710,7 +710,7 @@ func _effective_interview_lock(role: String) -> int:
 
 func _interview_stage_hint() -> String:
 	var stage := _interview_stage()
-	var mult := snapped(_interview_stage_cost_mult() * 100.0, 1.0)
+	var mult: float = float(snapped(_interview_stage_cost_mult() * 100.0, 1.0))
 	match stage:
 		"early":
 			return "Early-stage hiring market: interview costs are discounted (%s%%)." % str(mult)
@@ -1198,7 +1198,7 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 	vbox.add_child(top_strip)
 
 	var strip_hbox := HBoxContainer.new()
-	strip_hbox.alignment = BoxContainer.ALIGNMENT_SPACE_BETWEEN
+	strip_hbox.alignment = BoxContainer.ALIGNMENT_BEGIN
 	top_strip.add_child(strip_hbox)
 
 	var company_lbl := Label.new()
@@ -1206,6 +1206,10 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 	company_lbl.add_theme_font_size_override("font_size", 13)
 	company_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.9))
 	strip_hbox.add_child(company_lbl)
+
+	var strip_spacer := Control.new()
+	strip_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	strip_hbox.add_child(strip_spacer)
 
 	var badge_tag := Label.new()
 	badge_tag.text = "EMPLOYEE"

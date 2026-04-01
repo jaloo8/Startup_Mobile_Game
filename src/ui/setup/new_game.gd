@@ -221,6 +221,13 @@ func _on_background_changed(_idx: int) -> void:
 
 
 func _on_start() -> void:
+	start_btn.disabled = true
+	var gs := get_node_or_null("/root/GameState")
+	if gs == null:
+		push_error("NewGame: GameState autoload missing; cannot start company")
+		start_btn.disabled = false
+		return
+
 	var scenarios := ["garage", "accelerator", "spinoff", "vc_backed"]
 	var difficulties := ["sandbox", "normal", "hardcore"]
 
@@ -229,7 +236,7 @@ func _on_start() -> void:
 
 	var bg_id: int = background_selector.get_selected_id()
 	var niche_id := ""
-	if niche_selector != null:
+	if niche_selector != null and niche_selector.item_count > 0 and niche_selector.selected >= 0:
 		var meta = niche_selector.get_item_metadata(niche_selector.selected)
 		if meta != null:
 			niche_id = str(meta)
@@ -253,12 +260,18 @@ func _on_start() -> void:
 	GameState.market.competitors = CompetitorAI.generate_starting_competitors(6, GameState.company.type)
 	GameState.save_game(GameState.current_slot)
 
-	Analytics.track_new_game(
-		CompanyData.TYPE_NAMES.get(config["type"], "unknown"),
-		config["difficulty"],
-		config["scenario"],
-	)
-	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
+	var analytics := get_node_or_null("/root/Analytics")
+	if analytics != null and analytics.has_method("track_new_game"):
+		analytics.call(
+			"track_new_game",
+			CompanyData.TYPE_NAMES.get(config["type"], "unknown"),
+			config["difficulty"],
+			config["scenario"],
+		)
+	var err := get_tree().change_scene_to_file("res://src/ui/dashboard/quarter_dashboard.tscn")
+	if err != OK:
+		push_error("NewGame: failed to open dashboard scene (err=%d)" % err)
+		start_btn.disabled = false
 
 
 func _on_back() -> void:

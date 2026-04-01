@@ -628,7 +628,7 @@ func _img_card(filename: String, h: float = 46, r: int = 4) -> Control:
 	var tr := TextureRect.new()
 	tr.texture = tex
 	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tr.stretch_mode = TextureRect.STRETCH_COVER
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	clip.add_child(tr)
 	return clip
@@ -646,7 +646,7 @@ func _img_bubble(filename: String, size: float = 16) -> Control:
 	var tr := TextureRect.new()
 	tr.texture = tex
 	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tr.stretch_mode = TextureRect.STRETCH_COVER
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	clip.add_child(tr)
 	return clip

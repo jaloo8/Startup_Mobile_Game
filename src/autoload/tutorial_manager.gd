@@ -158,22 +158,13 @@ func _show_overlay() -> void:
 	_canvas = _build_canvas()
 	get_tree().root.add_child(_canvas)
 	_refresh_card()
-	# Fade the whole canvas in.
-	_canvas.modulate.a = 0.0
-	var tw := _canvas.create_tween()
-	tw.tween_property(_canvas, "modulate:a", 1.0, 0.45)
 
 
 func _finish() -> void:
 	_active = false
 	if _canvas and is_instance_valid(_canvas):
-		var tw := _canvas.create_tween()
-		tw.tween_property(_canvas, "modulate:a", 0.0, 0.30)
-		tw.finished.connect(func() -> void:
-			if _canvas and is_instance_valid(_canvas):
-				_canvas.queue_free()
-			_canvas = null
-		)
+		_canvas.queue_free()
+		_canvas = null
 	tutorial_completed.emit()
 
 

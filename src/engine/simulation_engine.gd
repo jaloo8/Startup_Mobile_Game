@@ -67,6 +67,10 @@ static var _feature_names := [
 ]
 
 
+static func _safe_dict(value) -> Dictionary:
+	return value if value is Dictionary else {}
+
+
 static func process_quarter(state: Node) -> void:
 	_apply_work_output(state)
 	_update_product_metrics(state)
@@ -88,8 +92,10 @@ static func process_quarter(state: Node) -> void:
 
 
 static func _growth_balance(company_type: int) -> Dictionary:
-	var cfg := GROWTH_BALANCE_BY_TYPE.get(company_type, DEFAULT_GROWTH_BALANCE)
-	return cfg if cfg is Dictionary else DEFAULT_GROWTH_BALANCE
+	var cfg: Dictionary = _safe_dict(GROWTH_BALANCE_BY_TYPE.get(company_type, DEFAULT_GROWTH_BALANCE))
+	if cfg.is_empty():
+		return DEFAULT_GROWTH_BALANCE
+	return cfg
 
 
 static func _apply_work_output(state: Node) -> void:

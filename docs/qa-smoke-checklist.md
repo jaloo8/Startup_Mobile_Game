@@ -399,6 +399,7 @@ These tests require deploying to a device or emulator, not just the editor.
 | 24.6 | `competitors.json` loads for all types | Rivals initialized per company type | `src/data/competitors.json`, `competitor_ai.gd` |
 | 24.7 | `niches.json` loads for all company types | New game niche picker and modifiers are valid | `src/data/niches.json`, `company_data.gd`, `tools/backend_smoke.py` |
 | 24.8 | `names.json` exists (future use) | Name pools available | `src/data/names.json` |
+| 24.9 | UI button wiring contracts pass | Critical button handlers and scene button nodes exist for main flows | `tools/backend_smoke.py` → `validate_button_script_contracts()`, `validate_button_scene_contracts()` |
 
 ---
 
@@ -406,7 +407,7 @@ These tests require deploying to a device or emulator, not just the editor.
 
 After any code change:
 
-1. **Backend smoke script** — run `python3 tools/backend_smoke.py` (fast structural/data checks)
+1. **Backend smoke script** — run `python3 tools/backend_smoke.py` (fast structural/data checks + UI button wiring contracts)
 2. **Lint check** — `ReadLints` on all modified `.gd` files
 3. **★ items** — Marked with ★ above: new game, dashboard, advance quarter, events, hiring, employee list, product, finances, navigation, edge cases (~15 min)
 4. **Section 17** — Save/load round-trip if persistence code changed
