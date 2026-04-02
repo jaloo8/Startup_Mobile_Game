@@ -87,6 +87,7 @@ func _ready() -> void:
 	%UxTitle.pressed.connect(Glossary.show_term.bind("ux_score"))
 	%ChurnTitle.pressed.connect(Glossary.show_term.bind("churn_rate"))
 	picker_panel.visible = false
+	build_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	_build_eta_label()
 	_build_celebration_panel()
@@ -141,12 +142,20 @@ func _build_eta_label() -> void:
 	_eta_label.add_theme_font_size_override("font_size", 13)
 	_eta_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
 	_eta_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_eta_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# build_progress lives in a VBoxContainer — add the label right after it
 	var parent := build_progress.get_parent()
 	if parent:
 		var idx := build_progress.get_index()
 		parent.add_child(_eta_label)
 		parent.move_child(_eta_label, idx + 1)
+
+
+func _product_root_vbox() -> VBoxContainer:
+	var scroll := feature_list_container.get_parent()
+	if scroll == null:
+		return null
+	return scroll.get_parent() as VBoxContainer
 
 
 func _build_celebration_panel() -> void:
@@ -171,11 +180,12 @@ func _build_celebration_panel() -> void:
 	_celebration_panel.add_child(lbl)
 
 	_celebration_panel.visible = false
-	# Add at top of the screen's root VBox so it's always visible
-	var root_parent := feature_list_container.get_parent()
-	if root_parent:
+	# Keep this outside the scroll area to avoid overlap with feature rows.
+	var root_parent := _product_root_vbox()
+	var scroll := feature_list_container.get_parent()
+	if root_parent and scroll:
 		root_parent.add_child(_celebration_panel)
-		root_parent.move_child(_celebration_panel, 0)
+		root_parent.move_child(_celebration_panel, scroll.get_index())
 
 
 func _build_visual_preset_controls() -> void:
@@ -805,7 +815,10 @@ func _on_select_feature(fdef: Dictionary) -> void:
 func _refresh_milestone_roadmap() -> void:
 	# Build or update a milestone strip showing next product + user goals.
 	# We look for an existing node or create one dynamically below the health bars.
-	var strip := feature_list_container.get_parent().get_node_or_null("MilestoneStrip") as VBoxContainer
+	var root_vbox := _product_root_vbox()
+	if root_vbox == null:
+		return
+	var strip := root_vbox.get_node_or_null("MilestoneStrip") as VBoxContainer
 	if strip == null:
 		strip = _create_milestone_strip()
 
@@ -824,9 +837,22 @@ func _refresh_milestone_roadmap() -> void:
 	strip.add_child(heading)
 
 	for m: Dictionary in milestones:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 3)
 		strip.add_child(row)
+
+		var lbl := Label.new()
+		lbl.text = m.get("label", "")
+		lbl.add_theme_font_size_override("font_size", 12)
+		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var done: bool = m.get("done", false)
+		if done:
+			lbl.add_theme_color_override("font_color", Color(0.35, 0.85, 0.45))
+			lbl.text = "✓ " + lbl.text
+		else:
+			lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
+		row.add_child(lbl)
 
 		var bar := ProgressBar.new()
 		bar.custom_minimum_size = Vector2(0, 18)
@@ -837,27 +863,19 @@ func _refresh_milestone_roadmap() -> void:
 		bar.show_percentage = false
 		row.add_child(bar)
 
-		var lbl := Label.new()
-		lbl.text = m.get("label", "")
-		lbl.add_theme_font_size_override("font_size", 12)
-		var done: bool = m.get("done", false)
-		if done:
-			lbl.add_theme_color_override("font_color", Color(0.35, 0.85, 0.45))
-			lbl.text = "✓ " + lbl.text
-		else:
-			lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
-		lbl.custom_minimum_size = Vector2(220, 0)
-		row.add_child(lbl)
-
 
 func _create_milestone_strip() -> VBoxContainer:
 	var strip := VBoxContainer.new()
 	strip.name = "MilestoneStrip"
 	strip.add_theme_constant_override("separation", 6)
-	var parent := feature_list_container.get_parent()
+	var parent := _product_root_vbox()
+	if parent == null:
+		return strip
 	parent.add_child(strip)
 	# Place it just above the shipped-features list
-	parent.move_child(strip, feature_list_container.get_index())
+	var scroll := feature_list_container.get_parent()
+	if scroll:
+		parent.move_child(strip, scroll.get_index())
 	return strip
 
 

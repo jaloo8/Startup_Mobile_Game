@@ -73,6 +73,8 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Key metric info clarity (DAU/MAU and peers)** — Dashboard `Key Metric` title is now an info button with click + hover glossary behavior; metric help text switches by company type (`MRR`, `DAU/MAU`, `GMV`, `API Calls`, `Valuation`) so players can quickly understand what each metric means.
+- **Product page overlap/readability fix** — Bottom-of-page roadmap + ship-celebration widgets now render outside the shipped-features scroll region, and build/ETA text wrapping was tightened to prevent overlap while quarter trends update.
 - **Hosting capacity actions (v2)** — Logistics now includes explicit player-facing infra upgrades: `Scale Web`, `Scale Cache`, `Scale Data`, and `Optimize request pipeline`, each with level caps, escalating one-time purchase costs, autosave hooks, and event-log traces.
 - **Hosting simulation tuning pass** — Hosting now applies lane-upgrade capacity multipliers and optimization demand reduction, with smoother reliability/incident curves and difficulty-aware pressure scaling to reduce early-run randomness while preserving late-run infra risk.
 - **Workload-aware hosting pressure** — Hosting demand now reacts to what you are actually building (AI/ML, streaming, marketplace, API/realtime) and surfaces a live workload profile (`General Cloud` / `Scale-Intensive` / `Data-Center Heavy`) across dashboard, finance, and logistics hints.
