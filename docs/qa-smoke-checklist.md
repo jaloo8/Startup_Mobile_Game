@@ -84,6 +84,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 4.17 | Dashboard plain-English finance explainer updates | One-line explainer describes positive or negative cashflow based on current quarter state | `quarter_dashboard.gd` → `_refresh_finance_plain_hint()` |
 | 4.18 | Dashboard hosting strip shows workload profile | Hosting status includes workload profile text and pressure warning when run becomes scale/data-center heavy | `quarter_dashboard.gd` → `_refresh_hosting_status()` |
 | 4.19 | Quarter transition FX + SFX triggers on advance | Advancing quarter plays sweep/tint/period-label transition and emits start/resolve SFX (asset-based or synth fallback) without blocking simulation flow | `quarter_dashboard.gd` → `_play_quarter_transition_placeholder()`, `_play_transition_sfx()` |
+| 4.20 | Key metric info icon explains DAU/MAU and peers | Key metric title shows `ⓘ`; click opens glossary and hover shows tooltip for current metric (MRR, DAU/MAU, GMV, API Calls, Valuation) | `quarter_dashboard.gd` → `_refresh_key_metric()`, `_on_key_metric_info_pressed()` |
 
 ---
 

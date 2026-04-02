@@ -213,10 +213,12 @@ layout_mode = 2
 text = "0 / 4"
 horizontal_alignment = 2
 
-[node name="KeyMetricTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="KeyMetricTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Key Metric"
+flat = true
+alignment = 0
+text = "Key Metric ⓘ"
 
 [node name="KeyMetricLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true

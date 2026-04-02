@@ -30,7 +30,7 @@ extends Control
 @onready var headline_label: Label = %HeadlineLabel
 @onready var economy_label: Label = %EconomyLabel
 @onready var energy_label: Label = %EnergyLabel
-@onready var key_metric_title: Label = %KeyMetricTitle
+@onready var key_metric_title: Button = %KeyMetricTitle
 @onready var key_metric_label: Label = %KeyMetricLabel
 @onready var ticker_strip: Label = %TickerStrip
 @onready var quarter_transition_tint: ColorRect = %QuarterTransitionTint
@@ -86,6 +86,7 @@ var _transition_ding_stream: AudioStream
 var _transition_tween: Tween
 var _office_worker_layer: Control
 var _finance_plain_label: Label
+var _key_metric_glossary_key: String = "valuation"
 
 
 func _ready() -> void:
@@ -102,6 +103,8 @@ func _ready() -> void:
 	_wire_glossary_button(revenue_title_btn, "quarterly_revenue")
 	_wire_glossary_button(burn_title_btn, "quarterly_burn")
 	_wire_glossary_button(runway_title_btn, "runway")
+	if key_metric_title:
+		key_metric_title.pressed.connect(_on_key_metric_info_pressed)
 
 	GameState.quarter_advanced.connect(_refresh)
 	GameState.game_over.connect(_on_game_over)
@@ -897,25 +900,41 @@ func _refresh_key_metric() -> void:
 	var p: ProductData = GameState.product
 	match GameState.company.type:
 		CompanyData.CompanyType.SAAS:
-			key_metric_title.text = "MRR"
+			key_metric_title.text = "MRR ⓘ"
+			_set_key_metric_glossary("mrr")
 			var mrr: float = GameState.financials.revenue / 3.0
 			key_metric_label.text = "$%s" % SceneLoader.format_money(mrr)
 		CompanyData.CompanyType.CONSUMER:
-			key_metric_title.text = "DAU / MAU"
+			key_metric_title.text = "DAU / MAU ⓘ"
+			_set_key_metric_glossary("dau_mau")
 			var mau: int = maxi(1, p.users)
 			var ratio: float = float(p.dau) / float(mau)
 			key_metric_label.text = "%.0f%%" % (ratio * 100)
 		CompanyData.CompanyType.MARKETPLACE:
-			key_metric_title.text = "GMV / Q"
+			key_metric_title.text = "GMV / Q ⓘ"
+			_set_key_metric_glossary("gmv")
 			var gmv: float = p.users * 50.0 * 3.0
 			key_metric_label.text = "$%s" % SceneLoader.format_money(gmv)
 		CompanyData.CompanyType.DEV_TOOLS:
-			key_metric_title.text = "API Calls / Q"
+			key_metric_title.text = "API Calls / Q ⓘ"
+			_set_key_metric_glossary("api_calls")
 			var calls: float = p.users * 1000.0 * 3.0
 			key_metric_label.text = "%s" % SceneLoader.format_number(roundi(calls))
 		_:
-			key_metric_title.text = "Valuation"
+			key_metric_title.text = "Valuation ⓘ"
+			_set_key_metric_glossary("valuation")
 			key_metric_label.text = "$%s" % SceneLoader.format_money(GameState.company.valuation)
+
+
+func _set_key_metric_glossary(glossary_key: String) -> void:
+	_key_metric_glossary_key = glossary_key.strip_edges()
+	_set_glossary_tooltip(key_metric_title, _key_metric_glossary_key)
+
+
+func _on_key_metric_info_pressed() -> void:
+	if _key_metric_glossary_key.is_empty():
+		return
+	Glossary.show_term(_key_metric_glossary_key)
 
 
 func _refresh_economy() -> void:
