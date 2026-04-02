@@ -44,6 +44,12 @@ const OFFICE_BANNER_PATHS := [
 	"res://assets/office/office_2_small.png",
 	"res://assets/office/office_3_hq.png",
 ]
+const OFFICE_WORKSPACE_STYLES := {
+	0: {"rows": 1, "per_row": 3, "base_y_ratio": 0.70, "row_gap": 14.0, "desk_w": 16.0, "desk_h": 4.0},
+	1: {"rows": 1, "per_row": 5, "base_y_ratio": 0.66, "row_gap": 14.0, "desk_w": 17.0, "desk_h": 4.0},
+	2: {"rows": 2, "per_row": 5, "base_y_ratio": 0.60, "row_gap": 15.0, "desk_w": 18.0, "desk_h": 4.0},
+	3: {"rows": 2, "per_row": 6, "base_y_ratio": 0.56, "row_gap": 14.0, "desk_w": 18.0, "desk_h": 4.0},
+}
 
 var _pending_events: Array[EventData] = []
 var _headlines: Array[String] = []
@@ -497,7 +503,16 @@ func _refresh_next_action_hint() -> void:
 		hint = "Next best action: pick a feature in Product to keep progress moving."
 	else:
 		var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
-		if GameState.company.hosting_reliability < 94.0:
+		var peak_util: float = maxf(
+			GameState.company.hosting_util_web,
+			maxf(GameState.company.hosting_util_cache, GameState.company.hosting_util_data)
+		)
+		var hosting_upgrade_total: int = GameState.company.hosting_upgrade_web_level \
+			+ GameState.company.hosting_upgrade_cache_level \
+			+ GameState.company.hosting_upgrade_data_level
+		if peak_util > 1.05 and hosting_upgrade_total < 2:
+			hint = "Next best action: open Logistics and buy a lane capacity upgrade before demand spikes."
+		elif GameState.company.hosting_reliability < 94.0:
 			hint = "Next best action: hosting is unstable — add Infra staffing or switch to a safer hosting plan."
 		elif rw < 1.0:
 			hint = "Next best action: runway is critical — open Finances and raise now."
@@ -516,14 +531,28 @@ func _refresh_hosting_status() -> void:
 		return
 	var c: CompanyData = GameState.company
 	var max_util: float = maxf(c.hosting_util_web, maxf(c.hosting_util_cache, c.hosting_util_data))
-	_hosting_status_label.text = "Hosting: %s · %.1f%% reliability · peak %.0f%% load" % [
+	var upgrades_total: int = c.hosting_upgrade_web_level + c.hosting_upgrade_cache_level + c.hosting_upgrade_data_level
+	var workload_profile: String = c.hosting_workload_profile.strip_edges()
+	if workload_profile.is_empty():
+		workload_profile = "General Cloud"
+	var pressure: float = c.hosting_data_center_pressure
+	_hosting_status_label.text = "Hosting: %s · %.1f%% reliability · peak %.0f%% load · %s" % [
 		c.hosting_plan_name(),
 		c.hosting_reliability,
 		max_util * 100.0,
+		workload_profile,
 	]
+	if pressure >= 2.2:
+		_hosting_status_label.text += " · data-center pressure high"
+	elif pressure >= 1.25:
+		_hosting_status_label.text += " · scaling pressure rising"
+	if upgrades_total > 0 or c.hosting_optimization_level > 0:
+		_hosting_status_label.text += " · upgrades %d · opt L%d" % [upgrades_total, c.hosting_optimization_level]
 	if c.hosting_reliability < 93.0:
 		_hosting_status_label.add_theme_color_override("font_color", Color(0.95, 0.50, 0.42))
-	elif c.hosting_reliability < 97.0:
+	elif pressure >= 2.2:
+		_hosting_status_label.add_theme_color_override("font_color", Color(0.95, 0.72, 0.42))
+	elif c.hosting_reliability < 97.0 or pressure >= 1.25:
 		_hosting_status_label.add_theme_color_override("font_color", Color(0.95, 0.80, 0.40))
 	else:
 		_hosting_status_label.add_theme_color_override("font_color", Color(0.55, 0.88, 0.56))
@@ -906,34 +935,134 @@ func _refresh_office_worker_ambient() -> void:
 	if GameState.employees.is_empty():
 		return
 
-	var total_visible: int = mini(GameState.employees.size(), clampi(2 + GameState.company.office_level * 2, 2, 10))
 	var width: float = maxf(120.0, office_banner.size.x)
 	var height: float = maxf(80.0, office_banner.size.y)
+	var office_level: int = clampi(GameState.company.office_level, 0, 3)
+	var style: Dictionary = OFFICE_WORKSPACE_STYLES.get(office_level, OFFICE_WORKSPACE_STYLES[0])
+	var accent: Color = _office_accent_color()
+
+	var tint := ColorRect.new()
+	tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tint.color = Color(accent.r, accent.g, accent.b, clampf(0.10 + float(office_level) * 0.02, 0.08, 0.18))
+	_office_worker_layer.add_child(tint)
+
+	var slots: Array[Vector2] = _build_desk_slots(style, width, height)
+	var total_visible: int = mini(GameState.employees.size(), slots.size())
+	var desk_w: float = float(style.get("desk_w", 16.0))
+	var desk_h: float = float(style.get("desk_h", 4.0))
 	for i in total_visible:
 		var emp: EmployeeData = GameState.employees[i]
-		var marker := ColorRect.new()
-		marker.custom_minimum_size = Vector2(6, 6)
-		marker.size = Vector2(6, 6)
-		marker.color = _assignment_color(emp.assignment)
-		var tx: float = float(i + 1) / float(total_visible + 1)
-		var lane_row: int = i / 5
-		var base_x: float = lerpf(12.0, width - 12.0, tx) - 3.0
-		var base_y: float = clampf((height * 0.58) + (float(lane_row) * 16.0), 26.0, height - 10.0)
+		var slot: Vector2 = slots[i]
 
 		var desk := ColorRect.new()
-		desk.custom_minimum_size = Vector2(10, 3)
-		desk.size = Vector2(10, 3)
-		desk.color = Color(0.2, 0.24, 0.3, 0.85)
-		desk.position = Vector2(base_x - 2.0, base_y + 4.0)
+		desk.custom_minimum_size = Vector2(desk_w, desk_h)
+		desk.size = Vector2(desk_w, desk_h)
+		desk.color = Color(0.18, 0.22, 0.3, 0.9).lerp(accent, 0.18)
+		desk.position = Vector2(slot.x - (desk_w * 0.5), slot.y)
 		_office_worker_layer.add_child(desk)
 
-		marker.position = Vector2(base_x, base_y)
-		_office_worker_layer.add_child(marker)
-		var tw := marker.create_tween().set_loops()
+		var monitor := ColorRect.new()
+		monitor.custom_minimum_size = Vector2(5, 2)
+		monitor.size = Vector2(5, 2)
+		monitor.color = Color(0.15, 0.2, 0.27, 0.95)
+		monitor.position = Vector2(slot.x + (desk_w * 0.25), slot.y - 2.0)
+		_office_worker_layer.add_child(monitor)
+
+		var worker: Control = _make_worker_sprite(emp)
+		worker.position = Vector2(slot.x - 4.0, slot.y - 11.0)
+		_office_worker_layer.add_child(worker)
+
+		var base_pos: Vector2 = worker.position
+		var tw := worker.create_tween().set_loops()
 		tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw.tween_interval(float(hash(emp.employee_uid) % 9) * 0.05)
-		tw.tween_property(marker, "position:y", base_y + 1.8, 0.55)
-		tw.tween_property(marker, "position:y", base_y, 0.55)
+		tw.tween_interval(float(hash(emp.employee_uid) % 11) * 0.04)
+		var bob: float = 1.1 + (float(emp.assignment % 3) * 0.25)
+		tw.tween_property(worker, "position:y", base_pos.y + bob, 0.54)
+		tw.tween_property(worker, "position:y", base_pos.y, 0.54)
+		if emp.assignment == EmployeeData.Assignment.BUGS:
+			tw.tween_property(worker, "position:x", base_pos.x + 0.6, 0.22)
+			tw.tween_property(worker, "position:x", base_pos.x - 0.6, 0.22)
+			tw.tween_property(worker, "position:x", base_pos.x, 0.22)
+
+
+func _build_desk_slots(style: Dictionary, width: float, height: float) -> Array[Vector2]:
+	var slots: Array[Vector2] = []
+	var rows: int = maxi(1, int(style.get("rows", 1)))
+	var per_row: int = maxi(1, int(style.get("per_row", 4)))
+	var base_y_ratio: float = clampf(float(style.get("base_y_ratio", 0.62)), 0.40, 0.86)
+	var row_gap: float = clampf(float(style.get("row_gap", 14.0)), 10.0, 24.0)
+	for row in rows:
+		var y: float = clampf((height * base_y_ratio) + (float(row) * row_gap), 24.0, height - 9.0)
+		for col in per_row:
+			var tx: float = float(col + 1) / float(per_row + 1)
+			var x: float = lerpf(12.0, width - 12.0, tx)
+			slots.append(Vector2(x, y))
+	return slots
+
+
+func _make_worker_sprite(emp: EmployeeData) -> Control:
+	var root := Control.new()
+	root.custom_minimum_size = Vector2(10, 10)
+	root.size = Vector2(10, 10)
+
+	var body := ColorRect.new()
+	body.custom_minimum_size = Vector2(6, 5)
+	body.size = Vector2(6, 5)
+	body.position = Vector2(2, 4)
+	body.color = _assignment_color(emp.assignment)
+	root.add_child(body)
+
+	var head := ColorRect.new()
+	head.custom_minimum_size = Vector2(4, 3)
+	head.size = Vector2(4, 3)
+	head.position = Vector2(3, 1)
+	head.color = _worker_skin_color(emp.employee_uid)
+	root.add_child(head)
+
+	var badge := ColorRect.new()
+	badge.custom_minimum_size = Vector2(2, 2)
+	badge.size = Vector2(2, 2)
+	badge.position = Vector2(6, 6)
+	badge.color = Color(0.9, 0.93, 0.98, 0.85)
+	root.add_child(badge)
+
+	return root
+
+
+func _worker_skin_color(uid: String) -> Color:
+	var palette: Array[Color] = [
+		Color(0.93, 0.79, 0.66, 1.0),
+		Color(0.85, 0.68, 0.52, 1.0),
+		Color(0.73, 0.55, 0.41, 1.0),
+		Color(0.58, 0.41, 0.29, 1.0),
+	]
+	var idx: int = absi(hash(uid)) % palette.size()
+	return palette[idx]
+
+
+func _office_accent_color() -> Color:
+	if GameState.company == null:
+		return Color(0.38, 0.62, 0.88, 1.0)
+	var base := Color(0.38, 0.62, 0.88, 1.0)
+	match GameState.company.type:
+		CompanyData.CompanyType.SAAS:
+			base = Color(0.36, 0.62, 0.9, 1.0)
+		CompanyData.CompanyType.CONSUMER:
+			base = Color(0.86, 0.52, 0.78, 1.0)
+		CompanyData.CompanyType.MARKETPLACE:
+			base = Color(0.9, 0.64, 0.42, 1.0)
+		CompanyData.CompanyType.DEV_TOOLS:
+			base = Color(0.58, 0.52, 0.94, 1.0)
+		_:
+			base = Color(0.38, 0.62, 0.88, 1.0)
+	match GameState.company.hosting_plan:
+		CompanyData.HostingPlan.MANAGED_CLOUD:
+			return base.lightened(0.08)
+		CompanyData.HostingPlan.IN_HOUSE:
+			return base.darkened(0.12)
+		_:
+			return base
 
 
 func _assignment_color(assignment: int) -> Color:

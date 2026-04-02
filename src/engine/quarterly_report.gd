@@ -126,22 +126,41 @@ static func _hosting_line(state: Node) -> String:
 	var reliability: float = float(state.company.hosting_reliability)
 	var overage_cost: float = float(state.company.hosting_overage_cost)
 	var incidents: int = int(state.company.hosting_incidents_last_quarter)
+	var total_upgrades: int = int(state.company.hosting_upgrade_web_level) \
+		+ int(state.company.hosting_upgrade_cache_level) \
+		+ int(state.company.hosting_upgrade_data_level)
+	var optimization_level: int = int(state.company.hosting_optimization_level)
+	var pressure: float = float(state.company.hosting_data_center_pressure)
+	var workload_profile: String = str(state.company.hosting_workload_profile).strip_edges()
+	if workload_profile.is_empty():
+		workload_profile = "General Cloud"
 	var plan_name := "Managed Cloud"
 	if state.company.has_method("hosting_plan_name"):
 		plan_name = str(state.company.call("hosting_plan_name"))
 
 	if incidents > 0:
-		return "Hosting had %d incident%s (%.1f%% reliability) — overage added $%s this quarter" % [
+		return "Hosting had %d incident%s (%.1f%% reliability) — overage added $%s this quarter under %s workload" % [
 			incidents,
 			"s" if incidents != 1 else "",
 			reliability,
 			SceneLoader.format_money(overage_cost),
+			workload_profile,
 		]
 	if reliability < 96.0:
-		return "Hosting looked strained (%.1f%% reliability). Consider adding Infra staff or switching plan" % reliability
+		return "Hosting looked strained (%.1f%% reliability) under %s workload. Consider adding Infra staff or switching plan" % [reliability, workload_profile]
 	if overage_cost >= 200.0:
-		return "Hosting overage: $%s this quarter on %s" % [SceneLoader.format_money(overage_cost), plan_name]
-	return "Hosting stable at %.1f%% reliability on %s" % [reliability, plan_name]
+		return "Hosting overage: $%s this quarter on %s (%s workload)" % [SceneLoader.format_money(overage_cost), plan_name, workload_profile]
+	if pressure >= 2.2:
+		return "Workload is now data-center-heavy (%s). Keep Data/Cache capacity ahead of growth" % workload_profile
+	if total_upgrades > 0 or optimization_level > 0:
+		return "Hosting stable at %.1f%% reliability on %s (%s, lane upgrades: %d, optimization L%d)" % [
+			reliability,
+			plan_name,
+			workload_profile,
+			total_upgrades,
+			optimization_level,
+		]
+	return "Hosting stable at %.1f%% reliability on %s (%s)" % [reliability, plan_name, workload_profile]
 
 
 static func _energy_line(state: Node) -> String:

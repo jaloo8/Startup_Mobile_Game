@@ -243,6 +243,12 @@ func _reset_hosting_state() -> void:
 	company.hosting_util_data = 0.0
 	company.hosting_overage_cost = 0.0
 	company.hosting_incidents_last_quarter = 0
+	company.hosting_upgrade_web_level = 0
+	company.hosting_upgrade_cache_level = 0
+	company.hosting_upgrade_data_level = 0
+	company.hosting_optimization_level = 0
+	company.hosting_workload_profile = "General Cloud"
+	company.hosting_data_center_pressure = 0.0
 
 
 func difficulty_mult(key: String) -> float:
@@ -386,6 +392,11 @@ func average_team_morale() -> float:
 
 
 func _take_snapshot() -> void:
+	var cost_lines: Dictionary = financials.costs_breakdown
+	var salaries_cost: float = float(cost_lines.get("salaries", 0.0))
+	var infra_cost: float = float(cost_lines.get("infrastructure", 0.0))
+	var hosting_cost: float = float(cost_lines.get("hosting", 0.0))
+	var office_cost: float = float(cost_lines.get("office", 0.0))
 	history.append({
 		"quarter": current_quarter,
 		"year": current_year,
@@ -399,6 +410,14 @@ func _take_snapshot() -> void:
 		"avg_morale": average_team_morale(),
 		"hosting_reliability": company.hosting_reliability,
 		"hosting_overage_cost": company.hosting_overage_cost,
+		"hosting_incidents": company.hosting_incidents_last_quarter,
+		"hosting_workload_profile": company.hosting_workload_profile,
+		"hosting_data_center_pressure": company.hosting_data_center_pressure,
+		"salaries_cost": salaries_cost,
+		"infrastructure_cost": infra_cost,
+		"hosting_cost": hosting_cost,
+		"office_cost": office_cost,
+		"net_income": financials.revenue - (salaries_cost + infra_cost + hosting_cost + office_cost),
 	})
 	if history.size() > MAX_HISTORY_SIZE:
 		history = history.slice(-MAX_HISTORY_SIZE)
@@ -830,6 +849,12 @@ func _serialize() -> Dictionary:
 			"hosting_util_data": company.hosting_util_data,
 			"hosting_overage_cost": company.hosting_overage_cost,
 			"hosting_incidents_last_quarter": company.hosting_incidents_last_quarter,
+			"hosting_upgrade_web_level": company.hosting_upgrade_web_level,
+			"hosting_upgrade_cache_level": company.hosting_upgrade_cache_level,
+			"hosting_upgrade_data_level": company.hosting_upgrade_data_level,
+			"hosting_optimization_level": company.hosting_optimization_level,
+			"hosting_workload_profile": company.hosting_workload_profile,
+			"hosting_data_center_pressure": company.hosting_data_center_pressure,
 		},
 		"product": {
 			"features": product.features.duplicate(),
@@ -914,6 +939,12 @@ func _deserialize(data: Dictionary) -> bool:
 	company.hosting_util_data = float(cd.get("hosting_util_data", 0.0))
 	company.hosting_overage_cost = float(cd.get("hosting_overage_cost", 0.0))
 	company.hosting_incidents_last_quarter = int(cd.get("hosting_incidents_last_quarter", 0))
+	company.hosting_upgrade_web_level = int(cd.get("hosting_upgrade_web_level", 0))
+	company.hosting_upgrade_cache_level = int(cd.get("hosting_upgrade_cache_level", 0))
+	company.hosting_upgrade_data_level = int(cd.get("hosting_upgrade_data_level", 0))
+	company.hosting_optimization_level = int(cd.get("hosting_optimization_level", 0))
+	company.hosting_workload_profile = str(cd.get("hosting_workload_profile", "General Cloud"))
+	company.hosting_data_center_pressure = float(cd.get("hosting_data_center_pressure", 0.0))
 	if company.niche_name.strip_edges().is_empty() and not company.niche_id.strip_edges().is_empty():
 		CompanyData.load_niche_catalog()
 		company.apply_niche(company.niche_id)
@@ -1026,6 +1057,14 @@ func _clamp_deserialized_values() -> void:
 	company.hosting_util_data = clampf(company.hosting_util_data, 0.0, 5.0)
 	company.hosting_overage_cost = clampf(company.hosting_overage_cost, 0.0, 1e12)
 	company.hosting_incidents_last_quarter = clampi(company.hosting_incidents_last_quarter, 0, 99)
+	company.hosting_upgrade_web_level = clampi(company.hosting_upgrade_web_level, 0, CompanyData.HOSTING_LANE_UPGRADE_MAX)
+	company.hosting_upgrade_cache_level = clampi(company.hosting_upgrade_cache_level, 0, CompanyData.HOSTING_LANE_UPGRADE_MAX)
+	company.hosting_upgrade_data_level = clampi(company.hosting_upgrade_data_level, 0, CompanyData.HOSTING_LANE_UPGRADE_MAX)
+	company.hosting_optimization_level = clampi(company.hosting_optimization_level, 0, CompanyData.HOSTING_OPTIMIZATION_MAX)
+	company.hosting_workload_profile = str(company.hosting_workload_profile).strip_edges()
+	if company.hosting_workload_profile.is_empty():
+		company.hosting_workload_profile = "General Cloud"
+	company.hosting_data_center_pressure = clampf(company.hosting_data_center_pressure, 0.0, 3.0)
 	for stat_key in ["technical", "finance", "people", "business"]:
 		company.founder_stats[stat_key] = clampi(int(company.founder_stats.get(stat_key, 5)), 1, 10)
 

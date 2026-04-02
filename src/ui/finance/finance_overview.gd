@@ -36,6 +36,7 @@ var _hosting_plan_picker: OptionButton
 var _hosting_meta_label: Label
 var _hosting_cost_value: Label
 var _logistics_btn: Button
+var _drilldown_label: Label
 
 
 func _ready() -> void:
@@ -88,6 +89,13 @@ func _build_context_hints() -> void:
 	vbox.add_child(_next_move_label)
 	vbox.move_child(_next_move_label, cash_value.get_parent().get_index() + 2)
 
+	_drilldown_label = Label.new()
+	_drilldown_label.add_theme_font_size_override("font_size", 11)
+	_drilldown_label.add_theme_color_override("font_color", Color(0.7, 0.75, 0.9))
+	_drilldown_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_drilldown_label)
+	vbox.move_child(_drilldown_label, cash_value.get_parent().get_index() + 3)
+
 
 func _build_hosting_controls() -> void:
 	var vbox := cash_value.get_parent().get_parent()
@@ -117,14 +125,14 @@ func _build_hosting_controls() -> void:
 	row.add_child(_logistics_btn)
 
 	vbox.add_child(row)
-	vbox.move_child(row, cash_value.get_parent().get_index() + 3)
+	vbox.move_child(row, cash_value.get_parent().get_index() + 4)
 
 	_hosting_meta_label = Label.new()
 	_hosting_meta_label.add_theme_font_size_override("font_size", 11)
 	_hosting_meta_label.add_theme_color_override("font_color", Color(0.62, 0.67, 0.82))
 	_hosting_meta_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_hosting_meta_label)
-	vbox.move_child(_hosting_meta_label, cash_value.get_parent().get_index() + 4)
+	vbox.move_child(_hosting_meta_label, cash_value.get_parent().get_index() + 5)
 
 	var hosting_title := Label.new()
 	hosting_title.text = "Hosting"
@@ -192,6 +200,7 @@ func _refresh() -> void:
 func _refresh_context_hints(runway_quarters: float) -> void:
 	_refresh_quarter_delta_hint()
 	_refresh_next_move_hint(runway_quarters)
+	_refresh_drilldown_hint()
 
 
 func _refresh_hosting_controls() -> void:
@@ -206,6 +215,10 @@ func _refresh_hosting_controls() -> void:
 		GameState.company.hosting_util_web,
 		maxf(GameState.company.hosting_util_cache, GameState.company.hosting_util_data)
 	)
+	var workload_profile: String = GameState.company.hosting_workload_profile.strip_edges()
+	if workload_profile.is_empty():
+		workload_profile = "General Cloud"
+	var pressure: float = GameState.company.hosting_data_center_pressure
 	_hosting_meta_label.text = "%s · Reliability %.1f%% · Web %.0f%% · Cache %.0f%% · Data %.0f%% · Overage $%s" % [
 		GameState.company.hosting_plan_name(),
 		GameState.company.hosting_reliability,
@@ -214,9 +227,24 @@ func _refresh_hosting_controls() -> void:
 		GameState.company.hosting_util_data * 100.0,
 		SceneLoader.format_money(GameState.company.hosting_overage_cost),
 	]
+	_hosting_meta_label.text += " · Workload %s" % workload_profile
+	if pressure >= 2.2:
+		_hosting_meta_label.text += " · data-center pressure high"
+	elif pressure >= 1.25:
+		_hosting_meta_label.text += " · scaling pressure rising"
+	var upgrades_total: int = GameState.company.hosting_upgrade_web_level \
+		+ GameState.company.hosting_upgrade_cache_level \
+		+ GameState.company.hosting_upgrade_data_level
+	if upgrades_total > 0 or GameState.company.hosting_optimization_level > 0:
+		_hosting_meta_label.text += " · Upgrades %d · Opt L%d" % [
+			upgrades_total,
+			GameState.company.hosting_optimization_level,
+		]
 	if GameState.company.hosting_reliability < 93.0 or peak_util > 1.15:
 		_hosting_meta_label.add_theme_color_override("font_color", Color(0.95, 0.56, 0.45))
-	elif GameState.company.hosting_reliability < 97.0 or peak_util > 0.95:
+	elif pressure >= 2.2:
+		_hosting_meta_label.add_theme_color_override("font_color", Color(0.95, 0.72, 0.42))
+	elif GameState.company.hosting_reliability < 97.0 or peak_util > 0.95 or pressure >= 1.25:
 		_hosting_meta_label.add_theme_color_override("font_color", Color(0.95, 0.8, 0.4))
 	else:
 		_hosting_meta_label.add_theme_color_override("font_color", Color(0.62, 0.82, 0.62))
@@ -248,11 +276,70 @@ func _refresh_quarter_delta_hint() -> void:
 		_quarter_delta_label.add_theme_color_override("font_color", Color(0.66, 0.74, 0.9))
 
 
+func _refresh_drilldown_hint() -> void:
+	if _drilldown_label == null:
+		return
+	var hist: Array = GameState.history
+	if hist.size() < 2:
+		_drilldown_label.text = "Driver read: appears after one completed quarter."
+		return
+
+	var prev: Dictionary = _as_dict(hist[hist.size() - 2])
+	var curr: Dictionary = _as_dict(hist[hist.size() - 1])
+	var rev_delta: float = float(curr.get("revenue", 0.0)) - float(prev.get("revenue", 0.0))
+	var cash_delta: float = float(curr.get("cash", 0.0)) - float(prev.get("cash", 0.0))
+	var salary_delta: float = _snapshot_cost(curr, "salaries_cost") - _snapshot_cost(prev, "salaries_cost")
+	var infra_delta: float = _snapshot_cost(curr, "infrastructure_cost") - _snapshot_cost(prev, "infrastructure_cost")
+	var hosting_delta: float = _snapshot_cost(curr, "hosting_cost") - _snapshot_cost(prev, "hosting_cost")
+	var office_delta: float = _snapshot_cost(curr, "office_cost") - _snapshot_cost(prev, "office_cost")
+	var incidents: int = int(curr.get("hosting_incidents", 0))
+
+	var parts: Array[String] = []
+	parts.append("Revenue %s" % _delta_money_text(rev_delta))
+	_append_cost_driver(parts, "Salaries", salary_delta)
+	_append_cost_driver(parts, "Infra", infra_delta)
+	_append_cost_driver(parts, "Hosting", hosting_delta)
+	_append_cost_driver(parts, "Office", office_delta)
+	if incidents > 0:
+		parts.append("%d hosting incident%s" % [incidents, "s" if incidents != 1 else ""])
+	if parts.size() > 5:
+		parts = parts.slice(0, 5)
+	parts.append("Cash %s" % _delta_money_text(cash_delta))
+
+	_drilldown_label.text = "Driver read: %s." % "; ".join(parts)
+	if cash_delta >= 0.0:
+		_drilldown_label.add_theme_color_override("font_color", Color(0.62, 0.84, 0.62))
+	else:
+		_drilldown_label.add_theme_color_override("font_color", Color(0.95, 0.7, 0.46))
+
+
+func _snapshot_cost(snapshot: Dictionary, key: String) -> float:
+	return float(snapshot.get(key, 0.0))
+
+
+func _append_cost_driver(parts: Array[String], label: String, delta: float) -> void:
+	if absf(delta) < 25.0:
+		return
+	parts.append("%s %s" % [label, _delta_money_text(delta)])
+
+
 func _refresh_next_move_hint(runway_quarters: float) -> void:
 	if _next_move_label == null:
 		return
 	var hint: String
-	if GameState.company.hosting_reliability < 93.0:
+	var peak_util: float = maxf(
+		GameState.company.hosting_util_web,
+		maxf(GameState.company.hosting_util_cache, GameState.company.hosting_util_data)
+	)
+	var pressure: float = GameState.company.hosting_data_center_pressure
+	var upgrades_total: int = GameState.company.hosting_upgrade_web_level \
+		+ GameState.company.hosting_upgrade_cache_level \
+		+ GameState.company.hosting_upgrade_data_level
+	if pressure >= 2.2 and upgrades_total < 3:
+		hint = "Next best move: your workload is data-center-heavy — prioritize data/cache capacity and infra staffing now."
+	elif peak_util > 1.05 and upgrades_total < 2:
+		hint = "Next best move: load is peaking — open Logistics and buy lane capacity before incidents pile up."
+	elif GameState.company.hosting_reliability < 93.0:
 		hint = "Next best move: hosting reliability is unstable — add Infra capacity or switch to a safer hosting plan."
 	elif GameState.company.hosting_overage_cost >= 600.0:
 		hint = "Next best move: hosting overage is high — rebalance Infra staffing or move to a cheaper plan."

@@ -34,9 +34,17 @@ enum HostingPlan { MANAGED_CLOUD, HYBRID, IN_HOUSE }
 @export var hosting_util_data: float = 0.0
 @export var hosting_overage_cost: float = 0.0
 @export var hosting_incidents_last_quarter: int = 0
+@export var hosting_upgrade_web_level: int = 0
+@export var hosting_upgrade_cache_level: int = 0
+@export var hosting_upgrade_data_level: int = 0
+@export var hosting_optimization_level: int = 0
+@export var hosting_workload_profile: String = "General Cloud"
+@export var hosting_data_center_pressure: float = 0.0
 
 const OFFICE_CAPACITY := {0: 4, 1: 10, 2: 25, 3: 60}
 const OFFICE_NAMES := {0: "Garage", 1: "Small Office", 2: "Mid-Size Office", 3: "HQ"}
+const HOSTING_LANE_UPGRADE_MAX := 6
+const HOSTING_OPTIMIZATION_MAX := 4
 
 const TYPE_NAMES := {
 	CompanyType.SAAS: "SaaS B2B",
@@ -228,3 +236,11 @@ func clamp_all() -> void:
 	hosting_util_data = clampf(hosting_util_data, 0.0, 5.0)
 	hosting_overage_cost = clampf(hosting_overage_cost, 0.0, 1e12)
 	hosting_incidents_last_quarter = clampi(hosting_incidents_last_quarter, 0, 99)
+	hosting_upgrade_web_level = clampi(hosting_upgrade_web_level, 0, HOSTING_LANE_UPGRADE_MAX)
+	hosting_upgrade_cache_level = clampi(hosting_upgrade_cache_level, 0, HOSTING_LANE_UPGRADE_MAX)
+	hosting_upgrade_data_level = clampi(hosting_upgrade_data_level, 0, HOSTING_LANE_UPGRADE_MAX)
+	hosting_optimization_level = clampi(hosting_optimization_level, 0, HOSTING_OPTIMIZATION_MAX)
+	hosting_workload_profile = hosting_workload_profile.strip_edges()
+	if hosting_workload_profile.is_empty():
+		hosting_workload_profile = "General Cloud"
+	hosting_data_center_pressure = clampf(hosting_data_center_pressure, 0.0, 3.0)

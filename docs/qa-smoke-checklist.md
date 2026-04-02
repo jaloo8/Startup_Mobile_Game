@@ -79,9 +79,10 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 4.12 | Advance button label shows explicit next period | Button text reads `Advance to Yx Qy` and switches to resolve-state text when blocked | `quarter_dashboard.gd` → `_update_advance_button_label()` |
 | 4.13 | Quarter-entry toast appears after advance | Toast shows new quarter and immediate cash/users deltas, then fades out | `quarter_dashboard.gd` → `_show_advance_toast()` |
 | 4.14 | Hosting status strip updates on dashboard | Shows plan + reliability + peak load and color state updates with infra pressure | `quarter_dashboard.gd` → `_refresh_hosting_status()` |
-| 4.15 | Office worker ambient markers render and animate | Assignment-colored workers appear on office banner and move subtly; updates after hires/reassignments | `quarter_dashboard.gd` → `_refresh_office_worker_ambient()` |
-| 4.16 | Dashboard finance labels are plain-English | Titles read `Cash in Bank`, `Money In / Q`, `Money Out / Q`, `Time Left` and glossary opens correct definitions | `quarter_dashboard.gd` → `_apply_plain_finance_titles()` |
+| 4.15 | Office worker desk sprites render and animate | Desk-aware pseudo-sprite workers (head/body badges) appear on office banner with subtle motion and per-office layout changes | `quarter_dashboard.gd` → `_refresh_office_worker_ambient()` |
+| 4.16 | Dashboard finance labels use hybrid CFO + plain wording | Titles read `Cash (On Hand)`, `Revenue (Qtr)`, `Burn Rate (Qtr)`, `Runway (Time Left)` and glossary opens correct definitions | `quarter_dashboard.gd` → `_apply_plain_finance_titles()` |
 | 4.17 | Dashboard plain-English finance explainer updates | One-line explainer describes positive or negative cashflow based on current quarter state | `quarter_dashboard.gd` → `_refresh_finance_plain_hint()` |
+| 4.18 | Dashboard hosting strip shows workload profile | Hosting status includes workload profile text and pressure warning when run becomes scale/data-center heavy | `quarter_dashboard.gd` → `_refresh_hosting_status()` |
 
 ---
 
@@ -106,6 +107,8 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 5.15 | Quarterly report generates 6+ bullets | Summary includes revenue/cash/team/product/users/economy/hosting (plus situational energy/board lines) | `src/engine/quarterly_report.gd` |
 | 5.16 | Hosting incidents apply reliability pressure | Overload lowers reliability and can increase bugs/churn/reduce stability | `simulation_engine.gd` → `_simulate_hosting()` |
 | 5.17 | Hosting event logs appear when stressed | Quarter log can show hosting incident/overage entries under load | `simulation_engine.gd` → `_calculate_costs()` |
+| 5.18 | Hosting upgrades affect lane capacity and cost | Purchasing lane upgrades/optimization increases effective capacity and raises recurring hosting cost | `simulation_engine.gd` → `_simulate_hosting()`, `logistics_overview.gd` |
+| 5.19 | Workload-aware hosting demand reacts to product direction | AI/streaming/marketplace/API/realtime feature mixes change lane demand multipliers and can escalate data-center pressure tier | `simulation_engine.gd` → `_hosting_workload_profile()`, `_simulate_hosting()` |
 
 ---
 
@@ -216,7 +219,9 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 11.14 | Hosting plan selector persists and affects costs | Switching Managed Cloud/Hybrid/In-house updates company plan, autosaves, and changes future hosting costs/reliability | `finance_overview.gd` → `_on_hosting_plan_selected()`, `game_state.gd` serialize/deserialize |
 | 11.15 | Hosting cost line item is visible in costs grid | `Hosting` value updates each quarter from simulation outputs | `finance_overview.gd` → `_build_hosting_controls()`, `_refresh()` |
 | 11.16 | Finance → Logistics navigation works | `Open Logistics` button opens logistics overview and back returns to Finances | `finance_overview.gd` → `_on_open_logistics()`, `logistics_overview.gd` |
-| 11.17 | Finance labels use plain-English wording | `Cash in Bank`, `Money In / Q`, `Money Out / Q`, `Time Left` visible in overview grid | `finance_overview.gd` → `_apply_plain_finance_titles()` |
+| 11.17 | Finance labels use hybrid CFO + plain wording | `Cash (On Hand)`, `Revenue (Qtr)`, `Burn Rate (Qtr)`, `Runway (Time Left)` visible in overview grid | `finance_overview.gd` → `_apply_plain_finance_titles()` |
+| 11.18 | Finance driver drill-down explains cash movement | `Driver read` line summarizes revenue/cost drivers and incidents from last quarter snapshot | `finance_overview.gd` → `_refresh_drilldown_hint()`, `game_state.gd` → `_take_snapshot()` |
+| 11.19 | Finance hosting meta includes workload profile | Hosting meta text shows profile + pressure tier and updates recommendation when data-center pressure is high | `finance_overview.gd` → `_refresh_hosting_controls()`, `_refresh_next_move_hint()` |
 
 ---
 
@@ -228,6 +233,9 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 11B.2 | Hosting lane bars match current demand/capacity | Web/Cache/Data utilization reflects latest quarter simulation outputs | `logistics_overview.gd` → `_set_lane()`, `simulation_engine.gd` → `_simulate_hosting()` |
 | 11B.3 | Plan switching from Logistics persists | Changing plan updates `company.hosting_plan` and autosaves current slot | `logistics_overview.gd` → `_on_plan_selected()`, `game_state.gd` |
 | 11B.4 | Objective lines progress correctly | Reliability streak, overage threshold, and infra staffing objective update with state | `logistics_overview.gd` → `_objective_lines()` |
+| 11B.5 | Capacity action buttons buy upgrades correctly | Web/Cache/Data/Optimization upgrades deduct cash, increase levels, append event log, and autosave | `logistics_overview.gd` → `_on_upgrade_pressed()`, `game_state.gd` |
+| 11B.6 | Upgrade affordability + max-level gating works | Buttons disable when cash is insufficient or level cap is reached; labels show next cost/level | `logistics_overview.gd` → `_refresh_upgrade_row()` |
+| 11B.7 | Logistics guidance adapts to workload pressure | Plan hint/objectives add data-lane scaling guidance when workload profile enters scale-intensive or data-center-heavy tiers | `logistics_overview.gd` → `_refresh()`, `_objective_lines()` |
 
 ---
 
@@ -252,6 +260,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 13.2 | Glossary popup shows correct definition | Term title + plain-English description | `src/ui/components/glossary_popup.gd`, `src/data/glossary.json` |
 | 13.3 | Popup dismisses cleanly | Tap outside or close button | `glossary_popup.gd` |
 | 13.4 | All stat terms have glossary entries | No missing keys when clicking any ℹ button | `glossary.json` |
+| 13.5 | Info icons show hover tooltip text | Hovering metric ℹ buttons shows concise term + explanation tooltip, while click still opens popup | `quarter_dashboard.gd`, `finance_overview.gd` |
 
 ---
 
@@ -301,6 +310,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 16.8 | Rewarded ad for stat reveal works | Triggers quick-peek interview report | `ad_manager.gd`, `employee_list.gd` → `_on_ad_reveal()` |
 | 16.9 | Restore purchases path works | Restore button attempts recovery and unlocks if entitlement exists | `ad_manager.gd` → `restore_purchases()`, `settings_screen.gd` |
 | 16.10 | Free save-slot gating enforced on mobile | Slots above free limit show locked premium cards | `save_slots.gd` → `_is_slot_unlocked()`, `ad_manager.gd` → `max_save_slots()` |
+| 16.11 | Stability-first monetization gate stays active on gameplay branch | `MONETIZATION_TEMP_DISABLED` remains true; gameplay flow does not block on paywall during stabilization | `ad_manager.gd`, `tools/backend_smoke.py` → `validate_monetization_gate()` |
 
 ---
 

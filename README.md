@@ -73,6 +73,12 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Hosting capacity actions (v2)** — Logistics now includes explicit player-facing infra upgrades: `Scale Web`, `Scale Cache`, `Scale Data`, and `Optimize request pipeline`, each with level caps, escalating one-time purchase costs, autosave hooks, and event-log traces.
+- **Hosting simulation tuning pass** — Hosting now applies lane-upgrade capacity multipliers and optimization demand reduction, with smoother reliability/incident curves and difficulty-aware pressure scaling to reduce early-run randomness while preserving late-run infra risk.
+- **Workload-aware hosting pressure** — Hosting demand now reacts to what you are actually building (AI/ML, streaming, marketplace, API/realtime) and surfaces a live workload profile (`General Cloud` / `Scale-Intensive` / `Data-Center Heavy`) across dashboard, finance, and logistics hints.
+- **Finance drill-down guidance** — Finances now includes a `Driver read` line that explains why cash moved quarter-over-quarter (revenue change + cost drivers + hosting incidents) instead of only showing deltas.
+- **Office worker scene v2** — Dashboard office banner now renders desk-aware pseudo-sprite workers (head/body badge style), desk/monitor placement, and office customization accents by company type/plan for a more readable "busy office" feel.
+- **Monetization stability gate contract** — `MONETIZATION_TEMP_DISABLED` remains explicitly enforced for gameplay stability work, and backend smoke now validates this guard so monetization cannot be re-enabled accidentally before QA signoff.
 - **Hosting economics + reliability pass** — Added a quarter-based hosting model with per-plan behavior (`Managed Cloud`, `Hybrid`, `In-house`), lane-level demand/capacity tracking (web/cache/data), overage costs, and reliability-driven incident pressure that can impact stability/churn when infrastructure is overloaded.
 - **Player-facing hosting controls** — Finances now includes a `Hosting Plan` selector, hosting cost line item, and live reliability/load/overage feedback so infra decisions are visible and actionable.
 - **Logistics screen (v1)** — Added a dedicated Logistics view from Finances with lane utilization bars, hosting cost breakdown, reliability status, and milestone-style operations objectives for infra planning.

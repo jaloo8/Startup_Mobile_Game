@@ -6,6 +6,14 @@ const BASE_ORGANIC_USERS_PER_QUARTER := 10
 const MARKETING_USER_MULT := 0.5
 const OFFICE_COST_BY_LEVEL := [0.0, 1_000.0, 4_000.0, 10_000.0]
 const HOSTING_BASE_CAPACITY_BY_OFFICE := [2_200.0, 7_500.0, 20_000.0, 52_000.0]
+const HOSTING_WEB_CAPACITY_PER_UPGRADE := 0.16
+const HOSTING_CACHE_CAPACITY_PER_UPGRADE := 0.14
+const HOSTING_DATA_CAPACITY_PER_UPGRADE := 0.18
+const HOSTING_OPTIMIZATION_DEMAND_REDUCTION_PER_LEVEL := 0.045
+const HOSTING_WEB_MAINTENANCE_PER_UPGRADE := 95.0
+const HOSTING_CACHE_MAINTENANCE_PER_UPGRADE := 78.0
+const HOSTING_DATA_MAINTENANCE_PER_UPGRADE := 118.0
+const HOSTING_OPTIMIZATION_MAINTENANCE_PER_LEVEL := 135.0
 
 const HOSTING_PROFILE_BY_TYPE := {
 	CompanyData.CompanyType.SAAS: {
@@ -64,6 +72,65 @@ const HOSTING_PLAN_CONFIG := {
 		"elastic_buffer": 0.04,
 		"incident_penalty_mult": 1.0,
 	},
+}
+
+const HOSTING_WORKLOAD_KEYWORDS := {
+	"ai_ml": [
+		"ai",
+		"ml",
+		"model",
+		"inference",
+		"training",
+		"recommend",
+		"vector",
+		"embedding",
+		"gpu",
+	],
+	"streaming": [
+		"stream",
+		"video",
+		"media",
+		"live",
+		"stories",
+		"playback",
+		"feed",
+	],
+	"marketplace": [
+		"market",
+		"search",
+		"listing",
+		"seller",
+		"payment",
+		"escrow",
+		"delivery",
+		"tracking",
+		"rating",
+		"review",
+	],
+	"api_platform": [
+		"api",
+		"sdk",
+		"webhook",
+		"rate",
+		"auth",
+		"token",
+		"usage",
+		"integration",
+		"plugin",
+		"cicd",
+		"cli",
+		"sandbox",
+	],
+	"realtime": [
+		"realtime",
+		"real_time",
+		"chat",
+		"live",
+		"webhook",
+		"notification",
+		"stream",
+		"tracking",
+	],
 }
 
 const DEFAULT_GROWTH_BALANCE := {
@@ -362,6 +429,8 @@ static func _calculate_costs(state: Node) -> void:
 	state.company.hosting_util_data = float(hosting.get("util_data", 0.0))
 	state.company.hosting_overage_cost = float(hosting.get("overage_cost", 0.0))
 	state.company.hosting_incidents_last_quarter = int(hosting.get("incidents", 0))
+	state.company.hosting_workload_profile = str(hosting.get("workload_label", "General Cloud"))
+	state.company.hosting_data_center_pressure = float(hosting.get("data_center_pressure", 0.0))
 	if state.company.hosting_incidents_last_quarter > 0:
 		var title := "Hosting incidents: %d this quarter (%.1f%% reliability)" % [
 			state.company.hosting_incidents_last_quarter,
@@ -416,9 +485,152 @@ static func _hosting_plan_cfg(hosting_plan: int) -> Dictionary:
 	return cfg
 
 
+static func _workload_base(company_type: int) -> Dictionary:
+	match company_type:
+		CompanyData.CompanyType.SAAS:
+			return {
+				"ai_ml": 0.10,
+				"streaming": 0.06,
+				"marketplace": 0.08,
+				"api_platform": 0.28,
+				"realtime": 0.14,
+			}
+		CompanyData.CompanyType.CONSUMER:
+			return {
+				"ai_ml": 0.08,
+				"streaming": 0.36,
+				"marketplace": 0.08,
+				"api_platform": 0.09,
+				"realtime": 0.30,
+			}
+		CompanyData.CompanyType.MARKETPLACE:
+			return {
+				"ai_ml": 0.08,
+				"streaming": 0.10,
+				"marketplace": 0.42,
+				"api_platform": 0.16,
+				"realtime": 0.22,
+			}
+		CompanyData.CompanyType.DEV_TOOLS:
+			return {
+				"ai_ml": 0.12,
+				"streaming": 0.04,
+				"marketplace": 0.06,
+				"api_platform": 0.44,
+				"realtime": 0.26,
+			}
+		_:
+			return {
+				"ai_ml": 0.10,
+				"streaming": 0.10,
+				"marketplace": 0.10,
+				"api_platform": 0.18,
+				"realtime": 0.12,
+			}
+
+
+static func _keyword_score(text: String, keywords: Array) -> float:
+	if text.is_empty() or keywords.is_empty():
+		return 0.0
+	var score: float = 0.0
+	for raw in keywords:
+		var needle: String = str(raw).strip_edges().to_lower()
+		if needle.is_empty():
+			continue
+		if text.find(needle) >= 0:
+			score += 1.0
+	return score
+
+
+static func _dominant_workload_label(ai_ml: float, streaming: float, marketplace: float, api_rt: float) -> String:
+	var dominant_label: String = "Balanced"
+	var dominant_score: float = 0.0
+	var labels: Array[String] = ["AI/ML", "Streaming", "Marketplace", "API/Realtime"]
+	var scores: Array[float] = [ai_ml, streaming, marketplace, api_rt]
+	for i in labels.size():
+		var score: float = scores[i]
+		if score > dominant_score:
+			dominant_score = score
+			dominant_label = labels[i]
+	return dominant_label
+
+
+static func _hosting_workload_profile(state: Node) -> Dictionary:
+	var buckets: Dictionary = _workload_base(state.company.type)
+	var ai_keywords: Array = HOSTING_WORKLOAD_KEYWORDS.get("ai_ml", [])
+	var streaming_keywords: Array = HOSTING_WORKLOAD_KEYWORDS.get("streaming", [])
+	var marketplace_keywords: Array = HOSTING_WORKLOAD_KEYWORDS.get("marketplace", [])
+	var api_keywords: Array = HOSTING_WORKLOAD_KEYWORDS.get("api_platform", [])
+	var realtime_keywords: Array = HOSTING_WORKLOAD_KEYWORDS.get("realtime", [])
+
+	for feature_v in state.product.features:
+		if not (feature_v is Dictionary):
+			continue
+		var feature_row: Dictionary = feature_v
+		var token: String = ("%s %s" % [str(feature_row.get("id", "")), str(feature_row.get("name", ""))]).to_lower()
+		if token.strip_edges().is_empty():
+			continue
+		buckets["ai_ml"] = float(buckets.get("ai_ml", 0.0)) + (_keyword_score(token, ai_keywords) * 0.18)
+		buckets["streaming"] = float(buckets.get("streaming", 0.0)) + (_keyword_score(token, streaming_keywords) * 0.16)
+		buckets["marketplace"] = float(buckets.get("marketplace", 0.0)) + (_keyword_score(token, marketplace_keywords) * 0.14)
+		buckets["api_platform"] = float(buckets.get("api_platform", 0.0)) + (_keyword_score(token, api_keywords) * 0.14)
+		buckets["realtime"] = float(buckets.get("realtime", 0.0)) + (_keyword_score(token, realtime_keywords) * 0.15)
+
+	var users_scale: float = clampf(float(state.product.users) / 250_000.0, 0.0, 1.0)
+	var dau_scale: float = clampf(float(state.product.dau) / 120_000.0, 0.0, 1.0)
+	buckets["marketplace"] = float(buckets.get("marketplace", 0.0)) + (users_scale * 0.18)
+	buckets["api_platform"] = float(buckets.get("api_platform", 0.0)) + (users_scale * 0.20)
+	buckets["streaming"] = float(buckets.get("streaming", 0.0)) + (dau_scale * 0.24)
+	buckets["realtime"] = float(buckets.get("realtime", 0.0)) + (dau_scale * 0.26)
+	if float(buckets.get("ai_ml", 0.0)) > 0.35:
+		buckets["ai_ml"] = float(buckets.get("ai_ml", 0.0)) + (users_scale * 0.22)
+
+	var ai_ml: float = clampf(float(buckets.get("ai_ml", 0.0)), 0.0, 2.4)
+	var streaming: float = clampf(float(buckets.get("streaming", 0.0)), 0.0, 2.4)
+	var marketplace: float = clampf(float(buckets.get("marketplace", 0.0)), 0.0, 2.4)
+	var api_platform: float = clampf(float(buckets.get("api_platform", 0.0)), 0.0, 2.4)
+	var realtime: float = clampf(float(buckets.get("realtime", 0.0)), 0.0, 2.4)
+	var api_realtime: float = api_platform + (realtime * 0.70)
+
+	var web_mult: float = 1.0 + (streaming * 0.20) + (marketplace * 0.16) + (realtime * 0.13) + (api_platform * 0.06)
+	var cache_mult: float = 1.0 + (api_platform * 0.18) + (realtime * 0.16) + (streaming * 0.12) + (ai_ml * 0.08)
+	var data_mult: float = 1.0 + (ai_ml * 0.30) + (marketplace * 0.18) + (api_platform * 0.14) + (realtime * 0.14) + (streaming * 0.10)
+	web_mult = clampf(web_mult, 1.0, 2.25)
+	cache_mult = clampf(cache_mult, 1.0, 2.25)
+	data_mult = clampf(data_mult, 1.0, 2.35)
+
+	var data_center_pressure: float = (
+		(ai_ml * 0.55)
+		+ (streaming * 0.30)
+		+ (marketplace * 0.26)
+		+ (api_platform * 0.10)
+		+ (realtime * 0.14)
+	)
+	data_center_pressure = clampf(data_center_pressure, 0.0, 3.0)
+
+	var dominant: String = _dominant_workload_label(ai_ml, streaming, marketplace, api_realtime)
+	var profile_label: String
+	if data_center_pressure >= 2.2:
+		profile_label = "Data-Center Heavy (%s)" % dominant
+	elif data_center_pressure >= 1.25:
+		profile_label = "Scale-Intensive (%s)" % dominant
+	else:
+		profile_label = "General Cloud (%s)" % dominant
+
+	return {
+		"web_mult": web_mult,
+		"cache_mult": cache_mult,
+		"data_mult": data_mult,
+		"data_center_pressure": data_center_pressure,
+		"workload_label": profile_label,
+		"dominant_workload": dominant,
+	}
+
+
 static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionary:
 	var profile: Dictionary = _hosting_profile(state.company.type)
 	var plan_cfg: Dictionary = _hosting_plan_cfg(state.company.hosting_plan)
+	var workload_profile: Dictionary = _hosting_workload_profile(state)
 
 	var traffic_units: float = maxf(
 		900.0,
@@ -429,6 +641,18 @@ static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionar
 	var demand_web: float = traffic_units * float(profile.get("demand_web", 1.0))
 	var demand_cache: float = traffic_units * float(profile.get("demand_cache", 1.0))
 	var demand_data: float = traffic_units * float(profile.get("demand_data", 1.0))
+	demand_web *= float(workload_profile.get("web_mult", 1.0))
+	demand_cache *= float(workload_profile.get("cache_mult", 1.0))
+	demand_data *= float(workload_profile.get("data_mult", 1.0))
+	var optimization_level: int = clampi(state.company.hosting_optimization_level, 0, CompanyData.HOSTING_OPTIMIZATION_MAX)
+	var optimization_reduction: float = clampf(
+		1.0 - (float(optimization_level) * HOSTING_OPTIMIZATION_DEMAND_REDUCTION_PER_LEVEL),
+		0.75,
+		1.0
+	)
+	demand_web *= optimization_reduction
+	demand_cache *= optimization_reduction
+	demand_data *= optimization_reduction
 
 	var office_level: int = clampi(state.company.office_level, 0, HOSTING_BASE_CAPACITY_BY_OFFICE.size() - 1)
 	var infra_staff := 0
@@ -445,9 +669,15 @@ static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionar
 	var split_web: float = float(profile.get("split_web", 0.34))
 	var split_cache: float = float(profile.get("split_cache", 0.33))
 	var split_data: float = float(profile.get("split_data", 0.33))
+	var web_upgrade_level: int = clampi(state.company.hosting_upgrade_web_level, 0, CompanyData.HOSTING_LANE_UPGRADE_MAX)
+	var cache_upgrade_level: int = clampi(state.company.hosting_upgrade_cache_level, 0, CompanyData.HOSTING_LANE_UPGRADE_MAX)
+	var data_upgrade_level: int = clampi(state.company.hosting_upgrade_data_level, 0, CompanyData.HOSTING_LANE_UPGRADE_MAX)
 	var capacity_web: float = maxf(100.0, total_capacity * split_web)
 	var capacity_cache: float = maxf(100.0, total_capacity * split_cache)
 	var capacity_data: float = maxf(100.0, total_capacity * split_data)
+	capacity_web *= 1.0 + (float(web_upgrade_level) * HOSTING_WEB_CAPACITY_PER_UPGRADE)
+	capacity_cache *= 1.0 + (float(cache_upgrade_level) * HOSTING_CACHE_CAPACITY_PER_UPGRADE)
+	capacity_data *= 1.0 + (float(data_upgrade_level) * HOSTING_DATA_CAPACITY_PER_UPGRADE)
 
 	var elastic: float = clampf(float(plan_cfg.get("elastic_buffer", 0.0)), 0.0, 0.40)
 	var effective_capacity_web: float = capacity_web * (1.0 + elastic)
@@ -465,32 +695,42 @@ static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionar
 	var avg_util: float = (util_web + util_cache + util_data) / 3.0
 	var max_util: float = maxf(util_web, maxf(util_cache, util_data))
 	var reliability: float = 99.6
-	reliability -= maxf(0.0, avg_util - 0.78) * 30.0
-	reliability -= maxf(0.0, max_util - 1.0) * 44.0
-	reliability -= minf(6.0, overage_total / 5_000.0)
-	reliability = clampf(reliability, 70.0, 99.95)
+	reliability -= maxf(0.0, avg_util - 0.82) * 24.0
+	reliability -= maxf(0.0, max_util - 1.0) * 38.0
+	reliability -= minf(5.0, overage_total / 6_500.0)
+	reliability = clampf(reliability, 72.0, 99.95)
 
 	var incidents := 0
 	var incident_penalty_mult: float = float(plan_cfg.get("incident_penalty_mult", 1.0))
-	var incident_risk: float = maxf(0.0, max_util - 1.0) * incident_penalty_mult
-	if reliability < 97.0:
+	var pressure_mult := 1.0
+	if state.has_method("difficulty_mult"):
+		pressure_mult = clampf(float(state.difficulty_mult("event_pressure_mult")), 0.8, 1.4)
+	var incident_risk: float = maxf(0.0, max_util - 0.98) * incident_penalty_mult * pressure_mult
+	if reliability < 96.5:
 		incidents += 1
-	if reliability < 93.0 and randf() < clampf(0.15 + incident_risk, 0.0, 0.95):
+	if reliability < 92.5 and randf() < clampf(0.10 + incident_risk, 0.0, 0.95):
 		incidents += 1
-	if reliability < 88.0 and randf() < clampf(incident_risk, 0.0, 0.85):
+	if reliability < 87.5 and randf() < clampf(0.05 + (incident_risk * 0.8), 0.0, 0.85):
 		incidents += 1
 
 	if incidents > 0:
 		var penalty_scale: float = clampf((99.0 - reliability) / 20.0, 0.0, 2.5)
-		state.product.stability = maxi(0, state.product.stability - ceili(2.0 + penalty_scale * 4.0))
-		state.product.bugs += ceili(1.0 + penalty_scale * 2.0)
-		state.product.churn_rate = minf(ProductData.CHURN_RATE_MAX, state.product.churn_rate + 0.002 + penalty_scale * 0.0015)
+		state.product.stability = maxi(0, state.product.stability - ceili(1.5 + penalty_scale * 3.5))
+		state.product.bugs += ceili(1.0 + penalty_scale * 1.8)
+		state.product.churn_rate = minf(ProductData.CHURN_RATE_MAX, state.product.churn_rate + 0.0015 + penalty_scale * 0.0012)
 
 	var usage_total: float = demand_web + demand_cache + demand_data
 	var hosting_cost: float = float(plan_cfg.get("fixed_cost", 0.0))
 	hosting_cost += usage_total * float(plan_cfg.get("usage_cost_per_cu", 0.0))
 	var overage_cost: float = overage_total * float(plan_cfg.get("overage_cost_per_cu", 0.0))
 	hosting_cost += overage_cost
+	var upgrade_maintenance: float = (
+		float(web_upgrade_level) * HOSTING_WEB_MAINTENANCE_PER_UPGRADE
+		+ float(cache_upgrade_level) * HOSTING_CACHE_MAINTENANCE_PER_UPGRADE
+		+ float(data_upgrade_level) * HOSTING_DATA_MAINTENANCE_PER_UPGRADE
+		+ float(optimization_level) * HOSTING_OPTIMIZATION_MAINTENANCE_PER_LEVEL
+	)
+	hosting_cost += upgrade_maintenance
 	if incidents > 0:
 		hosting_cost += float(incidents) * 350.0 * (1.0 + maxf(0.0, max_util - 1.0))
 	hosting_cost *= maxf(0.7, finance_discount)
@@ -498,6 +738,7 @@ static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionar
 	return {
 		"hosting_cost": maxf(0.0, hosting_cost),
 		"overage_cost": maxf(0.0, overage_cost * maxf(0.7, finance_discount)),
+		"upgrade_maintenance_cost": maxf(0.0, upgrade_maintenance * maxf(0.7, finance_discount)),
 		"reliability": reliability,
 		"incidents": incidents,
 		"demand_web": demand_web,
@@ -509,6 +750,10 @@ static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionar
 		"util_web": util_web,
 		"util_cache": util_cache,
 		"util_data": util_data,
+		"optimization_reduction": optimization_reduction,
+		"workload_label": str(workload_profile.get("workload_label", "General Cloud")),
+		"dominant_workload": str(workload_profile.get("dominant_workload", "Balanced")),
+		"data_center_pressure": float(workload_profile.get("data_center_pressure", 0.0)),
 	}
 
 

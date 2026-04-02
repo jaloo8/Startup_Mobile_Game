@@ -280,7 +280,7 @@ Do these in order. Each one should be playable before starting the next.
   - Each niche gets: a short flavor description, niche-specific competitors, tailored events, a starting user acquisition strategy, and unique headline templates
   - Niches within the same company type share the core growth curves and feature trees but get bonus modifiers (e.g., mobile games have spikier user growth but higher churn; CRMs grow slow but retain well)
   - Some niches are easier than others — utility apps are simpler to launch, while competing in OS/cloud is brutal but has massive upside
-  - Future DLC types (AI, Gaming, Hardware, Platform/OS) each get their own niche lists
+  - Future DLC types (AI, Gaming, Hardware, Platform/OS, Autonomous Mobility) each get their own niche lists
   - Modders can add custom niches via JSON
 - [~] **Early game economy revamp ($20K start)** — Hiring pipeline now includes full-time/contractor/intern employment types with different cost/output/retention dynamics, plus a lighter early-office cost curve (co-working/small/HQ) to reduce abrupt quarter-2 cash shocks; full expense-system rebalance is still pending:
   - Start with $20K (savings, side hustle money, or a small friends & family round)
@@ -374,20 +374,20 @@ Do these in order. Each one should be playable before starting the next.
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
 - [~] **Turn-change clarity polish** — Dashboard now shows a compact "Last quarter" momentum strip (cash/revenue/users/valuation), explicit event-count + resolve-state guidance, a lightweight quarter-entry toast, and a persistent "Next best action" hint; still pending: bespoke transition animation + SFX.
-- [~] **Finance decision guidance** — Finances now include a quarter-delta strip and a natural-language "Next best move" recommendation based on runway/burn/dilution state; deeper metric drill-down guidance is still pending.
-- [~] **Hosting economics + reliability** — Quarter simulation now models hosting demand/capacity lanes (web/cache/data), plan-based costs (Managed Cloud/Hybrid/In-house), overage costs, and reliability incident pressure; Logistics screen v1 is now live (lane bars + objectives), while explicit capacity-upgrade actions are still pending.
+- [x] **Finance decision guidance** — Finances now include quarter-delta context, a natural-language "Next best move", and a new driver-level drill-down summary (`Driver read`) that explains quarter-over-quarter cash movement from revenue and core cost buckets.
+- [x] **Hosting economics + reliability** — Quarter simulation now models hosting demand/capacity lanes (web/cache/data), plan-based costs (Managed Cloud/Hybrid/In-house), overage costs, reliability incident pressure, and explicit player-facing capacity actions (lane upgrades + optimization) via Logistics. It now also includes workload-aware pressure profiling (AI/ML, streaming, marketplace, API/realtime) so data-center-heavy runs surface naturally from what you build.
 - [~] **Charts and graphs** — Finance screen now includes two lightweight trend panels (cash/revenue/users and valuation/team/morale, normalized, last 12 quarters); deeper drill-down analytics are still pending
 - [x] **Employee detail view** — Added dedicated employee profile screen with history timeline + trajectory chart + role/trait metadata
 - [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; added `docs/difficulty-playtest-matrix.md` for structured 12-run validation, but full empirical pass is still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
 - [ ] **Sound effects** — Minimal UI sounds (optional)
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
-- [~] **Office worker ambient animation** — Dashboard office banner now includes lightweight assignment-colored worker ambient markers with subtle motion; full desk/furniture/sprite scene system is still outstanding.
+- [~] **Office worker ambient animation** — Dashboard office banner now uses desk-aware pseudo-sprite workers (head/body badges), monitor+desk placement, and office customization states (per office tier + company accent); fully custom animated sprite art pipeline is still outstanding.
 - [~] **Product visual prototype lab** — Product screen now includes a data-driven `Prototype Concept` switcher backed by `src/data/product_preview_prototypes.json` so new concept ideas can be added without code changes; concept-specific art variants and per-concept layout overrides are still pending
 - [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
 - [x] **Persistence hardening** — Save files now use checksum-enforced wrapper + strict validation + `.bak` fallback recovery; corrupted primary save auto-recovers from backup when available
 - [x] **Storage safety limits** — Size limits for save/settings payloads and clamp/sanitize pass during deserialize to guard against malformed or tampered data
-- [~] **Free vs paid foundation** — Free-tier gate + paywall + premium flags + restore path + save-slot entitlement gating are wired; final store plugin QA on physical iOS/Android builds is still pending
+- [~] **Free vs paid foundation** — Free-tier gate + paywall + premium flags + restore path + save-slot entitlement gating are wired; gameplay branch currently keeps monetization temp-disabled behind an explicit stability-first guard until core QA signoff, and final store plugin QA on physical iOS/Android builds remains pending
 
 #### Animation Roadmap (Now → Soon → Later)
 
@@ -474,6 +474,16 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **2 Platform company types** — OS, Developer Platform/Cloud
 - [ ] **Platform employee specialties** — DevRel, Platform Engineer, Partner Manager
 - [ ] **30 platform-specific events** — Antitrust, developer revolt, ecosystem health
+- [ ] **Balance & test**
+
+### v1.6 — DLC #5: Autonomous Mobility (Autonomous Vehicle Path)
+
+- [ ] **Autonomy stack management** — Track perception/planning quality, disengagement risk, and safety score over time
+- [ ] **Compute + edge infra layer** — Add data-center + edge-node capacity/cost loops tied to fleet growth and simulation demand
+- [ ] **Regulatory expansion loop** — City permits, safety audits, and rollout pacing decisions per market
+- [ ] **2 mobility company archetypes** — Robotaxi Network and Autonomous Logistics
+- [ ] **Mobility specialties** — Perception Engineer, Mapping Ops, Fleet Reliability, Safety Operations
+- [ ] **35 mobility-specific events** — Safety incidents, weather disruptions, map drift, recall pressure, competitor pilots
 - [ ] **Balance & test**
 
 ---

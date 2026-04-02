@@ -21,6 +21,7 @@ PRODUCT_OVERVIEW_PATH = ROOT / "src" / "ui" / "product" / "product_overview.gd"
 GAME_STATE_PATH = ROOT / "src" / "autoload" / "game_state.gd"
 FUNDRAISING_PATH = ROOT / "src" / "engine" / "fundraising_engine.gd"
 EVENT_ENGINE_PATH = ROOT / "src" / "engine" / "event_engine.gd"
+AD_MANAGER_PATH = ROOT / "src" / "autoload" / "ad_manager.gd"
 
 FEATURE_TYPES = {"saas", "consumer", "marketplace", "dev_tools"}
 FOCUS_TYPES = {"saas", "consumer", "marketplace", "dev_tools"}
@@ -149,6 +150,19 @@ UI_BUTTON_SCRIPT_CHECKS = (
             "decline_btn.pressed.connect(_on_decline_offer)",
         ],
         "required_funcs": ["_on_back", "_on_fundraise", "_on_accept_offer", "_on_decline_offer"],
+    },
+    {
+        "label": "Logistics actions + upgrades",
+        "path": ROOT / "src" / "ui" / "logistics" / "logistics_overview.gd",
+        "required_snippets": [
+            "back_btn.pressed.connect(_on_back)",
+            "plan_picker.item_selected.connect(_on_plan_selected)",
+            "_build_upgrade_actions()",
+            '_add_upgrade_row(body, "web", "Scale Web lane")',
+            "_on_upgrade_pressed(lane_key: String)",
+            "GameState.company.hosting_upgrade_web_level",
+        ],
+        "required_funcs": ["_on_back", "_on_plan_selected", "_on_upgrade_pressed"],
     },
     {
         "label": "Settings actions",
@@ -842,6 +856,23 @@ def validate_difficulty_contracts() -> List[str]:
     return errors
 
 
+def validate_monetization_gate() -> List[str]:
+    errors: List[str] = []
+    if not AD_MANAGER_PATH.exists():
+        return [f"missing file: {AD_MANAGER_PATH.relative_to(ROOT)}"]
+
+    src = AD_MANAGER_PATH.read_text(encoding="utf-8")
+    m = re.search(r"const\s+MONETIZATION_TEMP_DISABLED\s*:=\s*(true|false)", src)
+    if not m:
+        errors.append("ad_manager.gd missing MONETIZATION_TEMP_DISABLED constant")
+        return errors
+    if m.group(1) != "true":
+        errors.append("MONETIZATION_TEMP_DISABLED must remain true until stability signoff")
+    if "if MONETIZATION_TEMP_DISABLED:" not in src:
+        errors.append("ad_manager.gd missing runtime guard checks for MONETIZATION_TEMP_DISABLED")
+    return errors
+
+
 def validate_button_script_contracts() -> List[str]:
     errors: List[str] = []
     for check in UI_BUTTON_SCRIPT_CHECKS:
@@ -929,6 +960,7 @@ def main() -> int:
     errors.extend(validate_product_preview_prototypes(product_preview_prototypes_data))
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
+    errors.extend(validate_monetization_gate())
     errors.extend(validate_button_script_contracts())
     errors.extend(validate_button_scene_contracts())
 
@@ -942,7 +974,7 @@ def main() -> int:
     print("Backend smoke check PASSED")
     print(
         "Validated: features/events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
-        "+ visual presets + difficulty wiring + UI button wiring contracts"
+        "+ visual presets + difficulty wiring + monetization stability gate + UI button wiring contracts"
     )
     return 0
 
