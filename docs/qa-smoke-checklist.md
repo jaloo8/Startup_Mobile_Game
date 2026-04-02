@@ -73,6 +73,15 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 4.6 | Office banner matches office level | Garage/Co-working/Small Office/HQ image | `quarter_dashboard.gd` → `_refresh_office_banner()` |
 | 4.7 | Headline ticker rotates | Different headline every ~4 seconds | `quarter_dashboard.gd` → `_rotate_headline()` |
 | 4.8 | "Advance Quarter" button works | Triggers simulation, events fire, stats update | `quarter_dashboard.gd` → `_on_advance()` |
+| 4.9 | "Last quarter" momentum strip updates | Cash/Revenue/Users/Valuation deltas and tone update after each advance | `quarter_dashboard.gd` → `_refresh_turn_summary()` |
+| 4.10 | Dashboard "Next best action" hint is context-aware | Messaging changes for no hires, no feature assignment, no target feature, tight runway | `quarter_dashboard.gd` → `_refresh_next_action_hint()` |
+| 4.11 | Event heading count + resolve hint stay in sync | "This Quarter · N events" and pending-event hint update as events are resolved | `quarter_dashboard.gd` → `_refresh_events_heading()`, `_on_event_resolved()` |
+| 4.12 | Advance button label shows explicit next period | Button text reads `Advance to Yx Qy` and switches to resolve-state text when blocked | `quarter_dashboard.gd` → `_update_advance_button_label()` |
+| 4.13 | Quarter-entry toast appears after advance | Toast shows new quarter and immediate cash/users deltas, then fades out | `quarter_dashboard.gd` → `_show_advance_toast()` |
+| 4.14 | Hosting status strip updates on dashboard | Shows plan + reliability + peak load and color state updates with infra pressure | `quarter_dashboard.gd` → `_refresh_hosting_status()` |
+| 4.15 | Office worker ambient markers render and animate | Assignment-colored workers appear on office banner and move subtly; updates after hires/reassignments | `quarter_dashboard.gd` → `_refresh_office_worker_ambient()` |
+| 4.16 | Dashboard finance labels are plain-English | Titles read `Cash in Bank`, `Money In / Q`, `Money Out / Q`, `Time Left` and glossary opens correct definitions | `quarter_dashboard.gd` → `_apply_plain_finance_titles()` |
+| 4.17 | Dashboard plain-English finance explainer updates | One-line explainer describes positive or negative cashflow based on current quarter state | `quarter_dashboard.gd` → `_refresh_finance_plain_hint()` |
 
 ---
 
@@ -94,7 +103,9 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 5.12 | Employee morale/stress/turnover processed | Stressed employees may quit | `simulation_engine.gd` → morale/turnover logic |
 | 5.13 | Tech debt accumulates from rushing | Affects stability and bug rate | `simulation_engine.gd` |
 | 5.14 | Auto-save fires after advance | Save file updated in `user://saves/` | `game_state.gd` → `auto_save()` |
-| 5.15 | Quarterly report generates 5 bullets | Summary reflects actual state changes | `src/engine/quarterly_report.gd` |
+| 5.15 | Quarterly report generates 6+ bullets | Summary includes revenue/cash/team/product/users/economy/hosting (plus situational energy/board lines) | `src/engine/quarterly_report.gd` |
+| 5.16 | Hosting incidents apply reliability pressure | Overload lowers reliability and can increase bugs/churn/reduce stability | `simulation_engine.gd` → `_simulate_hosting()` |
+| 5.17 | Hosting event logs appear when stressed | Quarter log can show hosting incident/overage entries under load | `simulation_engine.gd` → `_calculate_costs()` |
 
 ---
 
@@ -181,6 +192,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 10.9 | Shimmer on in-progress features | White strip loops across ghosted card | `product_visual.gd` → `_start_shimmer()` |
 | 10.10 | Shimmer stops when feature ships | Ken Burns or reveal animation replaces shimmer | `product_visual.gd` → `_stop_shimmer()` |
 | 10.11 | All 4 company types have 10 features each | `features.json` has entries per type | `src/data/features.json` |
+| 10.12 | ETA text includes throughput hint | Build status displays estimated effort-per-quarter with current team assignment | `product_overview.gd` → `_refresh_build_status()`, `_build_eta_text()` |
 
 ---
 
@@ -199,6 +211,23 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 11.9 | Cost breakdown is transparent | Salaries + infra traceable | `simulation_engine.gd`, `financials_data.gd` |
 | 11.10 | Finance trend chart renders and updates | Cash/Revenue/Users lines draw from history (last 12 quarters) | `src/ui/finance/finance_overview.gd` → `_refresh_trend_chart()`, `src/ui/components/trend_chart.gd` |
 | 11.11 | Finance health chart renders and updates | Valuation/Team/Morale lines draw from history/live state | `finance_overview.gd` → `_refresh_health_trend_chart()`, `game_state.gd` → `_take_snapshot()` |
+| 11.12 | Finance quarter-delta strip reflects latest quarter | Cash/Revenue/Users delta text updates after each advance and colors by direction | `finance_overview.gd` → `_refresh_quarter_delta_hint()` |
+| 11.13 | Finance "Next best move" hint reflects runway pressure | Recommendation changes at critical/tight runway and high-burn scenarios | `finance_overview.gd` → `_refresh_next_move_hint()` |
+| 11.14 | Hosting plan selector persists and affects costs | Switching Managed Cloud/Hybrid/In-house updates company plan, autosaves, and changes future hosting costs/reliability | `finance_overview.gd` → `_on_hosting_plan_selected()`, `game_state.gd` serialize/deserialize |
+| 11.15 | Hosting cost line item is visible in costs grid | `Hosting` value updates each quarter from simulation outputs | `finance_overview.gd` → `_build_hosting_controls()`, `_refresh()` |
+| 11.16 | Finance → Logistics navigation works | `Open Logistics` button opens logistics overview and back returns to Finances | `finance_overview.gd` → `_on_open_logistics()`, `logistics_overview.gd` |
+| 11.17 | Finance labels use plain-English wording | `Cash in Bank`, `Money In / Q`, `Money Out / Q`, `Time Left` visible in overview grid | `finance_overview.gd` → `_apply_plain_finance_titles()` |
+
+---
+
+## 11B. Logistics (Hosting Ops)
+
+| # | Test | Expected | Source |
+|---|------|----------|--------|
+| 11B.1 | Logistics screen renders all hosting state | Reliability, lane bars, cost labels, and objectives are visible | `src/ui/logistics/logistics_overview.gd/.tscn` |
+| 11B.2 | Hosting lane bars match current demand/capacity | Web/Cache/Data utilization reflects latest quarter simulation outputs | `logistics_overview.gd` → `_set_lane()`, `simulation_engine.gd` → `_simulate_hosting()` |
+| 11B.3 | Plan switching from Logistics persists | Changing plan updates `company.hosting_plan` and autosaves current slot | `logistics_overview.gd` → `_on_plan_selected()`, `game_state.gd` |
+| 11B.4 | Objective lines progress correctly | Reliability streak, overage threshold, and infra staffing objective update with state | `logistics_overview.gd` → `_objective_lines()` |
 
 ---
 

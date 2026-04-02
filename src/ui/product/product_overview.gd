@@ -572,6 +572,8 @@ func _refresh_build_status() -> void:
 					engineers_on_features,
 					"s" if engineers_on_features != 1 else "",
 				]
+				var qtr_output: float = float(snapped(total_output * 0.5, 0.1))
+				_eta_label.text += " (~%s effort/Q ready)" % str(qtr_output)
 				_eta_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
 	else:
 		var cost: float = float(target.get("cost", 100))
@@ -616,6 +618,7 @@ func _build_eta_text(p: ProductData, target: Dictionary, engineer_count: int, to
 
 	var eng_word := "engineer" if engineer_count == 1 else "engineers"
 	var base := "%d %s working on this · %s" % [engineer_count, eng_word, eta_str]
+	base += " · ~%s effort/Q" % str(snapped(progress_per_quarter, 0.1))
 
 	# Count how many on Features are a great/good fit and mention it
 	var great_fits: int = 0

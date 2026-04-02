@@ -6,6 +6,7 @@ extends Resource
 @export var costs_breakdown: Dictionary = {
 	"salaries": 0.0,
 	"infrastructure": 0.0,
+	"hosting": 0.0,
 	"office": 0.0,
 	"marketing": 0.0,
 	"legal": 0.0,

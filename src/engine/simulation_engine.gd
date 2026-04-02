@@ -5,6 +5,66 @@ extends RefCounted
 const BASE_ORGANIC_USERS_PER_QUARTER := 10
 const MARKETING_USER_MULT := 0.5
 const OFFICE_COST_BY_LEVEL := [0.0, 1_000.0, 4_000.0, 10_000.0]
+const HOSTING_BASE_CAPACITY_BY_OFFICE := [2_200.0, 7_500.0, 20_000.0, 52_000.0]
+
+const HOSTING_PROFILE_BY_TYPE := {
+	CompanyData.CompanyType.SAAS: {
+		"demand_web": 0.95,
+		"demand_cache": 0.80,
+		"demand_data": 1.25,
+		"split_web": 0.34,
+		"split_cache": 0.25,
+		"split_data": 0.41,
+	},
+	CompanyData.CompanyType.CONSUMER: {
+		"demand_web": 1.25,
+		"demand_cache": 1.05,
+		"demand_data": 0.75,
+		"split_web": 0.45,
+		"split_cache": 0.35,
+		"split_data": 0.20,
+	},
+	CompanyData.CompanyType.MARKETPLACE: {
+		"demand_web": 1.10,
+		"demand_cache": 1.00,
+		"demand_data": 1.10,
+		"split_web": 0.38,
+		"split_cache": 0.30,
+		"split_data": 0.32,
+	},
+	CompanyData.CompanyType.DEV_TOOLS: {
+		"demand_web": 0.90,
+		"demand_cache": 1.20,
+		"demand_data": 1.00,
+		"split_web": 0.30,
+		"split_cache": 0.42,
+		"split_data": 0.28,
+	},
+}
+
+const HOSTING_PLAN_CONFIG := {
+	CompanyData.HostingPlan.MANAGED_CLOUD: {
+		"fixed_cost": 350.0,
+		"usage_cost_per_cu": 0.020,
+		"overage_cost_per_cu": 0.064,
+		"elastic_buffer": 0.22,
+		"incident_penalty_mult": 0.70,
+	},
+	CompanyData.HostingPlan.HYBRID: {
+		"fixed_cost": 1_100.0,
+		"usage_cost_per_cu": 0.016,
+		"overage_cost_per_cu": 0.048,
+		"elastic_buffer": 0.12,
+		"incident_penalty_mult": 0.88,
+	},
+	CompanyData.HostingPlan.IN_HOUSE: {
+		"fixed_cost": 2_450.0,
+		"usage_cost_per_cu": 0.012,
+		"overage_cost_per_cu": 0.038,
+		"elastic_buffer": 0.04,
+		"incident_penalty_mult": 1.0,
+	},
+}
 
 const DEFAULT_GROWTH_BALANCE := {
 	"maturity_start_users": 25_000.0,
@@ -286,14 +346,170 @@ static func _calculate_costs(state: Node) -> void:
 	state.financials.costs_breakdown["salaries"] = salary_total
 
 	var finance_discount: float = 1.0 - state.company.founder_stat("finance") * 0.02
-	var infra_cost := maxf(10.0, state.product.users * 0.01) * maxf(0.6, finance_discount)
+	var infra_cost := maxf(10.0, state.product.users * 0.006) * maxf(0.6, finance_discount)
 	state.financials.costs_breakdown["infrastructure"] = infra_cost
+	var hosting: Dictionary = _simulate_hosting(state, finance_discount)
+	state.financials.costs_breakdown["hosting"] = float(hosting.get("hosting_cost", 0.0))
+	state.company.hosting_reliability = float(hosting.get("reliability", 99.5))
+	state.company.hosting_demand_web = float(hosting.get("demand_web", 0.0))
+	state.company.hosting_demand_cache = float(hosting.get("demand_cache", 0.0))
+	state.company.hosting_demand_data = float(hosting.get("demand_data", 0.0))
+	state.company.hosting_capacity_web = float(hosting.get("capacity_web", 0.0))
+	state.company.hosting_capacity_cache = float(hosting.get("capacity_cache", 0.0))
+	state.company.hosting_capacity_data = float(hosting.get("capacity_data", 0.0))
+	state.company.hosting_util_web = float(hosting.get("util_web", 0.0))
+	state.company.hosting_util_cache = float(hosting.get("util_cache", 0.0))
+	state.company.hosting_util_data = float(hosting.get("util_data", 0.0))
+	state.company.hosting_overage_cost = float(hosting.get("overage_cost", 0.0))
+	state.company.hosting_incidents_last_quarter = int(hosting.get("incidents", 0))
+	if state.company.hosting_incidents_last_quarter > 0:
+		var title := "Hosting incidents: %d this quarter (%.1f%% reliability)" % [
+			state.company.hosting_incidents_last_quarter,
+			state.company.hosting_reliability,
+		]
+		state.append_event_log({
+			"quarter": state.current_quarter,
+			"year": state.current_year,
+			"event_id": "hosting_incident",
+			"title": title,
+		})
+	elif state.company.hosting_overage_cost >= 500.0:
+		var title := "Hosting overage: +$%s this quarter" % SceneLoader.format_money(state.company.hosting_overage_cost)
+		state.append_event_log({
+			"quarter": state.current_quarter,
+			"year": state.current_year,
+			"event_id": "hosting_overage",
+			"title": title,
+		})
 
 	state.financials.costs_breakdown["office"] = OFFICE_COST_BY_LEVEL[
 		clampi(state.company.office_level, 0, OFFICE_COST_BY_LEVEL.size() - 1)
 	]
 
 	state.financials.burn_rate = state.financials.total_costs()
+
+
+static func _hosting_profile(company_type: int) -> Dictionary:
+	var profile: Dictionary = _safe_dict(HOSTING_PROFILE_BY_TYPE.get(company_type, {}))
+	if profile.is_empty():
+		return {
+			"demand_web": 1.0,
+			"demand_cache": 1.0,
+			"demand_data": 1.0,
+			"split_web": 0.34,
+			"split_cache": 0.33,
+			"split_data": 0.33,
+		}
+	return profile
+
+
+static func _hosting_plan_cfg(hosting_plan: int) -> Dictionary:
+	var cfg: Dictionary = _safe_dict(HOSTING_PLAN_CONFIG.get(hosting_plan, {}))
+	if cfg.is_empty():
+		return {
+			"fixed_cost": 350.0,
+			"usage_cost_per_cu": 0.020,
+			"overage_cost_per_cu": 0.064,
+			"elastic_buffer": 0.22,
+			"incident_penalty_mult": 0.70,
+		}
+	return cfg
+
+
+static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionary:
+	var profile: Dictionary = _hosting_profile(state.company.type)
+	var plan_cfg: Dictionary = _hosting_plan_cfg(state.company.hosting_plan)
+
+	var traffic_units: float = maxf(
+		900.0,
+		(float(state.product.users) * 0.55)
+		+ (float(state.product.dau) * 0.95)
+		+ (float(state.product.feature_count()) * 220.0)
+	)
+	var demand_web: float = traffic_units * float(profile.get("demand_web", 1.0))
+	var demand_cache: float = traffic_units * float(profile.get("demand_cache", 1.0))
+	var demand_data: float = traffic_units * float(profile.get("demand_data", 1.0))
+
+	var office_level: int = clampi(state.company.office_level, 0, HOSTING_BASE_CAPACITY_BY_OFFICE.size() - 1)
+	var infra_staff := 0
+	for emp: EmployeeData in state.employees:
+		if emp.assignment == EmployeeData.Assignment.INFRA:
+			infra_staff += 1
+	var base_capacity: float = float(HOSTING_BASE_CAPACITY_BY_OFFICE[office_level])
+	var infra_bonus := float(infra_staff) * 1_400.0
+	var tech_bonus := float(state.company.founder_stat("technical")) * 260.0
+	var total_capacity := base_capacity + infra_bonus + tech_bonus
+	if state.company.hosting_plan == CompanyData.HostingPlan.IN_HOUSE and office_level >= 2:
+		total_capacity *= 1.08
+
+	var split_web: float = float(profile.get("split_web", 0.34))
+	var split_cache: float = float(profile.get("split_cache", 0.33))
+	var split_data: float = float(profile.get("split_data", 0.33))
+	var capacity_web: float = maxf(100.0, total_capacity * split_web)
+	var capacity_cache: float = maxf(100.0, total_capacity * split_cache)
+	var capacity_data: float = maxf(100.0, total_capacity * split_data)
+
+	var elastic: float = clampf(float(plan_cfg.get("elastic_buffer", 0.0)), 0.0, 0.40)
+	var effective_capacity_web: float = capacity_web * (1.0 + elastic)
+	var effective_capacity_cache: float = capacity_cache * (1.0 + elastic)
+	var effective_capacity_data: float = capacity_data * (1.0 + elastic)
+
+	var util_web: float = demand_web / maxf(1.0, effective_capacity_web)
+	var util_cache: float = demand_cache / maxf(1.0, effective_capacity_cache)
+	var util_data: float = demand_data / maxf(1.0, effective_capacity_data)
+	var overage_web: float = maxf(0.0, demand_web - effective_capacity_web)
+	var overage_cache: float = maxf(0.0, demand_cache - effective_capacity_cache)
+	var overage_data: float = maxf(0.0, demand_data - effective_capacity_data)
+	var overage_total: float = overage_web + overage_cache + overage_data
+
+	var avg_util: float = (util_web + util_cache + util_data) / 3.0
+	var max_util: float = maxf(util_web, maxf(util_cache, util_data))
+	var reliability: float = 99.6
+	reliability -= maxf(0.0, avg_util - 0.78) * 30.0
+	reliability -= maxf(0.0, max_util - 1.0) * 44.0
+	reliability -= minf(6.0, overage_total / 5_000.0)
+	reliability = clampf(reliability, 70.0, 99.95)
+
+	var incidents := 0
+	var incident_penalty_mult: float = float(plan_cfg.get("incident_penalty_mult", 1.0))
+	var incident_risk: float = maxf(0.0, max_util - 1.0) * incident_penalty_mult
+	if reliability < 97.0:
+		incidents += 1
+	if reliability < 93.0 and randf() < clampf(0.15 + incident_risk, 0.0, 0.95):
+		incidents += 1
+	if reliability < 88.0 and randf() < clampf(incident_risk, 0.0, 0.85):
+		incidents += 1
+
+	if incidents > 0:
+		var penalty_scale: float = clampf((99.0 - reliability) / 20.0, 0.0, 2.5)
+		state.product.stability = maxi(0, state.product.stability - ceili(2.0 + penalty_scale * 4.0))
+		state.product.bugs += ceili(1.0 + penalty_scale * 2.0)
+		state.product.churn_rate = minf(ProductData.CHURN_RATE_MAX, state.product.churn_rate + 0.002 + penalty_scale * 0.0015)
+
+	var usage_total: float = demand_web + demand_cache + demand_data
+	var hosting_cost: float = float(plan_cfg.get("fixed_cost", 0.0))
+	hosting_cost += usage_total * float(plan_cfg.get("usage_cost_per_cu", 0.0))
+	var overage_cost: float = overage_total * float(plan_cfg.get("overage_cost_per_cu", 0.0))
+	hosting_cost += overage_cost
+	if incidents > 0:
+		hosting_cost += float(incidents) * 350.0 * (1.0 + maxf(0.0, max_util - 1.0))
+	hosting_cost *= maxf(0.7, finance_discount)
+
+	return {
+		"hosting_cost": maxf(0.0, hosting_cost),
+		"overage_cost": maxf(0.0, overage_cost * maxf(0.7, finance_discount)),
+		"reliability": reliability,
+		"incidents": incidents,
+		"demand_web": demand_web,
+		"demand_cache": demand_cache,
+		"demand_data": demand_data,
+		"capacity_web": effective_capacity_web,
+		"capacity_cache": effective_capacity_cache,
+		"capacity_data": effective_capacity_data,
+		"util_web": util_web,
+		"util_cache": util_cache,
+		"util_data": util_data,
+	}
 
 
 static func _update_cash(state: Node) -> void:

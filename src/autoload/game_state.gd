@@ -203,15 +203,19 @@ func _apply_starting_scenario() -> void:
 		"garage":
 			company.cash = 20_000.0 * cash_mult
 			company.office_level = 0
+			company.hosting_plan = CompanyData.HostingPlan.MANAGED_CLOUD
 		"accelerator":
 			company.cash = 125_000.0 * cash_mult
 			company.office_level = 0
+			company.hosting_plan = CompanyData.HostingPlan.MANAGED_CLOUD
 		"spinoff":
 			company.cash = 500_000.0 * cash_mult
 			company.office_level = 1
+			company.hosting_plan = CompanyData.HostingPlan.HYBRID
 		"vc_backed":
 			company.cash = 2_000_000.0 * cash_mult
 			company.office_level = 1
+			company.hosting_plan = CompanyData.HostingPlan.HYBRID
 			financials = FinancialsData.new()
 			financials.funding_rounds.append({
 				"round": "Seed",
@@ -220,6 +224,25 @@ func _apply_starting_scenario() -> void:
 				"quarter": 0,
 			})
 			company.equity_owned = 75.0
+		_:
+			company.hosting_plan = CompanyData.HostingPlan.MANAGED_CLOUD
+
+	_reset_hosting_state()
+
+
+func _reset_hosting_state() -> void:
+	company.hosting_reliability = 99.5
+	company.hosting_demand_web = 0.0
+	company.hosting_demand_cache = 0.0
+	company.hosting_demand_data = 0.0
+	company.hosting_capacity_web = 0.0
+	company.hosting_capacity_cache = 0.0
+	company.hosting_capacity_data = 0.0
+	company.hosting_util_web = 0.0
+	company.hosting_util_cache = 0.0
+	company.hosting_util_data = 0.0
+	company.hosting_overage_cost = 0.0
+	company.hosting_incidents_last_quarter = 0
 
 
 func difficulty_mult(key: String) -> float:
@@ -374,6 +397,8 @@ func _take_snapshot() -> void:
 		"tech_debt": product.tech_debt,
 		"valuation": company.valuation,
 		"avg_morale": average_team_morale(),
+		"hosting_reliability": company.hosting_reliability,
+		"hosting_overage_cost": company.hosting_overage_cost,
 	})
 	if history.size() > MAX_HISTORY_SIZE:
 		history = history.slice(-MAX_HISTORY_SIZE)
@@ -792,6 +817,19 @@ func _serialize() -> Dictionary:
 			"niche_growth_mult": company.niche_growth_mult,
 			"niche_churn_mult": company.niche_churn_mult,
 			"niche_revenue_mult": company.niche_revenue_mult,
+			"hosting_plan": company.hosting_plan,
+			"hosting_reliability": company.hosting_reliability,
+			"hosting_demand_web": company.hosting_demand_web,
+			"hosting_demand_cache": company.hosting_demand_cache,
+			"hosting_demand_data": company.hosting_demand_data,
+			"hosting_capacity_web": company.hosting_capacity_web,
+			"hosting_capacity_cache": company.hosting_capacity_cache,
+			"hosting_capacity_data": company.hosting_capacity_data,
+			"hosting_util_web": company.hosting_util_web,
+			"hosting_util_cache": company.hosting_util_cache,
+			"hosting_util_data": company.hosting_util_data,
+			"hosting_overage_cost": company.hosting_overage_cost,
+			"hosting_incidents_last_quarter": company.hosting_incidents_last_quarter,
 		},
 		"product": {
 			"features": product.features.duplicate(),
@@ -863,6 +901,19 @@ func _deserialize(data: Dictionary) -> bool:
 	company.niche_growth_mult = float(cd.get("niche_growth_mult", 1.0))
 	company.niche_churn_mult = float(cd.get("niche_churn_mult", 1.0))
 	company.niche_revenue_mult = float(cd.get("niche_revenue_mult", 1.0))
+	company.hosting_plan = int(cd.get("hosting_plan", CompanyData.HostingPlan.MANAGED_CLOUD)) as CompanyData.HostingPlan
+	company.hosting_reliability = float(cd.get("hosting_reliability", 99.5))
+	company.hosting_demand_web = float(cd.get("hosting_demand_web", 0.0))
+	company.hosting_demand_cache = float(cd.get("hosting_demand_cache", 0.0))
+	company.hosting_demand_data = float(cd.get("hosting_demand_data", 0.0))
+	company.hosting_capacity_web = float(cd.get("hosting_capacity_web", 0.0))
+	company.hosting_capacity_cache = float(cd.get("hosting_capacity_cache", 0.0))
+	company.hosting_capacity_data = float(cd.get("hosting_capacity_data", 0.0))
+	company.hosting_util_web = float(cd.get("hosting_util_web", 0.0))
+	company.hosting_util_cache = float(cd.get("hosting_util_cache", 0.0))
+	company.hosting_util_data = float(cd.get("hosting_util_data", 0.0))
+	company.hosting_overage_cost = float(cd.get("hosting_overage_cost", 0.0))
+	company.hosting_incidents_last_quarter = int(cd.get("hosting_incidents_last_quarter", 0))
 	if company.niche_name.strip_edges().is_empty() and not company.niche_id.strip_edges().is_empty():
 		CompanyData.load_niche_catalog()
 		company.apply_niche(company.niche_id)
@@ -962,6 +1013,19 @@ func _clamp_deserialized_values() -> void:
 	company.niche_growth_mult = clampf(company.niche_growth_mult, 0.5, 2.0)
 	company.niche_churn_mult = clampf(company.niche_churn_mult, 0.5, 2.0)
 	company.niche_revenue_mult = clampf(company.niche_revenue_mult, 0.5, 2.0)
+	company.hosting_plan = clampi(company.hosting_plan, 0, 2) as CompanyData.HostingPlan
+	company.hosting_reliability = clampf(company.hosting_reliability, 60.0, 99.99)
+	company.hosting_demand_web = clampf(company.hosting_demand_web, 0.0, 1e12)
+	company.hosting_demand_cache = clampf(company.hosting_demand_cache, 0.0, 1e12)
+	company.hosting_demand_data = clampf(company.hosting_demand_data, 0.0, 1e12)
+	company.hosting_capacity_web = clampf(company.hosting_capacity_web, 0.0, 1e12)
+	company.hosting_capacity_cache = clampf(company.hosting_capacity_cache, 0.0, 1e12)
+	company.hosting_capacity_data = clampf(company.hosting_capacity_data, 0.0, 1e12)
+	company.hosting_util_web = clampf(company.hosting_util_web, 0.0, 5.0)
+	company.hosting_util_cache = clampf(company.hosting_util_cache, 0.0, 5.0)
+	company.hosting_util_data = clampf(company.hosting_util_data, 0.0, 5.0)
+	company.hosting_overage_cost = clampf(company.hosting_overage_cost, 0.0, 1e12)
+	company.hosting_incidents_last_quarter = clampi(company.hosting_incidents_last_quarter, 0, 99)
 	for stat_key in ["technical", "finance", "people", "business"]:
 		company.founder_stats[stat_key] = clampi(int(company.founder_stats.get(stat_key, 5)), 1, 10)
 
@@ -978,6 +1042,8 @@ func _clamp_deserialized_values() -> void:
 
 	financials.revenue = maxf(0.0, financials.revenue)
 	financials.burn_rate = maxf(0.0, financials.burn_rate)
+	for k in ["salaries", "infrastructure", "hosting", "office", "marketing", "legal", "tools"]:
+		financials.costs_breakdown[k] = maxf(0.0, float(financials.costs_breakdown.get(k, 0.0)))
 
 	current_quarter = clampi(current_quarter, 1, 4)
 	current_year = maxi(1, current_year)

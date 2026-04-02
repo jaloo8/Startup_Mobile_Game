@@ -73,6 +73,14 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Hosting economics + reliability pass** — Added a quarter-based hosting model with per-plan behavior (`Managed Cloud`, `Hybrid`, `In-house`), lane-level demand/capacity tracking (web/cache/data), overage costs, and reliability-driven incident pressure that can impact stability/churn when infrastructure is overloaded.
+- **Player-facing hosting controls** — Finances now includes a `Hosting Plan` selector, hosting cost line item, and live reliability/load/overage feedback so infra decisions are visible and actionable.
+- **Logistics screen (v1)** — Added a dedicated Logistics view from Finances with lane utilization bars, hosting cost breakdown, reliability status, and milestone-style operations objectives for infra planning.
+- **Finance wording clarity pass** — Dashboard and Finances now use plain-English metric names (`Cash in Bank`, `Money In / Q`, `Money Out / Q`, `Time Left`) with clearer glossary entries and an inline "Plain English" cashflow explanation on the dashboard.
+- **Office worker ambient animation (v1)** — Dashboard office banner now renders lightweight assignment-colored worker markers with subtle sitting/working bob animation so the office feels more alive between quarter advances.
+- **Quarter-feedback clarity pass** — Dashboard now surfaces a "Last quarter" momentum strip (cash/revenue/users/valuation deltas), explicit event-count + resolve messaging, a persistent "Next best action" hint, and a lightweight quarter-entry toast (`Now in Year X QY · Cash Δ · Users Δ`); the advance button now labels the exact next period (`Advance to Yx Qy`) for clearer turn flow.
+- **Finance decision guidance pass** — Finances screen now includes an inline quarter-delta strip (cash/revenue/users) plus a natural-language "Next best move" recommendation based on runway, burn/revenue pressure, and dilution posture.
+- **Product throughput readability pass** — Product ETA copy now includes estimated effort throughput per quarter so multi-person scaling is easier to read at a glance.
 - **Core v1 polish pass (niche + personality depth)** — Added niche-aware event weighting (including stage awareness), weighted niche-aware headlines (with optional `niches` / `company_types` filters), niche-biased competitor seeding, and team personality composition effects on collaboration + morale.
 - **Continue Last Run shortcut** — Main menu now includes a `Continue Last Run` button that loads the most recently modified valid save slot directly into gameplay, with safe fallback to the save-slot screen.
 - **Quit/autosave reliability pass** — Added lifecycle safety autosave hooks in `GameState` (close request + app pause/focus-out) and a quit-path save from main menu, so runs are less likely to lose progress when exiting.

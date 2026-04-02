@@ -9,6 +9,21 @@
     "short": "Monthly Recurring Revenue",
     "tip": "The subscription revenue you can count on each month. ARR is just this times 12."
   },
+  "cash_on_hand": {
+    "term": "Cash in Bank",
+    "short": "Money available right now",
+    "tip": "How much money you currently have. You use this to pay salaries, hosting, and all other costs."
+  },
+  "quarterly_revenue": {
+    "term": "Money In / Quarter",
+    "short": "Income coming in this quarter",
+    "tip": "The money your company earns in one quarter. If this is higher than money out, your cash grows."
+  },
+  "quarterly_burn": {
+    "term": "Money Out / Quarter",
+    "short": "Costs going out this quarter",
+    "tip": "Total spending in one quarter: team salaries, hosting/infrastructure, office, and other operating costs."
+  },
   "burn_rate": {
     "term": "Burn Rate",
     "short": "How fast you spend money",

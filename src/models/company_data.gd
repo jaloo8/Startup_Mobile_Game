@@ -3,6 +3,7 @@ extends Resource
 
 enum CompanyType { SAAS, CONSUMER, MARKETPLACE, DEV_TOOLS }
 enum FounderBackground { ENGINEER, FINANCE, RECRUITER, HUSTLER }
+enum HostingPlan { MANAGED_CLOUD, HYBRID, IN_HOUSE }
 
 @export var company_name: String = ""
 @export var type: CompanyType = CompanyType.SAAS
@@ -20,6 +21,19 @@ enum FounderBackground { ENGINEER, FINANCE, RECRUITER, HUSTLER }
 @export var niche_growth_mult: float = 1.0
 @export var niche_churn_mult: float = 1.0
 @export var niche_revenue_mult: float = 1.0
+@export var hosting_plan: HostingPlan = HostingPlan.MANAGED_CLOUD
+@export var hosting_reliability: float = 99.5
+@export var hosting_demand_web: float = 0.0
+@export var hosting_demand_cache: float = 0.0
+@export var hosting_demand_data: float = 0.0
+@export var hosting_capacity_web: float = 0.0
+@export var hosting_capacity_cache: float = 0.0
+@export var hosting_capacity_data: float = 0.0
+@export var hosting_util_web: float = 0.0
+@export var hosting_util_cache: float = 0.0
+@export var hosting_util_data: float = 0.0
+@export var hosting_overage_cost: float = 0.0
+@export var hosting_incidents_last_quarter: int = 0
 
 const OFFICE_CAPACITY := {0: 4, 1: 10, 2: 25, 3: 60}
 const OFFICE_NAMES := {0: "Garage", 1: "Small Office", 2: "Mid-Size Office", 3: "HQ"}
@@ -29,6 +43,11 @@ const TYPE_NAMES := {
 	CompanyType.CONSUMER: "Consumer App",
 	CompanyType.MARKETPLACE: "Marketplace",
 	CompanyType.DEV_TOOLS: "Dev Tools",
+}
+const HOSTING_PLAN_NAMES := {
+	HostingPlan.MANAGED_CLOUD: "Managed Cloud",
+	HostingPlan.HYBRID: "Hybrid",
+	HostingPlan.IN_HOUSE: "In-house",
 }
 
 const NICHES_PATH := "res://src/data/niches.json"
@@ -161,6 +180,10 @@ func type_name_with_niche() -> String:
 	return "%s (%s)" % [type_name(), niche_name]
 
 
+func hosting_plan_name() -> String:
+	return HOSTING_PLAN_NAMES.get(hosting_plan, "Managed Cloud")
+
+
 func apply_niche(requested_id: String) -> void:
 	var chosen := niche_by_id(type, requested_id)
 	if chosen.is_empty():
@@ -192,3 +215,16 @@ func clamp_all() -> void:
 	niche_growth_mult = clampf(niche_growth_mult, 0.5, 2.0)
 	niche_churn_mult = clampf(niche_churn_mult, 0.5, 2.0)
 	niche_revenue_mult = clampf(niche_revenue_mult, 0.5, 2.0)
+	hosting_plan = clampi(hosting_plan, 0, 2) as HostingPlan
+	hosting_reliability = clampf(hosting_reliability, 60.0, 99.99)
+	hosting_demand_web = clampf(hosting_demand_web, 0.0, 1e12)
+	hosting_demand_cache = clampf(hosting_demand_cache, 0.0, 1e12)
+	hosting_demand_data = clampf(hosting_demand_data, 0.0, 1e12)
+	hosting_capacity_web = clampf(hosting_capacity_web, 0.0, 1e12)
+	hosting_capacity_cache = clampf(hosting_capacity_cache, 0.0, 1e12)
+	hosting_capacity_data = clampf(hosting_capacity_data, 0.0, 1e12)
+	hosting_util_web = clampf(hosting_util_web, 0.0, 5.0)
+	hosting_util_cache = clampf(hosting_util_cache, 0.0, 5.0)
+	hosting_util_data = clampf(hosting_util_data, 0.0, 5.0)
+	hosting_overage_cost = clampf(hosting_overage_cost, 0.0, 1e12)
+	hosting_incidents_last_quarter = clampi(hosting_incidents_last_quarter, 0, 99)

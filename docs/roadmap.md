@@ -293,7 +293,7 @@ Do these in order. Each one should be playable before starting the next.
   - First few quarters should feel like stretching every dollar: do you hire help or buy better tools? Pay for marketing or grind organically?
   - Angel investor / VC cash injection as a lifeline if you're about to run out, but at a steep equity cost
 - [ ] **Employee bios** — 200+ bio templates with personality tags
-- [x] **Quarterly report** — 5-bullet narrative summary after each quarter advance (revenue, cash, team, product, users)
+- [x] **Quarterly report** — 6+ bullet narrative summary after each quarter advance (revenue, cash, team, product, users, economy, hosting + situational stress/board notes)
 - [x] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools each have unique growth curves, churn patterns, key metrics, feature trees (10 features each), and event filtering
 - [x] **Win conditions** — IPO ($100M+ ARR & 100K users), acquisition (accept event), sustainable (6Q profit + scale checks after Y5), unicorn ($1B val) + victory screen
 - [x] **CEO background & skills** — 4 founder archetypes (Engineer/Finance/Recruiter/Hustler) with stats affecting gameplay:
@@ -373,12 +373,16 @@ Do these in order. Each one should be playable before starting the next.
 
 **Phase 3 — Polish & Balance (TODO):**
 - [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
+- [~] **Turn-change clarity polish** — Dashboard now shows a compact "Last quarter" momentum strip (cash/revenue/users/valuation), explicit event-count + resolve-state guidance, a lightweight quarter-entry toast, and a persistent "Next best action" hint; still pending: bespoke transition animation + SFX.
+- [~] **Finance decision guidance** — Finances now include a quarter-delta strip and a natural-language "Next best move" recommendation based on runway/burn/dilution state; deeper metric drill-down guidance is still pending.
+- [~] **Hosting economics + reliability** — Quarter simulation now models hosting demand/capacity lanes (web/cache/data), plan-based costs (Managed Cloud/Hybrid/In-house), overage costs, and reliability incident pressure; Logistics screen v1 is now live (lane bars + objectives), while explicit capacity-upgrade actions are still pending.
 - [~] **Charts and graphs** — Finance screen now includes two lightweight trend panels (cash/revenue/users and valuation/team/morale, normalized, last 12 quarters); deeper drill-down analytics are still pending
 - [x] **Employee detail view** — Added dedicated employee profile screen with history timeline + trajectory chart + role/trait metadata
 - [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; added `docs/difficulty-playtest-matrix.md` for structured 12-run validation, but full empirical pass is still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
 - [ ] **Sound effects** — Minimal UI sounds (optional)
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
+- [~] **Office worker ambient animation** — Dashboard office banner now includes lightweight assignment-colored worker ambient markers with subtle motion; full desk/furniture/sprite scene system is still outstanding.
 - [~] **Product visual prototype lab** — Product screen now includes a data-driven `Prototype Concept` switcher backed by `src/data/product_preview_prototypes.json` so new concept ideas can be added without code changes; concept-specific art variants and per-concept layout overrides are still pending
 - [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
 - [x] **Persistence hardening** — Save files now use checksum-enforced wrapper + strict validation + `.bak` fallback recovery; corrupted primary save auto-recovers from backup when available

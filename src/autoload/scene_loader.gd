@@ -12,6 +12,7 @@ const PRELOAD_SCENES := [
 	"res://src/ui/people/employee_list.tscn",
 	"res://src/ui/product/product_overview.tscn",
 	"res://src/ui/finance/finance_overview.tscn",
+	"res://src/ui/logistics/logistics_overview.tscn",
 	"res://src/ui/market/market_leaderboard.tscn",
 	"res://src/ui/saves/save_slots.tscn",
 	"res://src/ui/game_over/game_over_screen.tscn",

@@ -13,6 +13,7 @@ static func generate(state: Node) -> Array[String]:
 	bullets.append(_product_line(state))
 	bullets.append(_user_line(state, history))
 	bullets.append(_economy_line(state))
+	bullets.append(_hosting_line(state))
 
 	var energy_line := _energy_line(state)
 	if not energy_line.is_empty():
@@ -119,6 +120,28 @@ static func _economy_line(state: Node) -> String:
 			return "Markets are rough — growth is harder and VCs are cautious"
 		_:
 			return "The market is steady — no strong tailwinds or headwinds"
+
+
+static func _hosting_line(state: Node) -> String:
+	var reliability: float = float(state.company.hosting_reliability)
+	var overage_cost: float = float(state.company.hosting_overage_cost)
+	var incidents: int = int(state.company.hosting_incidents_last_quarter)
+	var plan_name := "Managed Cloud"
+	if state.company.has_method("hosting_plan_name"):
+		plan_name = str(state.company.call("hosting_plan_name"))
+
+	if incidents > 0:
+		return "Hosting had %d incident%s (%.1f%% reliability) — overage added $%s this quarter" % [
+			incidents,
+			"s" if incidents != 1 else "",
+			reliability,
+			SceneLoader.format_money(overage_cost),
+		]
+	if reliability < 96.0:
+		return "Hosting looked strained (%.1f%% reliability). Consider adding Infra staff or switching plan" % reliability
+	if overage_cost >= 200.0:
+		return "Hosting overage: $%s this quarter on %s" % [SceneLoader.format_money(overage_cost), plan_name]
+	return "Hosting stable at %.1f%% reliability on %s" % [reliability, plan_name]
 
 
 static func _energy_line(state: Node) -> String:
