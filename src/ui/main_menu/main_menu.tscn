@@ -58,6 +58,12 @@ layout_mode = 2
 custom_minimum_size = Vector2(280, 50)
 text = "Play"
 
+[node name="ContinueButton" type="Button" parent="CenterContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 50)
+text = "Continue Last Run"
+
 [node name="SettingsButton" type="Button" parent="CenterContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2

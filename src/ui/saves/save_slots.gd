@@ -4,6 +4,8 @@ extends Control
 @onready var back_btn: Button = %BackButton
 @onready var slot_container: VBoxContainer = %SlotContainer
 
+const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
+
 var _card_style: StyleBoxFlat
 var _empty_style: StyleBoxFlat
 var _confirm_slot: String = ""
@@ -25,16 +27,11 @@ func _refresh() -> void:
 	SceneLoader.free_children(slot_container)
 	_confirm_slot = ""
 
-	var saves := GameState.list_saves()
-	if saves.is_empty():
-		for idx in range(1, 6):
-			saves.append({
-				"slot": "slot_%d" % idx,
-				"exists": false,
-			})
-	for raw_info in saves:
-		var save_info: Dictionary = raw_info if raw_info is Dictionary else {}
+	var saves: Array[Dictionary] = _list_saves_safe()
+	for save_info in saves:
 		var slot_name: String = str(save_info.get("slot", ""))
+		if slot_name.is_empty():
+			continue
 		if not _is_slot_unlocked(slot_name):
 			slot_container.add_child(_create_locked_slot(save_info))
 		elif save_info.get("exists", false):
@@ -63,7 +60,7 @@ func _create_occupied_slot(info: Dictionary) -> PanelContainer:
 
 	var name_label := Label.new()
 	var type_name: String = CompanyData.TYPE_NAMES.get(info.get("company_type", 0), "Unknown")
-	name_label.text = "%s — %s" % [info.get("company_name", "???"), type_name]
+	name_label.text = "%s — %s" % [str(info.get("company_name", "???")), type_name]
 	name_label.add_theme_font_size_override("font_size", 16)
 	info_vbox.add_child(name_label)
 
@@ -82,7 +79,7 @@ func _create_occupied_slot(info: Dictionary) -> PanelContainer:
 	info_vbox.add_child(detail_label)
 
 	var diff_label := Label.new()
-	diff_label.text = info.get("difficulty", "normal").capitalize()
+	diff_label.text = str(info.get("difficulty", "normal")).capitalize()
 	diff_label.add_theme_font_size_override("font_size", 11)
 	diff_label.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5))
 	info_vbox.add_child(diff_label)
@@ -91,7 +88,7 @@ func _create_occupied_slot(info: Dictionary) -> PanelContainer:
 	btn_vbox.add_theme_constant_override("separation", 6)
 	hbox.add_child(btn_vbox)
 
-	var slot_name: String = info["slot"]
+	var slot_name: String = str(info.get("slot", "slot_1"))
 
 	var load_btn := Button.new()
 	load_btn.text = "Load"
@@ -123,7 +120,7 @@ func _create_empty_slot(_info: Dictionary) -> PanelContainer:
 	label.add_theme_color_override("font_color", Color(0.4, 0.4, 0.45))
 	hbox.add_child(label)
 
-	var slot_name: String = _info["slot"]
+	var slot_name: String = str(_info.get("slot", "slot_1"))
 	var new_btn := Button.new()
 	new_btn.text = "New Game"
 	new_btn.custom_minimum_size = Vector2(100, 38)
@@ -179,6 +176,9 @@ func _on_load(slot_name: String) -> void:
 			Callable()
 		)
 		return
+	if _game_state() == null:
+		push_error("SaveSlots: GameState autoload missing; cannot load save")
+		return
 	GameState.current_slot = slot_name
 	if GameState.load_game(slot_name):
 		EventEngine.load_events("res://src/data/events.json")
@@ -195,11 +195,17 @@ func _on_new_game(slot_name: String) -> void:
 			Callable()
 		)
 		return
+	if _game_state() == null:
+		push_error("SaveSlots: GameState autoload missing; cannot start new game")
+		return
 	GameState.current_slot = slot_name
 	SceneLoader.goto_scene("res://src/ui/setup/new_game.tscn")
 
 
 func _on_delete_pressed(slot_name: String, btn: Button) -> void:
+	if _game_state() == null:
+		push_error("SaveSlots: GameState autoload missing; cannot delete save")
+		return
 	if _confirm_slot == slot_name:
 		GameState.delete_save(slot_name)
 		_refresh()
@@ -222,6 +228,52 @@ static func _make_style(bg: Color) -> StyleBoxFlat:
 	s.content_margin_top = 12
 	s.content_margin_bottom = 12
 	return s
+
+
+func _game_state() -> Node:
+	return get_node_or_null("/root/GameState")
+
+
+func _default_slot_infos() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for slot_name in SLOT_NAMES:
+		out.append({
+			"slot": slot_name,
+			"exists": false,
+		})
+	return out
+
+
+func _list_saves_safe() -> Array[Dictionary]:
+	var merged: Array[Dictionary] = _default_slot_infos()
+	var gs: Node = _game_state()
+	if gs == null or not gs.has_method("list_saves"):
+		return merged
+
+	var raw_value: Variant = gs.call("list_saves")
+	if not (raw_value is Array):
+		push_warning("SaveSlots: list_saves returned non-array; using defaults")
+		return merged
+
+	var by_slot: Dictionary = {}
+	for row in raw_value:
+		if not (row is Dictionary):
+			continue
+		var info: Dictionary = row
+		var slot_name: String = str(info.get("slot", "")).strip_edges()
+		if slot_name.is_empty() or not SLOT_NAMES.has(slot_name):
+			continue
+		by_slot[slot_name] = info
+
+	for i in range(merged.size()):
+		var slot_name: String = str(merged[i].get("slot", "")).strip_edges()
+		if slot_name.is_empty() or not by_slot.has(slot_name):
+			continue
+		var incoming: Dictionary = by_slot[slot_name]
+		for key in incoming.keys():
+			merged[i][key] = incoming[key]
+		merged[i]["slot"] = slot_name
+	return merged
 
 
 func _is_slot_unlocked(slot_name: String) -> bool:

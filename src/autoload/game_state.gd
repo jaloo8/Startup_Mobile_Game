@@ -133,6 +133,8 @@ const DIFFICULTY_MULTS := {
 
 var _save_thread: Thread
 var _save_mutex: Mutex
+var _last_lifecycle_autosave_ms: int = -1
+const LIFECYCLE_AUTOSAVE_DEBOUNCE_MS := 1500
 
 
 func _ready() -> void:
@@ -140,6 +142,16 @@ func _ready() -> void:
 	if err != OK and err != ERR_ALREADY_EXISTS:
 		push_error("GameState: failed to create save directory (%d)" % err)
 	_save_mutex = Mutex.new()
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			_lifecycle_autosave("wm_close_request")
+		NOTIFICATION_APPLICATION_PAUSED:
+			_lifecycle_autosave("application_paused")
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			_lifecycle_autosave("application_focus_out")
 
 
 func _exit_tree() -> void:
@@ -485,6 +497,27 @@ func auto_save() -> void:
 	save_game_async(current_slot)
 
 
+func autosave_now(reason: String = "manual") -> bool:
+	if current_slot.is_empty():
+		return false
+	if company == null or product == null or financials == null or market == null:
+		return false
+	var ok: bool = save_game(current_slot)
+	if not ok:
+		push_warning("GameState: autosave_now failed (%s)" % reason)
+	return ok
+
+
+func _lifecycle_autosave(reason: String) -> void:
+	# Some platforms can fire multiple lifecycle notifications in quick succession.
+	# Debounce to avoid redundant writes while still protecting player progress.
+	var now_ms: int = Time.get_ticks_msec()
+	if _last_lifecycle_autosave_ms >= 0 and (now_ms - _last_lifecycle_autosave_ms) < LIFECYCLE_AUTOSAVE_DEBOUNCE_MS:
+		return
+	_last_lifecycle_autosave_ms = now_ms
+	autosave_now(reason)
+
+
 func save_game_async(slot_name: String) -> void:
 	if slot_name not in SLOT_NAMES:
 		push_error("GameState: invalid slot name: %s" % slot_name)
@@ -520,6 +553,8 @@ func save_game(slot_name: String) -> bool:
 	if slot_name not in SLOT_NAMES:
 		push_error("GameState: invalid slot name: %s" % slot_name)
 		return false
+	if _save_thread and _save_thread.is_started():
+		_save_thread.wait_to_finish()
 	var data := _serialize()
 	if data.is_empty():
 		save_error.emit("Could not save — game state not initialized")
@@ -689,6 +724,27 @@ func has_save(slot_name: String) -> bool:
 		return false
 	var path := _slot_path(slot_name)
 	return FileAccess.file_exists(path) or FileAccess.file_exists(_backup_path(path))
+
+
+func latest_save_slot() -> String:
+	var best_slot := ""
+	var best_mtime: int = -1
+	for slot_name in SLOT_NAMES:
+		var info := peek_save(slot_name)
+		if not bool(info.get("exists", false)):
+			continue
+
+		var primary_path := _slot_path(slot_name)
+		var backup_path := _backup_path(primary_path)
+		var slot_mtime: int = -1
+		if FileAccess.file_exists(primary_path):
+			slot_mtime = maxi(slot_mtime, int(FileAccess.get_modified_time(primary_path)))
+		if FileAccess.file_exists(backup_path):
+			slot_mtime = maxi(slot_mtime, int(FileAccess.get_modified_time(backup_path)))
+		if slot_mtime > best_mtime:
+			best_mtime = slot_mtime
+			best_slot = slot_name
+	return best_slot
 
 
 func _serialize() -> Dictionary:

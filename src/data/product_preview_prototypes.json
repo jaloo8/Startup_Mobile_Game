@@ -1,0 +1,106 @@
+{
+	"consumer": [
+		{
+			"id": "onboarding_first",
+			"name": "Onboarding First",
+			"description": "Clean first-session flow with lightweight navigation and clear entry points.",
+			"preview_mode": 1
+		},
+		{
+			"id": "engagement_core",
+			"name": "Engagement Core",
+			"description": "Emphasizes repeat-use loops with stronger feed, stories, and recommendation presence.",
+			"preview_mode": 2
+		},
+		{
+			"id": "creator_monetization",
+			"name": "Creator Monetization",
+			"description": "Highlights monetization surfaces while keeping social interactions easy to discover.",
+			"preview_mode": 3
+		},
+		{
+			"id": "premium_polish",
+			"name": "Premium Polish",
+			"description": "Near-final concept with refined hierarchy, spacing, and high-fidelity presentation.",
+			"preview_mode": 4
+		}
+	],
+	"saas": [
+		{
+			"id": "operator_dashboard",
+			"name": "Operator Dashboard",
+			"description": "Focuses on clarity for core KPIs and first-time admin setup.",
+			"preview_mode": 1
+		},
+		{
+			"id": "workflow_depth",
+			"name": "Workflow Depth",
+			"description": "Shows denser reporting surfaces and practical day-to-day team workflows.",
+			"preview_mode": 2
+		},
+		{
+			"id": "enterprise_controls",
+			"name": "Enterprise Controls",
+			"description": "Adds billing and governance visibility while preserving readable information flow.",
+			"preview_mode": 3
+		},
+		{
+			"id": "exec_command_center",
+			"name": "Exec Command Center",
+			"description": "Polished enterprise concept designed for confidence in board and investor demos.",
+			"preview_mode": 4
+		}
+	],
+	"marketplace": [
+		{
+			"id": "listing_clarity",
+			"name": "Listing Clarity",
+			"description": "Prioritizes straightforward browsing and low-friction seller onboarding.",
+			"preview_mode": 1
+		},
+		{
+			"id": "trust_and_discovery",
+			"name": "Trust and Discovery",
+			"description": "Balances search relevance with ratings and social proof cues.",
+			"preview_mode": 2
+		},
+		{
+			"id": "transaction_ops",
+			"name": "Transaction Ops",
+			"description": "Centers delivery and dispute workflows for reliable buyer confidence.",
+			"preview_mode": 3
+		},
+		{
+			"id": "scale_market_brand",
+			"name": "Scale Market Brand",
+			"description": "Final-looking concept with premium merchandising and retention-oriented touchpoints.",
+			"preview_mode": 4
+		}
+	],
+	"dev_tools": [
+		{
+			"id": "quickstart_console",
+			"name": "Quickstart Console",
+			"description": "Optimized for first API call speed with minimal setup friction.",
+			"preview_mode": 1
+		},
+		{
+			"id": "developer_flow",
+			"name": "Developer Flow",
+			"description": "Expands docs and SDK visibility to support daily implementation workflows.",
+			"preview_mode": 2
+		},
+		{
+			"id": "platform_ops",
+			"name": "Platform Ops",
+			"description": "Adds auth, webhook, and reliability visibility for production usage confidence.",
+			"preview_mode": 3
+		},
+		{
+			"id": "ecosystem_hub",
+			"name": "Ecosystem Hub",
+			"description": "Polished concept for partner integrations, plugins, and developer ecosystem storytelling.",
+			"preview_mode": 4
+		}
+	]
+}

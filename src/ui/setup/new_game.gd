@@ -251,7 +251,12 @@ func _on_start() -> void:
 	}
 
 	if GameState.current_slot.is_empty():
-		GameState.current_slot = "slot_1"
+		# New Game should always come from Save Slots so a slot is explicit.
+		# If not, return the player to slot selection instead of forcing slot_1.
+		push_warning("NewGame: no save slot selected; returning to save slot picker")
+		start_btn.disabled = false
+		SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")
+		return
 
 	GameState.new_game(config)
 	EventEngine.load_events("res://src/data/events.json")
@@ -275,5 +280,4 @@ func _on_start() -> void:
 
 
 func _on_back() -> void:
-	# Temporary gameplay-first flow: return to main menu instead of save slots.
-	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+	SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")

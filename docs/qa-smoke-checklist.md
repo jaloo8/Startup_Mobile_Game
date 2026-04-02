@@ -26,6 +26,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 1.6 | Delete a save slot | Slot becomes empty; files cleaned up | `game_state.gd` → `delete_save()` |
 | 1.7 | Back button returns to main menu | Clean navigation, no orphaned nodes | `save_slots.gd`, `src/autoload/scene_loader.gd` |
 | 1.8 | Settings accessible from main menu | Settings screen opens and returns cleanly | `main_menu.gd` |
+| 1.9 | Continue Last Run button resumes latest save | Loads newest valid save slot directly into dashboard; falls back to save slots if unavailable | `main_menu.gd` → `_on_continue()`, `game_state.gd` → `latest_save_slot()` |
 
 ---
 
@@ -289,6 +290,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 17.12 | Save size stays under 4MB limit | `MAX_SAVE_BYTES` enforced | `game_state.gd` → `MAX_SAVE_BYTES` |
 | 17.13 | Load after version mismatch: clean error | Version != 1 → error, no crash | `game_state.gd` → `_deserialize()` version check |
 | 17.14 | Save round-trip: all state preserved | Save → quit → load → every field matches | Full `_serialize()` / `_deserialize()` |
+| 17.15 | Quit from main menu preserves latest run | Return to menu from dashboard, press Quit, relaunch, load same slot successfully | `main_menu.gd` → `_on_quit()`, `game_state.gd` → `autosave_now()` |
 
 ---
 
@@ -400,6 +402,7 @@ These tests require deploying to a device or emulator, not just the editor.
 | 24.7 | `niches.json` loads for all company types | New game niche picker and modifiers are valid | `src/data/niches.json`, `company_data.gd`, `tools/backend_smoke.py` |
 | 24.8 | `names.json` exists (future use) | Name pools available | `src/data/names.json` |
 | 24.9 | UI button wiring contracts pass | Critical button handlers and scene button nodes exist for main flows | `tools/backend_smoke.py` → `validate_button_script_contracts()`, `validate_button_scene_contracts()` |
+| 24.10 | `product_preview_prototypes.json` validates | Prototype concept names/descriptions/preview modes are valid for each company type | `src/data/product_preview_prototypes.json`, `product_overview.gd`, `tools/backend_smoke.py` |
 
 ---
 

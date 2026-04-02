@@ -53,15 +53,28 @@ UI_BUTTON_SCRIPT_CHECKS = (
         "path": ROOT / "src" / "ui" / "main_menu" / "main_menu.gd",
         "required_snippets": [
             "play_btn.pressed.connect(_on_play)",
+            "continue_btn.pressed.connect(_on_continue)",
             "settings_btn.pressed.connect(_on_settings)",
             "quit_btn.pressed.connect(_on_quit)",
         ],
-        "required_funcs": ["_on_play", "_on_settings", "_on_quit"],
+        "required_funcs": ["_on_play", "_on_continue", "_on_settings", "_on_quit"],
         "required_any": [
             [
-                'change_scene_to_file("res://src/ui/setup/new_game.tscn")',
                 'SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")',
-            ]
+                'change_scene_to_file("res://src/ui/saves/save_slots.tscn")',
+            ],
+            [
+                'gs.call("load_game", _continue_slot)',
+                "GameState.load_game(",
+            ],
+            [
+                'SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")',
+                'change_scene_to_file("res://src/ui/dashboard/quarter_dashboard.tscn")',
+            ],
+            [
+                'gs.call("autosave_now", "main_menu_quit")',
+                "save_game(",
+            ],
         ],
     },
     {
@@ -83,6 +96,7 @@ UI_BUTTON_SCRIPT_CHECKS = (
             "start_btn.pressed.connect(_on_start)",
             "back_btn.pressed.connect(_on_back)",
             "GameState.new_game(config)",
+            'SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")',
         ],
         "required_funcs": ["_on_start", "_on_back"],
         "required_any": [
@@ -196,7 +210,7 @@ UI_BUTTON_SCENE_CHECKS = (
     {
         "label": "Main menu button nodes",
         "path": ROOT / "src" / "ui" / "main_menu" / "main_menu.tscn",
-        "button_nodes": ["PlayButton", "SettingsButton", "QuitButton"],
+        "button_nodes": ["PlayButton", "ContinueButton", "SettingsButton", "QuitButton"],
     },
     {
         "label": "Save slot button nodes",
@@ -611,6 +625,57 @@ def validate_niches(data: object) -> List[str]:
     return errors
 
 
+def validate_product_preview_prototypes(data: object) -> List[str]:
+    errors: List[str] = []
+    if not isinstance(data, dict):
+        return ["product_preview_prototypes.json root must be an object"]
+
+    keys = set(data.keys())
+    missing_types = FEATURE_TYPES - keys
+    if missing_types:
+        errors.append(
+            f"product_preview_prototypes.json missing company types: {sorted(missing_types)}"
+        )
+
+    for ctype in FEATURE_TYPES:
+        rows = data.get(ctype, [])
+        if not isinstance(rows, list):
+            errors.append(f"product_preview_prototypes.{ctype} must be an array")
+            continue
+        if not rows:
+            errors.append(f"product_preview_prototypes.{ctype} must not be empty")
+            continue
+
+        ids_seen: Set[str] = set()
+        for idx, row in enumerate(rows):
+            pfx = f"product_preview_prototypes.{ctype}[{idx}]"
+            if not isinstance(row, dict):
+                errors.append(f"{pfx} must be an object")
+                continue
+
+            rid = row.get("id", "")
+            if not isinstance(rid, str) or not rid.strip():
+                errors.append(f"{pfx}.id must be a non-empty string")
+            elif rid in ids_seen:
+                errors.append(f"duplicate product preview id in {ctype}: {rid}")
+            else:
+                ids_seen.add(rid)
+
+            name = row.get("name", "")
+            if not isinstance(name, str) or not name.strip():
+                errors.append(f"{pfx}.name must be a non-empty string")
+
+            desc = row.get("description", "")
+            if not isinstance(desc, str) or not desc.strip():
+                errors.append(f"{pfx}.description must be a non-empty string")
+
+            mode = row.get("preview_mode", None)
+            if not isinstance(mode, int) or mode < 1 or mode > 4:
+                errors.append(f"{pfx}.preview_mode must be an integer between 1 and 4")
+
+    return errors
+
+
 def _extract_visual_preset_ids(source: str) -> Set[str]:
     marker = "const VISUAL_PRESET_FEATURES := {"
     start = source.find(marker)
@@ -791,6 +856,7 @@ def main() -> int:
         "vcs": DATA_DIR / "vcs.json",
         "competitors": DATA_DIR / "competitors.json",
         "niches": DATA_DIR / "niches.json",
+        "product_preview_prototypes": DATA_DIR / "product_preview_prototypes.json",
     }
     for p in paths.values():
         _require_file(p, errors)
@@ -807,6 +873,7 @@ def main() -> int:
         vcs_data = _load_json(paths["vcs"])
         competitors_data = _load_json(paths["competitors"])
         niches_data = _load_json(paths["niches"])
+        product_preview_prototypes_data = _load_json(paths["product_preview_prototypes"])
     except Exception as exc:
         print(f"[FAIL] JSON load error: {exc}")
         return 1
@@ -819,6 +886,7 @@ def main() -> int:
     errors.extend(validate_vcs(vcs_data))
     errors.extend(validate_competitors(competitors_data))
     errors.extend(validate_niches(niches_data))
+    errors.extend(validate_product_preview_prototypes(product_preview_prototypes_data))
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
     errors.extend(validate_button_script_contracts())
@@ -833,7 +901,7 @@ def main() -> int:
 
     print("Backend smoke check PASSED")
     print(
-        "Validated: features/events/headlines/glossary/vcs/competitors/niches "
+        "Validated: features/events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
         "+ visual presets + difficulty wiring + UI button wiring contracts"
     )
     return 0

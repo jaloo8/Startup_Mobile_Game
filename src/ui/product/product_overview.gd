@@ -29,6 +29,7 @@ const VISUAL_PRESET_LABELS := [
 ]
 const SHOWCASE_PRESET_ORDER := [1, 2, 3, 4]
 const SHOWCASE_STEP_SECONDS := 2.8
+const PRODUCT_PREVIEW_PROTOTYPES_PATH := "res://src/data/product_preview_prototypes.json"
 
 const VISUAL_PRESET_FEATURES := {
 	CompanyData.CompanyType.CONSUMER: [
@@ -73,6 +74,9 @@ var _showcase_btn: Button
 var _showcase_timer: Timer
 var _showcase_step_idx: int = 0
 var _showcase_enabled: bool = false
+var _prototype_picker: OptionButton
+var _prototype_hint: Label
+var _prototype_rows: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -177,6 +181,7 @@ func _build_celebration_panel() -> void:
 func _build_visual_preset_controls() -> void:
 	if product_visual == null:
 		return
+	_prototype_rows = _load_product_preview_prototypes()
 
 	_visual_preset_panel = PanelContainer.new()
 	var panel_style := StyleBoxFlat.new()
@@ -215,11 +220,35 @@ func _build_visual_preset_controls() -> void:
 	_showcase_btn.pressed.connect(_on_showcase_pressed)
 	row.add_child(_showcase_btn)
 
+	var proto_row := HBoxContainer.new()
+	proto_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(proto_row)
+
+	var proto_title := Label.new()
+	proto_title.text = "Prototype Concept"
+	proto_title.add_theme_font_size_override("font_size", 11)
+	proto_title.add_theme_color_override("font_color", Color(0.65, 0.74, 0.92))
+	proto_row.add_child(proto_title)
+
+	_prototype_picker = OptionButton.new()
+	_prototype_picker.add_item("None")
+	for row_data in _prototype_rows:
+		_prototype_picker.add_item(str(row_data.get("name", "Concept")))
+	_prototype_picker.selected = 0
+	_prototype_picker.item_selected.connect(_on_prototype_selected)
+	proto_row.add_child(_prototype_picker)
+
 	_visual_preset_hint = Label.new()
 	_visual_preset_hint.add_theme_font_size_override("font_size", 10)
 	_visual_preset_hint.add_theme_color_override("font_color", Color(0.55, 0.58, 0.66))
 	_visual_preset_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_visual_preset_hint)
+
+	_prototype_hint = Label.new()
+	_prototype_hint.add_theme_font_size_override("font_size", 10)
+	_prototype_hint.add_theme_color_override("font_color", Color(0.48, 0.55, 0.66))
+	_prototype_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_prototype_hint)
 
 	var parent := product_visual.get_parent()
 	if parent:
@@ -234,11 +263,124 @@ func _build_visual_preset_controls() -> void:
 	add_child(_showcase_timer)
 
 	_update_visual_preset_hint()
+	_update_prototype_hint("")
+
+
+func _load_product_preview_prototypes() -> Array[Dictionary]:
+	if GameState.company == null:
+		return _fallback_product_preview_prototypes()
+	var type_key := _company_type_key(GameState.company.type)
+	if type_key.is_empty():
+		return _fallback_product_preview_prototypes()
+	if not FileAccess.file_exists(PRODUCT_PREVIEW_PROTOTYPES_PATH):
+		return _fallback_product_preview_prototypes()
+
+	var file := FileAccess.open(PRODUCT_PREVIEW_PROTOTYPES_PATH, FileAccess.READ)
+	if file == null:
+		return _fallback_product_preview_prototypes()
+	var text := file.get_as_text()
+	file = null
+
+	var json := JSON.new()
+	if json.parse(text) != OK or not (json.data is Dictionary):
+		return _fallback_product_preview_prototypes()
+
+	var root: Dictionary = json.data
+	var rows = root.get(type_key, [])
+	if not (rows is Array):
+		return _fallback_product_preview_prototypes()
+
+	var out: Array[Dictionary] = []
+	for raw in rows:
+		if not (raw is Dictionary):
+			continue
+		var row: Dictionary = raw
+		var label := str(row.get("name", "")).strip_edges()
+		if label.is_empty():
+			continue
+		out.append({
+			"id": str(row.get("id", "")).strip_edges(),
+			"name": label,
+			"description": str(row.get("description", "")).strip_edges(),
+			"preview_mode": clampi(int(row.get("preview_mode", 1)), 1, VISUAL_PRESET_LABELS.size() - 1),
+		})
+
+	if out.is_empty():
+		return _fallback_product_preview_prototypes()
+	return out
+
+
+func _fallback_product_preview_prototypes() -> Array[Dictionary]:
+	return [
+		{
+			"id": "starter_usability",
+			"name": "Starter Usability",
+			"description": "Early concept focused on clean onboarding and easy first-session navigation.",
+			"preview_mode": 1,
+		},
+		{
+			"id": "engagement_loop",
+			"name": "Engagement Loop",
+			"description": "Mid concept focused on retention loops and repeat usage habits.",
+			"preview_mode": 2,
+		},
+		{
+			"id": "monetization_balance",
+			"name": "Monetization Balance",
+			"description": "Monetization-forward concept that still keeps the core experience readable.",
+			"preview_mode": 3,
+		},
+		{
+			"id": "premium_polish",
+			"name": "Premium Polish",
+			"description": "Near-final concept for polished visual hierarchy and production feel.",
+			"preview_mode": 4,
+		},
+	]
+
+
+static func _company_type_key(company_type: int) -> String:
+	match company_type:
+		CompanyData.CompanyType.SAAS:
+			return "saas"
+		CompanyData.CompanyType.CONSUMER:
+			return "consumer"
+		CompanyData.CompanyType.MARKETPLACE:
+			return "marketplace"
+		CompanyData.CompanyType.DEV_TOOLS:
+			return "dev_tools"
+		_:
+			return ""
+
+
+func _update_prototype_hint(text: String) -> void:
+	if _prototype_hint == null:
+		return
+	if text.strip_edges().is_empty():
+		_prototype_hint.text = "Add future concept ideas in src/data/product_preview_prototypes.json."
+		return
+	_prototype_hint.text = text
+
+
+func _on_prototype_selected(index: int) -> void:
+	if _showcase_enabled:
+		_stop_showcase_mode()
+	if index <= 0:
+		_update_prototype_hint("")
+		return
+	var safe_idx := clampi(index - 1, 0, _prototype_rows.size() - 1)
+	var row: Dictionary = _prototype_rows[safe_idx]
+	var mode := clampi(int(row.get("preview_mode", 1)), 1, VISUAL_PRESET_LABELS.size() - 1)
+	_set_visual_preset_mode(mode)
+	_update_prototype_hint(str(row.get("description", "")))
 
 
 func _on_visual_preset_selected(index: int) -> void:
 	if _showcase_enabled:
 		_stop_showcase_mode()
+	if _prototype_picker and _prototype_picker.selected != 0:
+		_prototype_picker.select(0)
+		_update_prototype_hint("")
 	_set_visual_preset_mode(index)
 
 

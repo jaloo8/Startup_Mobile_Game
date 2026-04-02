@@ -73,6 +73,9 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Continue Last Run shortcut** — Main menu now includes a `Continue Last Run` button that loads the most recently modified valid save slot directly into gameplay, with safe fallback to the save-slot screen.
+- **Quit/autosave reliability pass** — Added lifecycle safety autosave hooks in `GameState` (close request + app pause/focus-out) and a quit-path save from main menu, so runs are less likely to lose progress when exiting.
+- **Product prototype preview foundation** — Product screen now has a data-driven `Prototype Concept` switcher (backed by `src/data/product_preview_prototypes.json`) so future visual concept ideas can be previewed quickly without additional code changes.
 - **IAP + entitlement wiring pass** — `AdManager` now includes mobile purchase/restore bridge hooks (StoreKit / Google Play singleton detection, callback wiring, restore path) plus save-slot entitlement enforcement (`2` free slots vs `5` premium slots) in the save screen.
 - **Employee detail view shipped** — Added a dedicated People detail screen with role/profile metadata, trajectory chart (Skill/Morale/Stress), and quarter history log; employee cards now include a `Details` action.
 - **Niche system (P1)** — New game now includes per-company-type niche selection via `src/data/niches.json`; niche modifiers (growth/churn/revenue) are applied in simulation and revenue engines.
