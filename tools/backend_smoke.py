@@ -47,6 +47,21 @@ KNOWN_EFFECT_KEYS = {
     "reputation_bonus",
     "dau_bonus",
 }
+EVENT_EFFECT_KEYS = {
+    "cash",
+    "morale_all",
+    "stress_all",
+    "tech_debt",
+    "bugs",
+    "reputation",
+    "users",
+    "stability",
+    "game_win",
+    "salary_increase_pct",
+    "equity_grant_pct",
+    "lose_best_engineer",
+    "fundraising_opportunity",
+}
 KNOWN_NICHE_MOD_KEYS = {"growth_mult", "churn_mult", "revenue_mult"}
 WORLD_EVENT_EFFECT_KEYS = {
     "growth_mult",
@@ -424,6 +439,10 @@ def validate_events(data: object) -> List[str]:
             effects = choice.get("effects", {})
             if not isinstance(effects, dict):
                 errors.append(f"{cpfx}.effects must be an object")
+            else:
+                unknown_effects = set(effects.keys()) - EVENT_EFFECT_KEYS
+                if unknown_effects:
+                    errors.append(f"{cpfx}.effects has unknown keys: {sorted(unknown_effects)}")
 
         weight = ev.get("weight", 1.0)
         if not isinstance(weight, (int, float)) or float(weight) <= 0.0:

@@ -4,6 +4,22 @@ extends PanelContainer
 
 signal event_resolved(event: EventData, choice_index: int)
 
+const KNOWN_EFFECT_KEYS := {
+	"cash": true,
+	"morale_all": true,
+	"stress_all": true,
+	"tech_debt": true,
+	"bugs": true,
+	"reputation": true,
+	"users": true,
+	"stability": true,
+	"game_win": true,
+	"salary_increase_pct": true,
+	"equity_grant_pct": true,
+	"lose_best_engineer": true,
+	"fundraising_opportunity": true,
+}
+
 @onready var title_label: Label = $Margin/VBox/TitleLabel
 @onready var description_label: Label = $Margin/VBox/DescLabel
 @onready var choices_container: VBoxContainer = $Margin/VBox/ChoicesContainer
@@ -77,6 +93,8 @@ func _on_choice(index: int) -> void:
 
 
 func _apply_effects(effects: Dictionary) -> void:
+	_warn_unknown_effect_keys(effects)
+
 	if effects.has("cash"):
 		GameState.company.cash += float(effects["cash"])
 	if effects.has("morale_all"):
@@ -97,9 +115,110 @@ func _apply_effects(effects: Dictionary) -> void:
 		GameState.product.users = maxi(0, GameState.product.users + int(effects["users"]))
 	if effects.has("stability"):
 		GameState.product.stability = clampi(GameState.product.stability + int(effects["stability"]), 0, 100)
+	if effects.has("salary_increase_pct"):
+		_apply_salary_raise(float(effects["salary_increase_pct"]))
+	if effects.has("equity_grant_pct"):
+		_apply_equity_grant(float(effects["equity_grant_pct"]))
+	if effects.has("lose_best_engineer") and bool(effects["lose_best_engineer"]):
+		_apply_best_engineer_exit()
+	if effects.has("fundraising_opportunity") and bool(effects["fundraising_opportunity"]):
+		_apply_fundraising_opportunity()
 	if effects.has("game_win"):
 		GameState.is_game_active = false
 		GameState.game_won.emit(str(effects["game_win"]))
+
+
+func _warn_unknown_effect_keys(effects: Dictionary) -> void:
+	var unknown: Array[String] = []
+	for raw_key in effects.keys():
+		var key := str(raw_key).strip_edges()
+		if key.is_empty():
+			continue
+		if not KNOWN_EFFECT_KEYS.has(key):
+			unknown.append(key)
+	if not unknown.is_empty():
+		push_warning("EventPopup: unknown effect keys in event choice: %s" % str(unknown))
+
+
+func _apply_salary_raise(percent: float) -> void:
+	var target := _best_engineer_candidate()
+	if target == null:
+		return
+	var raise_mult := clampf(1.0 + (percent * 0.01), 1.0, 2.5)
+	target.salary_per_quarter = maxf(100.0, target.salary_per_quarter * raise_mult)
+	target.morale = clampi(target.morale + 6, 0, 100)
+
+
+func _apply_equity_grant(percent: float) -> void:
+	var grant := clampf(percent, 0.0, 25.0)
+	if grant <= 0.0:
+		return
+	GameState.company.equity_owned = maxf(0.0, GameState.company.equity_owned - grant)
+
+
+func _apply_best_engineer_exit() -> void:
+	var target := _best_engineer_candidate()
+	if target == null:
+		return
+	var leaver_name := target.employee_name
+	GameState.fire_employee(target)
+	GameState.employee_quit.emit(target)
+	GameState.append_event_log({
+		"quarter": GameState.current_quarter,
+		"year": GameState.current_year,
+		"event_id": "employee_quit",
+		"title": "%s quit after an external offer cycle" % leaver_name,
+	})
+
+
+func _apply_fundraising_opportunity() -> void:
+	GameState.company.reputation = clampi(GameState.company.reputation + 4, 0, 100)
+	GameState.append_event_log({
+		"quarter": GameState.current_quarter,
+		"year": GameState.current_year,
+		"event_id": "fundraising_warm_intro",
+		"title": "Built a warm VC intro pipeline for upcoming fundraising",
+	})
+
+
+func _best_engineer_candidate() -> EmployeeData:
+	if GameState.employees.is_empty():
+		return null
+	var technical_specialties := {
+		EmployeeData.Specialty.FRONTEND: true,
+		EmployeeData.Specialty.BACKEND: true,
+		EmployeeData.Specialty.MOBILE: true,
+		EmployeeData.Specialty.DATA_ML: true,
+		EmployeeData.Specialty.DEVOPS: true,
+	}
+	var best: EmployeeData = null
+	var best_score := -1e18
+	var best_any: EmployeeData = null
+	var best_any_score := -1e18
+	for emp: EmployeeData in GameState.employees:
+		if emp == null:
+			continue
+		var score := _retention_score(emp)
+		if score > best_any_score:
+			best_any_score = score
+			best_any = emp
+		if technical_specialties.has(emp.specialty) and score > best_score:
+			best_score = score
+			best = emp
+	return best if best != null else best_any
+
+
+func _retention_score(emp: EmployeeData) -> float:
+	var score := float(emp.skill) * 1.0
+	score += float(emp.speed) * 0.35
+	score += float(emp.seniority) * 4.0
+	if emp.assignment == EmployeeData.Assignment.FEATURES:
+		score += 8.0
+	elif emp.assignment == EmployeeData.Assignment.BUGS:
+		score += 5.0
+	elif emp.assignment == EmployeeData.Assignment.TECH_DEBT:
+		score += 4.0
+	return score
 
 
 func _on_continue() -> void:

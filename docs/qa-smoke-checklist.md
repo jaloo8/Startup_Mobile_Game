@@ -133,6 +133,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 6.8 | Niche-aware event weighting feels relevant | Selected niche surfaces more fitting event categories over multiple runs | `event_engine.gd` → `_effective_event_weight()` |
 | 6.9 | Event cadence and repeats adapt by stage + difficulty | Early + Sandbox runs feel calmer (lower cadence / longer repeats), while late + Hardcore runs feel denser (higher cadence / shorter repeats) without becoming spammy | `event_engine.gd` → `_event_count_bounds()`, `_effective_cooldown()`, `_effective_event_weight()` |
 | 6.10 | Multi-event quarters avoid same-category spam | When 2-4 events fire, picks usually span categories (not repeatedly `market`/`money` in the same quarter unless pool is constrained) | `event_engine.gd` → `_within_roll_category_dampener()`, `_weighted_pick()` |
+| 6.11 | Event choice effects are fully wired (no silent no-op keys) | Salary raise, equity grant, forced attrition, and fundraising-opportunity effects all apply tangible gameplay state changes | `event_popup.gd` → `_apply_effects()`, `tools/backend_smoke.py` → `EVENT_EFFECT_KEYS` |
 
 ---
 
@@ -466,6 +467,7 @@ These tests require deploying to a device or emulator, not just the editor.
 
 After any code change:
 
+0. **Execution order** — Follow `docs/current-execution-path.md` for current quality-first sequencing (stability -> balance -> phone gates -> beta)
 1. **Backend smoke script** — run `python3 tools/backend_smoke.py` (fast structural/data checks + UI button wiring contracts)
 2. **Lint check** — `ReadLints` on all modified `.gd` files
 3. **★ items** — Marked with ★ above: new game, dashboard, advance quarter, events, hiring, employee list, product, finances, navigation, edge cases (~15 min)

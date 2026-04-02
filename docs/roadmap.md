@@ -4,6 +4,20 @@
 
 ---
 
+## Current Priority Override (Spring 2026)
+
+For the active execution plan, use `docs/current-execution-path.md`.
+
+Right now, the smartest path is:
+- Quality and stability first
+- Balance validation second
+- Real-device readiness gates third
+- Internal mobile beta after gates pass
+
+This temporarily takes priority over large net-new scope until the first phone beta is stable.
+
+---
+
 ## Development Phases
 
 ### Phase 0: Paper Prototype (Weekend 1)
