@@ -56,6 +56,7 @@ static func _load_pool() -> void:
 			"focus": str(entry.get("focus", "")),
 			"size": str(entry.get("size", "startup")),
 			"tagline": str(entry.get("tagline", "")),
+			"niches": _string_array(entry.get("niches", [])),
 		})
 
 	if _pool.is_empty():
@@ -64,24 +65,36 @@ static func _load_pool() -> void:
 	print("CompetitorAI: loaded %d competitors from JSON" % _pool.size())
 
 
-static func generate_starting_competitors(count: int, company_type: CompanyData.CompanyType = CompanyData.CompanyType.SAAS) -> Array[Dictionary]:
+static func generate_starting_competitors(
+	count: int,
+	company_type: CompanyData.CompanyType = CompanyData.CompanyType.SAAS,
+	company_niche_id: String = ""
+) -> Array[Dictionary]:
 	if _pool.is_empty():
 		_load_pool()
 
 	var player_focus: String = TYPE_TO_FOCUS.get(company_type, "saas")
+	var niche_id: String = company_niche_id.strip_edges()
 
+	var same_niche: Array[Dictionary] = []
 	var same_industry: Array[Dictionary] = []
 	var enterprises: Array[Dictionary] = []
 	var others: Array[Dictionary] = []
 
 	for entry in _pool:
-		if entry.get("focus", "") == player_focus:
+		if _entry_niche_score(entry, niche_id) > 0:
+			same_niche.append(entry)
+		if str(entry.get("focus", "")) == player_focus:
 			same_industry.append(entry)
-		elif entry.get("size", "startup") == "enterprise":
+		elif str(entry.get("size", "startup")) == "enterprise":
 			enterprises.append(entry)
 		else:
 			others.append(entry)
 
+	if not same_niche.is_empty() and not niche_id.is_empty():
+		same_niche.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return _entry_niche_score(a, niche_id) > _entry_niche_score(b, niche_id)
+		)
 	same_industry.shuffle()
 	enterprises.shuffle()
 	others.shuffle()
@@ -89,27 +102,17 @@ static func generate_starting_competitors(count: int, company_type: CompanyData.
 	var picked: Array[Dictionary] = []
 	var used_names: Dictionary = {}
 
-	var same_count := ceili(count * 0.5)
-	var enterprise_count := ceili(count * 0.25)
-	var wild_count := count - same_count - enterprise_count
+	var niche_count: int = 0
+	if not niche_id.is_empty():
+		niche_count = mini(count, maxi(1, ceili(float(count) * 0.34)))
+	var same_count := ceili(count * 0.45)
+	var enterprise_count := ceili(count * 0.20)
+	var wild_count := maxi(0, count - niche_count - same_count - enterprise_count)
 
-	for source in [
-		[same_industry, same_count],
-		[enterprises, enterprise_count],
-		[others, wild_count],
-	]:
-		var pool_arr: Array = source[0]
-		var target: int = source[1]
-		for entry in pool_arr:
-			if picked.size() >= count:
-				break
-			if used_names.has(entry.get("name", "")):
-				continue
-			if target <= 0:
-				break
-			picked.append(_make_competitor(entry))
-			used_names[entry.get("name", "")] = true
-			target -= 1
+	_pick_from_pool(same_niche, niche_count, picked, used_names, count)
+	_pick_from_pool(same_industry, same_count, picked, used_names, count)
+	_pick_from_pool(enterprises, enterprise_count, picked, used_names, count)
+	_pick_from_pool(others, wild_count, picked, used_names, count)
 
 	while picked.size() < count:
 		var all_remaining := same_industry + enterprises + others
@@ -137,6 +140,7 @@ static func _make_competitor(entry: Dictionary) -> Dictionary:
 		"name": entry.get("name", "Unknown"),
 		"tagline": entry.get("tagline", ""),
 		"focus": entry.get("focus", ""),
+		"niches": _string_array(entry.get("niches", [])),
 		"users": randi_range(int(preset.get("users_min", 100)), int(preset.get("users_max", 1000))),
 		"funding": randi_range(int(preset.get("funding_min", 0)), int(preset.get("funding_max", 100000))),
 		"product_quality": randi_range(int(preset.get("quality_min", 30)), int(preset.get("quality_max", 70))),
@@ -174,3 +178,83 @@ static func _fallback_pool() -> Array[Dictionary]:
 		{"name": "Striipe", "focus": "dev_tools", "size": "growth"},
 		{"name": "Slak", "focus": "saas", "size": "growth"},
 	]
+
+
+static func _pick_from_pool(
+	source: Array[Dictionary],
+	target: int,
+	picked: Array[Dictionary],
+	used_names: Dictionary,
+	count_cap: int
+) -> void:
+	if target <= 0:
+		return
+	var added := 0
+	for entry in source:
+		if picked.size() >= count_cap or added >= target:
+			break
+		var name_val: String = str(entry.get("name", "")).strip_edges()
+		if name_val.is_empty() or used_names.has(name_val):
+			continue
+		picked.append(_make_competitor(entry))
+		used_names[name_val] = true
+		added += 1
+
+
+static func _entry_niche_score(entry: Dictionary, niche_id: String) -> int:
+	if niche_id.is_empty():
+		return 0
+	var explicit_niches: Array = entry.get("niches", [])
+	if explicit_niches is Array and niche_id in explicit_niches:
+		return 5
+	var keywords: Array[String] = _niche_keywords(niche_id)
+	if keywords.is_empty():
+		return 0
+	var text: String = ("%s %s" % [entry.get("name", ""), entry.get("tagline", "")]).to_lower()
+	var score := 0
+	for kw in keywords:
+		if kw.is_empty():
+			continue
+		if text.find(kw) >= 0:
+			score += 1
+	return score
+
+
+static func _niche_keywords(niche_id: String) -> Array[String]:
+	match niche_id:
+		"streaming_service":
+			return ["stream", "video", "music", "content", "media"]
+		"fitness_companion":
+			return ["fitness", "health", "wellness", "habit"]
+		"local_discovery":
+			return ["local", "city", "community", "events"]
+		"vertical_crm":
+			return ["crm", "sales", "customer", "pipeline"]
+		"workflow_automation":
+			return ["automation", "workflow", "productivity", "ops"]
+		"compliance_ops":
+			return ["compliance", "security", "risk", "audit"]
+		"home_services":
+			return ["home", "service", "booking", "provider"]
+		"resale_goods":
+			return ["resale", "seller", "listing", "auction"]
+		"food_delivery_hub":
+			return ["delivery", "food", "courier", "logistics"]
+		"api_observability":
+			return ["api", "observability", "monitor", "uptime"]
+		"ci_automation":
+			return ["ci", "deploy", "build", "pipeline"]
+		"cloud_cost_tools":
+			return ["cloud", "cost", "infrastructure", "optimization"]
+		_:
+			return []
+
+
+static func _string_array(value) -> Array[String]:
+	var out: Array[String] = []
+	if value is Array:
+		for raw in value:
+			var text: String = str(raw).strip_edges()
+			if not text.is_empty():
+				out.append(text)
+	return out

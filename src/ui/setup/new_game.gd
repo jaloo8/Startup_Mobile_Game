@@ -262,7 +262,11 @@ func _on_start() -> void:
 	EventEngine.load_events("res://src/data/events.json")
 	ProductData.load_feature_catalog("res://src/data/features.json")
 	HeadlineEngine.load_headlines("res://src/data/headlines.json")
-	GameState.market.competitors = CompetitorAI.generate_starting_competitors(6, GameState.company.type)
+	GameState.market.competitors = CompetitorAI.generate_starting_competitors(
+		6,
+		GameState.company.type,
+		GameState.company.niche_id
+	)
 	GameState.save_game(GameState.current_slot)
 
 	var analytics := get_node_or_null("/root/Analytics")

@@ -4,6 +4,7 @@ extends RefCounted
 
 const BASE_ORGANIC_USERS_PER_QUARTER := 10
 const MARKETING_USER_MULT := 0.5
+const OFFICE_COST_BY_LEVEL := [0.0, 1_000.0, 4_000.0, 10_000.0]
 
 const DEFAULT_GROWTH_BALANCE := {
 	"maturity_start_users": 25_000.0,
@@ -102,6 +103,9 @@ static func _apply_work_output(state: Node) -> void:
 	if state.employees.is_empty():
 		return
 
+	# Team personality mix slightly influences effective collaboration speed.
+	var collaboration_mult: float = _team_collaboration_mult(state)
+
 	for emp: EmployeeData in state.employees:
 		# Employees assigned as interviewers are unavailable for normal work output
 		# this quarter (opportunity cost of deeper interview process).
@@ -115,7 +119,7 @@ static func _apply_work_output(state: Node) -> void:
 			continue
 
 		var spec_mult: float = EmployeeData.specialty_mult(emp.specialty, emp.assignment, state.company.type)
-		var output: float = emp.work_output() * state.product.dev_speed_multiplier() * spec_mult
+		var output: float = emp.work_output() * state.product.dev_speed_multiplier() * spec_mult * collaboration_mult
 		var tech_bonus: float = state.company.founder_stat("technical") * 0.05
 
 		match emp.assignment:
@@ -285,8 +289,9 @@ static func _calculate_costs(state: Node) -> void:
 	var infra_cost := maxf(10.0, state.product.users * 0.01) * maxf(0.6, finance_discount)
 	state.financials.costs_breakdown["infrastructure"] = infra_cost
 
-	var office_cost := [0.0, 2_000.0, 5_000.0, 12_000.0]
-	state.financials.costs_breakdown["office"] = office_cost[clampi(state.company.office_level, 0, 3)]
+	state.financials.costs_breakdown["office"] = OFFICE_COST_BY_LEVEL[
+		clampi(state.company.office_level, 0, OFFICE_COST_BY_LEVEL.size() - 1)
+	]
 
 	state.financials.burn_rate = state.financials.total_costs()
 
@@ -351,8 +356,12 @@ static func _roll_events(state: Node) -> void:
 
 static func _update_employee_morale(state: Node) -> void:
 	var people_shield: int = roundi(state.company.founder_stat("people") * 0.3)
+	var team_morale_pulse: int = _team_morale_pulse(state)
 
 	for emp: EmployeeData in state.employees:
+		if team_morale_pulse != 0:
+			emp.morale += team_morale_pulse
+
 		if emp.stress > 70:
 			emp.morale -= maxi(1, randi_range(5, 12) - people_shield)
 		elif emp.stress > 50:
@@ -373,9 +382,84 @@ static func _update_employee_morale(state: Node) -> void:
 			emp.morale -= 2
 		elif emp.personality == EmployeeData.Personality.TEAM_PLAYER:
 			emp.morale += 1
+			if team_morale_pulse > 0:
+				emp.morale += 1
 		elif emp.personality == EmployeeData.Personality.PERFECTIONIST and state.product.bugs > 15:
 			emp.morale -= 2
+		elif emp.personality == EmployeeData.Personality.ADAPTABLE and team_morale_pulse < 0:
+			# Adaptable employees absorb team turbulence slightly better.
+			emp.morale += 1
 		emp.stress = maxi(0, emp.stress - randi_range(2, 5))
+
+
+static func _team_collaboration_mult(state: Node) -> float:
+	var team_size: int = state.employees.size()
+	if team_size < 2:
+		return 1.0
+
+	var mentors := 0
+	var team_players := 0
+	var ambitious := 0
+	var perfectionists := 0
+	for emp: EmployeeData in state.employees:
+		match emp.personality:
+			EmployeeData.Personality.MENTOR:
+				mentors += 1
+			EmployeeData.Personality.TEAM_PLAYER:
+				team_players += 1
+			EmployeeData.Personality.AMBITIOUS:
+				ambitious += 1
+			EmployeeData.Personality.PERFECTIONIST:
+				perfectionists += 1
+
+	var mult: float = 1.0
+	mult += minf(0.06, float(team_players) * 0.012)
+	if mentors > 0 and team_size >= 4:
+		mult += minf(0.05, float(mentors) * 0.015)
+
+	var perfectionist_threshold: int = maxi(2, ceili(float(team_size) * 0.4))
+	if perfectionists >= perfectionist_threshold and state.product.bugs > 15:
+		mult -= 0.05
+
+	var ambitious_threshold: int = maxi(3, ceili(float(team_size) * 0.45))
+	if ambitious >= ambitious_threshold and state.company.cash < state.financials.burn_rate * 2.0:
+		mult -= 0.04
+
+	return clampf(mult, 0.88, 1.18)
+
+
+static func _team_morale_pulse(state: Node) -> int:
+	if state.employees.is_empty():
+		return 0
+	var team_size: int = state.employees.size()
+	var mentors := 0
+	var team_players := 0
+	var ambitious := 0
+	var perfectionists := 0
+	for emp: EmployeeData in state.employees:
+		match emp.personality:
+			EmployeeData.Personality.MENTOR:
+				mentors += 1
+			EmployeeData.Personality.TEAM_PLAYER:
+				team_players += 1
+			EmployeeData.Personality.AMBITIOUS:
+				ambitious += 1
+			EmployeeData.Personality.PERFECTIONIST:
+				perfectionists += 1
+
+	var delta := 0
+	if team_players >= 2 and mentors >= 1 and team_size >= 4:
+		delta += 1
+
+	var ambitious_threshold: int = maxi(3, ceili(float(team_size) * 0.45))
+	if ambitious >= ambitious_threshold and state.company.cash < state.financials.burn_rate * 1.5:
+		delta -= 1
+
+	var perfectionist_threshold: int = maxi(2, ceili(float(team_size) * 0.35))
+	if perfectionists >= perfectionist_threshold and state.product.bugs > 20:
+		delta -= 1
+
+	return clampi(delta, -2, 2)
 
 
 static func _process_employee_turnover(state: Node) -> void:

@@ -221,5 +221,68 @@
   },
   {
     "template": "The average startup now takes 7 years to exit"
+  },
+  {
+    "template": "Streaming churn climbs industry-wide as subscribers trim monthly bills",
+    "niches": ["streaming_service"],
+    "min_users": 500,
+    "weight": 1.6
+  },
+  {
+    "template": "Creator partnerships are becoming the growth engine for streaming apps",
+    "niches": ["streaming_service"],
+    "weight": 1.45
+  },
+  {
+    "template": "Fitness apps race to improve streak retention before summer demand cools",
+    "niches": ["fitness_companion"],
+    "weight": 1.55
+  },
+  {
+    "template": "Local discovery startups win on trust as city communities go digital-first",
+    "niches": ["local_discovery"],
+    "weight": 1.45
+  },
+  {
+    "template": "Vertical CRM buyers prioritize workflow depth over flashy dashboards",
+    "niches": ["vertical_crm"],
+    "company_types": ["saas"],
+    "weight": 1.6
+  },
+  {
+    "template": "Compliance software budgets hold steady despite tighter macro conditions",
+    "niches": ["compliance_ops"],
+    "company_types": ["saas"],
+    "weight": 1.5
+  },
+  {
+    "template": "Marketplace food delivery sees frequency gains but margin pressure persists",
+    "niches": ["food_delivery_hub"],
+    "company_types": ["marketplace"],
+    "weight": 1.65
+  },
+  {
+    "template": "Resale marketplaces benefit from budget-conscious shoppers and social selling",
+    "niches": ["resale_goods"],
+    "company_types": ["marketplace"],
+    "weight": 1.55
+  },
+  {
+    "template": "API observability tools see rising demand after several public outages",
+    "niches": ["api_observability"],
+    "company_types": ["dev_tools"],
+    "weight": 1.6
+  },
+  {
+    "template": "Engineering teams cut CI wait times as deployment automation competition heats up",
+    "niches": ["ci_automation"],
+    "company_types": ["dev_tools"],
+    "weight": 1.55
+  },
+  {
+    "template": "Cloud optimization startups gain traction as CFOs scrutinize infra spend",
+    "niches": ["cloud_cost_tools"],
+    "company_types": ["dev_tools"],
+    "weight": 1.7
   }
 ]

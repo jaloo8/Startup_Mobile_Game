@@ -409,6 +409,15 @@ def validate_events(data: object) -> List[str]:
         if not isinstance(cooldown, int) or cooldown < 0:
             errors.append(f"{pfx}.cooldown_quarters must be an integer >= 0")
 
+        niches = ev.get("niches", [])
+        if niches:
+            if not isinstance(niches, list):
+                errors.append(f"{pfx}.niches must be an array when present")
+            else:
+                for nidx, niche in enumerate(niches):
+                    if not isinstance(niche, str) or not niche.strip():
+                        errors.append(f"{pfx}.niches[{nidx}] must be a non-empty string")
+
     return errors
 
 
@@ -456,6 +465,28 @@ def validate_headlines(data: object) -> List[str]:
                             errors.append(
                                 f"{pfx}.variations[{vidx}] has unknown placeholders: {sorted(unknown_v)}"
                             )
+
+        company_types = item.get("company_types", [])
+        if company_types:
+            if not isinstance(company_types, list):
+                errors.append(f"{pfx}.company_types must be an array when present")
+            else:
+                bad_types = [ct for ct in company_types if ct not in FEATURE_TYPES]
+                if bad_types:
+                    errors.append(f"{pfx}.company_types has invalid values: {bad_types}")
+
+        niches = item.get("niches", [])
+        if niches:
+            if not isinstance(niches, list):
+                errors.append(f"{pfx}.niches must be an array when present")
+            else:
+                for nidx, niche in enumerate(niches):
+                    if not isinstance(niche, str) or not niche.strip():
+                        errors.append(f"{pfx}.niches[{nidx}] must be a non-empty string")
+
+        weight = item.get("weight", 1.0)
+        if not isinstance(weight, (int, float)) or float(weight) <= 0.0:
+            errors.append(f"{pfx}.weight must be > 0 when present")
 
     return errors
 
@@ -557,6 +588,15 @@ def validate_competitors(data: object) -> List[str]:
         size = row.get("size", "")
         if size and size not in COMPANY_SIZES:
             errors.append(f"{pfx}.size invalid: {size}")
+
+        niches = row.get("niches", [])
+        if niches:
+            if not isinstance(niches, list):
+                errors.append(f"{pfx}.niches must be an array when present")
+            else:
+                for nidx, niche in enumerate(niches):
+                    if not isinstance(niche, str) or not niche.strip():
+                        errors.append(f"{pfx}.niches[{nidx}] must be a non-empty string")
 
     for focus, count in focus_counts.items():
         if count == 0:

@@ -17,9 +17,9 @@
     {"name": "Meto", "focus": "consumer", "size": "enterprise", "tagline": "Social networks and the metaverse"},
 
     {"name": "Nvidya", "focus": "dev_tools", "size": "enterprise", "tagline": "GPUs and AI accelerator hardware"},
-    {"name": "Netflex", "focus": "consumer", "size": "enterprise", "tagline": "Streaming entertainment platform"},
+    {"name": "Netflex", "focus": "consumer", "size": "enterprise", "tagline": "Streaming entertainment platform", "niches": ["streaming_service"]},
     {"name": "Teslo", "focus": "consumer", "size": "enterprise", "tagline": "Electric vehicles and clean energy"},
-    {"name": "Salesforge", "focus": "saas", "size": "enterprise", "tagline": "Enterprise CRM and business cloud"},
+    {"name": "Salesforge", "focus": "saas", "size": "enterprise", "tagline": "Enterprise CRM and business cloud", "niches": ["vertical_crm"]},
     {"name": "Adobo", "focus": "saas", "size": "enterprise", "tagline": "Creative tools for design and media"},
 
     {"name": "Oracl", "focus": "saas", "size": "enterprise", "tagline": "Databases, cloud infrastructure, and enterprise software"},
@@ -32,15 +32,15 @@
     {"name": "Striipe", "focus": "dev_tools", "size": "growth", "tagline": "Payment infrastructure for the internet"},
     {"name": "Ubr", "focus": "marketplace", "size": "growth", "tagline": "Ride-sharing and delivery platform"},
     {"name": "Slak", "focus": "saas", "size": "growth", "tagline": "Team messaging and collaboration"},
-    {"name": "Spotifi", "focus": "consumer", "size": "growth", "tagline": "Music streaming and podcasts"},
+    {"name": "Spotifi", "focus": "consumer", "size": "growth", "tagline": "Music streaming and podcasts", "niches": ["streaming_service"]},
 
     {"name": "Spase X", "focus": "dev_tools", "size": "growth", "tagline": "Rockets, satellites, and internet from space"},
     {"name": "Twitr", "focus": "consumer", "size": "growth", "tagline": "Microblogging and real-time news"},
-    {"name": "Shopifly", "focus": "marketplace", "size": "growth", "tagline": "E-commerce platform for online stores"},
+    {"name": "Shopifly", "focus": "marketplace", "size": "growth", "tagline": "E-commerce platform for online stores", "niches": ["resale_goods"]},
     {"name": "Zuum", "focus": "saas", "size": "growth", "tagline": "Video conferencing and virtual meetings"},
     {"name": "Snapp Inc", "focus": "consumer", "size": "growth", "tagline": "Disappearing photos and AR filters"},
 
-    {"name": "Cloudflair", "focus": "dev_tools", "size": "growth", "tagline": "CDN, security, and edge computing"},
+    {"name": "Cloudflair", "focus": "dev_tools", "size": "growth", "tagline": "CDN, security, and edge computing", "niches": ["api_observability", "cloud_cost_tools"]},
     {"name": "Dockr", "focus": "dev_tools", "size": "growth", "tagline": "Containers and developer deployment tools"},
     {"name": "Databriks", "focus": "dev_tools", "size": "growth", "tagline": "Data lakehouse and AI analytics"},
     {"name": "Snowflek", "focus": "saas", "size": "growth", "tagline": "Cloud data warehousing"},
@@ -48,11 +48,11 @@
 
     {"name": "Atlantian", "focus": "saas", "size": "growth", "tagline": "Project tracking and team collaboration"},
     {"name": "Intuut", "focus": "saas", "size": "enterprise", "tagline": "Tax, accounting, and small business software"},
-    {"name": "HubSplat", "focus": "saas", "size": "growth", "tagline": "Marketing, sales, and CRM platform"},
+    {"name": "HubSplat", "focus": "saas", "size": "growth", "tagline": "Marketing, sales, and CRM platform", "niches": ["vertical_crm", "workflow_automation"]},
     {"name": "Palantar", "focus": "saas", "size": "growth", "tagline": "Big data analytics and intelligence"},
     {"name": "CrowdStrke", "focus": "dev_tools", "size": "growth", "tagline": "Cybersecurity and endpoint protection"},
 
-    {"name": "Datadawg", "focus": "dev_tools", "size": "growth", "tagline": "Cloud monitoring and observability"},
+    {"name": "Datadawg", "focus": "dev_tools", "size": "growth", "tagline": "Cloud monitoring and observability", "niches": ["api_observability"]},
     {"name": "Twilo", "focus": "dev_tools", "size": "growth", "tagline": "Communications APIs for developers"},
     {"name": "Zendeq", "focus": "saas", "size": "growth", "tagline": "Customer support and helpdesk software"},
     {"name": "GitLob", "focus": "dev_tools", "size": "growth", "tagline": "Code hosting and open source collaboration"},
@@ -64,15 +64,15 @@
     {"name": "Robinhuud", "focus": "consumer", "size": "growth", "tagline": "Commission-free stock trading app"},
 
     {"name": "Airbnd", "focus": "marketplace", "size": "enterprise", "tagline": "Short-term rentals and travel experiences"},
-    {"name": "DoorDsh", "focus": "marketplace", "size": "growth", "tagline": "Food delivery and local logistics"},
+    {"name": "DoorDsh", "focus": "marketplace", "size": "growth", "tagline": "Food delivery and local logistics", "niches": ["food_delivery_hub"]},
     {"name": "iBay", "focus": "marketplace", "size": "enterprise", "tagline": "Online auctions and peer-to-peer marketplace"},
     {"name": "Instacrt", "focus": "marketplace", "size": "growth", "tagline": "Grocery delivery and pickup"},
-    {"name": "Etsee", "focus": "marketplace", "size": "growth", "tagline": "Handmade and vintage marketplace"},
+    {"name": "Etsee", "focus": "marketplace", "size": "growth", "tagline": "Handmade and vintage marketplace", "niches": ["resale_goods"]},
 
     {"name": "Reddyt", "focus": "consumer", "size": "growth", "tagline": "Forums, communities, and internet culture"},
     {"name": "TokTik", "focus": "consumer", "size": "enterprise", "tagline": "Short-form video and viral content"},
     {"name": "Pintrest", "focus": "consumer", "size": "growth", "tagline": "Visual discovery and inspiration boards"},
-    {"name": "Disni+", "focus": "consumer", "size": "enterprise", "tagline": "Streaming, theme parks, and entertainment empire"},
+    {"name": "Disni+", "focus": "consumer", "size": "enterprise", "tagline": "Streaming, theme parks, and entertainment empire", "niches": ["streaming_service"]},
     {"name": "Walmrt", "focus": "marketplace", "size": "enterprise", "tagline": "Retail giant with a growing tech division"},
 
     {"name": "AMX", "focus": "dev_tools", "size": "enterprise", "tagline": "CPUs and GPUs for gamers and data centers"},
@@ -93,7 +93,7 @@
     {"name": "Midjournee", "focus": "consumer", "size": "startup", "tagline": "AI image generation from text prompts"},
     {"name": "Anyscal", "focus": "dev_tools", "size": "startup", "tagline": "Distributed computing for AI workloads"},
     {"name": "Plaid.io", "focus": "dev_tools", "size": "startup", "tagline": "Financial data API connecting banks to apps"},
-    {"name": "Caleendly", "focus": "saas", "size": "startup", "tagline": "Scheduling links that just work"},
+    {"name": "Caleendly", "focus": "saas", "size": "startup", "tagline": "Scheduling links that just work", "niches": ["workflow_automation"]},
     {"name": "Airtayble", "focus": "saas", "size": "startup", "tagline": "Spreadsheet meets database for teams"},
     {"name": "Webfloe", "focus": "dev_tools", "size": "startup", "tagline": "No-code website builder for designers"},
     {"name": "Discrd", "focus": "consumer", "size": "startup", "tagline": "Voice and text chat for communities"},

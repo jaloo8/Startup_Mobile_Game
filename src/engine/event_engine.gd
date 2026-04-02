@@ -5,6 +5,22 @@ extends RefCounted
 static var _all_events: Array[EventData] = []
 static var _cooldowns: Dictionary = {}  # event_id -> quarters_remaining
 
+const STAGE_ANY := "any"
+const NICHE_EVENT_CATEGORY_MULTS := {
+	"streaming_service": {"market": 1.35, "product": 1.15, "money": 0.92},
+	"fitness_companion": {"people": 1.18, "product": 1.12, "culture": 1.08},
+	"local_discovery": {"market": 1.28, "culture": 1.10, "product": 1.05},
+	"vertical_crm": {"money": 1.18, "product": 1.10, "market": 1.05},
+	"workflow_automation": {"product": 1.20, "people": 1.08},
+	"compliance_ops": {"money": 1.24, "market": 1.15, "culture": 1.10},
+	"home_services": {"market": 1.25, "people": 1.10, "money": 1.05},
+	"resale_goods": {"market": 1.24, "product": 1.10, "culture": 1.08},
+	"food_delivery_hub": {"market": 1.30, "product": 1.12, "money": 1.06},
+	"api_observability": {"product": 1.24, "culture": 1.10, "money": 1.04},
+	"ci_automation": {"product": 1.20, "people": 1.10},
+	"cloud_cost_tools": {"money": 1.28, "product": 1.18, "market": 1.06},
+}
+
 
 static func load_events(path: String) -> void:
 	_all_events.clear()
@@ -49,6 +65,7 @@ static func load_events(path: String) -> void:
 		ev.set_meta("category", entry.get("category", ""))
 		ev.set_meta("stage", entry.get("stage", "any"))
 		ev.set_meta("cooldown", int(entry.get("cooldown_quarters", 0)))
+		ev.set_meta("niches", entry.get("niches", []))
 
 		_all_events.append(ev)
 
@@ -68,6 +85,8 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 		if ev.one_time and ev.id in state.fired_one_time_events:
 			continue
 		if _cooldowns.has(ev.id) and _cooldowns[ev.id] > 0:
+			continue
+		if not _matches_stage(ev, context):
 			continue
 		if ev.is_eligible(context):
 			eligible.append(ev)
@@ -102,7 +121,7 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 	for _i in count:
 		if remaining.is_empty():
 			break
-		var chosen := _weighted_pick(remaining)
+		var chosen := _weighted_pick(remaining, context)
 		if chosen == null:
 			break
 		picked.append(chosen)
@@ -144,24 +163,73 @@ static func _tick_cooldowns() -> void:
 		_cooldowns.erase(eid)
 
 
-static func _weighted_pick(pool: Array[EventData]) -> EventData:
+static func _weighted_pick(pool: Array[EventData], context: Dictionary) -> EventData:
 	var total := 0.0
 	for ev in pool:
-		total += maxf(ev.weight, 0.01)
+		total += _effective_event_weight(ev, context)
 	if total <= 0.0:
 		return null
 	var roll := randf() * total
+	var fallback: EventData = null
 	for ev in pool:
-		roll -= maxf(ev.weight, 0.01)
+		var w: float = _effective_event_weight(ev, context)
+		if w <= 0.0:
+			continue
+		if fallback == null:
+			fallback = ev
+		roll -= w
 		if roll <= 0.0:
 			return ev
-	return pool.back()
+	return fallback
+
+
+static func _matches_stage(ev: EventData, context: Dictionary) -> bool:
+	var stage: String = str(ev.get_meta("stage", STAGE_ANY)).strip_edges().to_lower()
+	if stage.is_empty() or stage == STAGE_ANY:
+		return true
+	return stage == _company_stage(context)
+
+
+static func _company_stage(context: Dictionary) -> String:
+	var total_q: int = int(context.get("total_quarters", 0))
+	var users: int = int(context.get("users", 0))
+	var valuation: float = float(context.get("valuation", 0.0))
+	if total_q >= 20 or users >= 80_000 or valuation >= 50_000_000.0:
+		return "late"
+	if total_q >= 6 or users >= 2_000 or valuation >= 2_000_000.0:
+		return "growth"
+	return "early"
+
+
+static func _effective_event_weight(ev: EventData, context: Dictionary) -> float:
+	var weight: float = maxf(ev.weight, 0.01)
+	var niche_id: String = str(context.get("niche_id", "")).strip_edges()
+	if not niche_id.is_empty():
+		var category: String = str(ev.get_meta("category", "")).to_lower()
+		var cat_mults: Dictionary = NICHE_EVENT_CATEGORY_MULTS.get(niche_id, {})
+		if not cat_mults.is_empty():
+			weight *= float(cat_mults.get(category, 1.0))
+
+		var raw_niches: Array = ev.get_meta("niches", []) if ev.has_meta("niches") else []
+		if not raw_niches.is_empty():
+			var niche_match := false
+			for raw in raw_niches:
+				if str(raw).strip_edges() == niche_id:
+					niche_match = true
+					break
+			weight *= 1.35 if niche_match else 0.35
+
+	var stage: String = str(ev.get_meta("stage", STAGE_ANY)).strip_edges().to_lower()
+	if stage == _company_stage(context):
+		weight *= 1.12
+	return maxf(weight, 0.01)
 
 
 static func _build_context(state: Node) -> Dictionary:
 	return {
 		"quarter": state.current_quarter,
 		"year": state.current_year,
+		"total_quarters": state.total_quarters_elapsed(),
 		"employee_count": state.employees.size(),
 		"cash": state.company.cash,
 		"users": state.product.users,
@@ -171,6 +239,7 @@ static func _build_context(state: Node) -> Dictionary:
 		"bugs": state.product.bugs,
 		"stability": state.product.stability,
 		"company_type": state.company.type,
+		"niche_id": state.company.niche_id,
 		"valuation": state.company.valuation,
 		"features_shipped": state.product.feature_count(),
 		"revenue": state.financials.revenue,

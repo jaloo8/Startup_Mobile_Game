@@ -73,6 +73,7 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Core v1 polish pass (niche + personality depth)** — Added niche-aware event weighting (including stage awareness), weighted niche-aware headlines (with optional `niches` / `company_types` filters), niche-biased competitor seeding, and team personality composition effects on collaboration + morale.
 - **Continue Last Run shortcut** — Main menu now includes a `Continue Last Run` button that loads the most recently modified valid save slot directly into gameplay, with safe fallback to the save-slot screen.
 - **Quit/autosave reliability pass** — Added lifecycle safety autosave hooks in `GameState` (close request + app pause/focus-out) and a quit-path save from main menu, so runs are less likely to lose progress when exiting.
 - **Product prototype preview foundation** — Product screen now has a data-driven `Prototype Concept` switcher (backed by `src/data/product_preview_prototypes.json`) so future visual concept ideas can be previewed quickly without additional code changes.

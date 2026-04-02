@@ -59,6 +59,7 @@
     "title": "Cloud Bill Shock",
     "category": "product",
     "stage": "any",
+    "niches": ["api_observability", "cloud_cost_tools", "ci_automation"],
     "description_template": "An unoptimized database query has been running in production for weeks. Your cloud bill doubled this quarter. That's money you didn't budget for.",
     "variations": [
       "Your CFO (you — there is no CFO) opens the AWS console and nearly spills coffee on the keyboard. Some engineer left a debug loop running in production. The bill is double what you budgeted.",
@@ -102,6 +103,7 @@
     "title": "Going Viral",
     "category": "market",
     "stage": "growth",
+    "niches": ["streaming_service", "local_discovery"],
     "description_template": "Someone posted a TikTok about {company_name} and it's blowing up. +50K signups in 48 hours. Can your infrastructure handle it?",
     "variations": [
       "Your phone won't stop buzzing. A creator with 2M followers just posted a video using {company_name} and it has 500K views in 3 hours. Your signup endpoint is already responding slowly.",
@@ -1149,6 +1151,7 @@
     "title": "App Store Rejection",
     "category": "product",
     "stage": "any",
+    "niches": ["streaming_service", "fitness_companion", "local_discovery"],
     "description_template": "Your latest update was rejected by the app store. The reason is vague: 'Guideline 4.2 — Minimum Functionality.' Your team spent three weeks on this update.",
     "variations": [
       "Rejection notice: 'Your app does not comply with Guideline 4.2.' No further explanation. Your mobile developer is staring at the screen trying to decode what Apple wants.",
@@ -1301,6 +1304,7 @@
     "title": "Big Fish, Big Discount",
     "category": "money",
     "stage": "growth",
+    "niches": ["vertical_crm", "workflow_automation", "compliance_ops"],
     "description_template": "A Fortune 500 company wants to use {company_name}. But they want a 40% volume discount on an annual contract. It's a lot of revenue — at a lot less margin.",
     "variations": [
       "Their procurement team sends a 47-page vendor agreement. Buried in it: 40% discount, net-90 payment terms, and a requirement for SOC 2 compliance. The deal is worth six figures.",

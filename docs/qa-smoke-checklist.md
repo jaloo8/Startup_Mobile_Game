@@ -109,6 +109,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 6.5 | Events respect eligibility filters | Company type, quarter, valuation gates work | `event_engine.gd` → eligibility logic |
 | 6.6 | Event frequency scales with valuation | More events as company grows, not overwhelming early | `event_engine.gd` |
 | 6.7 | Events are logged in event_log | Event history accessible | `game_state.gd` → `append_event_log()` |
+| 6.8 | Niche-aware event weighting feels relevant | Selected niche surfaces more fitting event categories over multiple runs | `event_engine.gd` → `_effective_event_weight()` |
 
 ---
 
@@ -119,6 +120,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 7.1 | Headlines generate without template errors | No `{variable}` placeholders visible in rendered text | `src/engine/headline_engine.gd`, `src/engine/template_engine.gd` |
 | 7.2 | Economy-appropriate headlines selected | Bull market = optimistic, Bear = pessimistic | `headline_engine.gd`, `src/data/headlines.json` |
 | 7.3 | Headlines reference company context | Company name, user count, etc. substituted correctly | `template_engine.gd` |
+| 7.4 | Niche-aware weighted headlines appear | Niche-tagged/keyword-relevant headlines show up more often for current niche | `headline_engine.gd` → `_template_weight()` |
 
 ---
 
@@ -209,6 +211,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 12.3 | Economy state transitions | Bull → Neutral → Bear based on events | `src/models/market_data.gd`, `simulation_engine.gd` |
 | 12.4 | Economy affects user growth and fundraising | Bull = easier growth, Bear = harder | `simulation_engine.gd` → economy multipliers |
 | 12.5 | Economy indicator visible on dashboard | Shows current state | `quarter_dashboard.gd` |
+| 12.6 | Starting competitors are niche-biased | Initial rival pool includes same-focus and niche-relevant competitors when available | `competitor_ai.gd` → `generate_starting_competitors()` |
 
 ---
 
