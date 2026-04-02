@@ -26,10 +26,43 @@ const DIFFICULTY_DESCS := {
 	1: "Normal — Realistic startup economics. Tight budget, real competition. Recommended for most players.",
 	2: "Hardcore — Minimal runway, aggressive competitors, realistic failure rates. For experienced players.",
 }
+const START_SCENARIOS := [
+	{
+		"id": "garage",
+		"label": "Garage Bootstrapper ($20K)",
+		"desc": "Classic zero-to-one path. Tiny team, every decision matters.",
+	},
+	{
+		"id": "accelerator",
+		"label": "Accelerator Graduate ($125K)",
+		"desc": "Small cushion and momentum, still very hands-on and scrappy.",
+	},
+	{
+		"id": "spinoff",
+		"label": "Corporate Spinoff ($500K)",
+		"desc": "Faster start with a bit more structure and room to experiment.",
+	},
+	{
+		"id": "vc_backed",
+		"label": "VC-Backed ($2M)",
+		"desc": "Strong runway, investor pressure, and higher growth expectations.",
+	},
+	{
+		"id": "growth_operator",
+		"label": "Growth Operator ($8M, mid-size team)",
+		"desc": "Jump into an active scale-up with a functional org and existing users.",
+	},
+	{
+		"id": "scale_chief",
+		"label": "Scale Chief ($30M, large team)",
+		"desc": "Start as a large company where role mesh and org discipline matter immediately.",
+	},
+]
 
 # Dynamically created description labels
 var _type_hint_label: Label
 var _difficulty_desc_label: Label
+var _scenario_desc_label: Label
 
 
 func _ready() -> void:
@@ -44,14 +77,17 @@ func _ready() -> void:
 	type_selector.item_selected.connect(_on_type_changed)
 	niche_selector.item_selected.connect(_on_niche_changed)
 	difficulty_selector.item_selected.connect(_on_difficulty_changed)
+	scenario_selector.item_selected.connect(_on_scenario_changed)
 
 	_build_type_hint_label()
 	_build_difficulty_desc_label()
+	_build_scenario_desc_label()
 
 	_on_background_changed(0)
 	_on_type_changed(1)         # Consumer App is the default (index 1)
 	_on_niche_changed(0)
 	_on_difficulty_changed(1)   # Normal is the default
+	_on_scenario_changed(0)
 
 
 func _load_type_illustration(type_id: int) -> void:
@@ -90,6 +126,17 @@ func _build_difficulty_desc_label() -> void:
 	if parent:
 		parent.add_child(_difficulty_desc_label)
 		parent.move_child(_difficulty_desc_label, difficulty_selector.get_index() + 1)
+
+
+func _build_scenario_desc_label() -> void:
+	_scenario_desc_label = Label.new()
+	_scenario_desc_label.add_theme_font_size_override("font_size", 12)
+	_scenario_desc_label.add_theme_color_override("font_color", Color(0.58, 0.78, 0.93))
+	_scenario_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var parent := scenario_selector.get_parent()
+	if parent:
+		parent.add_child(_scenario_desc_label)
+		parent.move_child(_scenario_desc_label, scenario_selector.get_index() + 1)
 
 
 func _on_type_changed(_idx: int) -> void:
@@ -174,6 +221,16 @@ func _on_difficulty_changed(idx: int) -> void:
 	_difficulty_desc_label.text = DIFFICULTY_DESCS.get(idx, "")
 
 
+func _on_scenario_changed(_idx: int) -> void:
+	if _scenario_desc_label == null:
+		return
+	if scenario_selector == null or scenario_selector.selected < 0:
+		_scenario_desc_label.text = ""
+		return
+	var safe_idx: int = clampi(scenario_selector.selected, 0, START_SCENARIOS.size() - 1)
+	_scenario_desc_label.text = str(START_SCENARIOS[safe_idx].get("desc", ""))
+
+
 func _populate_type_selector() -> void:
 	type_selector.clear()
 	type_selector.add_item("SaaS B2B Tool", CompanyData.CompanyType.SAAS)
@@ -194,10 +251,13 @@ func _populate_difficulty_selector() -> void:
 
 func _populate_scenario_selector() -> void:
 	scenario_selector.clear()
-	scenario_selector.add_item("Garage Bootstrapper ($20K)")
-	scenario_selector.add_item("Accelerator Graduate ($125K)")
-	scenario_selector.add_item("Corporate Spinoff ($500K)")
-	scenario_selector.add_item("VC-Backed ($2M)")
+	for row in START_SCENARIOS:
+		var label: String = str(row.get("label", "Scenario"))
+		var sid: String = str(row.get("id", "garage"))
+		scenario_selector.add_item(label)
+		var idx: int = scenario_selector.item_count - 1
+		scenario_selector.set_item_metadata(idx, sid)
+	scenario_selector.select(0)
 
 
 func _populate_background_selector() -> void:
@@ -228,11 +288,16 @@ func _on_start() -> void:
 		start_btn.disabled = false
 		return
 
-	var scenarios := ["garage", "accelerator", "spinoff", "vc_backed"]
 	var difficulties := ["sandbox", "normal", "hardcore"]
 
 	var diff_idx := clampi(difficulty_selector.selected, 0, difficulties.size() - 1)
-	var scen_idx := clampi(scenario_selector.selected, 0, scenarios.size() - 1)
+	var scen_idx := clampi(scenario_selector.selected, 0, START_SCENARIOS.size() - 1)
+	var scenario_id: String = "garage"
+	var scenario_meta = scenario_selector.get_item_metadata(scen_idx)
+	if scenario_meta != null:
+		scenario_id = str(scenario_meta).strip_edges()
+	if scenario_id.is_empty():
+		scenario_id = str(START_SCENARIOS[scen_idx].get("id", "garage"))
 
 	var bg_id: int = background_selector.get_selected_id()
 	var niche_id := ""
@@ -246,7 +311,7 @@ func _on_start() -> void:
 		"type": type_selector.get_selected_id(),
 		"niche_id": niche_id,
 		"difficulty": difficulties[diff_idx],
-		"scenario": scenarios[scen_idx],
+		"scenario": scenario_id,
 		"founder_background": bg_id,
 	}
 
@@ -260,6 +325,7 @@ func _on_start() -> void:
 
 	GameState.new_game(config)
 	EventEngine.load_events("res://src/data/events.json")
+	WorldEventEngine.load_events("res://src/data/world_events.json")
 	ProductData.load_feature_catalog("res://src/data/features.json")
 	HeadlineEngine.load_headlines("res://src/data/headlines.json")
 	GameState.market.competitors = CompetitorAI.generate_starting_competitors(

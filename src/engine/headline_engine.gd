@@ -136,23 +136,23 @@ static func _matches_filters(t: Dictionary, ctx: Dictionary) -> bool:
 
 
 static func _weighted_template_pick(pool: Array[Dictionary], ctx: Dictionary) -> Dictionary:
+	var candidates: Array[Dictionary] = []
+	var cumulative: Array[float] = []
 	var total := 0.0
 	for t in pool:
-		total += _template_weight(t, ctx)
-	if total <= 0.0:
+		var weight: float = _template_weight(t, ctx)
+		if weight <= 0.0:
+			continue
+		total += weight
+		candidates.append(t)
+		cumulative.append(total)
+	if candidates.is_empty() or total <= 0.0:
 		return {}
 	var roll := randf() * total
-	var fallback: Dictionary = {}
-	for t in pool:
-		var w: float = _template_weight(t, ctx)
-		if w <= 0.0:
-			continue
-		if fallback.is_empty():
-			fallback = t
-		roll -= w
-		if roll <= 0.0:
-			return t
-	return fallback
+	for i in range(candidates.size()):
+		if roll <= cumulative[i]:
+			return candidates[i]
+	return candidates.back()
 
 
 static func _template_weight(template_row: Dictionary, ctx: Dictionary) -> float:
@@ -209,6 +209,7 @@ static func _build_context(state: Node) -> Dictionary:
 		"valuation": state.company.valuation,
 		"year": state.current_year,
 		"quarter": state.current_quarter,
+		"world_event_title": state.active_world_event_title if int(state.active_world_event_quarters_left) > 0 else "steady conditions",
 	}
 
 

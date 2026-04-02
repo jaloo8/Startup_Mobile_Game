@@ -44,6 +44,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 2.8 | Feature catalog loads for selected type | `features.json` parsed, 10 features available per type | `src/models/product_data.gd`, `src/data/features.json` |
 | 2.9 | Events catalog loads | `events.json` parsed without errors | `src/engine/event_engine.gd`, `src/data/events.json` |
 | 2.10 | Competitors load for selected type | Rival companies initialized from `competitors.json` | `src/engine/competitor_ai.gd`, `src/data/competitors.json` |
+| 2.11 | Mid/large scenario presets start correctly | `Growth Operator` and `Scale Chief` start with seeded teams, users, and funding context (no crashes, values within expected ranges) | `new_game.gd`, `game_state.gd` → `_apply_starting_scenario()`, `_seed_starting_company_state()` |
 
 ---
 
@@ -85,6 +86,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 4.18 | Dashboard hosting strip shows workload profile | Hosting status includes workload profile text and pressure warning when run becomes scale/data-center heavy | `quarter_dashboard.gd` → `_refresh_hosting_status()` |
 | 4.19 | Quarter transition FX + SFX triggers on advance | Advancing quarter plays sweep/tint/period-label transition and emits start/resolve SFX (asset-based or synth fallback) without blocking simulation flow | `quarter_dashboard.gd` → `_play_quarter_transition_placeholder()`, `_play_transition_sfx()` |
 | 4.20 | Key metric info icon explains DAU/MAU and peers | Key metric title shows `ⓘ`; click opens glossary and hover shows tooltip for current metric (MRR, DAU/MAU, GMV, API Calls, Valuation) | `quarter_dashboard.gd` → `_refresh_key_metric()`, `_on_key_metric_info_pressed()` |
+| 4.21 | Dashboard economy strip shows active world pulse | When a world event is active, `Market:` line appends `World: <event> (NQ left)` and color tone reflects tailwind/headwind | `quarter_dashboard.gd` → `_refresh_economy()`, `game_state.gd` → `active_world_event_brief()` |
 
 ---
 
@@ -111,6 +113,9 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 5.17 | Hosting event logs appear when stressed | Quarter log can show hosting incident/overage entries under load | `simulation_engine.gd` → `_calculate_costs()` |
 | 5.18 | Hosting upgrades affect lane capacity and cost | Purchasing lane upgrades/optimization increases effective capacity and raises recurring hosting cost | `simulation_engine.gd` → `_simulate_hosting()`, `logistics_overview.gd` |
 | 5.19 | Workload-aware hosting demand reacts to product direction | AI/streaming/marketplace/API/realtime feature mixes change lane demand multipliers and can escalate data-center pressure tier | `simulation_engine.gd` → `_hosting_workload_profile()`, `_simulate_hosting()` |
+| 5.20 | Responsibility impact scales with company maturity | Early teams can still ship with shared hats, but growth/scale runs without Bugs/Debt/Infra/R&D coverage accumulate visible operational pressure (bugs, debt, stability/UX drag, churn) | `simulation_engine.gd` → `_responsibility_profile()`, `_apply_operational_pressure()` |
+| 5.21 | Role-mesh bonuses reward balanced coverage | Balanced lane staffing improves delivery quality/retention/ops pressure versus same-headcount single-lane teams | `simulation_engine.gd` → `_responsibility_mesh()`, `_apply_work_output()` |
+| 5.22 | World pulse modifiers affect core simulation | Active world event changes growth/churn/revenue/cost/fundraising behavior for multiple quarters, then expires cleanly | `world_event_engine.gd`, `simulation_engine.gd`, `fundraising_engine.gd`, `game_state.gd` |
 
 ---
 
@@ -179,6 +184,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 9.10 | No duplicate UIDs in employee list | Dedup on hire and deserialize | `game_state.gd` → `_has_employee_uid()` |
 | 9.11 | Employment type + personality visible | Team/candidate cards show type + trait labels | `employee_list.gd`, `employee_data.gd` |
 | 9.12 | Employee detail screen opens and renders history | `Details` button opens profile with trajectory chart + history rows | `employee_list.gd` → `_on_view_details()`, `employee_detail.gd` |
+| 9.13 | People screen responsibility hint adapts by stage | Early shows shared-hat guidance; growth/scale warns when specialization lanes have no owner | `employee_list.gd` → `_refresh_allocation_hint()`, `_assignment_description_for_stage()` |
 
 ---
 
@@ -251,6 +257,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 12.4 | Economy affects user growth and fundraising | Bull = easier growth, Bear = harder | `simulation_engine.gd` → economy multipliers |
 | 12.5 | Economy indicator visible on dashboard | Shows current state | `quarter_dashboard.gd` |
 | 12.6 | Starting competitors are niche-biased | Initial rival pool includes same-focus and niche-relevant competitors when available | `competitor_ai.gd` → `generate_starting_competitors()` |
+| 12.7 | World events roll + persist as macro conditions | Multi-quarter market pulses activate with weighted filters and log start/end entries | `world_event_engine.gd`, `game_state.gd` → `event_log` |
 
 ---
 
@@ -335,6 +342,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 17.13 | Load after version mismatch: clean error | Version != 1 → error, no crash | `game_state.gd` → `_deserialize()` version check |
 | 17.14 | Save round-trip: all state preserved | Save → quit → load → every field matches | Full `_serialize()` / `_deserialize()` |
 | 17.15 | Quit from main menu preserves latest run | Return to menu from dashboard, press Quit, relaunch, load same slot successfully | `main_menu.gd` → `_on_quit()`, `game_state.gd` → `autosave_now()` |
+| 17.16 | Save payload remains compact over long sessions | After 60+ quarters, serialized save keeps only compact windows for `history` and `event_log` (no unbounded growth) | `game_state.gd` → `_compact_history_for_save()`, `_compact_event_log_for_save()` |
 
 ---
 
@@ -447,6 +455,7 @@ These tests require deploying to a device or emulator, not just the editor.
 | 24.8 | `names.json` exists (future use) | Name pools available | `src/data/names.json` |
 | 24.9 | UI button wiring contracts pass | Critical button handlers and scene button nodes exist for main flows | `tools/backend_smoke.py` → `validate_button_script_contracts()`, `validate_button_scene_contracts()` |
 | 24.10 | `product_preview_prototypes.json` validates | Prototype concept names/descriptions/preview modes are valid for each company type | `src/data/product_preview_prototypes.json`, `product_overview.gd`, `tools/backend_smoke.py` |
+| 24.11 | `world_events.json` validates | World event IDs/effects/durations/filter fields pass backend smoke schema checks | `src/data/world_events.json`, `world_event_engine.gd`, `tools/backend_smoke.py` |
 
 ---
 
@@ -484,4 +493,4 @@ Full checklist: ~35 minutes in-editor, plus ~15 minutes on-device for Section 23
 
 ---
 
-*Last updated: covers all 6 autoloads, 13 UI screens, 10 engines, 6 data models, 7 JSON files, mobile QA, and pre-release gates.*
+*Last updated: covers all 6 autoloads, 13 UI screens, 11 engines, 6 data models, 8 JSON files, mobile QA, and pre-release gates.*

@@ -13,6 +13,9 @@ static func generate(state: Node) -> Array[String]:
 	bullets.append(_product_line(state))
 	bullets.append(_user_line(state, history))
 	bullets.append(_economy_line(state))
+	var world_line := _world_event_line(state)
+	if not world_line.is_empty():
+		bullets.append(world_line)
 	bullets.append(_hosting_line(state))
 
 	var energy_line := _energy_line(state)
@@ -95,7 +98,44 @@ static func _product_line(state: Node) -> String:
 	elif td > 40:
 		parts.append("tech debt building up")
 
+	var stage: String = _responsibility_stage(state)
+	if stage != "early":
+		var missing: Array[String] = []
+		if _assignment_count(state, EmployeeData.Assignment.BUGS) == 0:
+			missing.append("Bug Fixes")
+		if _assignment_count(state, EmployeeData.Assignment.TECH_DEBT) == 0:
+			missing.append("Tech Debt")
+		if _assignment_count(state, EmployeeData.Assignment.INFRA) == 0:
+			missing.append("Infrastructure")
+		if _assignment_count(state, EmployeeData.Assignment.RND) == 0:
+			missing.append("R&D")
+		if not missing.is_empty():
+			parts.append("specialization gap: no coverage in %s" % ", ".join(missing))
+		else:
+			parts.append("roles are meshing well — balanced coverage is protecting quality and retention")
+
 	return ". ".join(parts)
+
+
+static func _assignment_count(state: Node, target: EmployeeData.Assignment) -> int:
+	var count := 0
+	for emp: EmployeeData in state.employees:
+		if emp.assignment == target:
+			count += 1
+	return count
+
+
+static func _responsibility_stage(state: Node) -> String:
+	var team_size: int = state.employees.size()
+	var elapsed_q: int = 0
+	if state.has_method("total_quarters_elapsed"):
+		elapsed_q = int(state.total_quarters_elapsed())
+	var users: int = state.product.users
+	if team_size <= 4 and elapsed_q < 8:
+		return "early"
+	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
+		return "growth"
+	return "scale"
 
 
 static func _user_line(state: Node, history: Array[Dictionary]) -> String:
@@ -120,6 +160,29 @@ static func _economy_line(state: Node) -> String:
 			return "Markets are rough — growth is harder and VCs are cautious"
 		_:
 			return "The market is steady — no strong tailwinds or headwinds"
+
+
+static func _world_event_line(state: Node) -> String:
+	if int(state.active_world_event_quarters_left) <= 0:
+		return ""
+	var title := str(state.active_world_event_title).strip_edges()
+	if title.is_empty():
+		return ""
+	var growth_mult := 1.0
+	var cost_mult := 1.0
+	var fundraise_mult := 1.0
+	if state.has_method("world_event_mult"):
+		growth_mult = float(state.world_event_mult("growth_mult", 1.0))
+		cost_mult = float(state.world_event_mult("cost_mult", 1.0))
+		fundraise_mult = float(state.world_event_mult("fundraise_amount_mult", 1.0))
+	var tailwind := growth_mult > 1.03 and cost_mult <= 1.03 and fundraise_mult >= 1.0
+	var headwind := growth_mult < 0.97 or cost_mult > 1.03 or fundraise_mult < 0.97
+	var tone := "mixed impact"
+	if tailwind:
+		tone = "tailwind"
+	elif headwind:
+		tone = "headwind"
+	return "World pulse: %s (%dQ left) — %s" % [title, int(state.active_world_event_quarters_left), tone]
 
 
 static func _hosting_line(state: Node) -> String:

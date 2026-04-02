@@ -68,11 +68,16 @@ startup_mobile_game/
 - **Roadmap** — [`docs/roadmap.md`](docs/roadmap.md) — Development phases, priority checklist, workflow tips
 - **Monetization** — [`docs/monetization.md`](docs/monetization.md) — DLC strategy, pricing, release cadence, technical architecture for expansion packs
 - **Difficulty playtest matrix** — [`docs/difficulty-playtest-matrix.md`](docs/difficulty-playtest-matrix.md) — Manual run capture template for 12-run balance validation (all types x all difficulties)
+- **Reference tone guardrails** — [`docs/reference-tone-guardrails.md`](docs/reference-tone-guardrails.md) — Writing safety rules for parody/world-event content
 
 ---
 
 ## Recent changes
 
+- **Role mesh + stage-aware responsibilities** — Work allocation now follows startup maturity: early teams stay cross-functional (non-feature lanes still provide partial feature support), while growth/scale runs require specialization. Dedicated `Bugs`, `Tech Debt`, `Infrastructure`, and `R&D` assignments now have stronger impact, and cross-role mesh bonuses reward balanced teams with better quality, steadier retention, and lower operational drag.
+- **Expanded start scenarios** — New game now includes jump-in presets beyond bootstrap (`Growth Operator`, `Scale Chief`) so players can run mid-size or large companies immediately, each seeded with a realistic team mix, product state, and funding context.
+- **World events system (multi-quarter macro cycles)** — Added `WorldEventEngine` + `src/data/world_events.json` with persistent market pulses (risk-off cycles, supply bottlenecks, regulation waves, creator booms, capital reopenings). Active world events now influence growth/churn/revenue/costs/fundraising, persist through save/load, and surface in dashboard + quarterly report.
+- **Runtime + storage optimization pass** — Event/headline/world-event weighted picks now avoid duplicate weight computation, founder-energy quit counting now scans only current-quarter tail events, save serialization stores compact windows for `history`/`event_log`, and UI cleanup hooks were added for animation-heavy components to reduce lingering tween state on scene transitions.
 - **Key metric info clarity (DAU/MAU and peers)** — Dashboard `Key Metric` title is now an info button with click + hover glossary behavior; metric help text switches by company type (`MRR`, `DAU/MAU`, `GMV`, `API Calls`, `Valuation`) so players can quickly understand what each metric means.
 - **Product page overlap/readability fix** — Bottom-of-page roadmap + ship-celebration widgets now render outside the shipped-features scroll region, and build/ETA text wrapping was tightened to prevent overlap while quarter trends update.
 - **Hosting capacity actions (v2)** — Logistics now includes explicit player-facing infra upgrades: `Scale Web`, `Scale Cache`, `Scale Data`, and `Optimize request pipeline`, each with level caps, escalating one-time purchase costs, autosave hooks, and event-log traces.

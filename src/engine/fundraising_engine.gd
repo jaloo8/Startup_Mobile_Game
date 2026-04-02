@@ -124,6 +124,11 @@ static func generate_offer(state: Node) -> Dictionary:
 		# - threshold shift makes fundraising acceptance easier/harder.
 		amount_mult = clampf(float(state.difficulty_mult("fundraise_amount_mult")), 0.7, 1.3)
 		threshold_shift = clampf(float(state.difficulty_mult("fundraise_threshold_shift")), -0.15, 0.15)
+	if state.has_method("world_event_mult"):
+		# Macro cycles influence both check sizes and investor selectiveness.
+		var world_fundraise_mult := clampf(float(state.world_event_mult("fundraise_amount_mult", 1.0)), 0.6, 1.5)
+		amount_mult *= world_fundraise_mult
+		threshold_shift += clampf((1.0 - world_fundraise_mult) * 0.16, -0.10, 0.10)
 
 	var firm: Dictionary = _pick_firm(state, round_type, quality_signal)
 	var tier: String = firm.get("tier", "mid")

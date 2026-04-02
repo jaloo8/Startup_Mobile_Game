@@ -235,6 +235,8 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Advance quarter** — 12-step simulation engine (work output, growth, revenue, costs, competitors, events, morale, quits, skill growth, clamping)
 - [x] **Employee system** — Generate candidates, hire, view, fire, assign work categories, skill growth, quit mechanic
 - [x] **Work allocation** — Assign employees to Features/Bugs/Tech Debt/Infra/R&D, see output each quarter
+- [x] **Stage-aware responsibilities** — Early teams behave cross-functionally (shared hats + partial feature support), while growth/scale runs require dedicated ownership across Bugs/Tech Debt/Infra/R&D to avoid hidden operational drag
+- [x] **Role-mesh bonuses** — Balanced lane coverage now creates explicit cross-functional synergy (faster cleaner shipping, stronger reliability/retention, reduced operational pressure), so every assignment can move core outcomes
 - [x] **Product metrics** — Feature shipping, bugs, tech debt, stability, UX score, churn rate affected by work
 - [x] **Basic finances** — Burn rate (salaries + infra + office), revenue (4 models), cash, runway display
 - [x] **Game over** — Bankruptcy and dead product conditions
@@ -261,6 +263,7 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Nav tabs to top** — People / Product / Finances / Market row repositioned to top of dashboard in `_ready()`
 - [x] **Valuation-based event pacing** — Max 1 event/quarter under $500K valuation, 2 under $2M, 3 above; event context now includes `valuation`, `features_shipped`, `revenue`
 - [x] **New game UX** — Consumer App default + "★ Recommended" badge; plain-English descriptions per company type and difficulty; difficulty description updates live
+- [x] **Preset scenario ladder** — New game now supports bootstrap + mid/large-company starts (`Garage`, `Accelerator`, `Spinoff`, `VC-Backed`, `Growth Operator`, `Scale Chief`) for players who want different company scale entry points
 - [x] **Employee hire badge** — Pop-in "Welcome to the Team" modal immediately after hiring; shows avatar, name, title, Skill/Morale/Speed stats, employee number, and hire date; spring scale-in animation; transitions to assignment prompt
 - [x] **Visual asset set** — 8 Pixar-inspired employee avatars (deterministic hash assignment), 4 office banners (garage → co-working → small office → HQ), 4 product mockup illustrations per company type, 5 assignment-category icons, app icon; all loaded dynamically and displayed on relevant screens
 - [x] **Deep interviews system** — Candidate interviews now require picking an interviewer (Founder / VP / Director / Manager / Engineer tiers):
@@ -381,6 +384,7 @@ Do these in order. Each one should be playable before starting the next.
 - [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; added `docs/difficulty-playtest-matrix.md` for structured 12-run validation, but full empirical pass is still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
 - [ ] **Sound effects** — Minimal UI sounds (optional)
+- [ ] **Dynamic org structures (large companies)** — Introduce team pods / function leads once company reaches scale thresholds, with clearer inter-team mesh bonuses and delegation tradeoffs
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
 - [~] **Office worker ambient animation** — Dashboard office banner now uses desk-aware pseudo-sprite workers (head/body badges), monitor+desk placement, and office customization states (per office tier + company accent); fully custom animated sprite art pipeline is still outstanding.
 - [~] **Product visual prototype lab** — Product screen now includes a data-driven `Prototype Concept` switcher backed by `src/data/product_preview_prototypes.json` so new concept ideas can be added without code changes; concept-specific art variants and per-concept layout overrides are still pending
@@ -416,6 +420,9 @@ Do these in order. Each one should be playable before starting the next.
   - Monica parody — VC partner contact who gives better fundraising intel and friendlier term sheets
   - Big Head parody — low skill but incredibly lucky, stumbles into success, cheap to hire but unpredictable output
   - Each character triggers unique events and dialogue when on your team or encountered
+- [~] **Pop-culture parody reference pack** — First pass shipped via `src/data/world_events.json` (`Founder Docuseries Cycle`, `Boardroom Memo Leak Cycle`, etc.) to add subtle startup-media tone without direct quotes/names; broader pass across `events.json`, `headlines.json`, and rival bios is still pending.
+- [~] **Grounded world-events layer (historical + current-event inspired)** — New data-driven `WorldEventEngine` + `world_events.json` adds multi-quarter macro cycles (risk-off periods, rate shocks, supply bottlenecks, regulation waves, capital reopenings) with gameplay effects; scenario breadth and deeper economy coupling are still pending.
+- [x] **Reference tone + safety guardrails** — Added `docs/reference-tone-guardrails.md` with practical writing rules (neutral tone, no real-person defamation, no copyrighted dialogue, no graphic conflict framing) for future parody/event content.
 - [ ] **Expand competitor roster** — Add more parody companies per category; flesh out each with multiple product lines, unique behaviors, and market moves (acquisitions, pivots, IPOs)
 - [ ] **Competitor product depth** — Each major competitor can have multiple products (e.g., Googlr has search, cloud, ads, hardware) that affect different market segments
 - [ ] **Community mod packs** — Ship a companion "real names" JSON; build a simple import flow (paste URL or pick file) for user-created competitor packs

@@ -182,6 +182,7 @@ func _on_load(slot_name: String) -> void:
 	GameState.current_slot = slot_name
 	if GameState.load_game(slot_name):
 		EventEngine.load_events("res://src/data/events.json")
+		WorldEventEngine.load_events("res://src/data/world_events.json")
 		ProductData.load_feature_catalog("res://src/data/features.json")
 		CompanyData.load_niche_catalog()
 		HeadlineEngine.load_headlines("res://src/data/headlines.json")

@@ -187,6 +187,38 @@ const GROWTH_BALANCE_BY_TYPE := {
 	},
 }
 
+# Team responsibility model:
+# - Early: small crews share hats, and non-feature lanes still help feature momentum.
+# - Growth/Scale: specialization becomes critical and neglected lanes add real pressure.
+const RESPONSIBILITY_PROFILE := {
+	"early": {
+		"specialization_strength": 0.35,
+		"cross_support_features_share": 0.30,
+		"feature_focus_mult": 1.08,
+		"lane_effect_mult": 0.86,
+		"ops_pressure_mult": 0.45,
+	},
+	"growth": {
+		"specialization_strength": 0.72,
+		"cross_support_features_share": 0.12,
+		"feature_focus_mult": 1.0,
+		"lane_effect_mult": 1.08,
+		"ops_pressure_mult": 1.0,
+	},
+	"scale": {
+		"specialization_strength": 1.0,
+		"cross_support_features_share": 0.04,
+		"feature_focus_mult": 0.93,
+		"lane_effect_mult": 1.30,
+		"ops_pressure_mult": 1.42,
+	},
+}
+const RESPONSIBILITY_MESH_STAGE_MULT := {
+	"early": 0.55,
+	"growth": 1.0,
+	"scale": 1.25,
+}
+
 static var _feature_names := [
 	"User Dashboard", "Search", "Notifications", "Analytics",
 	"API v2", "Mobile View", "Export", "Integrations",
@@ -200,6 +232,7 @@ static func _safe_dict(value) -> Dictionary:
 
 
 static func process_quarter(state: Node) -> void:
+	WorldEventEngine.resolve_quarter(state)
 	_apply_work_output(state)
 	_update_product_metrics(state)
 	_calculate_user_growth(state)
@@ -226,12 +259,168 @@ static func _growth_balance(company_type: int) -> Dictionary:
 	return cfg
 
 
+static func _world_mult(state: Node, key: String, default_value: float = 1.0) -> float:
+	if state != null and state.has_method("world_event_mult"):
+		return clampf(float(state.world_event_mult(key, default_value)), 0.25, 3.0)
+	return default_value
+
+
+static func _responsibility_stage(state: Node) -> String:
+	var team_size: int = state.employees.size()
+	var elapsed_q: int = 0
+	if state.has_method("total_quarters_elapsed"):
+		elapsed_q = int(state.total_quarters_elapsed())
+	var users: int = 0
+	if state.product != null:
+		users = int(state.product.users)
+	if team_size <= 4 and elapsed_q < 8:
+		return "early"
+	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
+		return "growth"
+	return "scale"
+
+
+static func _responsibility_profile(state: Node) -> Dictionary:
+	var stage: String = _responsibility_stage(state)
+	var profile: Dictionary = _safe_dict(RESPONSIBILITY_PROFILE.get(stage, {}))
+	if profile.is_empty():
+		return _safe_dict(RESPONSIBILITY_PROFILE.get("growth", {}))
+	return profile
+
+
+static func _active_assignment_counts(state: Node) -> Dictionary:
+	var counts := {
+		"features": 0,
+		"bugs": 0,
+		"debt": 0,
+		"infra": 0,
+		"rnd": 0,
+	}
+	for emp: EmployeeData in state.employees:
+		if state.is_interviewer_busy(emp.employee_uid):
+			continue
+		match emp.assignment:
+			EmployeeData.Assignment.FEATURES:
+				counts["features"] = int(counts.get("features", 0)) + 1
+			EmployeeData.Assignment.BUGS:
+				counts["bugs"] = int(counts.get("bugs", 0)) + 1
+			EmployeeData.Assignment.TECH_DEBT:
+				counts["debt"] = int(counts.get("debt", 0)) + 1
+			EmployeeData.Assignment.INFRA:
+				counts["infra"] = int(counts.get("infra", 0)) + 1
+			EmployeeData.Assignment.RND:
+				counts["rnd"] = int(counts.get("rnd", 0)) + 1
+	return counts
+
+
+static func _responsibility_mesh(state: Node, assignment_counts: Dictionary) -> Dictionary:
+	var stage: String = _responsibility_stage(state)
+	var stage_mult: float = clampf(float(RESPONSIBILITY_MESH_STAGE_MULT.get(stage, 1.0)), 0.25, 1.5)
+	var features_assigned: int = int(assignment_counts.get("features", 0))
+	var bugs_assigned: int = int(assignment_counts.get("bugs", 0))
+	var debt_assigned: int = int(assignment_counts.get("debt", 0))
+	var infra_assigned: int = int(assignment_counts.get("infra", 0))
+	var rnd_assigned: int = int(assignment_counts.get("rnd", 0))
+
+	var has_bugs: bool = bugs_assigned > 0
+	var has_debt: bool = debt_assigned > 0
+	var has_infra: bool = infra_assigned > 0
+	var has_rnd: bool = rnd_assigned > 0
+	var support_covered: int = 0
+	if has_bugs:
+		support_covered += 1
+	if has_debt:
+		support_covered += 1
+	if has_infra:
+		support_covered += 1
+	if has_rnd:
+		support_covered += 1
+	var coverage_ratio: float = float(support_covered) / 4.0
+
+	var global_output_mult: float = 1.0
+	if features_assigned >= 2 and support_covered >= 2:
+		global_output_mult += 0.015 * stage_mult
+	if state.employees.size() >= 8 and support_covered == 4:
+		global_output_mult += 0.02 * stage_mult
+
+	var feature_progress_mult: float = 1.0
+	if features_assigned > 0:
+		feature_progress_mult += coverage_ratio * (0.045 * stage_mult)
+	if features_assigned >= 3 and support_covered >= 3:
+		feature_progress_mult += 0.018 * stage_mult
+	var feature_quality_bonus: int = roundi(float(support_covered) * 1.6 * stage_mult)
+
+	var bugs_mesh_mult: float = 1.0
+	if has_debt:
+		bugs_mesh_mult += 0.08 * stage_mult
+	if has_infra:
+		bugs_mesh_mult += 0.07 * stage_mult
+	if has_rnd:
+		bugs_mesh_mult += 0.05 * stage_mult
+
+	var debt_mesh_mult: float = 1.0
+	if has_bugs:
+		debt_mesh_mult += 0.08 * stage_mult
+	if has_infra:
+		debt_mesh_mult += 0.06 * stage_mult
+
+	var infra_mesh_mult: float = 1.0
+	if has_bugs:
+		infra_mesh_mult += 0.08 * stage_mult
+	if has_debt:
+		infra_mesh_mult += 0.08 * stage_mult
+
+	var rnd_mesh_mult: float = 1.0
+	if features_assigned > 0:
+		rnd_mesh_mult += 0.09 * stage_mult
+	if has_bugs:
+		rnd_mesh_mult += 0.04 * stage_mult
+
+	var churn_relief: float = coverage_ratio * 0.0009 * stage_mult
+	var pressure_shield: float = coverage_ratio * 0.46 * stage_mult
+	if state.employees.size() >= 10 and support_covered == 4:
+		pressure_shield += 0.08
+	pressure_shield = clampf(pressure_shield, 0.0, 0.75)
+
+	return {
+		"global_output_mult": clampf(global_output_mult, 0.92, 1.15),
+		"feature_progress_mult": clampf(feature_progress_mult, 0.92, 1.20),
+		"feature_quality_bonus": clampi(feature_quality_bonus, 0, 12),
+		"bugs_mesh_mult": clampf(bugs_mesh_mult, 0.92, 1.32),
+		"debt_mesh_mult": clampf(debt_mesh_mult, 0.92, 1.28),
+		"infra_mesh_mult": clampf(infra_mesh_mult, 0.92, 1.30),
+		"rnd_mesh_mult": clampf(rnd_mesh_mult, 0.92, 1.28),
+		"churn_relief": clampf(churn_relief, 0.0, 0.0035),
+		"pressure_shield": pressure_shield,
+	}
+
+
 static func _apply_work_output(state: Node) -> void:
 	if state.employees.is_empty():
 		return
 
 	# Team personality mix slightly influences effective collaboration speed.
 	var collaboration_mult: float = _team_collaboration_mult(state)
+	var profile: Dictionary = _responsibility_profile(state)
+	var assignment_counts: Dictionary = _active_assignment_counts(state)
+	var mesh: Dictionary = _responsibility_mesh(state, assignment_counts)
+	var specialization_strength: float = clampf(float(profile.get("specialization_strength", 1.0)), 0.0, 1.0)
+	var cross_support_share: float = clampf(float(profile.get("cross_support_features_share", 0.0)), 0.0, 0.7)
+	var feature_focus_mult: float = clampf(float(profile.get("feature_focus_mult", 1.0)), 0.7, 1.5)
+	var lane_effect_mult: float = clampf(float(profile.get("lane_effect_mult", 1.0)), 0.7, 1.8)
+	var global_output_mult: float = clampf(float(mesh.get("global_output_mult", 1.0)), 0.8, 1.2)
+	var feature_mesh_mult: float = clampf(float(mesh.get("feature_progress_mult", 1.0)), 0.85, 1.25)
+	var bugs_mesh_mult: float = clampf(float(mesh.get("bugs_mesh_mult", 1.0)), 0.85, 1.35)
+	var debt_mesh_mult: float = clampf(float(mesh.get("debt_mesh_mult", 1.0)), 0.85, 1.35)
+	var infra_mesh_mult: float = clampf(float(mesh.get("infra_mesh_mult", 1.0)), 0.85, 1.35)
+	var rnd_mesh_mult: float = clampf(float(mesh.get("rnd_mesh_mult", 1.0)), 0.85, 1.35)
+	var feature_quality_bonus: int = int(mesh.get("feature_quality_bonus", 0))
+	var active_features_assigned: int = 0
+	for emp_a: EmployeeData in state.employees:
+		if state.is_interviewer_busy(emp_a.employee_uid):
+			continue
+		if emp_a.assignment == EmployeeData.Assignment.FEATURES:
+			active_features_assigned += 1
 
 	for emp: EmployeeData in state.employees:
 		# Employees assigned as interviewers are unavailable for normal work output
@@ -245,8 +434,9 @@ static func _apply_work_output(state: Node) -> void:
 			emp.tenure_quarters += 1
 			continue
 
-		var spec_mult: float = EmployeeData.specialty_mult(emp.specialty, emp.assignment, state.company.type)
-		var output: float = emp.work_output() * state.product.dev_speed_multiplier() * spec_mult * collaboration_mult
+		var raw_spec_mult: float = EmployeeData.specialty_mult(emp.specialty, emp.assignment, state.company.type)
+		var spec_mult: float = lerpf(1.0, raw_spec_mult, specialization_strength)
+		var output: float = emp.work_output() * state.product.dev_speed_multiplier() * spec_mult * collaboration_mult * global_output_mult
 		var tech_bonus: float = state.company.founder_stat("technical") * 0.05
 
 		match emp.assignment:
@@ -257,10 +447,16 @@ static func _apply_work_output(state: Node) -> void:
 					if available.is_empty():
 						continue
 				var cost: float = float(target_def.get("cost", ProductData.FEATURE_COST))
-				state.product.feature_progress += output * 0.5
+				state.product.feature_progress += output * 0.5 * feature_focus_mult * feature_mesh_mult
 				if state.product.feature_progress >= cost:
 					state.product.feature_progress -= cost
-					var quality := clampi(ceili(output * 0.8) + randi_range(-10, 10) + roundi(tech_bonus * 5), 20, 100)
+					var debt_penalty: int = roundi(float(state.product.tech_debt) * 0.18)
+					var bug_penalty: int = roundi(minf(15.0, float(state.product.bugs) * 0.35))
+					var quality: int = clampi(
+						ceili(output * 0.82 * feature_focus_mult * feature_mesh_mult) + randi_range(-8, 8) + roundi(tech_bonus * 5) + feature_quality_bonus - debt_penalty - bug_penalty,
+						15,
+						100
+					)
 					var fname: String = target_def.get("name", _feature_names.pick_random())
 					var fid: String = target_def.get("id", "")
 					state.product.add_feature(fname, quality, state.current_quarter, fid)
@@ -268,18 +464,35 @@ static func _apply_work_output(state: Node) -> void:
 						state.product.apply_feature_effects(target_def)
 					state.product.target_feature_id = ""
 			EmployeeData.Assignment.BUGS:
-				var bug_mult := 1.0 + tech_bonus
-				state.product.bugs = maxi(0, state.product.bugs - maxi(1, ceili(output * 0.1 * bug_mult)))
+				var bug_mult: float = (1.0 + tech_bonus) * lane_effect_mult * bugs_mesh_mult
+				state.product.bugs = maxi(0, state.product.bugs - maxi(1, ceili(output * 0.16 * bug_mult)))
+				state.product.churn_rate = maxf(ProductData.CHURN_RATE_MIN, state.product.churn_rate - (output * 0.00003 * bug_mult))
 			EmployeeData.Assignment.TECH_DEBT:
-				state.product.tech_debt = maxi(0, state.product.tech_debt - maxi(1, ceili(output * 0.05)))
+				var debt_work: float = output * 0.11 * lane_effect_mult * debt_mesh_mult
+				state.product.tech_debt = maxi(0, state.product.tech_debt - maxi(1, ceili(debt_work)))
+				state.product.stability = mini(100, state.product.stability + maxi(0, ceili(debt_work * 0.15)))
 			EmployeeData.Assignment.INFRA:
-				state.product.stability = mini(100, state.product.stability + maxi(1, ceili(output * 0.05)))
+				var infra_work: float = output * 0.09 * lane_effect_mult * infra_mesh_mult
+				state.product.stability = mini(100, state.product.stability + maxi(1, ceili(infra_work)))
+				state.product.churn_rate = maxf(ProductData.CHURN_RATE_MIN, state.product.churn_rate - (infra_work * 0.00002))
 			EmployeeData.Assignment.RND:
-				state.product.ux_score = mini(100, state.product.ux_score + maxi(0, ceili(output * 0.02)))
+				var rnd_work: float = output * 0.08 * lane_effect_mult * rnd_mesh_mult
+				state.product.ux_score = mini(100, state.product.ux_score + maxi(1, ceili(rnd_work)))
+				state.product.churn_rate = maxf(ProductData.CHURN_RATE_MIN, state.product.churn_rate - (rnd_work * 0.000025))
+
+		if active_features_assigned > 0 \
+		and emp.assignment != EmployeeData.Assignment.FEATURES \
+		and not state.product.target_feature_id.is_empty():
+			state.product.feature_progress += output * 0.5 * cross_support_share * feature_mesh_mult
 		emp.tenure_quarters += 1
 
 
 static func _update_product_metrics(state: Node) -> void:
+	var profile: Dictionary = _responsibility_profile(state)
+	var assignment_counts: Dictionary = _active_assignment_counts(state)
+	var mesh: Dictionary = _responsibility_mesh(state, assignment_counts)
+	_apply_operational_pressure(state, profile, assignment_counts, mesh)
+
 	if state.product.tech_debt > 75:
 		state.product.bugs += randi_range(2, 5)
 	elif state.product.tech_debt > 50:
@@ -295,15 +508,89 @@ static func _update_product_metrics(state: Node) -> void:
 	if state.product.bugs > 20:
 		state.product.churn_rate += 0.01
 
+	if state.product.ux_score < 45:
+		state.product.churn_rate += 0.004
+	elif state.product.ux_score > 78:
+		state.product.churn_rate = maxf(ProductData.CHURN_RATE_MIN, state.product.churn_rate - 0.0025)
+
+	var churn_relief: float = float(mesh.get("churn_relief", 0.0))
+	if churn_relief > 0.0:
+		state.product.churn_rate = maxf(ProductData.CHURN_RATE_MIN, state.product.churn_rate - churn_relief)
+
+
+static func _apply_operational_pressure(state: Node, profile: Dictionary, assignment_counts: Dictionary, mesh: Dictionary) -> void:
+	var feature_count: float = float(state.product.feature_count())
+	if feature_count <= 0.0:
+		return
+
+	var users_scale: float = clampf(float(state.product.users) / 40_000.0, 0.0, 3.0)
+	var hosting_scale: float = clampf(float(state.company.hosting_data_center_pressure), 0.0, 3.0)
+	var complexity: float = clampf((feature_count * 0.32) + (users_scale * 1.30) + (hosting_scale * 0.90), 0.0, 8.0)
+	if complexity < 1.4:
+		return
+
+	var ops_pressure_mult: float = clampf(float(profile.get("ops_pressure_mult", 1.0)), 0.2, 2.0)
+	var pressure_scalar: float = complexity * ops_pressure_mult
+	var pressure_shield: float = clampf(float(mesh.get("pressure_shield", 0.0)), 0.0, 0.75)
+	pressure_scalar *= maxf(0.35, 1.0 - pressure_shield)
+
+	var bugs_required: int = 0
+	var debt_required: int = 0
+	var infra_required: int = 0
+	var rnd_required: int = 0
+	if complexity >= 2.2:
+		bugs_required = 1
+	if complexity >= 2.8:
+		debt_required = 1
+	if complexity >= 3.2:
+		infra_required = 1
+	if complexity >= 3.0:
+		rnd_required = 1
+	if complexity >= 5.8:
+		bugs_required += 1
+		infra_required += 1
+
+	var bugs_assigned: int = int(assignment_counts.get("bugs", 0))
+	var debt_assigned: int = int(assignment_counts.get("debt", 0))
+	var infra_assigned: int = int(assignment_counts.get("infra", 0))
+	var rnd_assigned: int = int(assignment_counts.get("rnd", 0))
+
+	var bugs_deficit: int = maxi(0, bugs_required - bugs_assigned)
+	var debt_deficit: int = maxi(0, debt_required - debt_assigned)
+	var infra_deficit: int = maxi(0, infra_required - infra_assigned)
+	var rnd_deficit: int = maxi(0, rnd_required - rnd_assigned)
+	if bugs_deficit + debt_deficit + infra_deficit + rnd_deficit <= 0:
+		return
+
+	var bug_add: int = ceili(float(bugs_deficit) * pressure_scalar * 0.45)
+	var debt_add: int = ceili(float(debt_deficit) * pressure_scalar * 0.38)
+	var stability_drop: int = ceili(float(infra_deficit) * pressure_scalar * 0.32)
+	var ux_drop: int = ceili(float(rnd_deficit) * pressure_scalar * 0.25)
+	state.product.bugs += maxi(0, bug_add)
+	state.product.tech_debt = mini(100, state.product.tech_debt + maxi(0, debt_add))
+	state.product.stability = maxi(0, state.product.stability - maxi(0, stability_drop))
+	state.product.ux_score = maxi(0, state.product.ux_score - maxi(0, ux_drop))
+
+	var churn_penalty: float = (
+		(float(bugs_deficit) * 0.00060)
+		+ (float(infra_deficit) * 0.00055)
+		+ (float(rnd_deficit) * 0.00045)
+	) * clampf(pressure_scalar / 4.0, 0.25, 1.8)
+	state.product.churn_rate = minf(ProductData.CHURN_RATE_MAX, state.product.churn_rate + churn_penalty)
+
 
 static func _calculate_user_growth(state: Node) -> void:
 	var quality_factor: float = state.product.avg_feature_quality() / 100.0
 	var feature_pull := minf(state.product.feature_count() * 0.5, 5.0)
 	var reputation_bonus: float = state.company.reputation / 100.0
+	var ux_pull: float = remap(float(state.product.ux_score), 0.0, 100.0, 0.86, 1.16)
+	var stability_pull: float = remap(float(state.product.stability), 0.0, 100.0, 0.88, 1.12)
 
 	var biz_bonus: float = 1.0 + state.company.founder_stat("business") * 0.04
 	var base_new := BASE_ORGANIC_USERS_PER_QUARTER + ceili(feature_pull * 5)
 	var organic_rate := remap(quality_factor, 0.0, 1.0, 0.01, 0.05)
+	organic_rate *= ux_pull
+	organic_rate *= stability_pull
 
 	match state.company.type:
 		CompanyData.CompanyType.SAAS:
@@ -329,6 +616,8 @@ static func _calculate_user_growth(state: Node) -> void:
 
 	var econ_growth_mult: float
 	var econ_churn_mult: float
+	var world_growth_mult: float = _world_mult(state, "growth_mult", 1.0)
+	var world_churn_mult: float = _world_mult(state, "churn_mult", 1.0)
 	match state.market.economy_state:
 		MarketData.EconomyState.BULL:
 			econ_growth_mult = 1.2
@@ -342,6 +631,7 @@ static func _calculate_user_growth(state: Node) -> void:
 
 	total_new = ceili(total_new * econ_growth_mult)
 	total_new = ceili(total_new * clampf(state.company.niche_growth_mult, 0.6, 1.6))
+	total_new = ceili(total_new * world_growth_mult)
 
 	# Growth naturally gets harder at scale; early game stays punchy.
 	# Per-type thresholds keep each company archetype on a believable trajectory.
@@ -377,7 +667,15 @@ static func _calculate_user_growth(state: Node) -> void:
 		difficulty_churn_mult = clampf(float(state.difficulty_mult("churn_mult")), 0.4, 2.0)
 
 	var niche_churn_mult := clampf(state.company.niche_churn_mult, 0.6, 1.6)
-	var churn_count := ceili(state.product.users * state.product.churn_rate * econ_churn_mult * type_churn_mult * difficulty_churn_mult * niche_churn_mult)
+	var churn_count := ceili(
+		state.product.users
+		* state.product.churn_rate
+		* econ_churn_mult
+		* type_churn_mult
+		* difficulty_churn_mult
+		* niche_churn_mult
+		* world_churn_mult
+	)
 	var bug_churn := ceili(state.product.bugs * 0.5)
 	var total_churn := churn_count + bug_churn
 	var late_churn_users := int(balance.get("late_churn_users", 50_000))
@@ -399,7 +697,8 @@ static func _calculate_user_growth(state: Node) -> void:
 
 
 static func _calculate_revenue(state: Node) -> void:
-	state.financials.revenue = RevenueEngine.calculate(state.company, state.product)
+	var world_revenue_mult: float = _world_mult(state, "revenue_mult", 1.0)
+	state.financials.revenue = RevenueEngine.calculate(state.company, state.product) * world_revenue_mult
 
 
 static func _update_valuation(state: Node) -> void:
@@ -412,11 +711,12 @@ static func _calculate_costs(state: Node) -> void:
 		salary_total += emp.salary_per_quarter
 	state.financials.costs_breakdown["salaries"] = salary_total
 
+	var world_cost_mult: float = _world_mult(state, "cost_mult", 1.0)
 	var finance_discount: float = 1.0 - state.company.founder_stat("finance") * 0.02
-	var infra_cost := maxf(10.0, state.product.users * 0.006) * maxf(0.6, finance_discount)
+	var infra_cost := maxf(10.0, state.product.users * 0.006) * maxf(0.6, finance_discount) * world_cost_mult
 	state.financials.costs_breakdown["infrastructure"] = infra_cost
 	var hosting: Dictionary = _simulate_hosting(state, finance_discount)
-	state.financials.costs_breakdown["hosting"] = float(hosting.get("hosting_cost", 0.0))
+	state.financials.costs_breakdown["hosting"] = float(hosting.get("hosting_cost", 0.0)) * world_cost_mult
 	state.company.hosting_reliability = float(hosting.get("reliability", 99.5))
 	state.company.hosting_demand_web = float(hosting.get("demand_web", 0.0))
 	state.company.hosting_demand_cache = float(hosting.get("demand_cache", 0.0))
@@ -427,7 +727,7 @@ static func _calculate_costs(state: Node) -> void:
 	state.company.hosting_util_web = float(hosting.get("util_web", 0.0))
 	state.company.hosting_util_cache = float(hosting.get("util_cache", 0.0))
 	state.company.hosting_util_data = float(hosting.get("util_data", 0.0))
-	state.company.hosting_overage_cost = float(hosting.get("overage_cost", 0.0))
+	state.company.hosting_overage_cost = float(hosting.get("overage_cost", 0.0)) * world_cost_mult
 	state.company.hosting_incidents_last_quarter = int(hosting.get("incidents", 0))
 	state.company.hosting_workload_profile = str(hosting.get("workload_label", "General Cloud"))
 	state.company.hosting_data_center_pressure = float(hosting.get("data_center_pressure", 0.0))
@@ -453,7 +753,7 @@ static func _calculate_costs(state: Node) -> void:
 
 	state.financials.costs_breakdown["office"] = OFFICE_COST_BY_LEVEL[
 		clampi(state.company.office_level, 0, OFFICE_COST_BY_LEVEL.size() - 1)
-	]
+	] * world_cost_mult
 
 	state.financials.burn_rate = state.financials.total_costs()
 
@@ -765,6 +1065,7 @@ static func _run_competitor_ai(state: Node) -> void:
 	var growth_mult := 1.0
 	if state.has_method("difficulty_mult"):
 		growth_mult = clampf(float(state.difficulty_mult("competitor_mult")), 0.5, 2.5)
+	growth_mult *= _world_mult(state, "competitor_mult", 1.0)
 	CompetitorAI.step(state.market, growth_mult)
 
 
@@ -967,10 +1268,13 @@ static func _update_founder_energy(state: Node) -> void:
 		delta -= 3
 
 	var quitters_this_q: int = 0
-	for entry: Dictionary in state.event_log:
-		if entry.get("quarter") == state.current_quarter and entry.get("year") == state.current_year:
-			if entry.get("event_id") == "employee_quit":
-				quitters_this_q += 1
+	if state.has_method("event_count_this_quarter"):
+		quitters_this_q = int(state.event_count_this_quarter("employee_quit"))
+	else:
+		for entry: Dictionary in state.event_log:
+			if entry.get("quarter") == state.current_quarter and entry.get("year") == state.current_year:
+				if entry.get("event_id") == "employee_quit":
+					quitters_this_q += 1
 	delta -= quitters_this_q * 4
 
 	if state.employees.is_empty() and state.total_quarters_elapsed() > 1:

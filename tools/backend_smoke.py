@@ -36,6 +36,7 @@ HEADLINE_PLACEHOLDERS = {
     "total_quarters",
     "year",
     "quarter",
+    "world_event_title",
 }
 KNOWN_EFFECT_KEYS = {
     "ux_bonus",
@@ -47,6 +48,15 @@ KNOWN_EFFECT_KEYS = {
     "dau_bonus",
 }
 KNOWN_NICHE_MOD_KEYS = {"growth_mult", "churn_mult", "revenue_mult"}
+WORLD_EVENT_EFFECT_KEYS = {
+    "growth_mult",
+    "churn_mult",
+    "revenue_mult",
+    "cost_mult",
+    "fundraise_amount_mult",
+    "event_pressure_mult",
+    "competitor_mult",
+}
 
 UI_BUTTON_SCRIPT_CHECKS = (
     {
@@ -505,6 +515,100 @@ def validate_headlines(data: object) -> List[str]:
     return errors
 
 
+def validate_world_events(data: object) -> List[str]:
+    errors: List[str] = []
+    if not isinstance(data, list):
+        return ["world_events.json root must be an array"]
+    if not data:
+        return ["world_events.json is empty"]
+
+    ids: Set[str] = set()
+    for idx, row in enumerate(data):
+        pfx = f"world_events[{idx}]"
+        if not isinstance(row, dict):
+            errors.append(f"{pfx} must be an object")
+            continue
+
+        event_id = row.get("id", "")
+        if not isinstance(event_id, str) or not event_id.strip():
+            errors.append(f"{pfx}.id must be a non-empty string")
+            continue
+        if event_id in ids:
+            errors.append(f"duplicate world event id: {event_id}")
+        ids.add(event_id)
+
+        title = row.get("title", "")
+        if not isinstance(title, str) or not title.strip():
+            errors.append(f"{pfx}.title must be a non-empty string")
+
+        desc = row.get("description", "")
+        if not isinstance(desc, str) or not desc.strip():
+            errors.append(f"{pfx}.description must be a non-empty string")
+
+        stage = row.get("stage", "any")
+        if stage not in {"any", "early", "growth", "late"}:
+            errors.append(f"{pfx}.stage must be one of any/early/growth/late")
+
+        economy = row.get("economy", None)
+        if economy is not None and economy not in {"bull", "bear", "neutral"}:
+            errors.append(f"{pfx}.economy must be one of bull/bear/neutral when present")
+
+        weight = row.get("weight", 1.0)
+        if not isinstance(weight, (int, float)) or float(weight) <= 0.0:
+            errors.append(f"{pfx}.weight must be > 0")
+
+        duration_min = row.get("duration_min", 1)
+        duration_max = row.get("duration_max", duration_min)
+        if not isinstance(duration_min, int) or duration_min < 1:
+            errors.append(f"{pfx}.duration_min must be an integer >= 1")
+        if not isinstance(duration_max, int) or duration_max < 1:
+            errors.append(f"{pfx}.duration_max must be an integer >= 1")
+        if isinstance(duration_min, int) and isinstance(duration_max, int) and duration_max < duration_min:
+            errors.append(f"{pfx}.duration_max cannot be smaller than duration_min")
+
+        for key in ("min_quarter", "max_quarter", "min_users", "max_users"):
+            if key in row and not isinstance(row.get(key), int):
+                errors.append(f"{pfx}.{key} must be an integer when present")
+        for key in ("min_valuation", "max_valuation"):
+            if key in row and not isinstance(row.get(key), (int, float)):
+                errors.append(f"{pfx}.{key} must be numeric when present")
+
+        company_types = row.get("company_types", [])
+        if company_types:
+            if not isinstance(company_types, list):
+                errors.append(f"{pfx}.company_types must be an array when present")
+            else:
+                bad_types = [ct for ct in company_types if ct not in FEATURE_TYPES]
+                if bad_types:
+                    errors.append(f"{pfx}.company_types has invalid values: {bad_types}")
+
+        niches = row.get("niches", [])
+        if niches:
+            if not isinstance(niches, list):
+                errors.append(f"{pfx}.niches must be an array when present")
+            else:
+                for nidx, niche in enumerate(niches):
+                    if not isinstance(niche, str) or not niche.strip():
+                        errors.append(f"{pfx}.niches[{nidx}] must be a non-empty string")
+
+        effects = row.get("effects", {})
+        if not isinstance(effects, dict):
+            errors.append(f"{pfx}.effects must be an object")
+        else:
+            unknown_effects = set(effects.keys()) - WORLD_EVENT_EFFECT_KEYS
+            if unknown_effects:
+                errors.append(f"{pfx}.effects has unknown keys: {sorted(unknown_effects)}")
+            for ekey, eval_raw in effects.items():
+                if not isinstance(eval_raw, (int, float)):
+                    errors.append(f"{pfx}.effects.{ekey} must be numeric")
+                    continue
+                eval_num = float(eval_raw)
+                if eval_num <= 0.0:
+                    errors.append(f"{pfx}.effects.{ekey} must be > 0")
+
+    return errors
+
+
 def validate_glossary(data: object) -> List[str]:
     errors: List[str] = []
     if not isinstance(data, dict):
@@ -922,6 +1026,7 @@ def main() -> int:
     paths = {
         "features": DATA_DIR / "features.json",
         "events": DATA_DIR / "events.json",
+        "world_events": DATA_DIR / "world_events.json",
         "headlines": DATA_DIR / "headlines.json",
         "glossary": DATA_DIR / "glossary.json",
         "vcs": DATA_DIR / "vcs.json",
@@ -939,6 +1044,7 @@ def main() -> int:
     try:
         features_data = _load_json(paths["features"])
         events_data = _load_json(paths["events"])
+        world_events_data = _load_json(paths["world_events"])
         headlines_data = _load_json(paths["headlines"])
         glossary_data = _load_json(paths["glossary"])
         vcs_data = _load_json(paths["vcs"])
@@ -952,6 +1058,7 @@ def main() -> int:
     feature_errors, feature_ids = validate_features(features_data)
     errors.extend(feature_errors)
     errors.extend(validate_events(events_data))
+    errors.extend(validate_world_events(world_events_data))
     errors.extend(validate_headlines(headlines_data))
     errors.extend(validate_glossary(glossary_data))
     errors.extend(validate_vcs(vcs_data))
@@ -973,7 +1080,7 @@ def main() -> int:
 
     print("Backend smoke check PASSED")
     print(
-        "Validated: features/events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
+        "Validated: features/events/world-events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
         "+ visual presets + difficulty wiring + monetization stability gate + UI button wiring contracts"
     )
     return 0

@@ -284,5 +284,42 @@
     "niches": ["cloud_cost_tools"],
     "company_types": ["dev_tools"],
     "weight": 1.7
+  },
+  {
+    "template": "Markets react to {world_event_title} as startup operators rewrite quarterly plans",
+    "min_quarter": 2,
+    "weight": 1.3
+  },
+  {
+    "template": "Board decks everywhere now include a slide titled: {world_event_title}",
+    "min_quarter": 3,
+    "weight": 1.22
+  },
+  {
+    "template": "Founder group chats split over {world_event_title}: discipline vs blitzscaling",
+    "min_quarter": 2,
+    "weight": 1.2
+  },
+  {
+    "template": "Operators call this quarter's mood: '{world_event_title}' with extra spreadsheets",
+    "min_quarter": 2,
+    "weight": 1.1
+  },
+  {
+    "template": "Another startup drama reboot drops and every seed deck suddenly has cinematic lighting",
+    "weight": 0.95
+  },
+  {
+    "template": "Anonymous memo season is back, and founders are pretending they did not read it",
+    "weight": 0.9
+  },
+  {
+    "template": "Venture partners debate whether {world_event_title} is panic or reset",
+    "min_quarter": 4,
+    "weight": 1.18
+  },
+  {
+    "template": "Internal docs leak, timelines slip, and PR teams call it an 'alignment sprint'",
+    "weight": 0.85
   }
 ]

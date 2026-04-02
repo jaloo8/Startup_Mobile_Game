@@ -664,7 +664,26 @@ func _refresh_next_action_hint() -> void:
 	elif GameState.product.get_target_feature(GameState.company.type).is_empty():
 		hint = "Next best action: pick a feature in Product to keep progress moving."
 	else:
+		var stage: String = _responsibility_stage()
+		var missing_lanes: Array[String] = []
+		if stage != "early":
+			if _assignment_count(EmployeeData.Assignment.BUGS) == 0:
+				missing_lanes.append("Bug Fixes")
+			if _assignment_count(EmployeeData.Assignment.TECH_DEBT) == 0:
+				missing_lanes.append("Tech Debt")
+			if _assignment_count(EmployeeData.Assignment.INFRA) == 0:
+				missing_lanes.append("Infrastructure")
+			if _assignment_count(EmployeeData.Assignment.RND) == 0:
+				missing_lanes.append("R&D")
+			if not missing_lanes.is_empty():
+				hint = "Next best action: as you scale, assign specialists to %s." % ", ".join(missing_lanes)
+				_next_action_label.text = hint
+				return
+
 		var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
+		var world_brief := GameState.active_world_event_brief()
+		var world_cost_mult := GameState.world_event_mult("cost_mult", 1.0)
+		var world_fundraise_mult := GameState.world_event_mult("fundraise_amount_mult", 1.0)
 		var peak_util: float = maxf(
 			GameState.company.hosting_util_web,
 			maxf(GameState.company.hosting_util_cache, GameState.company.hosting_util_data)
@@ -674,6 +693,10 @@ func _refresh_next_action_hint() -> void:
 			+ GameState.company.hosting_upgrade_data_level
 		if peak_util > 1.05 and hosting_upgrade_total < 2:
 			hint = "Next best action: open Logistics and buy a lane capacity upgrade before demand spikes."
+		elif not world_brief.is_empty() and world_fundraise_mult < 0.95 and rw < 4.0:
+			hint = "Next best action: capital markets are tighter (%s) — raise earlier and protect runway." % world_brief
+		elif not world_brief.is_empty() and world_cost_mult > 1.06 and rw < 5.0:
+			hint = "Next best action: costs are elevated (%s) — trim spend or add cash buffer." % world_brief
 		elif GameState.company.hosting_reliability < 94.0:
 			hint = "Next best action: hosting is unstable — add Infra staffing or switch to a safer hosting plan."
 		elif rw < 1.0:
@@ -834,6 +857,27 @@ func _features_assigned_count() -> int:
 	return count
 
 
+func _assignment_count(target: EmployeeData.Assignment) -> int:
+	var count := 0
+	for emp: EmployeeData in GameState.employees:
+		if emp.assignment == target:
+			count += 1
+	return count
+
+
+func _responsibility_stage() -> String:
+	var team_size: int = GameState.employees.size()
+	var elapsed_q: int = GameState.total_quarters_elapsed()
+	var users: int = 0
+	if GameState.product:
+		users = GameState.product.users
+	if team_size <= 4 and elapsed_q < 8:
+		return "early"
+	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
+		return "growth"
+	return "scale"
+
+
 func _as_dict(v: Variant) -> Dictionary:
 	if v is Dictionary:
 		return v
@@ -938,13 +982,28 @@ func _on_key_metric_info_pressed() -> void:
 
 
 func _refresh_economy() -> void:
+	var market_text := "Market: Neutral"
 	match GameState.market.economy_state:
 		MarketData.EconomyState.BULL:
-			economy_label.text = "Market: Bull"
+			market_text = "Market: Bull"
 		MarketData.EconomyState.BEAR:
-			economy_label.text = "Market: Bear"
-		_:
-			economy_label.text = "Market: Neutral"
+			market_text = "Market: Bear"
+
+	var world_text := GameState.active_world_event_brief()
+	if world_text.is_empty():
+		economy_label.text = market_text
+		economy_label.add_theme_color_override("font_color", Color(0.72, 0.78, 0.9))
+		return
+
+	economy_label.text = "%s  ·  World: %s" % [market_text, world_text]
+	var growth_mult := GameState.world_event_mult("growth_mult", 1.0)
+	var cost_mult := GameState.world_event_mult("cost_mult", 1.0)
+	if growth_mult < 0.97 or cost_mult > 1.03:
+		economy_label.add_theme_color_override("font_color", Color(0.96, 0.72, 0.45))
+	elif growth_mult > 1.03 and cost_mult <= 1.03:
+		economy_label.add_theme_color_override("font_color", Color(0.58, 0.88, 0.56))
+	else:
+		economy_label.add_theme_color_override("font_color", Color(0.62, 0.82, 0.95))
 
 
 func _refresh_energy() -> void:

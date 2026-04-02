@@ -28,6 +28,11 @@ var history: Array[Dictionary] = []
 var event_log: Array[Dictionary] = []
 var fired_one_time_events: Array[String] = []
 var pending_events: Array[EventData] = []
+var active_world_event_id: String = ""
+var active_world_event_title: String = ""
+var active_world_event_description: String = ""
+var active_world_event_quarters_left: int = 0
+var active_world_event_effects: Dictionary = {}
 
 var is_game_active: bool = false
 var current_slot: String = ""
@@ -67,6 +72,10 @@ static func _string_array(value) -> Array[String]:
 const MAX_SLOTS := 5
 const MAX_HISTORY_SIZE := 200
 const MAX_EVENT_LOG_SIZE := 500
+const MAX_HISTORY_SAVE_SIZE := 120
+const MAX_EVENT_LOG_SAVE_SIZE := 280
+const MAX_EVENT_ID_LEN := 64
+const MAX_EVENT_TITLE_LEN := 220
 const MAX_EMPLOYEES := 500
 const MAX_SAVE_BYTES := 4 * 1024 * 1024
 const SAVE_BACKUP_SUFFIX := ".bak"
@@ -180,6 +189,7 @@ func new_game(config: Dictionary) -> void:
 	event_log.clear()
 	fired_one_time_events.clear()
 	pending_events.clear()
+	clear_world_event_state()
 	_milestones_hit.clear()
 	_achieved_wins.clear()
 	interviewer_busy_quarters.clear()
@@ -190,10 +200,10 @@ func new_game(config: Dictionary) -> void:
 
 	difficulty = config.get("difficulty", "normal")
 	starting_scenario = config.get("scenario", "garage")
-	_apply_starting_scenario()
-
 	current_quarter = 1
 	current_year = 1
+	_apply_starting_scenario()
+
 	is_game_active = true
 
 
@@ -224,10 +234,189 @@ func _apply_starting_scenario() -> void:
 				"quarter": 0,
 			})
 			company.equity_owned = 75.0
+		"growth_operator":
+			company.cash = 8_000_000.0 * cash_mult
+			company.office_level = 2
+			company.hosting_plan = CompanyData.HostingPlan.HYBRID
+			company.reputation = 60
+			company.equity_owned = 62.0
+			company.valuation = 120_000_000.0
+			financials = FinancialsData.new()
+			financials.funding_rounds.append({
+				"round": "Series A",
+				"amount": 14_000_000.0 * cash_mult,
+				"valuation": 60_000_000.0,
+				"quarter": 0,
+			})
+			board_patience = 3
+			founder_energy = 88
+		"scale_chief":
+			company.cash = 30_000_000.0 * cash_mult
+			company.office_level = 3
+			company.hosting_plan = CompanyData.HostingPlan.IN_HOUSE
+			company.reputation = 68
+			company.equity_owned = 40.0
+			company.valuation = 650_000_000.0
+			financials = FinancialsData.new()
+			financials.funding_rounds.append({
+				"round": "Series A",
+				"amount": 18_000_000.0 * cash_mult,
+				"valuation": 75_000_000.0,
+				"quarter": 0,
+			})
+			financials.funding_rounds.append({
+				"round": "Series B",
+				"amount": 80_000_000.0 * cash_mult,
+				"valuation": 420_000_000.0,
+				"quarter": 0,
+			})
+			board_patience = 2
+			founder_energy = 80
 		_:
 			company.hosting_plan = CompanyData.HostingPlan.MANAGED_CLOUD
 
 	_reset_hosting_state()
+	_seed_starting_company_state()
+
+
+func _seed_starting_company_state() -> void:
+	match starting_scenario:
+		"growth_operator":
+			_seed_shipped_features(4, 58, 84)
+			product.users = 24_000
+			product.dau = 7_500
+			product.stability = 72
+			product.ux_score = 67
+			product.tech_debt = mini(100, maxi(product.tech_debt, 26))
+			product.bugs = maxi(product.bugs, 14)
+			product.churn_rate = 0.058
+			_seed_team(
+				{
+					EmployeeData.Assignment.FEATURES: 5,
+					EmployeeData.Assignment.BUGS: 2,
+					EmployeeData.Assignment.TECH_DEBT: 1,
+					EmployeeData.Assignment.INFRA: 2,
+					EmployeeData.Assignment.RND: 2,
+				},
+				12,
+				EmployeeData.Seniority.MID,
+				2,
+				8
+			)
+			_seed_next_feature_progress(0.35)
+			_seed_financial_snapshot_for_scenario()
+		"scale_chief":
+			_seed_shipped_features(7, 60, 90)
+			product.users = 185_000
+			product.dau = 56_000
+			product.stability = 68
+			product.ux_score = 63
+			product.tech_debt = mini(100, maxi(product.tech_debt, 44))
+			product.bugs = maxi(product.bugs, 30)
+			product.churn_rate = 0.072
+			_seed_team(
+				{
+					EmployeeData.Assignment.FEATURES: 8,
+					EmployeeData.Assignment.BUGS: 4,
+					EmployeeData.Assignment.TECH_DEBT: 3,
+					EmployeeData.Assignment.INFRA: 4,
+					EmployeeData.Assignment.RND: 3,
+				},
+				22,
+				EmployeeData.Seniority.SENIOR,
+				4,
+				14
+			)
+			_seed_next_feature_progress(0.48)
+			_seed_financial_snapshot_for_scenario()
+		_:
+			pass
+
+
+func _seed_shipped_features(target_count: int, quality_min: int, quality_max: int) -> void:
+	var remaining: int = maxi(0, target_count)
+	while remaining > 0:
+		var available: Array[Dictionary] = product.available_features(company.type)
+		if available.is_empty():
+			break
+		var feature_def: Dictionary = available[0]
+		var fid: String = str(feature_def.get("id", "")).strip_edges()
+		var fname: String = str(feature_def.get("name", "")).strip_edges()
+		if fname.is_empty():
+			fname = "Feature"
+		var quality: int = clampi(randi_range(quality_min, quality_max), 20, 100)
+		product.add_feature(fname, quality, 0, fid)
+		product.apply_feature_effects(feature_def)
+		remaining -= 1
+
+
+func _seed_next_feature_progress(progress_ratio: float) -> void:
+	var available: Array[Dictionary] = product.available_features(company.type)
+	if available.is_empty():
+		product.target_feature_id = ""
+		product.feature_progress = 0.0
+		return
+	var target: Dictionary = available[0]
+	product.target_feature_id = str(target.get("id", "")).strip_edges()
+	var cost: float = maxf(1.0, float(target.get("cost", ProductData.FEATURE_COST)))
+	product.feature_progress = clampf(cost * progress_ratio, 0.0, cost * 0.95)
+
+
+func _seed_financial_snapshot_for_scenario() -> void:
+	financials.revenue = RevenueEngine.calculate(company, product)
+	var salary_total := 0.0
+	for emp: EmployeeData in employees:
+		salary_total += emp.salary_per_quarter
+	var finance_discount: float = 1.0 - company.founder_stat("finance") * 0.02
+	var infra_cost := maxf(10.0, product.users * 0.006) * maxf(0.6, finance_discount)
+	var office_costs := [0.0, 1_000.0, 4_000.0, 10_000.0]
+	var office_idx: int = clampi(company.office_level, 0, office_costs.size() - 1)
+	financials.costs_breakdown["salaries"] = salary_total
+	financials.costs_breakdown["infrastructure"] = infra_cost
+	financials.costs_breakdown["hosting"] = 0.0
+	financials.costs_breakdown["office"] = float(office_costs[office_idx])
+	financials.burn_rate = financials.total_costs()
+
+
+func _seed_team(assignments: Dictionary, headcount: int, min_seniority: EmployeeData.Seniority, tenure_min: int, tenure_max: int) -> void:
+	var desired: int = maxi(0, headcount)
+	if desired <= 0:
+		return
+	var assignment_queue: Array[EmployeeData.Assignment] = []
+	for assignment_key in assignments.keys():
+		var assignment_val: int = int(assignment_key)
+		var amount: int = maxi(0, int(assignments.get(assignment_key, 0)))
+		for i in amount:
+			assignment_queue.append(assignment_val as EmployeeData.Assignment)
+	while assignment_queue.size() < desired:
+		assignment_queue.append(EmployeeData.Assignment.FEATURES)
+	assignment_queue.shuffle()
+
+	var pool_size: int = maxi(desired + 4, desired * 2)
+	var candidates: Array[EmployeeData] = HiringEngine.generate_candidates(pool_size, market, self)
+	var seed_count: int = mini(desired, mini(candidates.size(), company.office_capacity()))
+	var min_seniority_i: int = int(min_seniority)
+	for i in seed_count:
+		var emp: EmployeeData = candidates[i]
+		if int(emp.seniority) < min_seniority_i:
+			emp.seniority = min_seniority
+			emp.skill = clampi(emp.skill + randi_range(6, 16), 30, 99)
+			emp.speed = clampi(emp.speed + randi_range(5, 14), 30, 99)
+			var salary_range: Vector2 = EmployeeData.SALARY_RANGES[min_seniority]
+			var target_salary: float = randf_range(salary_range.x, salary_range.y)
+			if emp.employment_type == EmployeeData.EmploymentType.CONTRACTOR:
+				target_salary *= 0.78
+			elif emp.employment_type == EmployeeData.EmploymentType.INTERN:
+				target_salary *= 0.46
+			emp.salary_per_quarter = maxf(emp.salary_per_quarter, target_salary)
+		if min_seniority_i >= int(EmployeeData.Seniority.SENIOR) and emp.employment_type == EmployeeData.EmploymentType.INTERN:
+			emp.employment_type = EmployeeData.EmploymentType.FULL_TIME
+
+		emp.assignment = assignment_queue[i]
+		emp.tenure_quarters = randi_range(maxi(0, tenure_min), maxi(tenure_min, tenure_max))
+		emp.morale = clampi(emp.morale + randi_range(-6, 8), 45, 92)
+		emp.stress = clampi(emp.stress + randi_range(4, 18), 0, 95)
+		hire_employee(emp)
 
 
 func _reset_hosting_state() -> void:
@@ -249,6 +438,36 @@ func _reset_hosting_state() -> void:
 	company.hosting_optimization_level = 0
 	company.hosting_workload_profile = "General Cloud"
 	company.hosting_data_center_pressure = 0.0
+
+
+func clear_world_event_state() -> void:
+	active_world_event_id = ""
+	active_world_event_title = ""
+	active_world_event_description = ""
+	active_world_event_quarters_left = 0
+	active_world_event_effects.clear()
+
+
+func active_world_event_brief() -> String:
+	if active_world_event_quarters_left <= 0:
+		return ""
+	var title := active_world_event_title.strip_edges()
+	if title.is_empty():
+		return ""
+	return "%s (%dQ left)" % [title, active_world_event_quarters_left]
+
+
+func world_event_mult(key: String, default_value: float = 1.0) -> float:
+	if active_world_event_quarters_left <= 0:
+		return default_value
+	var clean_key := key.strip_edges()
+	if clean_key.is_empty():
+		return default_value
+	var value_raw = active_world_event_effects.get(clean_key, default_value)
+	var value: float = default_value
+	if value_raw is int or value_raw is float:
+		value = float(value_raw)
+	return clampf(value, 0.25, 3.0)
 
 
 func difficulty_mult(key: String) -> float:
@@ -413,6 +632,9 @@ func _take_snapshot() -> void:
 		"hosting_incidents": company.hosting_incidents_last_quarter,
 		"hosting_workload_profile": company.hosting_workload_profile,
 		"hosting_data_center_pressure": company.hosting_data_center_pressure,
+		"world_event_id": active_world_event_id,
+		"world_event_title": active_world_event_title,
+		"world_event_quarters_left": active_world_event_quarters_left,
 		"salaries_cost": salaries_cost,
 		"infrastructure_cost": infra_cost,
 		"hosting_cost": hosting_cost,
@@ -527,10 +749,72 @@ func _check_milestone_bonuses() -> void:
 			})
 
 
+func _compact_history_for_save() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = _dict_array(history)
+	if rows.size() > MAX_HISTORY_SAVE_SIZE:
+		rows = rows.slice(-MAX_HISTORY_SAVE_SIZE)
+	return rows
+
+
+func _compact_event_log_for_save() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = _dict_array(event_log)
+	if rows.size() > MAX_EVENT_LOG_SAVE_SIZE:
+		rows = rows.slice(-MAX_EVENT_LOG_SAVE_SIZE)
+	return rows
+
+
 func append_event_log(entry: Dictionary) -> void:
-	event_log.append(entry)
+	if entry.is_empty():
+		return
+	var year_val: int = maxi(1, int(entry.get("year", current_year)))
+	var quarter_val: int = clampi(int(entry.get("quarter", current_quarter)), 1, 4)
+	var event_id_val: String = str(entry.get("event_id", "")).strip_edges()
+	if event_id_val.is_empty():
+		event_id_val = "misc"
+	if event_id_val.length() > MAX_EVENT_ID_LEN:
+		event_id_val = event_id_val.substr(0, MAX_EVENT_ID_LEN)
+	var title_val: String = str(entry.get("title", "")).strip_edges()
+	if title_val.is_empty():
+		title_val = event_id_val
+	if title_val.length() > MAX_EVENT_TITLE_LEN:
+		title_val = title_val.substr(0, MAX_EVENT_TITLE_LEN)
+
+	var normalized := {
+		"quarter": quarter_val,
+		"year": year_val,
+		"event_id": event_id_val,
+		"title": title_val,
+	}
+	if not event_log.is_empty():
+		var last_raw = event_log.back()
+		if last_raw is Dictionary:
+			var last: Dictionary = last_raw
+			if int(last.get("quarter", 0)) == quarter_val \
+			and int(last.get("year", 0)) == year_val \
+			and str(last.get("event_id", "")) == event_id_val \
+			and str(last.get("title", "")) == title_val:
+				return
+
+	event_log.append(normalized)
 	if event_log.size() > MAX_EVENT_LOG_SIZE:
 		event_log = event_log.slice(-MAX_EVENT_LOG_SIZE)
+
+
+func event_count_this_quarter(event_id: String = "") -> int:
+	if event_log.is_empty():
+		return 0
+	var target_id: String = event_id.strip_edges()
+	var count := 0
+	for idx in range(event_log.size() - 1, -1, -1):
+		var raw = event_log[idx]
+		if not (raw is Dictionary):
+			continue
+		var row: Dictionary = raw
+		if int(row.get("quarter", -1)) != current_quarter or int(row.get("year", -1)) != current_year:
+			break
+		if target_id.is_empty() or str(row.get("event_id", "")) == target_id:
+			count += 1
+	return count
 
 
 # --- Save / Load ---
@@ -883,13 +1167,20 @@ func _serialize() -> Dictionary:
 			"trend": market.market_trend,
 			"economy": market.economy_state,
 		},
+		"world_event": {
+			"id": active_world_event_id,
+			"title": active_world_event_title,
+			"description": active_world_event_description,
+			"quarters_left": active_world_event_quarters_left,
+			"effects": active_world_event_effects.duplicate(true),
+		},
 		"employees": emp_list,
 		"quarter": current_quarter,
 		"year": current_year,
 		"difficulty": difficulty,
 		"scenario": starting_scenario,
-		"history": history.duplicate(true),
-		"event_log": event_log.duplicate(true),
+		"history": _compact_history_for_save(),
+		"event_log": _compact_event_log_for_save(),
 		"fired_events": fired_one_time_events.duplicate(),
 		"milestones_hit": _milestones_hit.duplicate(),
 		"achieved_wins": _achieved_wins.duplicate(),
@@ -978,6 +1269,13 @@ func _deserialize(data: Dictionary) -> bool:
 	market.competitors.assign(_safe_array(md.get("competitors", [])))
 	market.market_trend = md.get("trend", 0)
 	market.economy_state = md.get("economy", 0)
+
+	var wd: Dictionary = _safe_dict(data.get("world_event", {}))
+	active_world_event_id = str(wd.get("id", ""))
+	active_world_event_title = str(wd.get("title", ""))
+	active_world_event_description = str(wd.get("description", ""))
+	active_world_event_quarters_left = int(wd.get("quarters_left", 0))
+	active_world_event_effects = _safe_dict(wd.get("effects", {}))
 
 	employees.clear()
 	for raw_emp in _safe_array(data.get("employees", [])):
@@ -1092,6 +1390,25 @@ func _clamp_deserialized_values() -> void:
 	founder_energy = clampi(founder_energy, 0, 200)
 	board_patience = clampi(board_patience, 0, 20)
 	profit_streak = maxi(0, profit_streak)
+	active_world_event_id = active_world_event_id.strip_edges()
+	active_world_event_title = active_world_event_title.strip_edges()
+	active_world_event_description = active_world_event_description.strip_edges()
+	if active_world_event_title.length() > 96:
+		active_world_event_title = active_world_event_title.substr(0, 96)
+	if active_world_event_description.length() > 260:
+		active_world_event_description = active_world_event_description.substr(0, 260)
+	active_world_event_quarters_left = clampi(active_world_event_quarters_left, 0, 8)
+	var cleaned_world_effects: Dictionary = {}
+	for raw_key in active_world_event_effects.keys():
+		var key := str(raw_key).strip_edges()
+		if key.is_empty():
+			continue
+		var value_raw = active_world_event_effects.get(raw_key, 1.0)
+		if value_raw is int or value_raw is float:
+			cleaned_world_effects[key] = clampf(float(value_raw), 0.25, 3.0)
+	active_world_event_effects = cleaned_world_effects
+	if active_world_event_quarters_left <= 0 or active_world_event_title.is_empty():
+		clear_world_event_state()
 
 	market.economy_state = clampi(market.economy_state, 0, 2)
 
@@ -1223,6 +1540,7 @@ func _clear_run_state() -> void:
 	event_log.clear()
 	fired_one_time_events.clear()
 	pending_events.clear()
+	clear_world_event_state()
 	_milestones_hit.clear()
 	_achieved_wins.clear()
 	interviewer_busy_quarters.clear()

@@ -67,6 +67,16 @@ func setup(company_type: int) -> void:
 		CompanyData.CompanyType.DEV_TOOLS:   _build_dev_tools()
 
 
+func _exit_tree() -> void:
+	_clear_preview_animation()
+	_clear_idle_animations()
+	_clear_consumer_runtime()
+	_feature_map.clear()
+	_unlocked_features.clear()
+	_preview_feature_id = ""
+	_company_type = -1
+
+
 func refresh(shipped_ids: Array) -> void:
 	for fid: String in shipped_ids:
 		if fid.is_empty():

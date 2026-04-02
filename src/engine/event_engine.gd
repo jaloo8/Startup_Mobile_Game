@@ -79,6 +79,7 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 	_tick_cooldowns()
 
 	var context := _build_context(state)
+	context["company_stage"] = _company_stage(context)
 	var eligible: Array[EventData] = []
 
 	for ev in _all_events:
@@ -107,6 +108,8 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 	var pressure_mult := 1.0
 	if state.has_method("difficulty_mult"):
 		pressure_mult = clampf(float(state.difficulty_mult("event_pressure_mult")), 0.7, 1.5)
+	if state.has_method("world_event_mult"):
+		pressure_mult *= clampf(float(state.world_event_mult("event_pressure_mult", 1.0)), 0.7, 1.4)
 	# Use floor/ceil instead of round so multipliers always have a visible effect.
 	# Example: 2 * 0.85 should stay at 1 in sandbox, while 2 * 1.2 should become 3.
 	if pressure_mult < 1.0:
@@ -164,30 +167,30 @@ static func _tick_cooldowns() -> void:
 
 
 static func _weighted_pick(pool: Array[EventData], context: Dictionary) -> EventData:
+	var candidates: Array[EventData] = []
+	var cumulative: Array[float] = []
 	var total := 0.0
 	for ev in pool:
-		total += _effective_event_weight(ev, context)
-	if total <= 0.0:
+		var weight: float = _effective_event_weight(ev, context)
+		if weight <= 0.0:
+			continue
+		total += weight
+		candidates.append(ev)
+		cumulative.append(total)
+	if candidates.is_empty() or total <= 0.0:
 		return null
 	var roll := randf() * total
-	var fallback: EventData = null
-	for ev in pool:
-		var w: float = _effective_event_weight(ev, context)
-		if w <= 0.0:
-			continue
-		if fallback == null:
-			fallback = ev
-		roll -= w
-		if roll <= 0.0:
-			return ev
-	return fallback
+	for i in range(candidates.size()):
+		if roll <= cumulative[i]:
+			return candidates[i]
+	return candidates.back()
 
 
 static func _matches_stage(ev: EventData, context: Dictionary) -> bool:
 	var stage: String = str(ev.get_meta("stage", STAGE_ANY)).strip_edges().to_lower()
 	if stage.is_empty() or stage == STAGE_ANY:
 		return true
-	return stage == _company_stage(context)
+	return stage == str(context.get("company_stage", _company_stage(context)))
 
 
 static func _company_stage(context: Dictionary) -> String:
@@ -220,7 +223,7 @@ static func _effective_event_weight(ev: EventData, context: Dictionary) -> float
 			weight *= 1.35 if niche_match else 0.35
 
 	var stage: String = str(ev.get_meta("stage", STAGE_ANY)).strip_edges().to_lower()
-	if stage == _company_stage(context):
+	if stage == str(context.get("company_stage", _company_stage(context))):
 		weight *= 1.12
 	return maxf(weight, 0.01)
 
@@ -243,4 +246,6 @@ static func _build_context(state: Node) -> Dictionary:
 		"valuation": state.company.valuation,
 		"features_shipped": state.product.feature_count(),
 		"revenue": state.financials.revenue,
+		"world_event_id": state.active_world_event_id if int(state.active_world_event_quarters_left) > 0 else "",
+		"world_event_title": state.active_world_event_title if int(state.active_world_event_quarters_left) > 0 else "",
 	}

@@ -21,6 +21,13 @@ func _ready() -> void:
 	continue_btn.pressed.connect(_on_continue)
 
 
+func _exit_tree() -> void:
+	if _tween and _tween.is_running():
+		_tween.kill()
+	_tween = null
+	_current_event = null
+
+
 func show_event(event: EventData) -> void:
 	_current_event = event
 	_current_choice_index = -1

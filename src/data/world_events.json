@@ -1,0 +1,193 @@
+[
+  {
+    "id": "risk_off_capital_cycle",
+    "title": "Risk-Off Capital Cycle",
+    "description": "Institutional money rotates out of high-growth bets and into safer assets. Customers spend slower and investors ask harder questions.",
+    "economy": "bear",
+    "weight": 1.2,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "growth_mult": 0.86,
+      "churn_mult": 1.08,
+      "fundraise_amount_mult": 0.82,
+      "competitor_mult": 0.92
+    }
+  },
+  {
+    "id": "interest_rate_spike",
+    "title": "Rate Hike Shock",
+    "description": "Capital gets expensive quickly. Venture checks get smaller and operating budgets tighten across the market.",
+    "economy": "bear",
+    "weight": 1.0,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "fundraise_amount_mult": 0.78,
+      "growth_mult": 0.90,
+      "cost_mult": 1.06
+    }
+  },
+  {
+    "id": "supply_chain_bottleneck",
+    "title": "Supply Chain Bottleneck",
+    "description": "Infrastructure vendors and service providers pass through delays and surcharges. Launches still happen, just with more friction.",
+    "weight": 0.95,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "cost_mult": 1.12,
+      "churn_mult": 1.04
+    }
+  },
+  {
+    "id": "cloud_pricing_reset",
+    "title": "Cloud Pricing Reset",
+    "description": "Major providers quietly remove aggressive credits and promo tiers. Infra-heavy products feel it first.",
+    "min_users": 1000,
+    "weight": 0.92,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "cost_mult": 1.14
+    }
+  },
+  {
+    "id": "privacy_regulation_wave",
+    "title": "Privacy Regulation Wave",
+    "description": "New compliance requirements hit growth channels, but trust in serious operators improves over time.",
+    "weight": 0.85,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "growth_mult": 0.90,
+      "cost_mult": 1.05,
+      "churn_mult": 0.97
+    }
+  },
+  {
+    "id": "ad_market_correction",
+    "title": "Ad Market Correction",
+    "description": "Performance marketing weakens and ad inventory reprices. Monetized products see softer top-line numbers.",
+    "company_types": ["consumer", "marketplace"],
+    "stage": "growth",
+    "weight": 0.82,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "revenue_mult": 0.88,
+      "growth_mult": 0.93
+    }
+  },
+  {
+    "id": "creator_platform_boom",
+    "title": "Creator Platform Boom",
+    "description": "Short-form content and creator tools surge again. Products with social loops ride a meaningful tailwind.",
+    "economy": "bull",
+    "company_types": ["consumer", "marketplace"],
+    "weight": 0.95,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "growth_mult": 1.15,
+      "revenue_mult": 1.10,
+      "competitor_mult": 1.08
+    }
+  },
+  {
+    "id": "remote_work_reacceleration",
+    "title": "Remote Work Reacceleration",
+    "description": "Distributed teams increase spend on workflow, compliance, and developer tooling. B2B adoption speeds up.",
+    "company_types": ["saas", "dev_tools"],
+    "stage": "growth",
+    "weight": 1.05,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "growth_mult": 1.11,
+      "revenue_mult": 1.08
+    }
+  },
+  {
+    "id": "open_source_breakthrough",
+    "title": "Open-Source Breakthrough Cycle",
+    "description": "Core infra primitives get cheaper and better. Teams ship faster with less spend on foundational work.",
+    "weight": 0.8,
+    "duration_min": 1,
+    "duration_max": 2,
+    "effects": {
+      "cost_mult": 0.90,
+      "growth_mult": 1.05
+    }
+  },
+  {
+    "id": "ai_productivity_wave",
+    "title": "AI Productivity Wave",
+    "description": "AI copilots and automation tooling become mainstream. Shipping velocity rises, and expectations rise with it.",
+    "stage": "late",
+    "min_quarter": 8,
+    "weight": 0.9,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "growth_mult": 1.09,
+      "revenue_mult": 1.05,
+      "competitor_mult": 1.10
+    }
+  },
+  {
+    "id": "capital_reopens",
+    "title": "Capital Reopens",
+    "description": "Risk appetite comes back and growth stories get funded faster. Deals close with less friction than last year.",
+    "economy": "bull",
+    "stage": "late",
+    "min_quarter": 6,
+    "weight": 0.88,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "fundraise_amount_mult": 1.22,
+      "growth_mult": 1.06
+    }
+  },
+  {
+    "id": "compliance_spending_cycle",
+    "title": "Compliance Spending Cycle",
+    "description": "Enterprise buyers increase budgets for auditability and risk controls. Strong operators gain pricing power.",
+    "company_types": ["saas", "dev_tools"],
+    "stage": "late",
+    "min_users": 5000,
+    "weight": 0.76,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "revenue_mult": 1.10,
+      "cost_mult": 1.03
+    }
+  },
+  {
+    "id": "founder_docuseries_cycle",
+    "title": "Founder Docuseries Cycle",
+    "description": "A flashy startup mini-series dominates the feed. Users romanticize builder culture, and sign-up intent spikes for product-led teams.",
+    "stage": "early",
+    "weight": 0.62,
+    "duration_min": 1,
+    "duration_max": 2,
+    "effects": {
+      "growth_mult": 1.08,
+      "event_pressure_mult": 1.08
+    }
+  },
+  {
+    "id": "boardroom_memo_leak_cycle",
+    "title": "Boardroom Memo Leak Cycle",
+    "description": "A parade of leaked strategy decks puts startup culture under a microscope. Churn pressure ticks up as users scrutinize trust.",
+    "weight": 0.68,
+    "duration_min": 1,
+    "duration_max": 2,
+    "effects": {
+      "churn_mult": 1.06,
+      "event_pressure_mult": 1.12
+    }
+  }
+]

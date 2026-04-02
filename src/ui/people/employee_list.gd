@@ -17,6 +17,7 @@ var _card_style: StyleBoxFlat
 var _assign_target: EmployeeData
 var _sort_buttons: Dictionary = {}  # SortKey -> Button
 var _sort_hint_label: Label
+var _allocation_hint_label: Label
 
 enum SortKey { NAME, SKILL, MORALE, SALARY, ASSIGNMENT }
 var _current_sort: SortKey = SortKey.NAME
@@ -79,6 +80,9 @@ const ASSIGNMENT_DESCRIPTIONS := {
 	EmployeeData.Assignment.INFRA: "Improve stability and uptime.\nUnstable products lose users fast.",
 	EmployeeData.Assignment.RND: "Research and improve UX.\nBetter UX means happier users.",
 }
+const RESPONSIBILITY_STAGE_EARLY := "early"
+const RESPONSIBILITY_STAGE_GROWTH := "growth"
+const RESPONSIBILITY_STAGE_SCALE := "scale"
 
 
 func _ready() -> void:
@@ -87,6 +91,7 @@ func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	candidate_panel.visible = false
 	_build_sort_buttons()
+	_build_allocation_hint_label()
 	_update_hire_button()
 	_refresh_list()
 	Analytics.track_screen("people")
@@ -150,6 +155,104 @@ func _build_sort_hint_label() -> void:
 	_sort_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(_sort_hint_label)
 	parent.move_child(_sort_hint_label, sort_row.get_index() + 1)
+
+
+func _build_allocation_hint_label() -> void:
+	if _allocation_hint_label != null:
+		return
+	var parent := capacity_label.get_parent()
+	if parent == null:
+		return
+	_allocation_hint_label = Label.new()
+	_allocation_hint_label.add_theme_font_size_override("font_size", 11)
+	_allocation_hint_label.add_theme_color_override("font_color", Color(0.58, 0.74, 0.92))
+	_allocation_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	parent.add_child(_allocation_hint_label)
+	parent.move_child(_allocation_hint_label, capacity_label.get_index() + 1)
+
+
+func _responsibility_stage() -> String:
+	var team_size: int = GameState.employees.size()
+	var elapsed_q: int = GameState.total_quarters_elapsed()
+	var users: int = 0
+	if GameState.product != null:
+		users = GameState.product.users
+	if team_size <= 4 and elapsed_q < 8:
+		return RESPONSIBILITY_STAGE_EARLY
+	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
+		return RESPONSIBILITY_STAGE_GROWTH
+	return RESPONSIBILITY_STAGE_SCALE
+
+
+func _assignment_count(target: EmployeeData.Assignment) -> int:
+	var count := 0
+	for emp: EmployeeData in GameState.employees:
+		if emp.assignment == target:
+			count += 1
+	return count
+
+
+func _refresh_allocation_hint() -> void:
+	if _allocation_hint_label == null:
+		return
+	var stage: String = _responsibility_stage()
+	if stage == RESPONSIBILITY_STAGE_EARLY:
+		_allocation_hint_label.text = "Team model: Early startup (shared hats). Keep most people on Features; other lanes still provide partial feature support."
+		_allocation_hint_label.add_theme_color_override("font_color", Color(0.58, 0.74, 0.92))
+		return
+
+	var missing: Array[String] = []
+	if _assignment_count(EmployeeData.Assignment.BUGS) == 0:
+		missing.append("Bug Fixes")
+	if _assignment_count(EmployeeData.Assignment.TECH_DEBT) == 0:
+		missing.append("Tech Debt")
+	if _assignment_count(EmployeeData.Assignment.INFRA) == 0:
+		missing.append("Infrastructure")
+	if _assignment_count(EmployeeData.Assignment.RND) == 0:
+		missing.append("R&D")
+	if missing.is_empty():
+		if stage == RESPONSIBILITY_STAGE_GROWTH:
+			_allocation_hint_label.text = "Team model: Growth stage. Coverage looks balanced across delivery and maintenance lanes."
+		else:
+			_allocation_hint_label.text = "Team model: Scale stage. Nice specialization coverage — this keeps churn and hidden drag under control."
+		_allocation_hint_label.add_theme_color_override("font_color", Color(0.45, 0.84, 0.56))
+		return
+
+	_allocation_hint_label.text = "Specialization now matters: add coverage in %s." % ", ".join(missing)
+	_allocation_hint_label.add_theme_color_override("font_color", Color(0.92, 0.72, 0.40))
+
+
+func _assignment_description_for_stage(a_key: EmployeeData.Assignment, stage: String) -> String:
+	var base: String = str(ASSIGNMENT_DESCRIPTIONS.get(a_key, ""))
+	if stage == RESPONSIBILITY_STAGE_EARLY:
+		if a_key == EmployeeData.Assignment.FEATURES:
+			return base + "\nEarly stage: this is your main shipping lane."
+		return base + "\nEarly stage: still contributes some support to feature delivery."
+	if stage == RESPONSIBILITY_STAGE_GROWTH:
+		match a_key:
+			EmployeeData.Assignment.BUGS:
+				return base + "\nGrowth stage: prevents churn spikes from unresolved bugs."
+			EmployeeData.Assignment.TECH_DEBT:
+				return base + "\nGrowth stage: protects feature velocity as complexity rises."
+			EmployeeData.Assignment.INFRA:
+				return base + "\nGrowth stage: protects reliability and hosting pressure."
+			EmployeeData.Assignment.RND:
+				return base + "\nGrowth stage: improves retention and user pull."
+			_:
+				return base + "\nGrowth stage: still important, but not enough alone."
+	match a_key:
+		EmployeeData.Assignment.FEATURES:
+			return base + "\nScale stage: ships roadmap, but needs support lanes to stay efficient."
+		EmployeeData.Assignment.BUGS:
+			return base + "\nScale stage: critical for churn and quality control."
+		EmployeeData.Assignment.TECH_DEBT:
+			return base + "\nScale stage: critical for avoiding hidden productivity drag."
+		EmployeeData.Assignment.INFRA:
+			return base + "\nScale stage: critical for uptime and incident prevention."
+		EmployeeData.Assignment.RND:
+			return base + "\nScale stage: critical for engagement and growth quality."
+		_:
+			return base
 
 
 func _refresh_sort_hint() -> void:
@@ -249,6 +352,7 @@ func _refresh_list() -> void:
 		GameState.company.office_capacity(),
 		GameState.company.office_name(),
 	]
+	_refresh_allocation_hint()
 
 	if GameState.employees.is_empty():
 		var empty_label := Label.new()
@@ -1464,9 +1568,22 @@ func _show_assign_prompt(emp: EmployeeData) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	header_row.add_child(title)
 
+	var stage: String = _responsibility_stage()
+	var stage_hint := Label.new()
+	if stage == RESPONSIBILITY_STAGE_EARLY:
+		stage_hint.text = "Early startup mode: people wear multiple hats, and Features should stay the main lane."
+	elif stage == RESPONSIBILITY_STAGE_GROWTH:
+		stage_hint.text = "Growth mode: start dedicated coverage for Bugs, Tech Debt, Infra, and R&D."
+	else:
+		stage_hint.text = "Scale mode: specialization is required to avoid hidden drag and churn."
+	stage_hint.add_theme_font_size_override("font_size", 12)
+	stage_hint.add_theme_color_override("font_color", Color(0.58, 0.76, 0.92))
+	stage_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(stage_hint)
+
 	for a_key in ASSIGNMENT_DESCRIPTIONS:
 		var btn := Button.new()
-		btn.text = "%s\n%s" % [EmployeeData.ASSIGNMENT_NAMES[a_key], ASSIGNMENT_DESCRIPTIONS[a_key]]
+		btn.text = "%s\n%s" % [EmployeeData.ASSIGNMENT_NAMES[a_key], _assignment_description_for_stage(a_key, stage)]
 		btn.custom_minimum_size = Vector2(0, 50)
 		btn.add_theme_font_size_override("font_size", 13)
 		var prompt_icon := _assign_icon_texture(a_key)
