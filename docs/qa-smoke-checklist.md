@@ -83,6 +83,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 4.16 | Dashboard finance labels use hybrid CFO + plain wording | Titles read `Cash (On Hand)`, `Revenue (Qtr)`, `Burn Rate (Qtr)`, `Runway (Time Left)` and glossary opens correct definitions | `quarter_dashboard.gd` → `_apply_plain_finance_titles()` |
 | 4.17 | Dashboard plain-English finance explainer updates | One-line explainer describes positive or negative cashflow based on current quarter state | `quarter_dashboard.gd` → `_refresh_finance_plain_hint()` |
 | 4.18 | Dashboard hosting strip shows workload profile | Hosting status includes workload profile text and pressure warning when run becomes scale/data-center heavy | `quarter_dashboard.gd` → `_refresh_hosting_status()` |
+| 4.19 | Quarter transition FX + SFX triggers on advance | Advancing quarter plays sweep/tint/period-label transition and emits start/resolve SFX (asset-based or synth fallback) without blocking simulation flow | `quarter_dashboard.gd` → `_play_quarter_transition_placeholder()`, `_play_transition_sfx()` |
 
 ---
 

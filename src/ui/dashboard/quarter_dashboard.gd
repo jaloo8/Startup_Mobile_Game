@@ -44,6 +44,14 @@ const OFFICE_BANNER_PATHS := [
 	"res://assets/office/office_2_small.png",
 	"res://assets/office/office_3_hq.png",
 ]
+const QUARTER_TRANSITION_WHOOSH_PATHS := [
+	"res://assets/audio/sfx/quarter_whoosh.ogg",
+	"res://assets/audio/sfx/quarter_whoosh.wav",
+]
+const QUARTER_TRANSITION_DING_PATHS := [
+	"res://assets/audio/sfx/quarter_ding.ogg",
+	"res://assets/audio/sfx/quarter_ding.wav",
+]
 const OFFICE_WORKSPACE_STYLES := {
 	0: {"rows": 1, "per_row": 3, "base_y_ratio": 0.70, "row_gap": 14.0, "desk_w": 16.0, "desk_h": 4.0},
 	1: {"rows": 1, "per_row": 5, "base_y_ratio": 0.66, "row_gap": 14.0, "desk_w": 17.0, "desk_h": 4.0},
@@ -70,6 +78,12 @@ var _advance_hint_label: Label
 var _advance_toast_panel: PanelContainer
 var _advance_toast_label: Label
 var _hosting_status_label: Label
+var _transition_sweep: ColorRect
+var _transition_label: Label
+var _transition_sfx_player: AudioStreamPlayer
+var _transition_whoosh_stream: AudioStream
+var _transition_ding_stream: AudioStream
+var _transition_tween: Tween
 var _office_worker_layer: Control
 var _finance_plain_label: Label
 
@@ -107,6 +121,7 @@ func _ready() -> void:
 	_build_next_action_label()
 	_build_advance_hint_label()
 	_build_advance_toast()
+	_build_quarter_transition_fx()
 	_build_hosting_status_label()
 	_build_office_worker_layer()
 	_build_finance_plain_label()
@@ -163,6 +178,10 @@ func _apply_plain_finance_titles() -> void:
 
 func _exit_tree() -> void:
 	_headline_timer.stop()
+	if _transition_tween != null and is_instance_valid(_transition_tween):
+		_transition_tween.kill()
+	if _transition_sfx_player != null:
+		_transition_sfx_player.stop()
 	_safe_disconnect(GameState.quarter_advanced, _refresh)
 	_safe_disconnect(GameState.game_over, _on_game_over)
 	_safe_disconnect(GameState.game_won, _on_game_won)
@@ -229,19 +248,159 @@ func _move_nav_to_top() -> void:
 		btn.add_theme_font_size_override("font_size", 13)
 
 
-func _play_quarter_transition_placeholder() -> void:
-	# Visual hook layer for future bespoke quarter transition art.
+func _build_quarter_transition_fx() -> void:
 	if quarter_transition_tint == null:
 		return
+	quarter_transition_tint.visible = false
+	quarter_transition_tint.modulate.a = 0.0
+
+	_transition_sweep = ColorRect.new()
+	_transition_sweep.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_transition_sweep.color = Color(0.70, 0.86, 1.0, 0.30)
+	_transition_sweep.visible = false
+	quarter_transition_tint.add_child(_transition_sweep)
+
+	_transition_label = Label.new()
+	_transition_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_transition_label.offset_left = -170.0
+	_transition_label.offset_right = 170.0
+	_transition_label.offset_top = -14.0
+	_transition_label.offset_bottom = 14.0
+	_transition_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_transition_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_transition_label.add_theme_font_size_override("font_size", 17)
+	_transition_label.add_theme_color_override("font_color", Color(0.90, 0.96, 1.0))
+	_transition_label.visible = false
+	quarter_transition_tint.add_child(_transition_label)
+
+	_transition_sfx_player = AudioStreamPlayer.new()
+	_transition_sfx_player.bus = "Master"
+	add_child(_transition_sfx_player)
+	_transition_whoosh_stream = _load_first_audio_stream(QUARTER_TRANSITION_WHOOSH_PATHS)
+	_transition_ding_stream = _load_first_audio_stream(QUARTER_TRANSITION_DING_PATHS)
+
+
+func _next_quarter_label_text() -> String:
+	var next_year: int = GameState.current_year
+	var next_quarter: int = GameState.current_quarter + 1
+	if next_quarter > 4:
+		next_quarter = 1
+		next_year += 1
+	return "Advancing to Year %d Q%d..." % [next_year, next_quarter]
+
+
+func _load_first_audio_stream(paths: Array[String]) -> AudioStream:
+	for path in paths:
+		if not ResourceLoader.exists(path):
+			continue
+		var stream: AudioStream = ResourceLoader.load(path) as AudioStream
+		if stream != null:
+			return stream
+	return null
+
+
+func _play_transition_sfx(phase: String) -> void:
+	if _transition_sfx_player == null:
+		return
+	var stream: AudioStream = null
+	var volume_db: float = -7.0
+	if phase == "start":
+		stream = _transition_whoosh_stream
+		volume_db = -6.0
+	else:
+		stream = _transition_ding_stream
+		volume_db = -8.0
+
+	if stream != null:
+		_transition_sfx_player.stream = stream
+		_transition_sfx_player.volume_db = volume_db
+		_transition_sfx_player.pitch_scale = 1.0
+		_transition_sfx_player.play()
+		return
+
+	# Fallback: synthesize a tiny transition tone when no assets exist yet.
+	if phase == "start":
+		_play_synth_transition_sfx(220.0, 0.16, 0.12, 8.0)
+	else:
+		_play_synth_transition_sfx(690.0, 0.12, 0.10, 12.5)
+
+
+func _play_synth_transition_sfx(freq_hz: float, duration_s: float, amp: float, decay: float) -> void:
+	if _transition_sfx_player == null:
+		return
+	var generator := AudioStreamGenerator.new()
+	generator.mix_rate = 44_100.0
+	generator.buffer_length = 0.30
+	_transition_sfx_player.stream = generator
+	_transition_sfx_player.volume_db = -5.0
+	_transition_sfx_player.play()
+	var playback: AudioStreamGeneratorPlayback = _transition_sfx_player.get_stream_playback() as AudioStreamGeneratorPlayback
+	if playback == null:
+		return
+	var samples: int = int(generator.mix_rate * duration_s)
+	var safe_duration: float = maxf(0.001, duration_s)
+	for i in samples:
+		var t: float = float(i) / generator.mix_rate
+		var env: float = exp(-decay * t)
+		var pitch_glide: float = 1.0 + (0.18 * (1.0 - (t / safe_duration)))
+		var wave: float = sin(TAU * (freq_hz * pitch_glide) * t)
+		wave += sin(TAU * (freq_hz * 1.84) * t) * 0.22
+		var sample: float = clampf(wave * env * amp, -1.0, 1.0)
+		playback.push_frame(Vector2(sample, sample))
+
+
+func _play_quarter_transition_placeholder() -> float:
+	if quarter_transition_tint == null:
+		return 0.0
+	if _transition_tween != null and is_instance_valid(_transition_tween):
+		_transition_tween.kill()
+
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var width: float = maxf(420.0, viewport_size.x)
+	var height: float = maxf(240.0, viewport_size.y)
+	var sweep_w: float = clampf(width * 0.34, 140.0, 420.0)
 	quarter_transition_tint.visible = true
 	quarter_transition_tint.modulate.a = 0.0
+
+	if _transition_sweep != null:
+		_transition_sweep.visible = true
+		_transition_sweep.position = Vector2(-sweep_w, 0.0)
+		_transition_sweep.size = Vector2(sweep_w, height)
+		_transition_sweep.modulate.a = 0.0
+	if _transition_label != null:
+		_transition_label.visible = true
+		_transition_label.text = _next_quarter_label_text()
+		_transition_label.scale = Vector2(0.96, 0.96)
+		_transition_label.modulate.a = 0.0
+
+	_play_transition_sfx("start")
+
 	var tw := create_tween()
-	tw.tween_property(quarter_transition_tint, "modulate:a", 0.26, 0.10)
-	tw.tween_property(quarter_transition_tint, "modulate:a", 0.0, 0.22)
-	tw.finished.connect(func() -> void:
+	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(quarter_transition_tint, "modulate:a", 0.78, 0.12)
+	if _transition_label != null:
+		tw.parallel().tween_property(_transition_label, "modulate:a", 1.0, 0.10)
+		tw.parallel().tween_property(_transition_label, "scale", Vector2.ONE, 0.16)
+	if _transition_sweep != null:
+		tw.parallel().tween_property(_transition_sweep, "modulate:a", 0.34, 0.09)
+		tw.parallel().tween_property(_transition_sweep, "position:x", width + sweep_w, 0.27).set_trans(Tween.TRANS_CUBIC)
+
+	tw.tween_interval(0.03)
+	tw.tween_property(quarter_transition_tint, "modulate:a", 0.0, 0.24)
+	if _transition_label != null:
+		tw.parallel().tween_property(_transition_label, "modulate:a", 0.0, 0.16)
+	if _transition_sweep != null:
+		tw.parallel().tween_property(_transition_sweep, "modulate:a", 0.0, 0.14)
+	tw.tween_callback(func() -> void:
 		if quarter_transition_tint:
 			quarter_transition_tint.visible = false
+		if _transition_sweep:
+			_transition_sweep.visible = false
+		if _transition_label:
+			_transition_label.visible = false
 	)
+	_transition_tween = tw
+	return 0.11
 
 
 func _build_feature_banner() -> void:
@@ -837,12 +996,15 @@ func _on_advance() -> void:
 	advance_btn.disabled = true
 	_set_advance_hint("Simulating quarter...", Color(0.6, 0.78, 0.95))
 	_update_advance_button_label()
-	_play_quarter_transition_placeholder()
+	var transition_hold: float = _play_quarter_transition_placeholder()
+	if transition_hold > 0.0:
+		await get_tree().create_timer(transition_hold).timeout
 	SceneLoader.free_children(event_log_container)
 	_pending_events.clear()
 	_refresh_events_heading()
 	Analytics.track_quarter_advanced(GameState.current_year, GameState.current_quarter)
 	GameState.advance_quarter()
+	_play_transition_sfx("resolve")
 	_show_advance_toast()
 	Analytics.track_revenue(GameState.financials.revenue)
 
