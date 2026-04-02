@@ -14,6 +14,7 @@ func _ready() -> void:
 	_player_style = _make_style(Color(0.15, 0.20, 0.30))
 	back_btn.pressed.connect(_on_back)
 	_refresh()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("market")
 
 

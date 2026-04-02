@@ -14,6 +14,7 @@ func _ready() -> void:
 	visible = false
 	close_btn.pressed.connect(dismiss)
 	Glossary.term_requested.connect(show_term)
+	UITouchHelper.harden_tree(self)
 
 
 func _exit_tree() -> void:
@@ -30,6 +31,8 @@ func show_term(key: String) -> void:
 
 	modulate.a = 0.0
 	visible = true
+	# Placeholder hook: future polish can swap this fade for a richer authored
+	# slide/bounce animation while keeping this public API unchanged.
 
 	if _tween and _tween.is_running():
 		_tween.kill()

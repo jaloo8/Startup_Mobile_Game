@@ -420,7 +420,7 @@ Do these in order. Each one should be playable before starting the next.
   - Monica parody — VC partner contact who gives better fundraising intel and friendlier term sheets
   - Big Head parody — low skill but incredibly lucky, stumbles into success, cheap to hire but unpredictable output
   - Each character triggers unique events and dialogue when on your team or encountered
-- [~] **Pop-culture parody reference pack** — First pass shipped via `src/data/world_events.json` (`Founder Docuseries Cycle`, `Boardroom Memo Leak Cycle`, etc.) to add subtle startup-media tone without direct quotes/names; broader pass across `events.json`, `headlines.json`, and rival bios is still pending.
+- [x] **Pop-culture parody reference pack** — Expanded subtle startup-media parody layer across `src/data/events.json`, `src/data/headlines.json`, and `src/data/competitors.json` (plus world-event references) while keeping text legally safe and quote-free.
 - [~] **Grounded world-events layer (historical + current-event inspired)** — New data-driven `WorldEventEngine` + `world_events.json` adds multi-quarter macro cycles (risk-off periods, rate shocks, supply bottlenecks, regulation waves, capital reopenings) with gameplay effects; scenario breadth and deeper economy coupling are still pending.
 - [x] **Reference tone + safety guardrails** — Added `docs/reference-tone-guardrails.md` with practical writing rules (neutral tone, no real-person defamation, no copyrighted dialogue, no graphic conflict framing) for future parody/event content.
 - [ ] **Expand competitor roster** — Add more parody companies per category; flesh out each with multiple product lines, unique behaviors, and market moves (acquisitions, pivots, IPOs)

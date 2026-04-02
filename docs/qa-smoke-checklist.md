@@ -438,6 +438,7 @@ These tests require deploying to a device or emulator, not just the editor.
 | 23.13 | Text readability at 1x display scale | Font sizes legible on physical device | All `font_size` overrides |
 | 23.14 | ScrollContainer touch scrolling smooth | People list, finance screen, etc. scroll naturally | All `ScrollContainer` nodes |
 | 23.15 | No accidental taps through overlays | Modal overlays block input below them | `mouse_filter = MOUSE_FILTER_STOP` on overlay backgrounds |
+| 23.16 | Runtime-generated buttons still meet touch minimums | Dynamic controls (candidate cards, event choices, feature picker, save-slot cards) are >= 44-48px and maintain spacing | `ui_touch_helper.gd`, `scene_loader.gd`, dynamic UI builders in `employee_list.gd`, `event_popup.gd`, `product_overview.gd`, `save_slots.gd` |
 
 ---
 

@@ -56,6 +56,7 @@ func _ready() -> void:
 	decline_angel_btn.pressed.connect(_on_decline_angel)
 	restart_btn.pressed.connect(_on_restart)
 	menu_btn.pressed.connect(_on_menu)
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("game_over")
 
 	var reason: String = GameState.get_meta("game_over_reason", "bankruptcy") if GameState.has_meta("game_over_reason") else "bankruptcy"

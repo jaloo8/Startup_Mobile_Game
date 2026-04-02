@@ -68,7 +68,7 @@ theme_override_colors/font_color = Color(0.8, 0.8, 0.85, 1)
 [node name="DismissBannerButton" type="Button" parent="MarginContainer/VBox/ConsentBanner/BannerVBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 46)
 text = "Got it"
 
 [node name="AgeGatePanel" type="PanelContainer" parent="MarginContainer/VBox"]
@@ -101,14 +101,14 @@ theme_override_constants/separation = 16
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 text = "Yes, I'm 13+"
 
 [node name="AgeDenyButton" type="Button" parent="MarginContainer/VBox/AgeGatePanel/AgeVBox/AgeButtons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 text = "No"
 
 [node name="AnalyticsHeader" type="Label" parent="MarginContainer/VBox"]

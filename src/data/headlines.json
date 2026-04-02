@@ -321,5 +321,47 @@
   {
     "template": "Internal docs leak, timelines slip, and PR teams call it an 'alignment sprint'",
     "weight": 0.85
+  },
+  {
+    "template": "Founders argue whether this quarter needs a pivot memo or a shipping memo",
+    "weight": 0.98
+  },
+  {
+    "template": "Term sheet headlines look bigger this year; footnotes look longer",
+    "weight": 0.94
+  },
+  {
+    "template": "Invite-only launches return as startups rediscover scarcity marketing",
+    "weight": 0.9
+  },
+  {
+    "template": "Cofounder origin stories trend as teams debate who built version one",
+    "weight": 0.87
+  },
+  {
+    "template": "Demo day trailers get cinematic while engineering teams quietly request more QA",
+    "weight": 0.92
+  },
+  {
+    "template": "Podcast clips move faster than product updates in this week's founder discourse",
+    "weight": 0.89
+  },
+  {
+    "template": "Board observers call {world_event_title} the reason every deck suddenly has a downside plan",
+    "min_quarter": 3,
+    "weight": 1.16
+  },
+  {
+    "template": "Operators say reliability is the new growth hack after another week of outage threads",
+    "weight": 0.95
+  },
+  {
+    "template": "Campus-born startup myths return as users reward products that feel exclusive",
+    "company_types": ["consumer"],
+    "weight": 0.88
+  },
+  {
+    "template": "Markets, memos, and morale: startup teams call this quarter 'narrative ops'",
+    "weight": 0.9
   }
 ]

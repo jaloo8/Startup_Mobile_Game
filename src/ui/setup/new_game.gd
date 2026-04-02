@@ -88,6 +88,7 @@ func _ready() -> void:
 	_on_niche_changed(0)
 	_on_difficulty_changed(1)   # Normal is the default
 	_on_scenario_changed(0)
+	UITouchHelper.harden_tree(self)
 
 
 func _load_type_illustration(type_id: int) -> void:

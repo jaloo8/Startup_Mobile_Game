@@ -96,6 +96,7 @@ func _ready() -> void:
 
 	GameState.feature_shipped.connect(_on_feature_shipped)
 	_refresh()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("product")
 
 
@@ -732,11 +733,13 @@ func _refresh_picker() -> void:
 		lbl.text = "All features built — nice work!"
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		picker_container.add_child(lbl)
+		UITouchHelper.harden_tree(picker_panel)
 		return
 
 	for fdef in available:
 		var card := _create_feature_card(fdef)
 		picker_container.add_child(card)
+	UITouchHelper.harden_tree(picker_panel)
 
 
 func _create_feature_card(fdef: Dictionary) -> PanelContainer:
@@ -798,7 +801,7 @@ func _create_feature_card(fdef: Dictionary) -> PanelContainer:
 
 	var btn := Button.new()
 	btn.text = "Build This"
-	btn.custom_minimum_size = Vector2(0, 36)
+	btn.custom_minimum_size = Vector2(0, 46)
 	btn.pressed.connect(_on_select_feature.bind(fdef))
 	vbox.add_child(btn)
 

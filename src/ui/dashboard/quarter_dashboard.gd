@@ -131,6 +131,7 @@ func _ready() -> void:
 	_move_nav_to_top()
 
 	_refresh(GameState.current_quarter)
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("dashboard")
 
 	# Start tutorial on first run (deferred so all nodes are fully laid out).
@@ -247,7 +248,7 @@ func _move_nav_to_top() -> void:
 
 	# Also style the nav buttons to look more like tabs
 	for btn: Button in [people_btn, product_btn, finance_btn, market_btn]:
-		btn.custom_minimum_size = Vector2(0, 40)
+		btn.custom_minimum_size = Vector2(0, 46)
 		btn.add_theme_font_size_override("font_size", 13)
 
 

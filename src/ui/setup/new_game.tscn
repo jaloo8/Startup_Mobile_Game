@@ -50,7 +50,7 @@ text = "Company Name"
 [node name="CompanyNameInput" type="LineEdit" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 placeholder_text = "My Startup"
 
 [node name="TypeLabel" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
@@ -60,7 +60,7 @@ text = "Company Type"
 [node name="TypeSelector" type="OptionButton" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 
 [node name="TypeIllustration" type="TextureRect" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
@@ -76,7 +76,7 @@ text = "Starting Niche"
 [node name="NicheSelector" type="OptionButton" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 
 [node name="NicheDesc" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
@@ -92,7 +92,7 @@ text = "Difficulty"
 [node name="DifficultySelector" type="OptionButton" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 
 [node name="ScenarioLabel" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 layout_mode = 2
@@ -101,7 +101,7 @@ text = "Starting Scenario"
 [node name="ScenarioSelector" type="OptionButton" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 
 [node name="BackgroundLabel" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 layout_mode = 2
@@ -110,7 +110,7 @@ text = "Your Background"
 [node name="BackgroundSelector" type="OptionButton" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 
 [node name="BackgroundDesc" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
@@ -139,5 +139,5 @@ text = "Start Company"
 [node name="BackButton" type="Button" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 text = "← Back"

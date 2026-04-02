@@ -56,6 +56,7 @@ func _ready() -> void:
 	_build_context_hints()
 	_build_hosting_controls()
 	_refresh()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("finance")
 
 

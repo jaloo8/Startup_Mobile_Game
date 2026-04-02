@@ -14,6 +14,7 @@ func _ready() -> void:
 	settings_btn.pressed.connect(_on_settings)
 	quit_btn.pressed.connect(_on_quit)
 	_refresh_continue_state()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("main_menu")
 
 

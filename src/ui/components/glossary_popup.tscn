@@ -45,5 +45,5 @@ autowrap_mode = 2
 
 [node name="CloseButton" type="Button" parent="Margin/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 46)
 text = "Got it"

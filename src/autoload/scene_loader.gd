@@ -22,6 +22,7 @@ const PRELOAD_SCENES := [
 
 
 func _ready() -> void:
+	_apply_touch_hardening.call_deferred(get_tree().current_scene)
 	_preload_all.call_deferred()
 
 
@@ -64,7 +65,16 @@ func _switch_scene(path: String) -> void:
 
 	tree.root.add_child(new_scene)
 	tree.current_scene = new_scene
+	_apply_touch_hardening.call_deferred(new_scene)
 	scene_changed.emit(path)
+
+
+func _apply_touch_hardening(root: Node) -> void:
+	if root == null or not is_instance_valid(root):
+		return
+	# Mobile accessibility baseline. This also tags nodes with lightweight
+	# visual-polish metadata hooks for future animation passes.
+	UITouchHelper.harden_tree(root)
 
 
 static func free_children(node: Node) -> void:

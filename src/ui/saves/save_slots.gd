@@ -16,6 +16,7 @@ func _ready() -> void:
 	_empty_style = _make_style(Color(0.09, 0.09, 0.12))
 	back_btn.pressed.connect(_on_back)
 	_refresh()
+	UITouchHelper.harden_tree(self)
 
 
 func _exit_tree() -> void:
@@ -43,6 +44,7 @@ func _refresh() -> void:
 	# so players are never blocked from starting a new run.
 	if slot_container.get_child_count() == 0:
 		slot_container.add_child(_create_empty_slot({"slot": "slot_1"}))
+	UITouchHelper.harden_tree(slot_container)
 
 
 func _create_occupied_slot(info: Dictionary) -> PanelContainer:
@@ -92,13 +94,13 @@ func _create_occupied_slot(info: Dictionary) -> PanelContainer:
 
 	var load_btn := Button.new()
 	load_btn.text = "Load"
-	load_btn.custom_minimum_size = Vector2(80, 34)
+	load_btn.custom_minimum_size = Vector2(88, 46)
 	load_btn.pressed.connect(_on_load.bind(slot_name))
 	btn_vbox.add_child(load_btn)
 
 	var delete_btn := Button.new()
 	delete_btn.text = "Delete"
-	delete_btn.custom_minimum_size = Vector2(80, 34)
+	delete_btn.custom_minimum_size = Vector2(88, 46)
 	delete_btn.pressed.connect(_on_delete_pressed.bind(slot_name, delete_btn))
 	btn_vbox.add_child(delete_btn)
 
@@ -123,7 +125,7 @@ func _create_empty_slot(_info: Dictionary) -> PanelContainer:
 	var slot_name: String = str(_info.get("slot", "slot_1"))
 	var new_btn := Button.new()
 	new_btn.text = "New Game"
-	new_btn.custom_minimum_size = Vector2(100, 38)
+	new_btn.custom_minimum_size = Vector2(112, 46)
 	new_btn.pressed.connect(_on_new_game.bind(slot_name))
 	hbox.add_child(new_btn)
 
@@ -158,7 +160,7 @@ func _create_locked_slot(info: Dictionary) -> PanelContainer:
 
 	var unlock_btn := Button.new()
 	unlock_btn.text = "Unlock Full Game"
-	unlock_btn.custom_minimum_size = Vector2(140, 36)
+	unlock_btn.custom_minimum_size = Vector2(150, 46)
 	unlock_btn.pressed.connect(func() -> void:
 		_show_unlock_paywall(
 			func() -> void: _refresh(),

@@ -57,6 +57,7 @@ func _ready() -> void:
 
 	_build_premium_section()
 	AdManager.premium_unlocked.connect(_on_premium_unlocked)
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("settings")
 
 

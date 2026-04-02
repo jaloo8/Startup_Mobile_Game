@@ -2080,5 +2080,357 @@
     "weight": 0.7,
     "one_time": false,
     "cooldown_quarters": 5
+  },
+  {
+    "id": "pivot_pressure_cycle",
+    "title": "Pivot Pressure Week",
+    "category": "product",
+    "stage": "growth",
+    "description_template": "Your board asks whether {company_name} is still an app or now a platform. Product strategy is suddenly everyone's favorite topic.",
+    "variations": [
+      "A late-night deck review turns into a two-hour debate: keep the roadmap, or pivot toward a broader platform story before next quarter's metrics review?",
+      "Three advisors send the same message in one day: 'Great product, but where is the platform narrative?' Nobody agrees on what that means."
+    ],
+    "choices": [
+      {
+        "label": "Run a visible pivot + relaunch",
+        "effects": {
+          "cash": -7000,
+          "users": 1200,
+          "reputation": 6,
+          "stability": -4,
+          "stress_all": 6
+        },
+        "outcome_template": "The relaunch gets attention and signups, but the rushed scope creates new rough edges. Momentum is up; polish debt is up too.",
+        "outcome_variations": [
+          "You win the narrative cycle. Press and investors mention your new direction. Engineering now has a long bug queue.",
+          "Traffic spikes after launch day. So do support tickets. The team buys in, but everyone needs a weekend."
+        ]
+      },
+      {
+        "label": "Quietly improve retention fundamentals",
+        "effects": {
+          "tech_debt": -5,
+          "stability": 5,
+          "users": 500,
+          "reputation": 2
+        },
+        "outcome_template": "No flashy pivot story, but your product gets sturdier and more reliable. Growth is slower, foundations are stronger.",
+        "outcome_variations": [
+          "You skip the theatrics and tighten onboarding and reliability. Fewer headlines, better underlying health.",
+          "The board wanted fireworks. You shipped boring improvements instead. Churn trends improve next quarter."
+        ]
+      },
+      {
+        "label": "Ignore the pressure and stay course",
+        "effects": {
+          "reputation": -4,
+          "morale_all": -3,
+          "users": -600
+        },
+        "outcome_template": "The team keeps shipping, but external confidence dips. You may be right long-term, yet the short-term narrative hurts.",
+        "outcome_variations": [
+          "No pivot, no presentation, just roadmap execution. Internally consistent; externally hard to explain.",
+          "You stand firm. Some respect it. Some call it stubborn. Either way, top-of-funnel cools."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 1200,
+      "quarter": 3
+    },
+    "weight": 0.75,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "term_sheet_footnotes",
+    "title": "Term Sheet Footnotes",
+    "category": "finance",
+    "stage": "growth",
+    "description_template": "A top-tier fund sends an offer for {company_name}. The headline number is great, but the preference terms are... educational.",
+    "variations": [
+      "The partner smiles through the pitch: 'Founder-friendly terms.' Legal reads the draft and circles half the page in red.",
+      "You finally got the meeting everyone wants. The valuation is high, the liquidation stack is higher."
+    ],
+    "choices": [
+      {
+        "label": "Take the deal as-is for speed",
+        "effects": {
+          "cash": 30000,
+          "reputation": -3,
+          "morale_all": -2
+        },
+        "outcome_template": "Cash arrives quickly and buys runway, but the team notices the strings attached. Future rounds may be harder to negotiate.",
+        "outcome_variations": [
+          "You optimize for survival and sign quickly. The bank balance looks better; your future cap table looks busier.",
+          "Runway extends immediately. Board dynamics get more complicated right away."
+        ]
+      },
+      {
+        "label": "Negotiate cleaner terms",
+        "effects": {
+          "cash": 14000,
+          "reputation": 5,
+          "stress_all": 5
+        },
+        "outcome_template": "You get a smaller check with healthier structure. It costs energy now but preserves flexibility later.",
+        "outcome_variations": [
+          "The process drags for weeks, but the final paperwork is much less punishing.",
+          "Less money, better alignment. Not glamorous, very useful."
+        ]
+      },
+      {
+        "label": "Walk and keep control",
+        "effects": {
+          "cash": -5000,
+          "morale_all": 4,
+          "reputation": 2
+        },
+        "outcome_template": "You keep autonomy and avoid bad terms, but runway pressure returns fast. Discipline now matters more than ever.",
+        "outcome_variations": [
+          "You pass. Some call it brave, others call it risky. Either way, burn rate becomes front-page internally.",
+          "No deal this quarter. Team pride rises, spreadsheet anxiety rises too."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 4,
+      "users": 1000
+    },
+    "weight": 0.72,
+    "one_time": false,
+    "cooldown_quarters": 8
+  },
+  {
+    "id": "cofounder_credit_spike",
+    "title": "Cofounder Credit Dispute",
+    "category": "people",
+    "stage": "any",
+    "description_template": "A heated discussion starts over who built the core of {company_name}. What began as lore now affects trust.",
+    "variations": [
+      "A podcast clip goes around where one founder tells the origin story differently. Internal chat turns from jokes to tension.",
+      "An old launch screenshot resurfaces and people start debating who really shipped the first version."
+    ],
+    "choices": [
+      {
+        "label": "Facilitate a reset + clear ownership norms",
+        "effects": {
+          "morale_all": 7,
+          "stress_all": -4,
+          "cash": -2000
+        },
+        "outcome_template": "The conversation is uncomfortable but productive. Team trust recovers with clearer norms and less mythology.",
+        "outcome_variations": [
+          "You document contributions and commit to shared credit in public updates. The room exhales.",
+          "Not glamorous, very necessary. People stop side-threading speculation and get back to work."
+        ]
+      },
+      {
+        "label": "Postpone and focus on shipping",
+        "effects": {
+          "morale_all": -6,
+          "stress_all": 7,
+          "reputation": -2
+        },
+        "outcome_template": "Velocity holds briefly, but unresolved tension leaks into reviews and decisions. The issue returns louder next quarter.",
+        "outcome_variations": [
+          "You defer the talk and ship features. Team cohesion quietly erodes anyway.",
+          "No immediate explosion, just colder collaboration over time."
+        ]
+      },
+      {
+        "label": "Pick a side and move on",
+        "effects": {
+          "morale_all": -9,
+          "tech_debt": -2,
+          "stress_all": 4
+        },
+        "outcome_template": "Decision speed improves, culture trust drops. Short-term clarity trades off against long-term alignment.",
+        "outcome_variations": [
+          "The org gets simpler on paper and messier in spirit.",
+          "You get a decisive structure. You also lose some goodwill."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5
+    },
+    "weight": 0.66,
+    "one_time": false,
+    "cooldown_quarters": 7
+  },
+  {
+    "id": "demo_day_sizzle",
+    "title": "Demo Day Sizzle Cut",
+    "category": "culture",
+    "stage": "any",
+    "description_template": "Your launch demo can either be polished theater or brutally honest product reality. Both choices send a signal.",
+    "variations": [
+      "Marketing wants cinematic transitions and soundtrack cues. Engineering wants fewer promises and fewer surprises.",
+      "Investors ask for a wow moment at demo day. Product asks for another month to stabilize."
+    ],
+    "choices": [
+      {
+        "label": "Ship the cinematic version",
+        "effects": {
+          "cash": -6000,
+          "reputation": 7,
+          "users": 900,
+          "bugs": 8
+        },
+        "outcome_template": "The presentation lands and signups rise, but support volume rises too. Great first impression, shakier second impression.",
+        "outcome_variations": [
+          "The room applauds. Your on-call channel does not.",
+          "You win launch week headlines and inherit a larger bug backlog."
+        ]
+      },
+      {
+        "label": "Show a raw live walkthrough",
+        "effects": {
+          "reputation": 4,
+          "users": 500,
+          "stability": 3
+        },
+        "outcome_template": "Less flash, more credibility. Audience reaction is calmer, retention quality is better.",
+        "outcome_variations": [
+          "A few rough edges appear live, but authenticity plays well with serious buyers.",
+          "You under-promise and over-deliver. Slower hype, stronger trust."
+        ]
+      },
+      {
+        "label": "Skip demo day and keep building",
+        "effects": {
+          "reputation": -3,
+          "tech_debt": -3
+        },
+        "outcome_template": "You avoid launch risk and improve internals, but lose a chance for narrative momentum this quarter.",
+        "outcome_variations": [
+          "No applause, no outage, no buzz. Quietly useful quarter.",
+          "The product improves materially while your competitor dominates the news cycle."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 2
+    },
+    "weight": 0.64,
+    "one_time": false,
+    "cooldown_quarters": 5
+  },
+  {
+    "id": "founder_podcast_circuit",
+    "title": "Founder Podcast Circuit",
+    "category": "culture",
+    "stage": "growth",
+    "description_template": "You get invited to three top startup podcasts in one week. Great exposure, high risk of saying something you'll need to explain later.",
+    "variations": [
+      "The producer promises 'founder-friendly editing.' Your comms lead calls that phrase a trap.",
+      "Everyone says the same thing: one great clip can accelerate growth; one bad clip can dominate your quarter."
+    ],
+    "choices": [
+      {
+        "label": "Lean in with bold takes",
+        "effects": {
+          "reputation": 8,
+          "users": 1200,
+          "stress_all": 8
+        },
+        "outcome_template": "You go viral and bring in attention fast. The team now fields a lot more questions from customers and candidates.",
+        "outcome_variations": [
+          "Great awareness spike, mixed sentiment, full inbox.",
+          "You become part of the conversation overnight. Not all of it is helpful."
+        ]
+      },
+      {
+        "label": "Do measured product-first interviews",
+        "effects": {
+          "reputation": 5,
+          "users": 700,
+          "stress_all": 3
+        },
+        "outcome_template": "Steady, credible exposure with fewer surprises. Growth is smaller but cleaner.",
+        "outcome_variations": [
+          "No viral moment, but better-fit inbound users.",
+          "Your clips are less spicy and more useful. Customers appreciate the clarity."
+        ]
+      },
+      {
+        "label": "Decline and stay heads-down",
+        "effects": {
+          "reputation": -2,
+          "tech_debt": -4
+        },
+        "outcome_template": "You miss a media window, but engineering focus improves. Quiet quarter, stronger internals.",
+        "outcome_variations": [
+          "Less visibility, fewer distractions, cleaner sprint board.",
+          "You pass on attention and buy back deep work time."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 2000
+    },
+    "weight": 0.58,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "boardroom_leak_week",
+    "title": "Boardroom Leak Week",
+    "category": "market",
+    "stage": "any",
+    "description_template": "An internal strategy memo leaks and gets picked apart online. Teams, users, and investors all want context from {company_name}.",
+    "variations": [
+      "A screenshot of your planning doc trends in founder circles by lunch. Half the comments are jokes, half are worried customers.",
+      "Nobody knows who leaked it. Everyone has an opinion anyway."
+    ],
+    "choices": [
+      {
+        "label": "Run a transparent all-hands + customer note",
+        "effects": {
+          "reputation": 5,
+          "morale_all": 6,
+          "stress_all": 5
+        },
+        "outcome_template": "You absorb short-term stress and rebuild trust through clarity. Internally and externally, uncertainty drops.",
+        "outcome_variations": [
+          "Hard day, good reset. People appreciate direct communication.",
+          "Clear messaging stabilizes sentiment faster than expected."
+        ]
+      },
+      {
+        "label": "No comment until legal review",
+        "effects": {
+          "reputation": -6,
+          "morale_all": -4,
+          "cash": -3000
+        },
+        "outcome_template": "Legally tidy, culturally costly. Silence creates room for louder narratives you do not control.",
+        "outcome_variations": [
+          "Your statement is precise and late. Audience interpretation fills the gap.",
+          "The legal posture is safe. The trust posture is not."
+        ]
+      },
+      {
+        "label": "Counter with aggressive spin",
+        "effects": {
+          "reputation": 1,
+          "morale_all": -2,
+          "stress_all": 6
+        },
+        "outcome_template": "You win a few headlines but lose internal confidence. The quarter remains noisy.",
+        "outcome_variations": [
+          "External narrative stabilizes briefly, internal skepticism rises.",
+          "You contain the story without truly resolving it."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 6
+    },
+    "weight": 0.61,
+    "one_time": false,
+    "cooldown_quarters": 7
   }
 ]

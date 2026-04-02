@@ -17,6 +17,7 @@ var _employee: EmployeeData = null
 func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	_load_employee()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("employee_detail")
 
 

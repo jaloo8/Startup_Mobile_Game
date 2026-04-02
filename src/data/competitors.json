@@ -99,6 +99,15 @@
     {"name": "Discrd", "focus": "consumer", "size": "startup", "tagline": "Voice and text chat for communities"},
     {"name": "Candva", "focus": "consumer", "size": "startup", "tagline": "Easy graphic design for non-designers"},
     {"name": "Deel.co", "focus": "saas", "size": "startup", "tagline": "Global payroll and contractor management"},
-    {"name": "Pied Pyper", "focus": "dev_tools", "size": "startup", "tagline": "Middle-out compression algorithm. Somehow still alive."}
+    {"name": "Pied Pyper", "focus": "dev_tools", "size": "startup", "tagline": "Middle-out compression algorithm. Somehow still alive."},
+
+    {"name": "MiddlOut Labs", "focus": "dev_tools", "size": "startup", "tagline": "Compression-first infra startup with dramatic quarterly pivots"},
+    {"name": "FinalClub Social", "focus": "consumer", "size": "growth", "tagline": "Campus-born network where exclusivity is the product"},
+    {"name": "CapTable Club", "focus": "saas", "size": "growth", "tagline": "Founder finance platform for dilution math and board prep"},
+    {"name": "PitchPlease", "focus": "saas", "size": "startup", "tagline": "Deck automation app promising investor-ready narratives overnight"},
+    {"name": "QuietPivot", "focus": "saas", "size": "startup", "tagline": "Workflow suite that quietly rebrands every two quarters"},
+    {"name": "SignalLeak", "focus": "consumer", "size": "startup", "tagline": "Anonymous workplace rumor network with sticky engagement loops"},
+    {"name": "TermSheetr", "focus": "dev_tools", "size": "startup", "tagline": "Fundraising document workflow tooling for legal and finance teams"},
+    {"name": "BoardroomOS", "focus": "marketplace", "size": "growth", "tagline": "Marketplace for advisors, operators, and executive planning services"}
   ]
 }

@@ -37,6 +37,7 @@ func _ready() -> void:
 	continue_btn.pressed.connect(_on_continue)
 	menu_btn.pressed.connect(_on_menu)
 	new_game_btn.pressed.connect(_on_new_game)
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("victory")
 
 	var win_type: String = GameState.get_meta("win_type", "ipo") if GameState.has_meta("win_type") else "ipo"

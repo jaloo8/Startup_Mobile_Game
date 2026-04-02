@@ -34,6 +34,7 @@ func _ready() -> void:
 	_populate_plan_picker()
 	_build_upgrade_actions()
 	_refresh()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("logistics")
 
 

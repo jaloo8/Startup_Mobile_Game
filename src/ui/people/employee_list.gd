@@ -94,6 +94,7 @@ func _ready() -> void:
 	_build_allocation_hint_label()
 	_update_hire_button()
 	_refresh_list()
+	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("people")
 
 
@@ -132,7 +133,7 @@ func _build_sort_buttons() -> void:
 	for key in SortKey.values():
 		var btn := Button.new()
 		btn.text = SORT_LABELS[key]
-		btn.custom_minimum_size = Vector2(76, 34)
+		btn.custom_minimum_size = Vector2(82, 46)
 		btn.add_theme_font_size_override("font_size", 11)
 		btn.pressed.connect(_on_sort_pressed.bind(key))
 		sort_row.add_child(btn)
@@ -360,11 +361,13 @@ func _refresh_list() -> void:
 		empty_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		list_container.add_child(empty_label)
 		_refresh_sort_hint()
+		UITouchHelper.harden_tree(self)
 		return
 
 	for emp in _sorted_employees():
 		list_container.add_child(_create_employee_card(emp))
 	_refresh_sort_hint()
+	UITouchHelper.harden_tree(self)
 
 
 static func _avatar_texture(employee_name: String) -> Texture2D:
@@ -473,7 +476,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 			continue
 		var btn := Button.new()
 		btn.text = EmployeeData.ASSIGNMENT_NAMES[a_key]
-		btn.custom_minimum_size = Vector2(0, 30)
+		btn.custom_minimum_size = Vector2(0, 46)
 		btn.toggle_mode = true
 		btn.button_pressed = (emp.assignment == a_key)
 		btn.add_theme_font_size_override("font_size", 11)
@@ -492,13 +495,13 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 
 	var fire_btn := Button.new()
 	fire_btn.text = "Let Go"
-	fire_btn.custom_minimum_size = Vector2(70, 30)
+	fire_btn.custom_minimum_size = Vector2(78, 46)
 	fire_btn.pressed.connect(_on_fire.bind(emp))
 	action_row.add_child(fire_btn)
 
 	var detail_btn := Button.new()
 	detail_btn.text = "Details"
-	detail_btn.custom_minimum_size = Vector2(74, 30)
+	detail_btn.custom_minimum_size = Vector2(82, 46)
 	detail_btn.pressed.connect(_on_view_details.bind(emp))
 	action_row.add_child(detail_btn)
 
@@ -575,6 +578,7 @@ func _refresh_candidates() -> void:
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		candidate_container.add_child(lbl)
 		_refresh_sort_hint()
+		UITouchHelper.harden_tree(candidate_panel)
 		return
 
 	for candidate in _candidates:
@@ -698,7 +702,7 @@ func _refresh_candidates() -> void:
 
 			var neg_btn := Button.new()
 			neg_btn.text = "Negotiate Salary (-15%)"
-			neg_btn.custom_minimum_size = Vector2(0, 32)
+			neg_btn.custom_minimum_size = Vector2(0, 46)
 			neg_btn.add_theme_font_size_override("font_size", 12)
 			neg_btn.pressed.connect(_on_negotiate_salary.bind(candidate))
 			neg_row.add_child(neg_btn)
@@ -722,32 +726,33 @@ func _refresh_candidates() -> void:
 		if not interviewed:
 			var interview_btn := Button.new()
 			interview_btn.text = "Interview Team…"
-			interview_btn.custom_minimum_size = Vector2(130, 36)
+			interview_btn.custom_minimum_size = Vector2(134, 46)
 			interview_btn.pressed.connect(_on_interview.bind(candidate))
 			btn_row.add_child(interview_btn)
 
 			if AdManager.is_ad_available("rewarded_reveal_stats"):
 				var ad_btn := Button.new()
 				ad_btn.text = "Quick Peek (Ad)"
-				ad_btn.custom_minimum_size = Vector2(110, 36)
+				ad_btn.custom_minimum_size = Vector2(120, 46)
 				ad_btn.add_theme_font_size_override("font_size", 11)
 				ad_btn.pressed.connect(_on_ad_reveal.bind(candidate))
 				btn_row.add_child(ad_btn)
 
 		var hire_one_btn := Button.new()
 		hire_one_btn.text = "Hire"
-		hire_one_btn.custom_minimum_size = Vector2(70, 32)
+		hire_one_btn.custom_minimum_size = Vector2(78, 46)
 		hire_one_btn.pressed.connect(_on_hire_candidate.bind(candidate))
 		btn_row.add_child(hire_one_btn)
 
 		var pass_btn := Button.new()
 		pass_btn.text = "Pass"
-		pass_btn.custom_minimum_size = Vector2(60, 32)
+		pass_btn.custom_minimum_size = Vector2(68, 46)
 		pass_btn.pressed.connect(_on_pass_candidate.bind(candidate))
 		btn_row.add_child(pass_btn)
 
 		candidate_container.add_child(card)
 	_refresh_sort_hint()
+	UITouchHelper.harden_tree(candidate_panel)
 
 
 func _show_office_upgrade_hint() -> void:
@@ -1131,9 +1136,10 @@ func _show_interviewer_picker(candidate: EmployeeData) -> void:
 
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Cancel"
-	cancel_btn.custom_minimum_size = Vector2(0, 38)
+	cancel_btn.custom_minimum_size = Vector2(0, 46)
 	cancel_btn.pressed.connect(func() -> void: overlay.queue_free())
 	root.add_child(cancel_btn)
+	UITouchHelper.harden_tree(overlay)
 
 
 func _add_interviewer_option(
@@ -1204,7 +1210,7 @@ func _add_interviewer_option(
 
 	var run_btn := Button.new()
 	run_btn.text = "Run interview"
-	run_btn.custom_minimum_size = Vector2(0, 34)
+	run_btn.custom_minimum_size = Vector2(0, 46)
 	body.add_child(run_btn)
 
 	var busy_q := 0
@@ -1592,6 +1598,7 @@ func _show_assign_prompt(emp: EmployeeData) -> void:
 			btn.add_theme_constant_override("icon_max_width", 24)
 		btn.pressed.connect(_on_assign_from_prompt.bind(emp, a_key, overlay))
 		vbox.add_child(btn)
+	UITouchHelper.harden_tree(overlay)
 
 
 func _on_assign_from_prompt(emp: EmployeeData, assignment: EmployeeData.Assignment, overlay: Control) -> void:

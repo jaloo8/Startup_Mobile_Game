@@ -19,6 +19,7 @@ func _ready() -> void:
 	visible = false
 	continue_btn.visible = false
 	continue_btn.pressed.connect(_on_continue)
+	UITouchHelper.harden_tree(self)
 
 
 func _exit_tree() -> void:
@@ -47,9 +48,10 @@ func show_event(event: EventData) -> void:
 			var choice: Dictionary = event.choices[i]
 			var btn := Button.new()
 			btn.text = choice.get("label", "...")
-			btn.custom_minimum_size = Vector2(0, 44)
+			btn.custom_minimum_size = Vector2(0, 46)
 			btn.pressed.connect(_on_choice.bind(i))
 			choices_container.add_child(btn)
+	UITouchHelper.harden_tree(self)
 
 	modulate.a = 0.0
 	visible = true
