@@ -16,12 +16,15 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PROJECT_CONFIG_PATH = ROOT / "project.godot"
 DATA_DIR = ROOT / "src" / "data"
 PRODUCT_OVERVIEW_PATH = ROOT / "src" / "ui" / "product" / "product_overview.gd"
 GAME_STATE_PATH = ROOT / "src" / "autoload" / "game_state.gd"
 FUNDRAISING_PATH = ROOT / "src" / "engine" / "fundraising_engine.gd"
 EVENT_ENGINE_PATH = ROOT / "src" / "engine" / "event_engine.gd"
 AD_MANAGER_PATH = ROOT / "src" / "autoload" / "ad_manager.gd"
+TOUCH_HELPER_BRIDGE_PATH = ROOT / "src" / "autoload" / "ui_touch_helper_bridge.gd"
+WORLD_EVENT_BRIDGE_PATH = ROOT / "src" / "autoload" / "world_event_engine_bridge.gd"
 
 FEATURE_TYPES = {"saas", "consumer", "marketplace", "dev_tools"}
 FOCUS_TYPES = {"saas", "consumer", "marketplace", "dev_tools"}
@@ -996,6 +999,42 @@ def validate_monetization_gate() -> List[str]:
     return errors
 
 
+def validate_runtime_bridges() -> List[str]:
+    errors: List[str] = []
+    if not PROJECT_CONFIG_PATH.exists():
+        return [f"missing file: {PROJECT_CONFIG_PATH.relative_to(ROOT)}"]
+
+    config_src = PROJECT_CONFIG_PATH.read_text(encoding="utf-8")
+    required_autoload_lines = (
+        'UITouchHelper="*res://src/autoload/ui_touch_helper_bridge.gd"',
+        'WorldEventEngine="*res://src/autoload/world_event_engine_bridge.gd"',
+    )
+    for line in required_autoload_lines:
+        if line not in config_src:
+            errors.append(f"project.godot missing autoload entry: {line}")
+
+    if not TOUCH_HELPER_BRIDGE_PATH.exists():
+        errors.append(f"missing file: {TOUCH_HELPER_BRIDGE_PATH.relative_to(ROOT)}")
+    else:
+        bridge_src = TOUCH_HELPER_BRIDGE_PATH.read_text(encoding="utf-8")
+        if 'preload("res://src/ui/ui_touch_helper.gd")' not in bridge_src:
+            errors.append("ui_touch_helper_bridge.gd missing helper preload")
+        if "TouchHelperScript.harden_tree(" not in bridge_src:
+            errors.append("ui_touch_helper_bridge.gd missing harden_tree forwarding")
+
+    if not WORLD_EVENT_BRIDGE_PATH.exists():
+        errors.append(f"missing file: {WORLD_EVENT_BRIDGE_PATH.relative_to(ROOT)}")
+    else:
+        bridge_src = WORLD_EVENT_BRIDGE_PATH.read_text(encoding="utf-8")
+        if 'preload("res://src/engine/world_event_engine.gd")' not in bridge_src:
+            errors.append("world_event_engine_bridge.gd missing engine preload")
+        if "WorldEventScript.resolve_quarter(" not in bridge_src:
+            errors.append("world_event_engine_bridge.gd missing resolve_quarter forwarding")
+        if "WorldEventScript.load_events(" not in bridge_src:
+            errors.append("world_event_engine_bridge.gd missing load_events forwarding")
+    return errors
+
+
 def validate_button_script_contracts() -> List[str]:
     errors: List[str] = []
     for check in UI_BUTTON_SCRIPT_CHECKS:
@@ -1087,6 +1126,7 @@ def main() -> int:
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
     errors.extend(validate_monetization_gate())
+    errors.extend(validate_runtime_bridges())
     errors.extend(validate_button_script_contracts())
     errors.extend(validate_button_scene_contracts())
 

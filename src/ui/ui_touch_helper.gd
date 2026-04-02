@@ -1,4 +1,3 @@
-class_name UITouchHelper
 extends RefCounted
 ## Centralized touch-target/accessibility hardening for mobile-first UI.
 ##

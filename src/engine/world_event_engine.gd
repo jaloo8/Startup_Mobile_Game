@@ -1,4 +1,3 @@
-class_name WorldEventEngine
 extends RefCounted
 ## Data-driven macro events that persist for multiple quarters.
 

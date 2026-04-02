@@ -27,6 +27,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 1.7 | Back button returns to main menu | Clean navigation, no orphaned nodes | `save_slots.gd`, `src/autoload/scene_loader.gd` |
 | 1.8 | Settings accessible from main menu | Settings screen opens and returns cleanly | `main_menu.gd` |
 | 1.9 | Continue Last Run button resumes latest save | Loads newest valid save slot directly into dashboard; falls back to save slots if unavailable | `main_menu.gd` → `_on_continue()`, `game_state.gd` → `latest_save_slot()` |
+| 1.10 | Main-menu buttons respond after cold launch | Play/Settings/Quit all register taps immediately (no script parse/autoload fallout) | `project.godot` autoloads, `ui_touch_helper_bridge.gd`, `world_event_engine_bridge.gd`, `main_menu.gd` |
 
 ---
 

@@ -75,6 +75,7 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Main-menu/button input regression fix** — Added runtime autoload bridges for `UITouchHelper` and `WorldEventEngine` (`src/autoload/ui_touch_helper_bridge.gd`, `src/autoload/world_event_engine_bridge.gd`) and wired them in `project.godot` so UI/button scripts compile reliably even when class-name cache metadata is stale.
 - **Role mesh + stage-aware responsibilities** — Work allocation now follows startup maturity: early teams stay cross-functional (non-feature lanes still provide partial feature support), while growth/scale runs require specialization. Dedicated `Bugs`, `Tech Debt`, `Infrastructure`, and `R&D` assignments now have stronger impact, and cross-role mesh bonuses reward balanced teams with better quality, steadier retention, and lower operational drag.
 - **Expanded start scenarios** — New game now includes jump-in presets beyond bootstrap (`Growth Operator`, `Scale Chief`) so players can run mid-size or large companies immediately, each seeded with a realistic team mix, product state, and funding context.
 - **World events system (multi-quarter macro cycles)** — Added `WorldEventEngine` + `src/data/world_events.json` with persistent market pulses (risk-off cycles, supply bottlenecks, regulation waves, creator booms, capital reopenings). Active world events now influence growth/churn/revenue/costs/fundraising, persist through save/load, and surface in dashboard + quarterly report.
