@@ -128,9 +128,11 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 6.3 | Choosing an option applies consequences | Cash/morale/reputation change as described | `event_popup.gd`, `game_state.gd` |
 | 6.4 | One-time events don't repeat | `fired_one_time_events` prevents re-firing | `game_state.gd` → `fired_one_time_events`, `event_engine.gd` |
 | 6.5 | Events respect eligibility filters | Company type, quarter, valuation gates work | `event_engine.gd` → eligibility logic |
-| 6.6 | Event frequency scales with valuation | More events as company grows, not overwhelming early | `event_engine.gd` |
+| 6.6 | Event frequency scales with company maturity | Event count ramps from early to growth/late runs (with valuation/team signals) without overwhelming opening quarters | `event_engine.gd` |
 | 6.7 | Events are logged in event_log | Event history accessible | `game_state.gd` → `append_event_log()` |
 | 6.8 | Niche-aware event weighting feels relevant | Selected niche surfaces more fitting event categories over multiple runs | `event_engine.gd` → `_effective_event_weight()` |
+| 6.9 | Event cadence and repeats adapt by stage + difficulty | Early + Sandbox runs feel calmer (lower cadence / longer repeats), while late + Hardcore runs feel denser (higher cadence / shorter repeats) without becoming spammy | `event_engine.gd` → `_event_count_bounds()`, `_effective_cooldown()`, `_effective_event_weight()` |
+| 6.10 | Multi-event quarters avoid same-category spam | When 2-4 events fire, picks usually span categories (not repeatedly `market`/`money` in the same quarter unless pool is constrained) | `event_engine.gd` → `_within_roll_category_dampener()`, `_weighted_pick()` |
 
 ---
 
