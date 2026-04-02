@@ -8,12 +8,15 @@ extends Control
 @onready var candidate_container: VBoxContainer = %CandidateContainer
 @onready var candidate_panel: PanelContainer = %CandidatePanel
 @onready var sort_row: HBoxContainer = %SortRow
+@onready var sort_label: Label = %SortLabel
 
 var _candidates: Array[EmployeeData] = []
 var _interview_reports: Dictionary = {}  # candidate_key -> interview report
 var _negotiated: Dictionary = {}         # candidate_key -> true if already negotiated
 var _card_style: StyleBoxFlat
 var _assign_target: EmployeeData
+var _sort_buttons: Dictionary = {}  # SortKey -> Button
+var _sort_hint_label: Label
 
 enum SortKey { NAME, SKILL, MORALE, SALARY, ASSIGNMENT }
 var _current_sort: SortKey = SortKey.NAME
@@ -116,21 +119,57 @@ func _update_hire_button() -> void:
 
 
 func _build_sort_buttons() -> void:
-	# Add a label before the sort buttons so it's clear they sort the team list
-	var sort_heading := Label.new()
-	sort_heading.text = "Sort your team by:"
-	sort_heading.add_theme_font_size_override("font_size", 11)
-	sort_heading.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
-	sort_row.add_child(sort_heading)
+	sort_label.text = "Sort hired team:"
+	sort_label.add_theme_font_size_override("font_size", 12)
+	sort_label.add_theme_color_override("font_color", Color(0.72, 0.76, 0.86))
 
+	_sort_buttons.clear()
 	for key in SortKey.values():
 		var btn := Button.new()
 		btn.text = SORT_LABELS[key]
-		btn.custom_minimum_size = Vector2(56, 28)
+		btn.custom_minimum_size = Vector2(76, 34)
 		btn.add_theme_font_size_override("font_size", 11)
 		btn.pressed.connect(_on_sort_pressed.bind(key))
 		sort_row.add_child(btn)
+		_sort_buttons[key] = btn
+
+	_build_sort_hint_label()
 	_highlight_sort_button()
+	_refresh_sort_hint()
+
+
+func _build_sort_hint_label() -> void:
+	if _sort_hint_label != null:
+		return
+	var parent := sort_row.get_parent()
+	if parent == null:
+		return
+	_sort_hint_label = Label.new()
+	_sort_hint_label.add_theme_font_size_override("font_size", 11)
+	_sort_hint_label.add_theme_color_override("font_color", Color(0.56, 0.6, 0.72))
+	_sort_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	parent.add_child(_sort_hint_label)
+	parent.move_child(_sort_hint_label, sort_row.get_index() + 1)
+
+
+func _refresh_sort_hint() -> void:
+	if _sort_hint_label == null:
+		return
+	var order_text := "A→Z"
+	match _current_sort:
+		SortKey.SKILL, SortKey.MORALE, SortKey.SALARY:
+			order_text = "low→high" if _sort_ascending else "high→low"
+		SortKey.ASSIGNMENT:
+			order_text = "focus A→Z" if _sort_ascending else "focus Z→A"
+		_:
+			order_text = "A→Z" if _sort_ascending else "Z→A"
+
+	var base := "Team sort: %s (%s)." % [SORT_LABELS[_current_sort], order_text]
+	if GameState.employees.size() <= 1:
+		base += " Hire at least 2 teammates to see reordering."
+	elif candidate_panel.visible and not _candidates.is_empty():
+		base += " Candidate cards keep hiring-pipeline order."
+	_sort_hint_label.text = base
 
 
 func _on_sort_pressed(key: SortKey) -> void:
@@ -138,42 +177,66 @@ func _on_sort_pressed(key: SortKey) -> void:
 		_sort_ascending = not _sort_ascending
 	else:
 		_current_sort = key
-		_sort_ascending = true
+		# Numeric priorities default to strongest-first.
+		_sort_ascending = false if key in [SortKey.SKILL, SortKey.MORALE, SortKey.SALARY] else true
 	_highlight_sort_button()
 	_refresh_list()
+	_refresh_sort_hint()
 
 
 func _highlight_sort_button() -> void:
-	var idx := 0
-	for child in sort_row.get_children():
-		if child is Button:
-			var key: SortKey = SortKey.values()[idx]
-			if key == _current_sort:
-				child.modulate = Color(0.4, 0.85, 1.0)
-				child.text = SORT_LABELS[key] + (" ↑" if _sort_ascending else " ↓")
-			else:
-				child.modulate = Color(1, 1, 1, 0.7)
-				child.text = SORT_LABELS[key]
-			idx += 1
+	for key in SortKey.values():
+		var btn := _sort_buttons.get(key, null) as Button
+		if btn == null:
+			continue
+		if key == _current_sort:
+			btn.modulate = Color(0.4, 0.85, 1.0)
+			btn.text = SORT_LABELS[key] + (" ↑" if _sort_ascending else " ↓")
+		else:
+			btn.modulate = Color(1, 1, 1, 0.7)
+			btn.text = SORT_LABELS[key]
+
+
+static func _int_cmp(a: int, b: int) -> int:
+	if a < b:
+		return -1
+	if a > b:
+		return 1
+	return 0
+
+
+static func _float_cmp(a: float, b: float) -> int:
+	if is_equal_approx(a, b):
+		return 0
+	return -1 if a < b else 1
+
+
+func _employee_cmp(a: EmployeeData, b: EmployeeData) -> int:
+	var cmp := 0
+	match _current_sort:
+		SortKey.SKILL:
+			cmp = _int_cmp(a.skill, b.skill)
+		SortKey.MORALE:
+			cmp = _int_cmp(a.morale, b.morale)
+		SortKey.SALARY:
+			cmp = _float_cmp(a.salary_per_quarter, b.salary_per_quarter)
+		SortKey.ASSIGNMENT:
+			cmp = _int_cmp(int(a.assignment), int(b.assignment))
+		_:
+			cmp = a.employee_name.naturalnocasecmp_to(b.employee_name)
+	if cmp == 0:
+		cmp = a.employee_name.naturalnocasecmp_to(b.employee_name)
+	return cmp
 
 
 func _sorted_employees() -> Array[EmployeeData]:
 	var arr: Array[EmployeeData] = []
 	arr.assign(GameState.employees.duplicate())
 	arr.sort_custom(func(a: EmployeeData, b: EmployeeData) -> bool:
-		var result: bool
-		match _current_sort:
-			SortKey.SKILL:
-				result = a.skill > b.skill
-			SortKey.MORALE:
-				result = a.morale < b.morale
-			SortKey.SALARY:
-				result = a.salary_per_quarter > b.salary_per_quarter
-			SortKey.ASSIGNMENT:
-				result = int(a.assignment) < int(b.assignment)
-			_:
-				result = a.employee_name.naturalnocasecmp_to(b.employee_name) < 0
-		return result if _sort_ascending else not result
+		var cmp := _employee_cmp(a, b)
+		if cmp == 0:
+			return false
+		return (cmp < 0) if _sort_ascending else (cmp > 0)
 	)
 	return arr
 
@@ -192,10 +255,12 @@ func _refresh_list() -> void:
 		empty_label.text = "No employees yet. Hire your first team member!"
 		empty_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		list_container.add_child(empty_label)
+		_refresh_sort_hint()
 		return
 
 	for emp in _sorted_employees():
 		list_container.add_child(_create_employee_card(emp))
+	_refresh_sort_hint()
 
 
 static func _avatar_texture(employee_name: String) -> Texture2D:
@@ -405,6 +470,7 @@ func _refresh_candidates() -> void:
 		lbl.text = "No more candidates this round."
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		candidate_container.add_child(lbl)
+		_refresh_sort_hint()
 		return
 
 	for candidate in _candidates:
@@ -577,6 +643,7 @@ func _refresh_candidates() -> void:
 		btn_row.add_child(pass_btn)
 
 		candidate_container.add_child(card)
+	_refresh_sort_hint()
 
 
 func _show_office_upgrade_hint() -> void:
