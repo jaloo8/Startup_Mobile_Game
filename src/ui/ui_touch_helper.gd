@@ -72,6 +72,31 @@ static func _harden_scroll(scroll: ScrollContainer) -> void:
 	# Small deadzone reduces "tap swallowed as click" when the intent is to drag.
 	if scroll.scroll_deadzone > 8 or scroll.scroll_deadzone <= 0:
 		scroll.scroll_deadzone = 8
+	_ensure_scroll_content_width(scroll)
+	if not scroll.has_meta("_touch_scroll_resize_hooked"):
+		scroll.set_meta("_touch_scroll_resize_hooked", true)
+		scroll.resized.connect(func() -> void:
+			if is_instance_valid(scroll):
+				_ensure_scroll_content_width(scroll)
+		)
+
+
+static func _ensure_scroll_content_width(scroll: ScrollContainer) -> void:
+	var content := _primary_scroll_content(scroll)
+	if content == null:
+		return
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var min_size := content.custom_minimum_size
+	if scroll.size.x > 0.0 and min_size.x < scroll.size.x:
+		min_size.x = scroll.size.x
+		content.custom_minimum_size = min_size
+
+
+static func _primary_scroll_content(scroll: ScrollContainer) -> Control:
+	for child in scroll.get_children():
+		if child is Control:
+			return child as Control
+	return null
 
 
 static func _harden_grid_spacing(grid: GridContainer, min_button_gap: int) -> void:

@@ -28,7 +28,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 1.8 | Settings accessible from main menu | Settings screen opens and returns cleanly | `main_menu.gd` |
 | 1.9 | Continue Last Run button resumes latest save | Loads newest valid save slot directly into dashboard; falls back to save slots if unavailable | `main_menu.gd` → `_on_continue()`, `game_state.gd` → `latest_save_slot()` |
 | 1.10 | Main-menu buttons respond after cold launch | Play/Settings/Quit all register taps immediately (no script parse/autoload fallout) | `project.godot` autoloads, `ui_touch_helper_bridge.gd`, `world_event_engine_bridge.gd`, `main_menu.gd` |
-| 1.11 | Save slots screen full-page scroll works on small phones | Top title/back and last slot card remain reachable with one continuous drag area (no dead scroll zones) | `save_slots.tscn`, `save_slots.gd`, `ui_touch_helper.gd` |
+| 1.11 | Save slots list scroll works on small phones | Top title/back stay fixed and lower slot cards remain reachable via the slot-list scroll area | `save_slots.tscn`, `save_slots.gd`, `ui_touch_helper.gd` |
 
 ---
 

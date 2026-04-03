@@ -1114,9 +1114,9 @@ def validate_scroll_contracts() -> List[str]:
         {
             "path": SAVE_SLOTS_SCENE_PATH,
             "required_snippets": (
-                '[node name="MainScroll" type="ScrollContainer" parent="."]',
-                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
-                '[node name="SlotContainer" type="VBoxContainer" parent="MarginContainer/VBox"]',
+                '[node name="MarginContainer" type="MarginContainer" parent="."]',
+                '[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]',
+                '[node name="SlotContainer" type="VBoxContainer" parent="MarginContainer/VBox/ScrollContainer"]',
             ),
         },
         {
