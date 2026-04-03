@@ -125,14 +125,20 @@ func _build_premium_section() -> void:
 	if parent == null:
 		return
 
+	var insert_idx := version_label.get_index() + 1
+
 	var sep := HSeparator.new()
 	sep.add_theme_color_override("color", Color(0.18, 0.20, 0.30, 0.7))
 	parent.add_child(sep)
+	parent.move_child(sep, insert_idx)
+	insert_idx += 1
 
 	# Premium status / buy row
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	parent.add_child(row)
+	parent.move_child(row, insert_idx)
+	insert_idx += 1
 	_premium_row = row
 
 	if AdManager.is_premium():
@@ -189,6 +195,8 @@ func _build_premium_section() -> void:
 	var sep2 := HSeparator.new()
 	sep2.add_theme_color_override("color", Color(0.18, 0.20, 0.30, 0.5))
 	parent.add_child(sep2)
+	parent.move_child(sep2, insert_idx)
+	insert_idx += 1
 
 	var tut_btn := Button.new()
 	tut_btn.text = "Replay Tutorial"
@@ -206,6 +214,7 @@ func _build_premium_section() -> void:
 	tut_btn.add_theme_stylebox_override("focus", tb_style)
 	tut_btn.pressed.connect(_on_replay_tutorial)
 	parent.add_child(tut_btn)
+	parent.move_child(tut_btn, insert_idx)
 	_tutorial_btn = tut_btn
 
 

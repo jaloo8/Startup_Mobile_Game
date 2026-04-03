@@ -18,6 +18,8 @@ static func harden_tree(root: Node, min_touch_size: float = DEFAULT_MIN_TOUCH_SI
 static func _harden_recursive(node: Node, min_touch_size: float, min_button_gap: int) -> void:
 	if node is BaseButton:
 		_harden_button(node as BaseButton, min_touch_size)
+	elif node is ScrollContainer:
+		_harden_scroll(node as ScrollContainer)
 	elif node is BoxContainer:
 		_harden_box_spacing(node as BoxContainer, min_button_gap)
 	elif node is GridContainer:
@@ -60,6 +62,16 @@ static func _harden_box_spacing(box: BoxContainer, min_button_gap: int) -> void:
 	var current_sep := box.get_theme_constant("separation")
 	if current_sep < min_button_gap:
 		box.add_theme_constant_override("separation", min_button_gap)
+
+
+static func _harden_scroll(scroll: ScrollContainer) -> void:
+	if scroll == null:
+		return
+	# Keep keyboard/focus navigation usable on smaller screens.
+	scroll.follow_focus = true
+	# Small deadzone reduces "tap swallowed as click" when the intent is to drag.
+	if scroll.scroll_deadzone > 8 or scroll.scroll_deadzone <= 0:
+		scroll.scroll_deadzone = 8
 
 
 static func _harden_grid_spacing(grid: GridContainer, min_button_gap: int) -> void:

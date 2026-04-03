@@ -153,10 +153,7 @@ func _build_eta_label() -> void:
 
 
 func _product_root_vbox() -> VBoxContainer:
-	var scroll := feature_list_container.get_parent()
-	if scroll == null:
-		return null
-	return scroll.get_parent() as VBoxContainer
+	return feature_list_container.get_parent() as VBoxContainer
 
 
 func _build_celebration_panel() -> void:
@@ -181,12 +178,11 @@ func _build_celebration_panel() -> void:
 	_celebration_panel.add_child(lbl)
 
 	_celebration_panel.visible = false
-	# Keep this outside the scroll area to avoid overlap with feature rows.
+	# Keep this as a direct VBox sibling so it does not overlap feature rows.
 	var root_parent := _product_root_vbox()
-	var scroll := feature_list_container.get_parent()
-	if root_parent and scroll:
+	if root_parent:
 		root_parent.add_child(_celebration_panel)
-		root_parent.move_child(_celebration_panel, scroll.get_index())
+		root_parent.move_child(_celebration_panel, feature_list_container.get_index())
 
 
 func _build_visual_preset_controls() -> void:
@@ -876,9 +872,7 @@ func _create_milestone_strip() -> VBoxContainer:
 		return strip
 	parent.add_child(strip)
 	# Place it just above the shipped-features list
-	var scroll := feature_list_container.get_parent()
-	if scroll:
-		parent.move_child(strip, scroll.get_index())
+	parent.move_child(strip, feature_list_container.get_index())
 	return strip
 
 

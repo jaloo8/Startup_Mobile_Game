@@ -28,6 +28,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 1.8 | Settings accessible from main menu | Settings screen opens and returns cleanly | `main_menu.gd` |
 | 1.9 | Continue Last Run button resumes latest save | Loads newest valid save slot directly into dashboard; falls back to save slots if unavailable | `main_menu.gd` → `_on_continue()`, `game_state.gd` → `latest_save_slot()` |
 | 1.10 | Main-menu buttons respond after cold launch | Play/Settings/Quit all register taps immediately (no script parse/autoload fallout) | `project.godot` autoloads, `ui_touch_helper_bridge.gd`, `world_event_engine_bridge.gd`, `main_menu.gd` |
+| 1.11 | Save slots screen full-page scroll works on small phones | Top title/back and last slot card remain reachable with one continuous drag area (no dead scroll zones) | `save_slots.tscn`, `save_slots.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -189,6 +190,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 9.11 | Employment type + personality visible | Team/candidate cards show type + trait labels | `employee_list.gd`, `employee_data.gd` |
 | 9.12 | Employee detail screen opens and renders history | `Details` button opens profile with trajectory chart + history rows | `employee_list.gd` → `_on_view_details()`, `employee_detail.gd` |
 | 9.13 | People screen responsibility hint adapts by stage | Early shows shared-hat guidance; growth/scale warns when specialization lanes have no owner | `employee_list.gd` → `_refresh_allocation_hint()`, `_assignment_description_for_stage()` |
+| 9.14 | People screen full-page scroll works with candidate panel open | Header/hints/candidate cards/employee rows remain reachable from one scroll gesture area | `employee_list.tscn`, `employee_list.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -208,6 +210,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 10.10 | Shimmer stops when feature ships | Ken Burns or reveal animation replaces shimmer | `product_visual.gd` → `_stop_shimmer()` |
 | 10.11 | All 4 company types have 10 features each | `features.json` has entries per type | `src/data/features.json` |
 | 10.12 | ETA text includes throughput hint | Build status displays estimated effort-per-quarter with current team assignment | `product_overview.gd` → `_refresh_build_status()`, `_build_eta_text()` |
+| 10.13 | Product screen supports full-page top/bottom scrolling | Header/back controls, feature picker cards, and shipped-features list are all reachable on small screens without dead scroll zones | `product_overview.tscn`, `product_overview.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -262,6 +265,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 12.5 | Economy indicator visible on dashboard | Shows current state | `quarter_dashboard.gd` |
 | 12.6 | Starting competitors are niche-biased | Initial rival pool includes same-focus and niche-relevant competitors when available | `competitor_ai.gd` → `generate_starting_competitors()` |
 | 12.7 | World events roll + persist as macro conditions | Multi-quarter market pulses activate with weighted filters and log start/end entries | `world_event_engine.gd`, `game_state.gd` → `event_log` |
+| 12.8 | Market leaderboard full-page scroll works | Back/title and lower-ranked cards are reachable via continuous scroll on short screens | `market_leaderboard.tscn`, `market_leaderboard.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -306,6 +310,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 15.5 | Game over screen displays correctly | Reason, stats summary, options | `src/ui/game_over/game_over_screen.gd` |
 | 15.6 | Angel bailout option (first time only) | Cash injection at steep equity cost | `game_over_screen.gd`, `game_state.gd` → `angel_bailout_used` |
 | 15.7 | "Menu" and "New Game" buttons work | Navigate correctly | `game_over_screen.gd` |
+| 15.8 | Game over screen supports top/bottom scrolling on small phones | Reason/stats/angel offer/actions all remain reachable without clipped controls | `game_over_screen.tscn`, `game_over_screen.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -401,6 +406,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 21.3 | Premium status persists across sessions | `is_premium` stored in settings | `analytics.gd` → `set_premium()` |
 | 21.4 | Version label shows correct version | Matches `project.godot` | `settings_screen.gd` |
 | 21.5 | Privacy policy link works | Opens URL or shows text | `settings_screen.gd` |
+| 21.6 | Settings screen scroll reaches both top and bottom on small phones | Back/analytics controls and lower premium/tutorial controls are both reachable via touch scroll with no clipped dead zones | `settings_screen.tscn`, `settings_screen.gd`, `ui_touch_helper.gd` |
 
 ---
 

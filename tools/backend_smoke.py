@@ -25,6 +25,12 @@ EVENT_ENGINE_PATH = ROOT / "src" / "engine" / "event_engine.gd"
 AD_MANAGER_PATH = ROOT / "src" / "autoload" / "ad_manager.gd"
 TOUCH_HELPER_BRIDGE_PATH = ROOT / "src" / "autoload" / "ui_touch_helper_bridge.gd"
 WORLD_EVENT_BRIDGE_PATH = ROOT / "src" / "autoload" / "world_event_engine_bridge.gd"
+SETTINGS_SCREEN_TSCN_PATH = ROOT / "src" / "ui" / "settings" / "settings_screen.tscn"
+PRODUCT_OVERVIEW_SCENE_PATH = ROOT / "src" / "ui" / "product" / "product_overview.tscn"
+PEOPLE_LIST_SCENE_PATH = ROOT / "src" / "ui" / "people" / "employee_list.tscn"
+SAVE_SLOTS_SCENE_PATH = ROOT / "src" / "ui" / "saves" / "save_slots.tscn"
+MARKET_SCENE_PATH = ROOT / "src" / "ui" / "market" / "market_leaderboard.tscn"
+GAME_OVER_SCENE_PATH = ROOT / "src" / "ui" / "game_over" / "game_over_screen.tscn"
 
 FEATURE_TYPES = {"saas", "consumer", "marketplace", "dev_tools"}
 FOCUS_TYPES = {"saas", "consumer", "marketplace", "dev_tools"}
@@ -1078,6 +1084,71 @@ def validate_button_scene_contracts() -> List[str]:
     return errors
 
 
+def validate_scroll_contracts() -> List[str]:
+    errors: List[str] = []
+    contracts = (
+        {
+            "path": SETTINGS_SCREEN_TSCN_PATH,
+            "required_snippets": (
+                '[node name="MainScroll" type="ScrollContainer" parent="."]',
+                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+                '[node name="PrivacyPanel" type="PanelContainer" parent="."]',
+            ),
+        },
+        {
+            "path": PRODUCT_OVERVIEW_SCENE_PATH,
+            "required_snippets": (
+                '[node name="MainScroll" type="ScrollContainer" parent="."]',
+                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+                '[node name="FeatureListContainer" type="VBoxContainer" parent="MarginContainer/VBox"]',
+            ),
+        },
+        {
+            "path": PEOPLE_LIST_SCENE_PATH,
+            "required_snippets": (
+                '[node name="MainScroll" type="ScrollContainer" parent="."]',
+                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+                '[node name="EmployeeListContainer" type="VBoxContainer" parent="MarginContainer/VBox"]',
+            ),
+        },
+        {
+            "path": SAVE_SLOTS_SCENE_PATH,
+            "required_snippets": (
+                '[node name="MainScroll" type="ScrollContainer" parent="."]',
+                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+                '[node name="SlotContainer" type="VBoxContainer" parent="MarginContainer/VBox"]',
+            ),
+        },
+        {
+            "path": MARKET_SCENE_PATH,
+            "required_snippets": (
+                '[node name="MainScroll" type="ScrollContainer" parent="."]',
+                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+                '[node name="LeaderboardList" type="VBoxContainer" parent="MarginContainer/VBox"]',
+            ),
+        },
+        {
+            "path": GAME_OVER_SCENE_PATH,
+            "required_snippets": (
+                '[node name="MainScroll" type="ScrollContainer" parent="."]',
+                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+            ),
+        },
+    )
+
+    for contract in contracts:
+        path: Path = contract["path"]  # type: ignore[index]
+        if not path.exists():
+            errors.append(f"missing file: {path.relative_to(ROOT)}")
+            continue
+        src = path.read_text(encoding="utf-8")
+        rel = path.relative_to(ROOT)
+        for snippet in contract.get("required_snippets", ()):  # type: ignore[union-attr]
+            if snippet not in src:
+                errors.append(f"{rel} [scroll contract] missing snippet: {snippet}")
+    return errors
+
+
 def main() -> int:
     errors: List[str] = []
 
@@ -1129,6 +1200,7 @@ def main() -> int:
     errors.extend(validate_runtime_bridges())
     errors.extend(validate_button_script_contracts())
     errors.extend(validate_button_scene_contracts())
+    errors.extend(validate_scroll_contracts())
 
     if errors:
         print("Backend smoke check FAILED")
@@ -1140,7 +1212,7 @@ def main() -> int:
     print("Backend smoke check PASSED")
     print(
         "Validated: features/events/world-events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
-        "+ visual presets + difficulty wiring + monetization stability gate + UI button wiring contracts"
+        "+ visual presets + difficulty wiring + monetization stability gate + UI button wiring + scroll contracts"
     )
     return 0
 
