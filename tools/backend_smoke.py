@@ -1098,17 +1098,18 @@ def validate_scroll_contracts() -> List[str]:
         {
             "path": PRODUCT_OVERVIEW_SCENE_PATH,
             "required_snippets": (
-                '[node name="MainScroll" type="ScrollContainer" parent="."]',
-                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
-                '[node name="FeatureListContainer" type="VBoxContainer" parent="MarginContainer/VBox"]',
+                '[node name="MarginContainer" type="MarginContainer" parent="."]',
+                '[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]',
+                '[node name="FeatureListContainer" type="VBoxContainer" parent="MarginContainer/VBox/ScrollContainer"]',
+                '[node name="FeaturePickerScroll" type="ScrollContainer" parent="MarginContainer/VBox/FeaturePickerPanel"]',
             ),
         },
         {
             "path": PEOPLE_LIST_SCENE_PATH,
             "required_snippets": (
-                '[node name="MainScroll" type="ScrollContainer" parent="."]',
-                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
-                '[node name="EmployeeListContainer" type="VBoxContainer" parent="MarginContainer/VBox"]',
+                '[node name="MarginContainer" type="MarginContainer" parent="."]',
+                '[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]',
+                '[node name="EmployeeListContainer" type="VBoxContainer" parent="MarginContainer/VBox/ScrollContainer"]',
             ),
         },
         {
@@ -1122,16 +1123,16 @@ def validate_scroll_contracts() -> List[str]:
         {
             "path": MARKET_SCENE_PATH,
             "required_snippets": (
-                '[node name="MainScroll" type="ScrollContainer" parent="."]',
-                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
-                '[node name="LeaderboardList" type="VBoxContainer" parent="MarginContainer/VBox"]',
+                '[node name="MarginContainer" type="MarginContainer" parent="."]',
+                '[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]',
+                '[node name="LeaderboardList" type="VBoxContainer" parent="MarginContainer/VBox/ScrollContainer"]',
             ),
         },
         {
             "path": GAME_OVER_SCENE_PATH,
             "required_snippets": (
-                '[node name="MainScroll" type="ScrollContainer" parent="."]',
-                '[node name="MarginContainer" type="MarginContainer" parent="MainScroll"]',
+                '[node name="MarginContainer" type="MarginContainer" parent="."]',
+                '[node name="ButtonRow" type="HBoxContainer" parent="MarginContainer/VBox"]',
             ),
         },
     )

@@ -190,7 +190,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 9.11 | Employment type + personality visible | Team/candidate cards show type + trait labels | `employee_list.gd`, `employee_data.gd` |
 | 9.12 | Employee detail screen opens and renders history | `Details` button opens profile with trajectory chart + history rows | `employee_list.gd` → `_on_view_details()`, `employee_detail.gd` |
 | 9.13 | People screen responsibility hint adapts by stage | Early shows shared-hat guidance; growth/scale warns when specialization lanes have no owner | `employee_list.gd` → `_refresh_allocation_hint()`, `_assignment_description_for_stage()` |
-| 9.14 | People screen full-page scroll works with candidate panel open | Header/hints/candidate cards/employee rows remain reachable from one scroll gesture area | `employee_list.tscn`, `employee_list.gd`, `ui_touch_helper.gd` |
+| 9.14 | People list pane scroll works with candidate panel open | Header/hints stay anchored and employee rows remain reachable via the list scroll area | `employee_list.tscn`, `employee_list.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -210,7 +210,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 10.10 | Shimmer stops when feature ships | Ken Burns or reveal animation replaces shimmer | `product_visual.gd` → `_stop_shimmer()` |
 | 10.11 | All 4 company types have 10 features each | `features.json` has entries per type | `src/data/features.json` |
 | 10.12 | ETA text includes throughput hint | Build status displays estimated effort-per-quarter with current team assignment | `product_overview.gd` → `_refresh_build_status()`, `_build_eta_text()` |
-| 10.13 | Product screen supports full-page top/bottom scrolling | Header/back controls, feature picker cards, and shipped-features list are all reachable on small screens without dead scroll zones | `product_overview.tscn`, `product_overview.gd`, `ui_touch_helper.gd` |
+| 10.13 | Product feature-picker and shipped-features panes scroll reliably | Opening `Choose Next Feature` keeps picker cards scrollable, and the shipped-features list remains scrollable without collapsing the rest of the layout | `product_overview.tscn`, `product_overview.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -265,7 +265,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 12.5 | Economy indicator visible on dashboard | Shows current state | `quarter_dashboard.gd` |
 | 12.6 | Starting competitors are niche-biased | Initial rival pool includes same-focus and niche-relevant competitors when available | `competitor_ai.gd` → `generate_starting_competitors()` |
 | 12.7 | World events roll + persist as macro conditions | Multi-quarter market pulses activate with weighted filters and log start/end entries | `world_event_engine.gd`, `game_state.gd` → `event_log` |
-| 12.8 | Market leaderboard full-page scroll works | Back/title and lower-ranked cards are reachable via continuous scroll on short screens | `market_leaderboard.tscn`, `market_leaderboard.gd`, `ui_touch_helper.gd` |
+| 12.8 | Market leaderboard list scroll works on short screens | Back/title stay anchored and lower-ranked cards remain reachable via leaderboard list scrolling | `market_leaderboard.tscn`, `market_leaderboard.gd`, `ui_touch_helper.gd` |
 
 ---
 
@@ -310,7 +310,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 15.5 | Game over screen displays correctly | Reason, stats summary, options | `src/ui/game_over/game_over_screen.gd` |
 | 15.6 | Angel bailout option (first time only) | Cash injection at steep equity cost | `game_over_screen.gd`, `game_state.gd` → `angel_bailout_used` |
 | 15.7 | "Menu" and "New Game" buttons work | Navigate correctly | `game_over_screen.gd` |
-| 15.8 | Game over screen supports top/bottom scrolling on small phones | Reason/stats/angel offer/actions all remain reachable without clipped controls | `game_over_screen.tscn`, `game_over_screen.gd`, `ui_touch_helper.gd` |
+| 15.8 | Game over layout remains stable on small phones | Reason/stats/angel offer/actions render in expected order with no top-left collapse or overlapping controls | `game_over_screen.tscn`, `game_over_screen.gd` |
 
 ---
 
