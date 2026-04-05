@@ -17,11 +17,13 @@ This is the active path for the project right now. It intentionally prioritizes 
 
 ## Sequence (Smartest Path Right Now)
 
-1. **Stability hardening**
+1. **Stability hardening** (last pass: March 2026)
    - Keep running `python3 tools/backend_smoke.py` after meaningful changes.
    - Keep lints clean on touched files.
    - Eliminate silent no-op behavior and data/code contract drift.
    - Preserve save/load safety under long runs and repeated scene transitions.
+   - Follow conventions in `docs/coding-conventions.md` for consistent patterns.
+   - Latest audit (March 2026): fixed 10 critical bugs, 3 data issues, 5 user-facing text issues, 1 code duplication, 2 future-proofing items. Smoke test expanded with 7 new validators.
 
 2. **Empirical balance pass**
    - Execute the 12-run matrix in `docs/difficulty-playtest-matrix.md`.
@@ -50,6 +52,7 @@ This is the active path for the project right now. It intentionally prioritizes 
 
 - Dynamic org structures
 - Time progression alternatives (real-time/monthly mode)
+- Hybrid real-time operations monetization experiment (optional timers + acceleration; non-pay-to-win guardrails)
 - Large net-new systems (executive poaching, stock-market endgame, CVC program)
 - DLC path systems (AI, gaming, hardware, platform, mobility)
 

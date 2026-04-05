@@ -47,7 +47,6 @@ static func _harden_button(btn: BaseButton, min_touch_size: float) -> void:
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	# Placeholder hook for a future visual polish pass (press scale/ripple/haptics).
-	# Sonnet/Opus can key off this metadata and implement richer per-screen effects.
 	if not btn.has_meta(VISUAL_HOOK_META_KEY):
 		btn.set_meta(VISUAL_HOOK_META_KEY, "press_feedback_v1")
 

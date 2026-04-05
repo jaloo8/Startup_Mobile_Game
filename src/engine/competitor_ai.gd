@@ -159,7 +159,8 @@ static func step(market: MarketData, growth_mult: float = 1.0) -> void:
 		var base_min := maxi(1, ceili((BASE_USER_GROWTH_PER_QUARTER / 2.0) * growth_mult))
 		var base_max := maxi(base_min, ceili(BASE_USER_GROWTH_PER_QUARTER * growth_mult))
 		var base := randi_range(base_min, base_max)
-		comp["users"] = current_users + organic + base
+		var growth_cap := 10_000_000
+		comp["users"] = mini(growth_cap, current_users + organic + base)
 
 		comp["product_quality"] = mini(100, comp.get("product_quality", 50) + randi_range(0, 3))
 

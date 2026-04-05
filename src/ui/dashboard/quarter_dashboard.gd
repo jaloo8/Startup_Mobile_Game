@@ -25,6 +25,7 @@ extends Control
 @onready var team_container: VBoxContainer = %TeamContainer
 @onready var event_popup: EventPopup = %EventPopup
 @onready var report_panel: PanelContainer = %ReportPanel
+@onready var report_header: Label = %ReportHeader
 @onready var report_body: Label = %ReportBody
 @onready var events_label: Label = $MarginContainer/VBox/EventsLabel
 @onready var headline_label: Label = %HeadlineLabel
@@ -37,6 +38,7 @@ extends Control
 
 const MAX_VISIBLE_EVENTS := 10
 const HEADLINE_ROTATE_SECONDS := 4.0
+const DASHBOARD_REPORT_BULLET_LIMIT := 5
 
 const OFFICE_BANNER_PATHS := [
 	"res://assets/office/office_0_garage.png",
@@ -291,6 +293,22 @@ func _next_quarter_label_text() -> String:
 		next_quarter = 1
 		next_year += 1
 	return "Advancing to Year %d Q%d..." % [next_year, next_quarter]
+
+
+func _last_closed_quarter_year() -> int:
+	var report_year: int = GameState.current_year
+	var report_quarter: int = GameState.current_quarter - 1
+	if report_quarter < 1:
+		report_quarter = 4
+		report_year -= 1
+	return maxi(1, report_year)
+
+
+func _last_closed_quarter_number() -> int:
+	var report_quarter: int = GameState.current_quarter - 1
+	if report_quarter < 1:
+		report_quarter = 4
+	return report_quarter
 
 
 func _load_first_audio_stream(paths: Array[String]) -> AudioStream:
@@ -780,8 +798,17 @@ func _refresh_events_heading() -> void:
 func _update_advance_button_label() -> void:
 	if advance_btn == null:
 		return
+	if not GameState.is_game_active:
+		advance_btn.text = "Run Ended — Return to Menu"
+		return
+	if AdManager.is_game_locked():
+		advance_btn.text = "Unlock Full Game to Continue"
+		return
 	if advance_btn.disabled and _pending_events.size() > 0:
 		advance_btn.text = "Resolve Events to Continue"
+		return
+	if advance_btn.disabled:
+		advance_btn.text = "Advancing..."
 		return
 	var next_year: int = GameState.current_year
 	var next_quarter: int = GameState.current_quarter + 1
@@ -867,16 +894,7 @@ func _assignment_count(target: EmployeeData.Assignment) -> int:
 
 
 func _responsibility_stage() -> String:
-	var team_size: int = GameState.employees.size()
-	var elapsed_q: int = GameState.total_quarters_elapsed()
-	var users: int = 0
-	if GameState.product:
-		users = GameState.product.users
-	if team_size <= 4 and elapsed_q < 8:
-		return "early"
-	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
-		return "growth"
-	return "scale"
+	return SimulationEngine.responsibility_stage(GameState)
 
 
 func _as_dict(v: Variant) -> Dictionary:
@@ -1059,13 +1077,25 @@ func _on_event(event: EventData) -> void:
 
 
 func _on_advance() -> void:
+	if not GameState.is_game_active:
+		advance_btn.disabled = true
+		_set_advance_hint("This run has ended. Return to menu to start or load a game.", Color(0.95, 0.55, 0.45))
+		_update_advance_button_label()
+		return
+
 	# Free-tier gate: after FREE_QUARTER_LIMIT quarters the player must unlock.
 	if AdManager.is_game_locked():
 		AdManager.show_paywall(
 			# on_unlock: re-enable the button so the player can continue immediately.
-			func() -> void: advance_btn.disabled = false,
+			func() -> void:
+				advance_btn.disabled = false
+				_set_advance_hint("Unlocked. You can continue the run.", Color(0.55, 0.88, 0.55))
+				_update_advance_button_label(),
 			# on_cancel: just re-enable the button so they can try again later.
-			func() -> void: advance_btn.disabled = false,
+			func() -> void:
+				advance_btn.disabled = false
+				_set_advance_hint("Unlock required to continue past the free limit.", Color(0.95, 0.55, 0.45))
+				_update_advance_button_label(),
 		)
 		advance_btn.disabled = true
 		_set_advance_hint("Unlock the full game to continue this run.", Color(0.95, 0.55, 0.45))
@@ -1082,7 +1112,18 @@ func _on_advance() -> void:
 	_pending_events.clear()
 	_refresh_events_heading()
 	Analytics.track_quarter_advanced(GameState.current_year, GameState.current_quarter)
+	var prev_year: int = GameState.current_year
+	var prev_quarter: int = GameState.current_quarter
 	GameState.advance_quarter()
+	var did_advance: bool = (GameState.current_year != prev_year) or (GameState.current_quarter != prev_quarter)
+	if not did_advance:
+		advance_btn.disabled = false
+		if not GameState.is_game_active:
+			_set_advance_hint("This run has ended. Return to menu to start or load a game.", Color(0.95, 0.55, 0.45))
+		else:
+			_set_advance_hint("Quarter did not advance. Try returning to menu and reloading this save.", Color(0.95, 0.55, 0.45))
+		_update_advance_button_label()
+		return
 	_play_transition_sfx("resolve")
 	_show_advance_toast()
 	Analytics.track_revenue(GameState.financials.revenue)
@@ -1370,9 +1411,18 @@ func _show_quarterly_report() -> void:
 	if bullets.is_empty():
 		report_panel.visible = false
 		return
+	if report_header:
+		report_header.text = "Quarterly Report · Year %d Q%d (just ended)" % [
+			_last_closed_quarter_year(),
+			_last_closed_quarter_number(),
+		]
 	var lines: Array[String] = []
-	for b in bullets:
+	var shown: int = mini(bullets.size(), DASHBOARD_REPORT_BULLET_LIMIT)
+	for i in shown:
+		var b: String = bullets[i]
 		lines.append("• " + b)
+	if bullets.size() > DASHBOARD_REPORT_BULLET_LIMIT:
+		lines.append("• ...more notes available next quarter as conditions evolve")
 	report_body.text = "\n".join(lines)
 	report_panel.visible = true
 

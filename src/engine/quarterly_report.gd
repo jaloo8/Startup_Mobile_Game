@@ -126,16 +126,7 @@ static func _assignment_count(state: Node, target: EmployeeData.Assignment) -> i
 
 
 static func _responsibility_stage(state: Node) -> String:
-	var team_size: int = state.employees.size()
-	var elapsed_q: int = 0
-	if state.has_method("total_quarters_elapsed"):
-		elapsed_q = int(state.total_quarters_elapsed())
-	var users: int = state.product.users
-	if team_size <= 4 and elapsed_q < 8:
-		return "early"
-	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
-		return "growth"
-	return "scale"
+	return SimulationEngine.responsibility_stage(state)
 
 
 static func _user_line(state: Node, history: Array[Dictionary]) -> String:

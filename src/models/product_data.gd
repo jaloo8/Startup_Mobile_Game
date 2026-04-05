@@ -16,6 +16,7 @@ extends Resource
 var feature_progress: float = 0.0
 var current_feature_name: String = ""
 var target_feature_id: String = ""
+var _pending_reputation_bonus: int = 0
 
 const CHURN_RATE_MIN := 0.01
 const CHURN_RATE_MAX := 0.40
@@ -103,13 +104,19 @@ func apply_feature_effects(feature_def: Dictionary) -> void:
 	if effects.has("churn_reduction"):
 		churn_rate = maxf(CHURN_RATE_MIN, churn_rate - float(effects["churn_reduction"]))
 	if effects.has("revenue_mult"):
-		revenue_mult *= float(effects["revenue_mult"])
+		revenue_mult = clampf(revenue_mult * float(effects["revenue_mult"]), 0.1, 5.0)
 	if effects.has("user_growth_bonus"):
 		user_growth_flat_bonus += int(effects["user_growth_bonus"])
 	if effects.has("reputation_bonus"):
-		pass
+		_pending_reputation_bonus += int(effects["reputation_bonus"])
 	if effects.has("dau_bonus"):
 		dau_bonus += float(effects["dau_bonus"])
+
+
+func drain_pending_reputation_bonus() -> int:
+	var bonus := _pending_reputation_bonus
+	_pending_reputation_bonus = 0
+	return bonus
 
 
 func dev_speed_multiplier() -> float:
@@ -156,3 +163,4 @@ func clamp_all() -> void:
 	users = maxi(0, users)
 	dau = clampi(dau, 0, users)
 	churn_rate = clampf(churn_rate, CHURN_RATE_MIN, CHURN_RATE_MAX)
+	revenue_mult = clampf(revenue_mult, 0.1, 5.0)

@@ -32,7 +32,7 @@ func _ready() -> void:
 	age_deny_btn.pressed.connect(_on_age_denied)
 
 	privacy_panel.visible = false
-	version_label.text = "Venture v0.1.0"
+	version_label.text = "Venture v%s · %s Mode" % [GameState.GAME_VERSION, AdManager.build_mode_label()]
 
 	if AdManager.is_premium():
 		analytics_header.text = "Analytics"
@@ -141,7 +141,13 @@ func _build_premium_section() -> void:
 	insert_idx += 1
 	_premium_row = row
 
-	if AdManager.is_premium():
+	if AdManager.is_dev_mode():
+		var icon_dev := Label.new()
+		icon_dev.text = "DEV MODE - premium features unlocked for testing"
+		icon_dev.add_theme_font_size_override("font_size", 14)
+		icon_dev.add_theme_color_override("font_color", Color(0.66, 0.86, 1.0))
+		row.add_child(icon_dev)
+	elif AdManager.is_premium():
 		var icon := Label.new()
 		icon.text = "✓  Full Game — Unlocked"
 		icon.add_theme_font_size_override("font_size", 14)

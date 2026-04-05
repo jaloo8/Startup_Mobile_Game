@@ -173,16 +173,7 @@ func _build_allocation_hint_label() -> void:
 
 
 func _responsibility_stage() -> String:
-	var team_size: int = GameState.employees.size()
-	var elapsed_q: int = GameState.total_quarters_elapsed()
-	var users: int = 0
-	if GameState.product != null:
-		users = GameState.product.users
-	if team_size <= 4 and elapsed_q < 8:
-		return RESPONSIBILITY_STAGE_EARLY
-	if team_size <= 8 and elapsed_q < 20 and users < 30_000:
-		return RESPONSIBILITY_STAGE_GROWTH
-	return RESPONSIBILITY_STAGE_SCALE
+	return SimulationEngine.responsibility_stage(GameState)
 
 
 func _assignment_count(target: EmployeeData.Assignment) -> int:
@@ -886,14 +877,16 @@ func _effective_interview_lock(role: String) -> int:
 
 func _interview_stage_hint() -> String:
 	var stage := _interview_stage()
-	var mult: float = float(snapped(_interview_stage_cost_mult() * 100.0, 1.0))
+	var raw_mult: float = _interview_stage_cost_mult()
 	match stage:
 		"early":
-			return "Early-stage hiring market: interview costs are discounted (%s%%)." % str(mult)
+			var discount_pct := roundi((1.0 - raw_mult) * 100.0)
+			return "Early-stage hiring market: interview costs are %d%% cheaper." % discount_pct
 		"late":
-			return "Late-stage hiring market: interview costs and senior lock time are higher (%s%%)." % str(mult)
+			var premium_pct := roundi((raw_mult - 1.0) * 100.0)
+			return "Late-stage hiring market: interview costs are %d%% higher and senior lock times are longer." % premium_pct
 		_:
-			return "Growth-stage hiring market: standard interview costs (%s%%)." % str(mult)
+			return "Growth-stage hiring market: standard interview costs."
 
 
 static func _cost_k(cost: float) -> String:

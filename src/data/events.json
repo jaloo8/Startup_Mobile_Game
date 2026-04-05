@@ -506,8 +506,8 @@
       {
         "label": "Ask for double",
         "effects": {
-          "cash": 150000,
-          "reputation": -10
+          "cash": 120000,
+          "reputation": -14
         },
         "outcome_template": "He laughs so hard he spills his green juice on your whiteboard. 'I like you. Bold.' He doubles the check. Your investors are furious but the runway is looking real comfortable.",
         "outcome_variations": [
@@ -1517,6 +1517,7 @@
       {
         "label": "Apply — free money is free money",
         "effects": {
+          "cash": 100000,
           "stress_all": 5
         },
         "outcome_template": "Three weeks of paperwork. Quarterly reports forever. But 4 months later, a check arrives. Government money with government strings.",
@@ -2146,7 +2147,7 @@
   {
     "id": "term_sheet_footnotes",
     "title": "Term Sheet Footnotes",
-    "category": "finance",
+    "category": "money",
     "stage": "growth",
     "description_template": "A top-tier fund sends an offer for {company_name}. The headline number is great, but the preference terms are... educational.",
     "variations": [

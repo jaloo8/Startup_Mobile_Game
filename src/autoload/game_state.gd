@@ -1,6 +1,8 @@
 extends Node
 ## Holds all game state. Access via GameState.
 
+const GAME_VERSION := "0.1.0"
+
 signal quarter_advanced(quarter_number: int)
 signal game_over(reason: String)
 signal save_error(message: String)
@@ -190,6 +192,7 @@ func new_game(config: Dictionary) -> void:
 	fired_one_time_events.clear()
 	pending_events.clear()
 	clear_world_event_state()
+	EventEngine.reset_cooldowns()
 	_milestones_hit.clear()
 	_achieved_wins.clear()
 	interviewer_busy_quarters.clear()
@@ -347,6 +350,9 @@ func _seed_shipped_features(target_count: int, quality_min: int, quality_max: in
 		var quality: int = clampi(randi_range(quality_min, quality_max), 20, 100)
 		product.add_feature(fname, quality, 0, fid)
 		product.apply_feature_effects(feature_def)
+		var rep_bonus := product.drain_pending_reputation_bonus()
+		if rep_bonus != 0:
+			company.reputation = clampi(company.reputation + rep_bonus, 0, 100)
 		remaining -= 1
 
 
@@ -626,6 +632,7 @@ func _take_snapshot() -> void:
 		"burn_rate": financials.burn_rate,
 		"tech_debt": product.tech_debt,
 		"valuation": company.valuation,
+		"features": product.feature_count(),
 		"avg_morale": average_team_morale(),
 		"hosting_reliability": company.hosting_reliability,
 		"hosting_overage_cost": company.hosting_overage_cost,
@@ -1335,7 +1342,7 @@ func _clamp_deserialized_values() -> void:
 	company.valuation = clampf(company.valuation, 0.0, 1e13)
 	company.equity_owned = clampf(company.equity_owned, 0.0, 100.0)
 	company.reputation = clampi(company.reputation, 0, 100)
-	company.office_level = clampi(company.office_level, 0, 10)
+	company.office_level = clampi(company.office_level, 0, CompanyData.OFFICE_CAPACITY.size() - 1)
 	company.niche_id = company.niche_id.strip_edges()
 	company.niche_name = company.niche_name.strip_edges()
 	company.niche_desc = company.niche_desc.strip_edges()

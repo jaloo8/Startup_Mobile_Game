@@ -94,6 +94,9 @@ func _on_choice(index: int) -> void:
 
 func _apply_effects(effects: Dictionary) -> void:
 	_warn_unknown_effect_keys(effects)
+	if GameState.company == null or GameState.product == null:
+		push_warning("EventPopup: company or product is null; skipping effects")
+		return
 
 	if effects.has("cash"):
 		GameState.company.cash += float(effects["cash"])

@@ -105,7 +105,7 @@ func _refresh() -> void:
 	if workload_profile.is_empty():
 		workload_profile = "General Cloud"
 	var pressure: float = GameState.company.hosting_data_center_pressure
-	plan_hint.text = "Workload profile: %s. Plan changes apply immediately and are fully reflected after the next quarter simulation." % workload_profile
+	plan_hint.text = "Workload profile: %s. Plan changes apply immediately and take full effect next quarter." % workload_profile
 	if pressure >= 2.2:
 		plan_hint.text += "\nThis run is data-center-heavy: prioritize Data/Cache upgrades and Infra staffing."
 	elif pressure >= 1.25:
@@ -336,7 +336,7 @@ func _objective_lines() -> Array[String]:
 	var reliability_streak: int = _hosting_reliability_streak(97.0)
 	var streak_goal: int = 2
 	var streak_done: bool = reliability_streak >= streak_goal
-	lines.append("%s Keep reliability >=97%% for 2 consecutive quarters (%d/%d)" % [
+	lines.append("%s Keep reliability above 97%% for 2 consecutive quarters (%d/%d)" % [
 		"✓" if streak_done else "•",
 		mini(reliability_streak, streak_goal),
 		streak_goal,

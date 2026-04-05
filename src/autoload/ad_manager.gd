@@ -3,8 +3,8 @@ extends Node
 ##
 ## Free tier: full gameplay up to FREE_QUARTER_LIMIT quarters (end of Year 2).
 ## After that, show_paywall() blocks progression until the player unlocks.
-## On PC/Mac (dev builds) the unlock is instant — no real IAP needed.
-## On iOS/Android the IAP stub is called (wire up StoreKit/Google Play later).
+## In dev mode, unlock/paywall are bypassed for faster iteration.
+## In release mode, monetization follows premium + store bridge behavior.
 
 signal ad_shown(slot: String)
 signal ad_reward_granted(slot: String)
@@ -30,6 +30,30 @@ const PREMIUM_SAVE_SLOT_LIMIT := 5
 const PREMIUM_UNLOCK_PRODUCT_ID := "venture.full_game_unlock"
 # Temporary gameplay-first mode: disable monetization/purchase flows.
 const MONETIZATION_TEMP_DISABLED := true
+const BUILD_MODE_DEV := "dev"
+const BUILD_MODE_RELEASE := "release"
+# Optional local override for testing:
+#   ""         -> auto (editor/debug = dev, export = release)
+#   "dev"      -> force dev behavior
+#   "release"  -> force release behavior
+const BUILD_MODE_OVERRIDE := ""
+
+
+static func current_build_mode() -> String:
+	var forced := BUILD_MODE_OVERRIDE.strip_edges().to_lower()
+	if forced == BUILD_MODE_DEV or forced == BUILD_MODE_RELEASE:
+		return forced
+	if OS.has_feature("editor") or OS.is_debug_build():
+		return BUILD_MODE_DEV
+	return BUILD_MODE_RELEASE
+
+
+static func is_dev_mode() -> bool:
+	return current_build_mode() == BUILD_MODE_DEV
+
+
+static func build_mode_label() -> String:
+	return "Dev" if is_dev_mode() else "Release"
 
 
 func _ready() -> void:
@@ -42,6 +66,8 @@ func _ready() -> void:
 
 func is_premium() -> bool:
 	if MONETIZATION_TEMP_DISABLED:
+		return true
+	if is_dev_mode():
 		return true
 	return Analytics.is_premium()
 
@@ -59,7 +85,9 @@ func is_ads_enabled() -> bool:
 func max_save_slots() -> int:
 	if MONETIZATION_TEMP_DISABLED:
 		return PREMIUM_SAVE_SLOT_LIMIT
-	if is_premium() or _is_desktop_platform():
+	if is_premium():
+		return PREMIUM_SAVE_SLOT_LIMIT
+	if _is_desktop_platform() and _iap_provider == null:
 		return PREMIUM_SAVE_SLOT_LIMIT
 	return FREE_SAVE_SLOT_LIMIT
 
@@ -194,8 +222,13 @@ func purchase_full_game(on_unlock: Callable = Callable(), on_cancel: Callable = 
 	_pending_purchase_unlock = on_unlock
 	_pending_purchase_cancel = on_cancel
 
-	# Desktop unlock remains immediate for local development convenience.
-	if _is_desktop_platform():
+	# Dev mode bypasses store purchase for fast local iteration.
+	if is_dev_mode():
+		_complete_premium_unlock()
+		return
+
+	# Desktop fallback while store bridge is unavailable.
+	if _is_desktop_platform() and _iap_provider == null:
 		_complete_premium_unlock()
 		return
 
@@ -222,7 +255,11 @@ func restore_purchases(on_restored: Callable = Callable(), on_failed: Callable =
 	_pending_restore_ok = on_restored
 	_pending_restore_fail = on_failed
 
-	if _is_desktop_platform():
+	if is_dev_mode():
+		_complete_premium_unlock()
+		return
+
+	if _is_desktop_platform() and _iap_provider == null:
 		_complete_premium_unlock()
 		return
 
@@ -313,8 +350,10 @@ func is_game_locked() -> bool:
 		return false
 	if is_premium():
 		return false
-	# Desktop builds are always unlocked (dev / TestFlight convenience).
-	if _is_desktop_platform():
+	if is_dev_mode():
+		return false
+	# Desktop fallback remains unlocked while no purchase bridge is available.
+	if _is_desktop_platform() and _iap_provider == null:
 		return false
 	return GameState.total_quarters_elapsed() >= FREE_QUARTER_LIMIT
 

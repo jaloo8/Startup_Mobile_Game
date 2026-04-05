@@ -47,6 +47,8 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 2.9 | Events catalog loads | `events.json` parsed without errors | `src/engine/event_engine.gd`, `src/data/events.json` |
 | 2.10 | Competitors load for selected type | Rival companies initialized from `competitors.json` | `src/engine/competitor_ai.gd`, `src/data/competitors.json` |
 | 2.11 | Mid/large scenario presets start correctly | `Growth Operator` and `Scale Chief` start with seeded teams, users, and funding context (no crashes, values within expected ranges) | `new_game.gd`, `game_state.gd` → `_apply_starting_scenario()`, `_seed_starting_company_state()` |
+| 2.12 | Niche selector updates per company type | Switching type repopulates niches; recommended niche shows star; modifiers shown below | `new_game.gd` → `_populate_niche_selector()`, `_on_niche_changed()` |
+| 2.13 | Selected niche persists into gameplay | Niche modifiers affect growth/churn/revenue in first quarter | `game_state.gd` → `new_game()`, `company_data.gd` → `apply_niche()` |
 
 ---
 
@@ -136,6 +138,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 6.9 | Event cadence and repeats adapt by stage + difficulty | Early + Sandbox runs feel calmer (lower cadence / longer repeats), while late + Hardcore runs feel denser (higher cadence / shorter repeats) without becoming spammy | `event_engine.gd` → `_event_count_bounds()`, `_effective_cooldown()`, `_effective_event_weight()` |
 | 6.10 | Multi-event quarters avoid same-category spam | When 2-4 events fire, picks usually span categories (not repeatedly `market`/`money` in the same quarter unless pool is constrained) | `event_engine.gd` → `_within_roll_category_dampener()`, `_weighted_pick()` |
 | 6.11 | Event choice effects are fully wired (no silent no-op keys) | Salary raise, equity grant, forced attrition, and fundraising-opportunity effects all apply tangible gameplay state changes | `event_popup.gd` → `_apply_effects()`, `tools/backend_smoke.py` → `EVENT_EFFECT_KEYS` |
+| 6.12 | World events roll and persist across quarters | Multi-quarter macro pulses activate, modify simulation multipliers, and expire with log entries | `world_event_engine.gd` → `resolve_quarter()`, `game_state.gd` → world event state |
 
 ---
 
@@ -211,6 +214,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 10.11 | All 4 company types have 10 features each | `features.json` has entries per type | `src/data/features.json` |
 | 10.12 | ETA text includes throughput hint | Build status displays estimated effort-per-quarter with current team assignment | `product_overview.gd` → `_refresh_build_status()`, `_build_eta_text()` |
 | 10.13 | Product feature-picker and shipped-features panes scroll reliably | Opening `Choose Next Feature` keeps picker cards scrollable, and the shipped-features list remains scrollable without collapsing the rest of the layout | `product_overview.tscn`, `product_overview.gd`, `ui_touch_helper.gd` |
+| 10.14 | Prototype concept switcher cycles correctly | Prototype selector dropdown updates visual preview and hint text; showcase mode auto-cycles presets | `product_overview.gd` → `_on_prototype_selected()`, `_start_showcase_mode()` |
 
 ---
 
@@ -407,6 +411,7 @@ Comprehensive test checklist covering every game system, UI screen, engine, and 
 | 21.4 | Version label shows correct version | Matches `project.godot` | `settings_screen.gd` |
 | 21.5 | Privacy policy link works | Opens URL or shows text | `settings_screen.gd` |
 | 21.6 | Settings screen scroll reaches both top and bottom on small phones | Back/analytics controls and lower premium/tutorial controls are both reachable via touch scroll with no clipped dead zones | `settings_screen.tscn`, `settings_screen.gd`, `ui_touch_helper.gd` |
+| 21.7 | Age confirmation gate works for analytics | Confirming age enables analytics toggle; denying hides analytics row | `settings_screen.gd` → `_on_age_confirmed()`, `_on_age_denied()` |
 
 ---
 
@@ -467,6 +472,13 @@ These tests require deploying to a device or emulator, not just the editor.
 | 24.9 | UI button wiring contracts pass | Critical button handlers and scene button nodes exist for main flows | `tools/backend_smoke.py` → `validate_button_script_contracts()`, `validate_button_scene_contracts()` |
 | 24.10 | `product_preview_prototypes.json` validates | Prototype concept names/descriptions/preview modes are valid for each company type | `src/data/product_preview_prototypes.json`, `product_overview.gd`, `tools/backend_smoke.py` |
 | 24.11 | `world_events.json` validates | World event IDs/effects/durations/filter fields pass backend smoke schema checks | `src/data/world_events.json`, `world_event_engine.gd`, `tools/backend_smoke.py` |
+| 24.12 | Glossary has no near-duplicate keys | No keys differing only by case (e.g., `mrr` vs `MRR`) | `tools/backend_smoke.py` → `validate_glossary_no_near_duplicates()` |
+| 24.13 | Every niche has tagged competitors | All niche IDs in `niches.json` have at least one competitor in `competitors.json` | `tools/backend_smoke.py` → `validate_niche_competitor_coverage()` |
+| 24.14 | Headlines have no broken dollar amounts | No templates with missing numbers like `"a M company"` | `tools/backend_smoke.py` → `validate_headline_content_quality()` |
+| 24.15 | `GAME_VERSION` constant exists and is referenced | Version constant in `game_state.gd`, used by settings and analytics | `tools/backend_smoke.py` → `validate_version_constant()` |
+| 24.16 | Event cooldown reset wired | `EventEngine.reset_cooldowns()` exists and is called in `new_game()` | `tools/backend_smoke.py` → `validate_event_cooldown_reset()` |
+| 24.17 | History snapshots include feature count | `_take_snapshot()` records `"features"` for board patience tracking | `tools/backend_smoke.py` → `validate_history_snapshot_features()` |
+| 24.18 | Scene transitions use SceneLoader only | No raw `change_scene_to_file()` in game screens | `tools/backend_smoke.py` → `validate_scene_loader_usage()` |
 
 ---
 
@@ -475,6 +487,7 @@ These tests require deploying to a device or emulator, not just the editor.
 After any code change:
 
 0. **Execution order** — Follow `docs/current-execution-path.md` for current quality-first sequencing (stability -> balance -> phone gates -> beta)
+0.5 **Edge-case slots (recommended)** — Re-run impacted slot(s) from `docs/dev-edge-case-test-matrix.md` to catch regression spillover quickly
 1. **Backend smoke script** — run `python3 tools/backend_smoke.py` (fast structural/data checks + UI button wiring contracts)
 2. **Lint check** — `ReadLints` on all modified `.gd` files
 3. **★ items** — Marked with ★ above: new game, dashboard, advance quarter, events, hiring, employee list, product, finances, navigation, edge cases (~15 min)
@@ -505,4 +518,4 @@ Full checklist: ~35 minutes in-editor, plus ~15 minutes on-device for Section 23
 
 ---
 
-*Last updated: covers all 6 autoloads, 13 UI screens, 11 engines, 6 data models, 8 JSON files, mobile QA, and pre-release gates.*
+*Last updated: March 2026. Covers all 6 autoloads, 13 UI screens, 11 engines, 6 data models, 9 JSON files, 7 code-quality validators, mobile QA, and pre-release gates.*

@@ -5,7 +5,8 @@ const SETTINGS_PATH := "user://settings.json"
 const SETTINGS_TMP_PATH := "user://settings.json.tmp"
 const SETTINGS_BAK_PATH := "user://settings.json.bak"
 const MAX_SETTINGS_BYTES := 256 * 1024
-const GA_BUILD_VERSION := "0.1.0"
+var GA_BUILD_VERSION: String:
+	get: return GameState.GAME_VERSION
 
 var _ga = null
 var _sdk_available := false

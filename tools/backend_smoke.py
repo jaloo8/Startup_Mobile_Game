@@ -1084,6 +1084,148 @@ def validate_button_scene_contracts() -> List[str]:
     return errors
 
 
+def validate_glossary_no_near_duplicates(data: object) -> List[str]:
+    """Flag glossary keys that differ only by case (e.g. 'MRR' vs 'mrr')."""
+    errors: List[str] = []
+    if not isinstance(data, dict):
+        return errors
+    lower_to_keys: Dict[str, List[str]] = {}
+    for key in data:
+        lower = key.strip().lower()
+        lower_to_keys.setdefault(lower, []).append(key)
+    for lower, keys in lower_to_keys.items():
+        if len(keys) > 1:
+            errors.append(f"glossary.json has near-duplicate keys (case mismatch): {keys}")
+    return errors
+
+
+def validate_niche_competitor_coverage(niches_data: object, competitors_data: object) -> List[str]:
+    """Every niche ID should have at least one competitor tagged with it."""
+    errors: List[str] = []
+    if not isinstance(niches_data, dict) or not isinstance(competitors_data, dict):
+        return errors
+    all_niche_ids: Set[str] = set()
+    for ctype, rows in niches_data.items():
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if isinstance(row, dict):
+                nid = row.get("id", "")
+                if isinstance(nid, str) and nid.strip():
+                    all_niche_ids.add(nid.strip())
+    if not all_niche_ids:
+        return errors
+
+    tagged_niches: Set[str] = set()
+    for comp in competitors_data.get("competitors", []):
+        if not isinstance(comp, dict):
+            continue
+        niches = comp.get("niches", [])
+        if isinstance(niches, list):
+            for n in niches:
+                if isinstance(n, str):
+                    tagged_niches.add(n.strip())
+
+    missing = sorted(all_niche_ids - tagged_niches)
+    if missing:
+        errors.append(f"niches with zero tagged competitors in competitors.json: {missing}")
+    return errors
+
+
+def validate_headline_content_quality(data: object) -> List[str]:
+    """Catch headlines with missing dollar amounts or obviously broken text."""
+    errors: List[str] = []
+    if not isinstance(data, list):
+        return errors
+    for idx, item in enumerate(data):
+        if not isinstance(item, dict):
+            continue
+        template = item.get("template", "")
+        if not isinstance(template, str):
+            continue
+        # Detect patterns like "hit  billion" or "build a M company" (missing $amount)
+        if re.search(r"\b[a-zA-Z]\s{2,}[a-zA-Z]", template):
+            errors.append(f"headlines[{idx}].template may have missing text (double space): {template!r}")
+        if re.search(r"\ba\s+[KMBT]\s", template):
+            errors.append(f"headlines[{idx}].template may have missing dollar amount: {template!r}")
+    return errors
+
+
+def validate_version_constant() -> List[str]:
+    """Ensure GAME_VERSION exists in game_state.gd and is referenced by settings + analytics."""
+    errors: List[str] = []
+    if not GAME_STATE_PATH.exists():
+        return [f"missing file: {GAME_STATE_PATH.relative_to(ROOT)}"]
+    gs = GAME_STATE_PATH.read_text(encoding="utf-8")
+    if 'const GAME_VERSION' not in gs:
+        errors.append("game_state.gd missing GAME_VERSION constant")
+
+    settings_path = ROOT / "src" / "ui" / "settings" / "settings_screen.gd"
+    if settings_path.exists():
+        src = settings_path.read_text(encoding="utf-8")
+        if "GameState.GAME_VERSION" not in src:
+            errors.append("settings_screen.gd should reference GameState.GAME_VERSION instead of hardcoding")
+
+    analytics_path = ROOT / "src" / "autoload" / "analytics.gd"
+    if analytics_path.exists():
+        src = analytics_path.read_text(encoding="utf-8")
+        if "GameState.GAME_VERSION" not in src:
+            errors.append("analytics.gd should reference GameState.GAME_VERSION instead of hardcoding")
+
+    return errors
+
+
+def validate_event_cooldown_reset() -> List[str]:
+    """Ensure EventEngine has a reset_cooldowns method and it's called in new_game."""
+    errors: List[str] = []
+    if not EVENT_ENGINE_PATH.exists():
+        return [f"missing file: {EVENT_ENGINE_PATH.relative_to(ROOT)}"]
+    ee = EVENT_ENGINE_PATH.read_text(encoding="utf-8")
+    if "func reset_cooldowns()" not in ee:
+        errors.append("event_engine.gd missing reset_cooldowns() method — cooldowns will leak across new games")
+
+    if GAME_STATE_PATH.exists():
+        gs = GAME_STATE_PATH.read_text(encoding="utf-8")
+        if "EventEngine.reset_cooldowns()" not in gs and "reset_cooldowns()" not in gs:
+            errors.append("game_state.gd new_game() should call EventEngine.reset_cooldowns()")
+    return errors
+
+
+def validate_history_snapshot_features() -> List[str]:
+    """Ensure history snapshots include a 'features' count for board patience tracking."""
+    errors: List[str] = []
+    if not GAME_STATE_PATH.exists():
+        return errors
+    gs = GAME_STATE_PATH.read_text(encoding="utf-8")
+    # Look for "features" key in the _take_snapshot dictionary literal
+    if re.search(r'"features"\s*:\s*product\.feature_count\(\)', gs):
+        return errors
+    # Fallback: just check for the key
+    if '"features":' not in gs:
+        errors.append("game_state.gd _take_snapshot() should include 'features' count for board patience tracking")
+    return errors
+
+
+def validate_scene_loader_usage() -> List[str]:
+    """Ensure game screens use SceneLoader.goto_scene() instead of raw change_scene_to_file()."""
+    errors: List[str] = []
+    # Files that should exclusively use SceneLoader for scene transitions
+    check_paths = [
+        ROOT / "src" / "ui" / "setup" / "new_game.gd",
+        ROOT / "src" / "ui" / "saves" / "save_slots.gd",
+        ROOT / "src" / "ui" / "game_over" / "game_over_screen.gd",
+        ROOT / "src" / "ui" / "victory" / "victory_screen.gd",
+    ]
+    for path in check_paths:
+        if not path.exists():
+            continue
+        src = path.read_text(encoding="utf-8")
+        if "change_scene_to_file(" in src:
+            rel = path.relative_to(ROOT)
+            errors.append(f"{rel} uses raw change_scene_to_file() — should use SceneLoader.goto_scene()")
+    return errors
+
+
 def validate_scroll_contracts() -> List[str]:
     errors: List[str] = []
     contracts = (
@@ -1190,15 +1332,22 @@ def main() -> int:
     errors.extend(validate_events(events_data))
     errors.extend(validate_world_events(world_events_data))
     errors.extend(validate_headlines(headlines_data))
+    errors.extend(validate_headline_content_quality(headlines_data))
     errors.extend(validate_glossary(glossary_data))
+    errors.extend(validate_glossary_no_near_duplicates(glossary_data))
     errors.extend(validate_vcs(vcs_data))
     errors.extend(validate_competitors(competitors_data))
     errors.extend(validate_niches(niches_data))
+    errors.extend(validate_niche_competitor_coverage(niches_data, competitors_data))
     errors.extend(validate_product_preview_prototypes(product_preview_prototypes_data))
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
     errors.extend(validate_monetization_gate())
     errors.extend(validate_runtime_bridges())
+    errors.extend(validate_version_constant())
+    errors.extend(validate_event_cooldown_reset())
+    errors.extend(validate_history_snapshot_features())
+    errors.extend(validate_scene_loader_usage())
     errors.extend(validate_button_script_contracts())
     errors.extend(validate_button_scene_contracts())
     errors.extend(validate_scroll_contracts())
@@ -1213,7 +1362,10 @@ def main() -> int:
     print("Backend smoke check PASSED")
     print(
         "Validated: features/events/world-events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
-        "+ visual presets + difficulty wiring + monetization stability gate + UI button wiring + scroll contracts"
+        "+ visual presets + difficulty wiring + monetization stability gate + version constant "
+        "+ event cooldown reset + history snapshots + SceneLoader usage "
+        "+ glossary near-dupes + niche-competitor coverage + headline quality "
+        "+ UI button wiring + scroll contracts"
     )
     return 0
 

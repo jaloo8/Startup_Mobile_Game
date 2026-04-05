@@ -2,7 +2,7 @@
 
 A premium mobile management sim where you build a tech startup from garage to IPO. *Pocket GM 3, but for tech startups.* Each run spans 20–40 quarters of strategic CEO decisions — hiring, product allocation, fundraising, and navigating the chaos of startup life.
 
-Built with **Godot 4.3** (GDScript). Targets iOS and Android first, with Steam/desktop as a future option.
+Built with **Godot 4.6** (GDScript). Targets iOS and Android first, with Steam/desktop as a future option.
 
 ---
 
@@ -10,7 +10,7 @@ Built with **Godot 4.3** (GDScript). Targets iOS and Android first, with Steam/d
 
 | | |
 |---|---|
-| **Engine** | Godot 4.3 (Forward Plus) |
+| **Engine** | Godot 4.6 (Forward Plus) |
 | **Language** | GDScript |
 | **Platforms** | iOS, Android, Steam (future) |
 | **Price** | Free through Year 2, then $2.99 full unlock (mobile) |
@@ -28,36 +28,62 @@ startup_mobile_game/
 ├── project.godot
 ├── src/
 │   ├── autoload/
-│   │   └── game_state.gd             # Singleton — all run state
+│   │   ├── game_state.gd             # Singleton — all run state
+│   │   ├── scene_loader.gd           # Scene transitions + helpers
+│   │   ├── glossary.gd               # Term lookup popup system
+│   │   ├── analytics.gd              # GameAnalytics + settings I/O
+│   │   ├── ad_manager.gd             # Ads, IAP, paywall gating
+│   │   ├── tutorial_manager.gd       # First-run tutorial overlay
+│   │   ├── ui_touch_helper_bridge.gd # Runtime bridge for UITouchHelper
+│   │   └── world_event_engine_bridge.gd
 │   ├── models/
-│   │   ├── company_data.gd           # Company type, cash, valuation
-│   │   ├── employee_data.gd          # Skills, morale, assignment
+│   │   ├── company_data.gd           # Company type, cash, hosting
+│   │   ├── employee_data.gd          # Skills, morale, personality
 │   │   ├── product_data.gd           # Features, tech debt, users
 │   │   ├── financials_data.gd        # Revenue, burn rate, funding
-│   │   ├── market_data.gd            # Competitors, trends
+│   │   ├── market_data.gd            # Competitors, economy state
 │   │   └── event_data.gd             # Event definitions
 │   ├── engine/
 │   │   ├── simulation_engine.gd      # Core quarterly sim loop
-│   │   ├── hiring_engine.gd          # Candidate generation
+│   │   ├── event_engine.gd           # Event triggers and resolution
 │   │   ├── revenue_engine.gd         # Revenue calc by company type
 │   │   ├── competitor_ai.gd          # AI competitor behavior
-│   │   └── event_engine.gd           # Event triggers and resolution
+│   │   ├── fundraising_engine.gd     # VC offers and dilution
+│   │   ├── valuation_engine.gd       # Company valuation model
+│   │   ├── hiring_engine.gd          # Candidate generation
+│   │   ├── headline_engine.gd        # News ticker headlines
+│   │   ├── template_engine.gd        # Text template resolution
+│   │   ├── quarterly_report.gd       # End-of-quarter summary
+│   │   └── world_event_engine.gd     # Multi-quarter macro events
 │   ├── ui/
-│   │   ├── main_menu/
-│   │   ├── setup/                    # New game config
+│   │   ├── main_menu/                # Title screen
+│   │   ├── setup/                    # New game + niche picker
+│   │   ├── saves/                    # Save slot management
 │   │   ├── dashboard/                # Quarter hub screen
-│   │   ├── people/                   # Employee management (TBD)
-│   │   ├── product/                  # Product allocation (TBD)
-│   │   ├── finance/                  # Financial overview (TBD)
-│   │   └── events/                   # Event resolution (TBD)
+│   │   ├── people/                   # Employees + interviews
+│   │   ├── product/                  # Product + visuals
+│   │   ├── finance/                  # Finances + fundraising
+│   │   ├── logistics/                # Hosting ops + upgrades
+│   │   ├── market/                   # Competitor leaderboard
+│   │   ├── settings/                 # Settings + premium
+│   │   ├── components/               # Shared (popup, glossary, chart)
+│   │   ├── victory/                  # Win screen + continue
+│   │   └── game_over/                # Loss screen + angel bailout
 │   └── data/
 │       ├── events.json               # Event definitions
-│       └── names.json                # Name generation pools
-├── docs/
-│   ├── game-design.md                # Full GDD
-│   ├── roadmap.md                    # Development phases & checklist
-│   └── monetization.md               # DLC strategy & pricing
-└── tests/                            # GdUnit / GUT tests (TBD)
+│       ├── features.json             # Feature trees per type
+│       ├── headlines.json            # News ticker templates
+│       ├── competitors.json          # Rival company pool
+│       ├── vcs.json                  # VC firm pool
+│       ├── glossary.json             # Term definitions
+│       ├── names.json                # Name generation pools
+│       ├── niches.json               # Per-type niche definitions
+│       ├── product_preview_prototypes.json
+│       └── world_events.json         # Macro event definitions
+├── tools/
+│   └── backend_smoke.py              # Offline structural validation
+├── docs/                             # GDD, roadmap, QA, guardrails
+└── assets/                           # Illustrations, icons, avatars
 ```
 
 ---
@@ -69,12 +95,15 @@ startup_mobile_game/
 - **Current execution path** — [`docs/current-execution-path.md`](docs/current-execution-path.md) — Active quality-first plan (stability -> balance -> phone readiness -> internal beta)
 - **Monetization** — [`docs/monetization.md`](docs/monetization.md) — DLC strategy, pricing, release cadence, technical architecture for expansion packs
 - **Difficulty playtest matrix** — [`docs/difficulty-playtest-matrix.md`](docs/difficulty-playtest-matrix.md) — Manual run capture template for 12-run balance validation (all types x all difficulties)
+- **Dev edge-case matrix** — [`docs/dev-edge-case-test-matrix.md`](docs/dev-edge-case-test-matrix.md) — 5-slot repeatable test setup for regression and stress coverage
 - **Reference tone guardrails** — [`docs/reference-tone-guardrails.md`](docs/reference-tone-guardrails.md) — Writing safety rules for parody/world-event content
+- **Coding conventions** — [`docs/coding-conventions.md`](docs/coding-conventions.md) — Architecture overview, coding rules, common pitfalls, and how to add content
 
 ---
 
 ## Recent changes
 
+- **Comprehensive code audit + smoke test expansion** — Fixed 10 critical bugs (government grant effect, glossary dupes, headline templates, board patience logic, reputation bonus wiring, event cooldown leak, SceneLoader usage, null guards, office level clamping, paywall fallback), 3 data issues, 5 user-facing text issues, consolidated duplicated logic, added future-proofing clamps. Expanded `backend_smoke.py` with 7 new validators (glossary near-dupes, niche-competitor coverage, headline quality, version constant, event cooldown reset, history snapshots, SceneLoader-only enforcement). Added `docs/coding-conventions.md` as a reference for future sessions.
 - **Main-menu/button input regression fix** — Added runtime autoload bridges for `UITouchHelper` and `WorldEventEngine` (`src/autoload/ui_touch_helper_bridge.gd`, `src/autoload/world_event_engine_bridge.gd`) and wired them in `project.godot` so UI/button scripts compile reliably even when class-name cache metadata is stale.
 - **Role mesh + stage-aware responsibilities** — Work allocation now follows startup maturity: early teams stay cross-functional (non-feature lanes still provide partial feature support), while growth/scale runs require specialization. Dedicated `Bugs`, `Tech Debt`, `Infrastructure`, and `R&D` assignments now have stronger impact, and cross-role mesh bonuses reward balanced teams with better quality, steadier retention, and lower operational drag.
 - **Expanded start scenarios** — New game now includes jump-in presets beyond bootstrap (`Growth Operator`, `Scale Chief`) so players can run mid-size or large companies immediately, each seeded with a realistic team mix, product state, and funding context.

@@ -36,6 +36,10 @@ const CATEGORY_ALIASES := {
 const SAME_CATEGORY_PICK_DAMPING := 0.72
 
 
+static func reset_cooldowns() -> void:
+	_cooldowns.clear()
+
+
 static func load_events(path: String) -> void:
 	_all_events.clear()
 	_cooldowns.clear()

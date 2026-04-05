@@ -344,10 +344,7 @@ func _on_start() -> void:
 			config["difficulty"],
 			config["scenario"],
 		)
-	var err := get_tree().change_scene_to_file("res://src/ui/dashboard/quarter_dashboard.tscn")
-	if err != OK:
-		push_error("NewGame: failed to open dashboard scene (err=%d)" % err)
-		start_btn.disabled = false
+	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 
 func _on_back() -> void:

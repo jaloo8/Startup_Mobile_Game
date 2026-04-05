@@ -368,7 +368,7 @@ func _update_prototype_hint(text: String) -> void:
 	if _prototype_hint == null:
 		return
 	if text.strip_edges().is_empty():
-		_prototype_hint.text = "Add future concept ideas in src/data/product_preview_prototypes.json."
+		_prototype_hint.text = "No concept prototypes loaded yet."
 		return
 	_prototype_hint.text = text
 

@@ -10,7 +10,7 @@
 
   "competitors": [
 
-    {"name": "Orange", "focus": "consumer", "size": "enterprise", "tagline": "Premium hardware and walled-garden ecosystem"},
+    {"name": "Orange", "focus": "consumer", "size": "enterprise", "tagline": "Premium hardware and walled-garden ecosystem", "niches": ["fitness_companion"]},
     {"name": "Googlr", "focus": "consumer", "size": "enterprise", "tagline": "Search, ads, cloud, and everything in between"},
     {"name": "Macrosoft", "focus": "saas", "size": "enterprise", "tagline": "Enterprise software, cloud, and operating systems"},
     {"name": "Amazn", "focus": "marketplace", "size": "enterprise", "tagline": "E-commerce empire and cloud services"},
@@ -41,13 +41,13 @@
     {"name": "Snapp Inc", "focus": "consumer", "size": "growth", "tagline": "Disappearing photos and AR filters"},
 
     {"name": "Cloudflair", "focus": "dev_tools", "size": "growth", "tagline": "CDN, security, and edge computing", "niches": ["api_observability", "cloud_cost_tools"]},
-    {"name": "Dockr", "focus": "dev_tools", "size": "growth", "tagline": "Containers and developer deployment tools"},
+    {"name": "Dockr", "focus": "dev_tools", "size": "growth", "tagline": "Containers and developer deployment tools", "niches": ["ci_automation"]},
     {"name": "Databriks", "focus": "dev_tools", "size": "growth", "tagline": "Data lakehouse and AI analytics"},
     {"name": "Snowflek", "focus": "saas", "size": "growth", "tagline": "Cloud data warehousing"},
     {"name": "MongoDV", "focus": "dev_tools", "size": "growth", "tagline": "NoSQL database platform"},
 
     {"name": "Atlantian", "focus": "saas", "size": "growth", "tagline": "Project tracking and team collaboration"},
-    {"name": "Intuut", "focus": "saas", "size": "enterprise", "tagline": "Tax, accounting, and small business software"},
+    {"name": "Intuut", "focus": "saas", "size": "enterprise", "tagline": "Tax, accounting, and small business software", "niches": ["compliance_ops"]},
     {"name": "HubSplat", "focus": "saas", "size": "growth", "tagline": "Marketing, sales, and CRM platform", "niches": ["vertical_crm", "workflow_automation"]},
     {"name": "Palantar", "focus": "saas", "size": "growth", "tagline": "Big data analytics and intelligence"},
     {"name": "CrowdStrke", "focus": "dev_tools", "size": "growth", "tagline": "Cybersecurity and endpoint protection"},
@@ -55,7 +55,7 @@
     {"name": "Datadawg", "focus": "dev_tools", "size": "growth", "tagline": "Cloud monitoring and observability", "niches": ["api_observability"]},
     {"name": "Twilo", "focus": "dev_tools", "size": "growth", "tagline": "Communications APIs for developers"},
     {"name": "Zendeq", "focus": "saas", "size": "growth", "tagline": "Customer support and helpdesk software"},
-    {"name": "GitLob", "focus": "dev_tools", "size": "growth", "tagline": "Code hosting and open source collaboration"},
+    {"name": "GitLob", "focus": "dev_tools", "size": "growth", "tagline": "Code hosting and open source collaboration", "niches": ["ci_automation"]},
     {"name": "Vercl", "focus": "dev_tools", "size": "startup", "tagline": "Frontend deployment and serverless platform"},
 
     {"name": "PalPay", "focus": "marketplace", "size": "enterprise", "tagline": "Online payments and digital wallets"},
@@ -63,15 +63,15 @@
     {"name": "Coinbaze", "focus": "marketplace", "size": "growth", "tagline": "Cryptocurrency exchange and wallet"},
     {"name": "Robinhuud", "focus": "consumer", "size": "growth", "tagline": "Commission-free stock trading app"},
 
-    {"name": "Airbnd", "focus": "marketplace", "size": "enterprise", "tagline": "Short-term rentals and travel experiences"},
+    {"name": "Airbnd", "focus": "marketplace", "size": "enterprise", "tagline": "Short-term rentals and travel experiences", "niches": ["home_services"]},
     {"name": "DoorDsh", "focus": "marketplace", "size": "growth", "tagline": "Food delivery and local logistics", "niches": ["food_delivery_hub"]},
     {"name": "iBay", "focus": "marketplace", "size": "enterprise", "tagline": "Online auctions and peer-to-peer marketplace"},
-    {"name": "Instacrt", "focus": "marketplace", "size": "growth", "tagline": "Grocery delivery and pickup"},
+    {"name": "Instacrt", "focus": "marketplace", "size": "growth", "tagline": "Grocery delivery and pickup", "niches": ["home_services", "food_delivery_hub"]},
     {"name": "Etsee", "focus": "marketplace", "size": "growth", "tagline": "Handmade and vintage marketplace", "niches": ["resale_goods"]},
 
     {"name": "Reddyt", "focus": "consumer", "size": "growth", "tagline": "Forums, communities, and internet culture"},
     {"name": "TokTik", "focus": "consumer", "size": "enterprise", "tagline": "Short-form video and viral content"},
-    {"name": "Pintrest", "focus": "consumer", "size": "growth", "tagline": "Visual discovery and inspiration boards"},
+    {"name": "Pintrest", "focus": "consumer", "size": "growth", "tagline": "Visual discovery and inspiration boards", "niches": ["local_discovery"]},
     {"name": "Disni+", "focus": "consumer", "size": "enterprise", "tagline": "Streaming, theme parks, and entertainment empire", "niches": ["streaming_service"]},
     {"name": "Walmrt", "focus": "marketplace", "size": "enterprise", "tagline": "Retail giant with a growing tech division"},
 

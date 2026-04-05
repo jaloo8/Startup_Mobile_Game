@@ -274,12 +274,18 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="ReportHeader" type="Label" parent="MarginContainer/VBox/ReportPanel/ReportVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Quarterly Report"
 theme_override_font_sizes/font_size = 15
 theme_override_colors/font_color = Color(0.6, 0.8, 0.95, 1)
 
-[node name="ReportBody" type="Label" parent="MarginContainer/VBox/ReportPanel/ReportVBox"]
+[node name="ReportScroll" type="ScrollContainer" parent="MarginContainer/VBox/ReportPanel/ReportVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 104)
+vertical_scroll_mode = 1
+
+[node name="ReportBody" type="Label" parent="MarginContainer/VBox/ReportPanel/ReportVBox/ReportScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 2

@@ -265,7 +265,7 @@ static func _world_mult(state: Node, key: String, default_value: float = 1.0) ->
 	return default_value
 
 
-static func _responsibility_stage(state: Node) -> String:
+static func responsibility_stage(state: Node) -> String:
 	var team_size: int = state.employees.size()
 	var elapsed_q: int = 0
 	if state.has_method("total_quarters_elapsed"):
@@ -281,7 +281,7 @@ static func _responsibility_stage(state: Node) -> String:
 
 
 static func _responsibility_profile(state: Node) -> Dictionary:
-	var stage: String = _responsibility_stage(state)
+	var stage: String = responsibility_stage(state)
 	var profile: Dictionary = _safe_dict(RESPONSIBILITY_PROFILE.get(stage, {}))
 	if profile.is_empty():
 		return _safe_dict(RESPONSIBILITY_PROFILE.get("growth", {}))
@@ -314,7 +314,7 @@ static func _active_assignment_counts(state: Node) -> Dictionary:
 
 
 static func _responsibility_mesh(state: Node, assignment_counts: Dictionary) -> Dictionary:
-	var stage: String = _responsibility_stage(state)
+	var stage: String = responsibility_stage(state)
 	var stage_mult: float = clampf(float(RESPONSIBILITY_MESH_STAGE_MULT.get(stage, 1.0)), 0.25, 1.5)
 	var features_assigned: int = int(assignment_counts.get("features", 0))
 	var bugs_assigned: int = int(assignment_counts.get("bugs", 0))
@@ -462,6 +462,9 @@ static func _apply_work_output(state: Node) -> void:
 					state.product.add_feature(fname, quality, state.current_quarter, fid)
 					if not target_def.is_empty():
 						state.product.apply_feature_effects(target_def)
+						var rep_bonus := state.product.drain_pending_reputation_bonus()
+						if rep_bonus != 0:
+							state.company.reputation = clampi(state.company.reputation + rep_bonus, 0, 100)
 					state.product.target_feature_id = ""
 			EmployeeData.Assignment.BUGS:
 				var bug_mult: float = (1.0 + tech_bonus) * lane_effect_mult * bugs_mesh_mult
@@ -1312,9 +1315,9 @@ static func _update_board_patience(state: Node) -> void:
 
 	var users_grew: bool = curr.get("users", 0) > prev.get("users", 0)
 	var rev_grew: bool = curr.get("revenue", 0.0) > prev.get("revenue", 0.0)
-	var shipped: bool = state.product.feature_count() > 0
+	var shipped_new: bool = curr.get("features", 0) > prev.get("features", 0)
 
-	if users_grew or rev_grew or shipped:
+	if users_grew or rev_grew or shipped_new:
 		state.board_patience = mini(state.board_patience + 1, 6)
 	else:
 		state.board_patience -= 1

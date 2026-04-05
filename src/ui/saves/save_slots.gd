@@ -319,6 +319,6 @@ func _show_unlock_paywall(on_unlock: Callable = Callable(), on_cancel: Callable 
 	if mgr and mgr.has_method("show_paywall"):
 		mgr.call("show_paywall", on_unlock, on_cancel)
 	else:
-		# Safe fallback: don't hard-block the player if paywall manager is unavailable.
-		if on_unlock.is_valid():
-			on_unlock.call()
+		push_warning("SaveSlots: paywall unavailable; running cancel path instead of granting premium access")
+		if on_cancel.is_valid():
+			on_cancel.call()

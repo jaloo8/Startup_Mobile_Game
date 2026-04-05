@@ -7,7 +7,7 @@
   "MRR": {
     "term": "MRR",
     "short": "Monthly Recurring Revenue",
-    "tip": "The subscription revenue you can count on each month. ARR is just this times 12."
+    "tip": "The subscription revenue you can count on each month. ARR is just this times 12. MRR is the heartbeat of a SaaS business — investors love predictable, recurring revenue."
   },
   "cash_on_hand": {
     "term": "Cash in Bank",
@@ -224,20 +224,10 @@
     "short": "What your company is estimated to be worth",
     "tip": "Valuation updates each quarter based on revenue, users, growth rate, team size, and market conditions. SaaS companies are valued on revenue multiples. Consumer companies on per-user value. Fundraising sets a floor."
   },
-  "mrr": {
-    "term": "MRR (Monthly Recurring Revenue)",
-    "short": "How much subscription revenue comes in each month",
-    "tip": "MRR is the heartbeat of a SaaS business. It's your quarterly revenue divided by 3. Investors love predictable, recurring revenue — it's the main driver of SaaS valuations."
-  },
   "dau_mau": {
     "term": "DAU/MAU Ratio",
     "short": "Daily active users as a percentage of monthly users",
     "tip": "Measures how often users come back. A 50%+ ratio means users open the app almost every day — that's exceptional. Below 20% means most users are dormant. Social media apps typically aim for 40%+."
-  },
-  "gmv": {
-    "term": "GMV (Gross Merchandise Volume)",
-    "short": "Total value of goods sold through your marketplace",
-    "tip": "GMV is the total transaction volume — not your revenue. Your actual revenue is the cut you take (the 'take rate'). A marketplace with $1M GMV and a 10% take rate earns $100K."
   },
   "api_calls": {
     "term": "API Calls",
