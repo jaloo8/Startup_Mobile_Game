@@ -13,7 +13,26 @@
       "Bash(python3:*)",
       "Bash(grep -E \"\\\\.json$\")",
       "Bash(grep -l \"employee_bios\\\\|bios\\\\.json\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/engine/*.gd)",
-      "Bash(grep -r \"news_headlines\\\\|quarterly_reports\\\\|postmortems\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/data/*.json)"
+      "Bash(grep -r \"news_headlines\\\\|quarterly_reports\\\\|postmortems\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/data/*.json)",
+      "Bash(grep -n \"custom_minimum_size\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/**/*.tscn)",
+      "Bash(for file:*)",
+      "Bash(do grep:*)",
+      "Bash(do if:*)",
+      "Bash(then echo:*)",
+      "Bash(grep -l \"goto_scene\\\\|screen_wipe\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/**/*.gd)",
+      "Bash(grep \"screen_wipe\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/**/*.gd)",
+      "Bash(wc -l /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/**/*.gd)",
+      "Bash(grep -l AnimHelper /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/dashboard/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/product/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/finance/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/logistics/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/settings/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/market/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/people/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/saves/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/game_over/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/victory/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/setup/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/main_menu/*.gd)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(grep -l \"create_tween\\\\|Tween\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/dashboard/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/product/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/finance/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/logistics/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/settings/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/market/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/people/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/saves/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/game_over/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/victory/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/setup/*.gd /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/main_menu/*.gd)",
+      "Bash(ls /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui/*/*.gd)",
+      "Bash(/tmp/animation_report.txt:*)",
+      "Bash(grep -E \"\\\\.\\(gd|md\\)$\")",
+      "Bash(grep -n \"is_dev_mode\\\\|dev_mode\\\\|DEBUG\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/autoload/*.gd)",
+      "Bash(grep -n \"class CompanyData\\\\|class ProductData\\\\|class EmployeeData\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/models/*.gd)",
+      "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --oneline -30)",
+      "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --format=\"%H %ai\" --reverse)",
+      "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --format=\"%H %ai\")"
     ]
   }
 }

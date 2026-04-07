@@ -16,6 +16,7 @@ func _ready() -> void:
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("market")
+	AnimHelper.stagger_list(list_container, 0.04, 0.0, 22.0)
 
 
 func _exit_tree() -> void:

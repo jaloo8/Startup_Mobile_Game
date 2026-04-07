@@ -672,6 +672,14 @@ func _check_end_conditions() -> void:
 		_emit_victory("sustainable")
 		return
 
+	# God mode (dev panel): suppress all loss conditions.
+	if has_meta("god_mode") and get_meta("god_mode"):
+		founder_energy = maxi(founder_energy, 20)
+		board_patience = maxi(board_patience, 1)
+		if company.cash <= 0:
+			company.cash = 10_000.0
+		return
+
 	if founder_energy <= 0:
 		is_game_active = false
 		game_over.emit("founder_burnout")

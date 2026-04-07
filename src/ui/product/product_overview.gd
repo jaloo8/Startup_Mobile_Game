@@ -101,6 +101,9 @@ func _ready() -> void:
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("product")
+	var content := get_node_or_null("MarginContainer/ScrollContainer/VBox")
+	if content is Control:
+		AnimHelper.slide_in(content, Vector2(0, 28), 0.0, 0.22)
 
 
 func _exit_tree() -> void:
@@ -222,6 +225,7 @@ func _build_visual_preset_controls() -> void:
 	row.add_child(title)
 
 	_visual_preset_picker = OptionButton.new()
+	_visual_preset_picker.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
 	for label in VISUAL_PRESET_LABELS:
 		_visual_preset_picker.add_item(label)
 	_visual_preset_picker.selected = _visual_preset_mode
@@ -230,7 +234,7 @@ func _build_visual_preset_controls() -> void:
 
 	_showcase_btn = Button.new()
 	_showcase_btn.text = "Showcase ▶"
-	_showcase_btn.custom_minimum_size = Vector2(110, 0)
+	_showcase_btn.custom_minimum_size = Vector2(110, ThemeManager.TOUCH_MIN_H)
 	_showcase_btn.pressed.connect(_on_showcase_pressed)
 	row.add_child(_showcase_btn)
 
@@ -245,6 +249,7 @@ func _build_visual_preset_controls() -> void:
 	proto_row.add_child(proto_title)
 
 	_prototype_picker = OptionButton.new()
+	_prototype_picker.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
 	_prototype_picker.add_item("None")
 	for row_data in _prototype_rows:
 		_prototype_picker.add_item(str(row_data.get("name", "Concept")))

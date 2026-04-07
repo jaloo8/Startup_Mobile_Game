@@ -59,6 +59,7 @@ func _ready() -> void:
 	AdManager.premium_unlocked.connect(_on_premium_unlocked)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("settings")
+	AnimHelper.fade_in(self, 0.0, 0.18)
 
 
 func _on_age_confirmed() -> void:
@@ -162,6 +163,7 @@ func _build_premium_section() -> void:
 		sn.bg_color = Color(0.18, 0.44, 0.88)
 		sn.set_corner_radius_all(9)
 		sn.set_content_margin_all(12.0)
+		unlock_btn.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
 		unlock_btn.add_theme_stylebox_override("normal", sn)
 		var sh := sn.duplicate() as StyleBoxFlat
 		sh.bg_color = sn.bg_color.lightened(0.10)
@@ -186,6 +188,7 @@ func _build_premium_section() -> void:
 		rs.bg_color = Color(0.14, 0.18, 0.30)
 		rs.set_corner_radius_all(9)
 		rs.set_content_margin_all(10.0)
+		restore_btn.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
 		restore_btn.add_theme_stylebox_override("normal", rs)
 		restore_btn.add_theme_stylebox_override("hover", rs)
 		restore_btn.add_theme_stylebox_override("pressed", rs)
@@ -212,6 +215,7 @@ func _build_premium_section() -> void:
 	tb_style.bg_color = Color(0.12, 0.14, 0.24)
 	tb_style.set_corner_radius_all(7)
 	tb_style.set_content_margin_all(10.0)
+	tut_btn.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
 	tut_btn.add_theme_stylebox_override("normal", tb_style)
 	var tb_hover := tb_style.duplicate() as StyleBoxFlat
 	tb_hover.bg_color = tb_style.bg_color.lightened(0.08)

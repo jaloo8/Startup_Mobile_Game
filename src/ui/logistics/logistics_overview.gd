@@ -36,6 +36,7 @@ func _ready() -> void:
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("logistics")
+	AnimHelper.fade_in(self, 0.0, 0.18)
 
 
 func _populate_plan_picker() -> void:
@@ -196,7 +197,7 @@ func _add_upgrade_row(parent: VBoxContainer, lane_key: String, label_text: Strin
 	_upgrade_cost_labels[lane_key] = cost_label
 
 	var action_btn := Button.new()
-	action_btn.custom_minimum_size = Vector2(140, 0)
+	action_btn.custom_minimum_size = Vector2(140, ThemeManager.TOUCH_MIN_H)
 	action_btn.pressed.connect(_on_upgrade_pressed.bind(lane_key))
 	row.add_child(action_btn)
 	_upgrade_buttons[lane_key] = action_btn

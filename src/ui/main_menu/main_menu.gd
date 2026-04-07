@@ -16,6 +16,7 @@ func _ready() -> void:
 	_refresh_continue_state()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("main_menu")
+	_animate_entrance()
 
 
 func _on_play() -> void:
@@ -74,6 +75,26 @@ func _refresh_continue_state() -> void:
 			if not company_name.is_empty():
 				label = "Continue: %s" % company_name
 	continue_btn.text = label
+
+
+func _animate_entrance() -> void:
+	# Title: pop in with spring overshoot.
+	var title: Label = get_node_or_null("CenterContainer/VBox/Title")
+	if title:
+		AnimHelper.pop_in(title, 0.0, 0.32)
+
+	# Subtitle: fade in slightly delayed.
+	var subtitle: Label = get_node_or_null("CenterContainer/VBox/Subtitle")
+	if subtitle:
+		AnimHelper.fade_in(subtitle, 0.12, 0.24)
+
+	# Buttons: stagger slide up from below.
+	var buttons: Array[Control] = []
+	for btn in [play_btn, continue_btn, settings_btn, quit_btn]:
+		if btn != null:
+			buttons.append(btn)
+	for i in buttons.size():
+		AnimHelper.slide_in(buttons[i], Vector2(0, 32), 0.18 + i * 0.06)
 
 
 func _on_settings() -> void:

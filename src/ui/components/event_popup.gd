@@ -73,12 +73,18 @@ func show_event(event: EventData) -> void:
 	UITouchHelper.harden_tree(self)
 
 	SfxPlayer.play("event_popup")
-	modulate.a = 0.0
 	visible = true
 	if _tween and _tween.is_running():
 		_tween.kill()
-	_tween = create_tween()
-	_tween.tween_property(self, "modulate:a", 1.0, 0.2)
+	# Spring pop-in with scale overshoot — much more impactful than a plain fade.
+	scale = Vector2(0.85, 0.85)
+	pivot_offset = size * 0.5
+	modulate.a = 0.0
+	_tween = create_tween().set_parallel(true)
+	_tween.tween_property(self, "scale", Vector2.ONE, 0.26) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	_tween.tween_property(self, "modulate:a", 1.0, 0.18) \
+		.set_ease(Tween.EASE_OUT)
 
 
 func _on_choice(index: int) -> void:
@@ -234,11 +240,16 @@ func _retention_score(emp: EmployeeData) -> float:
 func _on_continue() -> void:
 	if _tween and _tween.is_running():
 		_tween.kill()
-	_tween = create_tween()
-	_tween.tween_property(self, "modulate:a", 0.0, 0.15)
-	_tween.tween_callback(_finish_resolve)
+	pivot_offset = size * 0.5
+	_tween = create_tween().set_parallel(true)
+	_tween.tween_property(self, "scale", Vector2(0.90, 0.90), 0.14) \
+		.set_ease(Tween.EASE_IN)
+	_tween.tween_property(self, "modulate:a", 0.0, 0.14) \
+		.set_ease(Tween.EASE_IN)
+	_tween.chain().tween_callback(_finish_resolve)
 
 
 func _finish_resolve() -> void:
 	visible = false
+	scale = Vector2.ONE
 	event_resolved.emit(_current_event, _current_choice_index)

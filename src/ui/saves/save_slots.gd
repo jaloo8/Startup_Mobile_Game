@@ -17,6 +17,7 @@ func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	_refresh()
 	UITouchHelper.harden_tree(self)
+	AnimHelper.stagger_list(slot_container, 0.06, 0.0, 24.0)
 
 
 func _exit_tree() -> void:

@@ -95,6 +95,13 @@ var _chip_hud_label: Label
 var _passive_ticker_label: Label
 var _offline_summary_backdrop: ColorRect
 
+# Previous stat values for animated counter rolls.
+var _first_refresh: bool = true
+var _prev_cash: float = 0.0
+var _prev_revenue: float = 0.0
+var _prev_burn: float = 0.0
+var _prev_users: float = 0.0
+
 
 func _ready() -> void:
 	advance_btn.pressed.connect(_on_advance)
@@ -146,6 +153,8 @@ func _ready() -> void:
 	_refresh(GameState.current_quarter)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("dashboard")
+
+	_build_dev_button()
 
 	# Start tutorial on first run (deferred so all nodes are fully laid out).
 	TutorialManager.start_if_needed.call_deferred()
@@ -553,11 +562,34 @@ func _refresh(_q: int) -> void:
 		return
 	quarter_label.text = "Year %d, Q%d" % [GameState.current_year, GameState.current_quarter]
 	company_label.text = "%s — %s" % [GameState.company.company_name, GameState.company.type_name_with_niche()]
-	cash_label.text = "$%s" % SceneLoader.format_money(GameState.company.cash)
-	users_label.text = "%s users" % SceneLoader.format_number(GameState.product.users)
 	employees_label.text = "%d / %d" % [GameState.employees.size(), GameState.company.office_capacity()]
-	revenue_label.text = "$%s/qtr" % SceneLoader.format_money(GameState.financials.revenue)
-	burn_label.text = "$%s/qtr" % SceneLoader.format_money(GameState.financials.burn_rate)
+
+	# Animate key financial counters when values change; static set on first load.
+	var new_cash: float = GameState.company.cash
+	var new_revenue: float = GameState.financials.revenue
+	var new_burn: float = GameState.financials.burn_rate
+	var new_users: float = float(GameState.product.users)
+
+	if _first_refresh:
+		_first_refresh = false
+		# First refresh — set text directly, no animation.
+		cash_label.text = "$%s" % SceneLoader.format_money(new_cash)
+		revenue_label.text = "$%s/qtr" % SceneLoader.format_money(new_revenue)
+		burn_label.text = "$%s/qtr" % SceneLoader.format_money(new_burn)
+		users_label.text = "%s users" % SceneLoader.format_number(int(new_users))
+	else:
+		AnimHelper.roll_money(cash_label, _prev_cash, new_cash, 0.45, "$")
+		AnimHelper.roll_number(revenue_label, _prev_revenue, new_revenue, 0.45,
+			func(v: float) -> String: return "$%s/qtr" % SceneLoader.format_money(v))
+		AnimHelper.roll_number(burn_label, _prev_burn, new_burn, 0.45,
+			func(v: float) -> String: return "$%s/qtr" % SceneLoader.format_money(v))
+		AnimHelper.roll_number(users_label, _prev_users, new_users, 0.55,
+			func(v: float) -> String: return "%s users" % SceneLoader.format_number(int(v)))
+
+	_prev_cash = new_cash
+	_prev_revenue = new_revenue
+	_prev_burn = new_burn
+	_prev_users = new_users
 
 	var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
 	if rw == INF:
@@ -1268,20 +1300,24 @@ func _refresh_office_worker_ambient() -> void:
 		_office_worker_layer.add_child(monitor)
 
 		var worker: Control = _make_worker_sprite(emp)
-		worker.position = Vector2(slot.x - 4.0, slot.y - 11.0)
+		worker.position = Vector2(slot.x - 7.0, slot.y - 20.0)
 		_office_worker_layer.add_child(worker)
 
+		# PixelCharacter handles its own frame-swap animation internally.
+		# We add a subtle positional bob here so each worker has unique rhythm.
 		var base_pos: Vector2 = worker.position
 		var tw := worker.create_tween().set_loops()
 		tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		# Stagger start by UID so workers don't bob in unison.
 		tw.tween_interval(float(hash(emp.employee_uid) % 11) * 0.04)
-		var bob: float = 1.1 + (float(emp.assignment % 3) * 0.25)
-		tw.tween_property(worker, "position:y", base_pos.y + bob, 0.54)
-		tw.tween_property(worker, "position:y", base_pos.y, 0.54)
+		var bob: float = 0.8 + (float(emp.assignment % 3) * 0.2)
+		tw.tween_property(worker, "position:y", base_pos.y + bob, 0.58)
+		tw.tween_property(worker, "position:y", base_pos.y, 0.58)
+		# Bug-fixers get extra lateral fidget.
 		if emp.assignment == EmployeeData.Assignment.BUGS:
-			tw.tween_property(worker, "position:x", base_pos.x + 0.6, 0.22)
-			tw.tween_property(worker, "position:x", base_pos.x - 0.6, 0.22)
-			tw.tween_property(worker, "position:x", base_pos.x, 0.22)
+			tw.tween_property(worker, "position:x", base_pos.x + 0.5, 0.20)
+			tw.tween_property(worker, "position:x", base_pos.x - 0.5, 0.20)
+			tw.tween_property(worker, "position:x", base_pos.x, 0.20)
 
 
 func _build_desk_slots(style: Dictionary, width: float, height: float) -> Array[Vector2]:
@@ -1300,43 +1336,8 @@ func _build_desk_slots(style: Dictionary, width: float, height: float) -> Array[
 
 
 func _make_worker_sprite(emp: EmployeeData) -> Control:
-	var root := Control.new()
-	root.custom_minimum_size = Vector2(10, 10)
-	root.size = Vector2(10, 10)
-
-	var body := ColorRect.new()
-	body.custom_minimum_size = Vector2(6, 5)
-	body.size = Vector2(6, 5)
-	body.position = Vector2(2, 4)
-	body.color = _assignment_color(emp.assignment)
-	root.add_child(body)
-
-	var head := ColorRect.new()
-	head.custom_minimum_size = Vector2(4, 3)
-	head.size = Vector2(4, 3)
-	head.position = Vector2(3, 1)
-	head.color = _worker_skin_color(emp.employee_uid)
-	root.add_child(head)
-
-	var badge := ColorRect.new()
-	badge.custom_minimum_size = Vector2(2, 2)
-	badge.size = Vector2(2, 2)
-	badge.position = Vector2(6, 6)
-	badge.color = Color(0.9, 0.93, 0.98, 0.85)
-	root.add_child(badge)
-
-	return root
-
-
-func _worker_skin_color(uid: String) -> Color:
-	var palette: Array[Color] = [
-		Color(0.93, 0.79, 0.66, 1.0),
-		Color(0.85, 0.68, 0.52, 1.0),
-		Color(0.73, 0.55, 0.41, 1.0),
-		Color(0.58, 0.41, 0.29, 1.0),
-	]
-	var idx: int = absi(hash(uid)) % palette.size()
-	return palette[idx]
+	# Pixel-art character sized to match desk scale (20px native, shown at ~18px).
+	return PixelCharacter.create(emp, 18.0)
 
 
 func _office_accent_color() -> Color:
@@ -1578,11 +1579,12 @@ func _show_offline_summary(payload: Dictionary) -> void:
 
 	# Re-centre after layout pass.
 	await get_tree().process_frame
-	if is_instance_valid(panel):
-		panel.offset_left  = -panel.size.x * 0.5
-		panel.offset_right =  panel.size.x * 0.5
-		panel.offset_top   = -panel.size.y * 0.5
-		panel.offset_bottom =  panel.size.y * 0.5
+	if not is_instance_valid(self) or not is_instance_valid(panel):
+		return
+	panel.offset_left  = -panel.size.x * 0.5
+	panel.offset_right =  panel.size.x * 0.5
+	panel.offset_top   = -panel.size.y * 0.5
+	panel.offset_bottom =  panel.size.y * 0.5
 
 	panel.collected.connect(func(_inc: float, _ch: int) -> void:
 		AnimHelper.hide_backdrop(_offline_summary_backdrop)
@@ -1594,5 +1596,53 @@ func _show_offline_summary(payload: Dictionary) -> void:
 func _safe_disconnect(sig: Signal, callable: Callable) -> void:
 	if sig.is_connected(callable):
 		sig.disconnect(callable)
+
+
+func _build_dev_button() -> void:
+	if not AdManager.is_dev_mode():
+		return
+	var btn := Button.new()
+	btn.text = "DEV"
+	btn.custom_minimum_size = Vector2(54, 32)
+	var style := ThemeManager._flat_box_static(
+		Color(1.0, 0.6, 0.2, 0.25), Color(1.0, 0.6, 0.2, 0.7),
+		ThemeManager.CORNER_SM)
+	style.content_margin_left = 6.0
+	style.content_margin_right = 6.0
+	style.content_margin_top = 4.0
+	style.content_margin_bottom = 4.0
+	btn.add_theme_stylebox_override("normal", style)
+	btn.add_theme_stylebox_override("hover", ThemeManager._flat_box_static(
+		Color(1.0, 0.6, 0.2, 0.4), Color(1.0, 0.6, 0.2, 0.9),
+		ThemeManager.CORNER_SM))
+	btn.add_theme_color_override("font_color", Color(1.0, 0.6, 0.2))
+	btn.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+	btn.pressed.connect(_open_dev_panel)
+	# Place in top-right corner via a CanvasLayer so it floats above scroll
+	var layer := CanvasLayer.new()
+	layer.layer = 90
+	add_child(layer)
+	var anchor := Control.new()
+	anchor.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	anchor.offset_left = -66
+	anchor.offset_top = 6
+	anchor.offset_right = -8
+	anchor.offset_bottom = 38
+	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(anchor)
+	anchor.add_child(btn)
+	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	btn.mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func _open_dev_panel() -> void:
+	var panel := DevPanel.create()
+	if panel == null:
+		return
+	get_tree().root.add_child(panel)
+	panel.closed.connect(func():
+		# Refresh dashboard after dev changes
+		_refresh(GameState.current_quarter)
+	)
 
 

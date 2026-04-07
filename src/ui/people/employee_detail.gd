@@ -19,6 +19,7 @@ func _ready() -> void:
 	_load_employee()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("employee_detail")
+	AnimHelper.fade_in(self, 0.0, 0.20)
 
 
 func _load_employee() -> void:

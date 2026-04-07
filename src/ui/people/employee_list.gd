@@ -357,6 +357,7 @@ func _refresh_list() -> void:
 
 	for emp in _sorted_employees():
 		list_container.add_child(_create_employee_card(emp))
+	AnimHelper.stagger_list(list_container, 0.045, 0.0, 24.0)
 	_refresh_sort_hint()
 	UITouchHelper.harden_tree(self)
 

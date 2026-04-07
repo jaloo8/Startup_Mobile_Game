@@ -1,9 +1,19 @@
 extends Node
 ## Loads and caches scenes for fast transitions.
+## All scene changes go through goto_scene() which plays a short crossfade wipe.
 
 signal scene_changed(scene_path: String)
 
 var _cache: Dictionary = {}  # path -> PackedScene
+
+## Persistent overlay layer for scene transition effects.
+## Lives on this autoload so it survives scene swaps.
+var _transition_layer: CanvasLayer
+var _transition_rect: ColorRect
+var _transitioning: bool = false
+const WIPE_COLOR := Color(0.02, 0.04, 0.08, 1.0)
+const WIPE_FADE_OUT := 0.14  # seconds to fade to black
+const WIPE_FADE_IN  := 0.20  # seconds to fade from black
 
 const PRELOAD_SCENES := [
 	"res://src/ui/main_menu/main_menu.tscn",
@@ -22,8 +32,22 @@ const PRELOAD_SCENES := [
 
 
 func _ready() -> void:
+	_build_transition_overlay()
 	_apply_touch_hardening.call_deferred(get_tree().current_scene)
 	_preload_all.call_deferred()
+
+
+func _build_transition_overlay() -> void:
+	_transition_layer = CanvasLayer.new()
+	_transition_layer.layer = 128  # above everything
+	add_child(_transition_layer)
+
+	_transition_rect = ColorRect.new()
+	_transition_rect.color = WIPE_COLOR
+	_transition_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_transition_rect.modulate.a = 0.0
+	_transition_layer.add_child(_transition_rect)
 
 
 func _preload_all() -> void:
@@ -37,10 +61,31 @@ func _preload_all() -> void:
 
 
 func goto_scene(path: String) -> void:
-	_switch_scene.call_deferred(path)
+	if _transitioning:
+		return  # prevent double-tap scene swaps
+	_transitioning = true
+	_animate_scene_swap.call_deferred(path)
 
 
-func _switch_scene(path: String) -> void:
+func _animate_scene_swap(path: String) -> void:
+	# Phase 1: fade to black.
+	var tw := create_tween()
+	tw.tween_property(_transition_rect, "modulate:a", 1.0, WIPE_FADE_OUT) \
+		.set_ease(Tween.EASE_OUT)
+	await tw.finished
+
+	# Phase 2: swap the scene while the screen is black.
+	var swap_ok := _do_scene_swap(path)
+
+	# Phase 3: fade from black (even on failure — don't leave the screen black).
+	var tw2 := create_tween()
+	tw2.tween_property(_transition_rect, "modulate:a", 0.0, WIPE_FADE_IN) \
+		.set_ease(Tween.EASE_IN)
+	await tw2.finished
+	_transitioning = false
+
+
+func _do_scene_swap(path: String) -> bool:
 	var packed: PackedScene
 	if _cache.has(path):
 		packed = _cache[path]
@@ -51,13 +96,13 @@ func _switch_scene(path: String) -> void:
 
 	if packed == null:
 		push_error("SceneLoader: failed to load '%s' — scene file missing or corrupt" % path)
-		return
+		return false
 
 	# Instantiate before touching the tree; if this throws, the current scene survives.
 	var new_scene := packed.instantiate()
 	if new_scene == null:
 		push_error("SceneLoader: instantiate() returned null for '%s'" % path)
-		return
+		return false
 
 	var tree := get_tree()
 	if tree.current_scene:
@@ -67,6 +112,7 @@ func _switch_scene(path: String) -> void:
 	tree.current_scene = new_scene
 	_apply_touch_hardening.call_deferred(new_scene)
 	scene_changed.emit(path)
+	return true
 
 
 func _apply_touch_hardening(root: Node) -> void:

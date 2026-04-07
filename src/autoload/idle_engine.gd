@@ -95,6 +95,8 @@ func _process(delta: float) -> void:
 func deposit_pending_income() -> void:
 	if pending_income <= 0.0:
 		return
+	if GameState.company == null:
+		return
 	var amount := snappedf(pending_income, 1.0)
 	GameState.company.cash += amount
 	GameState.append_event_log({

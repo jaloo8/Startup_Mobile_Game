@@ -175,7 +175,13 @@ func _animate_out(callback: Callable) -> void:
 # Actions
 # ---------------------------------------------------------------------------
 
+var _collected: bool = false
+
 func _on_collect() -> void:
+	if _collected:
+		return
+	_collected = true
+
 	# Deposit income and award chips
 	IdleEngine.deposit_pending_income()
 	IdleEngine.mark_offline_processed()

@@ -58,6 +58,10 @@ func _ready() -> void:
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("finance")
+	# Entrance: slide the content up from below.
+	var content := get_node_or_null("MarginContainer/VBox")
+	if content is Control:
+		AnimHelper.slide_in(content, Vector2(0, 30), 0.0, 0.22)
 
 
 func _apply_plain_finance_titles() -> void:
@@ -112,7 +116,7 @@ func _build_hosting_controls() -> void:
 	row.add_child(title)
 
 	_hosting_plan_picker = OptionButton.new()
-	_hosting_plan_picker.custom_minimum_size = Vector2(170, 0)
+	_hosting_plan_picker.custom_minimum_size = Vector2(170, ThemeManager.TOUCH_MIN_H)
 	_hosting_plan_picker.add_item(CompanyData.HOSTING_PLAN_NAMES.get(CompanyData.HostingPlan.MANAGED_CLOUD, "Managed Cloud"))
 	_hosting_plan_picker.add_item(CompanyData.HOSTING_PLAN_NAMES.get(CompanyData.HostingPlan.HYBRID, "Hybrid"))
 	_hosting_plan_picker.add_item(CompanyData.HOSTING_PLAN_NAMES.get(CompanyData.HostingPlan.IN_HOUSE, "In-house"))
@@ -121,7 +125,7 @@ func _build_hosting_controls() -> void:
 
 	_logistics_btn = Button.new()
 	_logistics_btn.text = "Open Logistics"
-	_logistics_btn.custom_minimum_size = Vector2(120, 0)
+	_logistics_btn.custom_minimum_size = Vector2(120, ThemeManager.TOUCH_MIN_H)
 	_logistics_btn.pressed.connect(_on_open_logistics)
 	row.add_child(_logistics_btn)
 

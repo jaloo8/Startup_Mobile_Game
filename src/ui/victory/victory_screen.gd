@@ -70,6 +70,7 @@ func _ready() -> void:
 	]
 
 	_build_timeline()
+	_animate_entrance()
 
 
 func _build_timeline() -> void:
@@ -100,6 +101,28 @@ func _build_timeline() -> void:
 		lbl.add_theme_color_override("font_color", Color(0.6, 0.75, 0.6))
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		timeline_container.add_child(lbl)
+
+
+func _animate_entrance() -> void:
+	# Title: big celebratory pop.
+	AnimHelper.pop_in(win_title, 0.0, 0.36)
+	# Subtitle: slide up.
+	AnimHelper.slide_in(win_subtitle, Vector2(0, 24), 0.10, 0.26)
+	# Stats: fade in after title lands.
+	AnimHelper.fade_in(stats_label, 0.28, 0.30)
+	# Timeline: stagger the milestone entries.
+	AnimHelper.stagger_list(timeline_container, 0.06, 0.40, 20.0)
+	# Buttons: slide up from bottom, staggered.
+	var buttons: Array[Control] = []
+	for btn in [continue_btn, menu_btn, new_game_btn]:
+		if btn != null:
+			buttons.append(btn)
+	for i in buttons.size():
+		AnimHelper.slide_in(buttons[i], Vector2(0, 28), 0.55 + i * 0.06)
+	# Celebratory pulse on the title after it lands.
+	get_tree().create_timer(0.40).timeout.connect(func() -> void:
+		if is_instance_valid(win_title):
+			AnimHelper.pulse(win_title, 1.12, 0.20))
 
 
 func _on_menu() -> void:

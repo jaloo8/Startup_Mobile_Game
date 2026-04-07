@@ -58,6 +58,7 @@ func _ready() -> void:
 	menu_btn.pressed.connect(_on_menu)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("game_over")
+	_animate_entrance()
 
 	var reason: String = GameState.get_meta("game_over_reason", "bankruptcy") if GameState.has_meta("game_over_reason") else "bankruptcy"
 	var display_reason: String = GAME_OVER_MESSAGES.get(reason, reason.replace("_", " ").capitalize())
@@ -155,6 +156,19 @@ func _on_restart() -> void:
 
 func _on_menu() -> void:
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+
+
+func _animate_entrance() -> void:
+	# Somber, slower reveals — this is a loss screen.
+	AnimHelper.fade_in(reason_label, 0.0, 0.40)
+	AnimHelper.fade_in(stats_label, 0.25, 0.35)
+	# Angel panel slides up as a dramatic reveal — hope after failure.
+	if angel_panel.visible:
+		AnimHelper.slide_in(angel_panel, Vector2(0, 40), 0.50, 0.30)
+	# Buttons fade in last.
+	for btn in [restart_btn, menu_btn]:
+		if btn != null:
+			AnimHelper.fade_in(btn, 0.70, 0.25)
 
 
 func _peak_users() -> int:
