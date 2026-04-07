@@ -37,6 +37,11 @@ var _hosting_meta_label: Label
 var _hosting_cost_value: Label
 var _logistics_btn: Button
 var _drilldown_label: Label
+var _marketing_picker: OptionButton
+var _marketing_cost_value: Label
+
+const MARKETING_TIERS := [0.0, 1_000.0, 3_000.0, 6_000.0, 12_000.0, 20_000.0]
+const MARKETING_TIER_NAMES := ["None ($0)", "Minimal ($1K)", "Light ($3K)", "Moderate ($6K)", "Aggressive ($12K)", "Heavy ($20K)"]
 
 
 func _ready() -> void:
@@ -55,6 +60,7 @@ func _ready() -> void:
 	_wire_glossary(%ValuationTitle, "valuation")
 	_build_context_hints()
 	_build_hosting_controls()
+	_build_marketing_controls()
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("finance")
@@ -148,6 +154,51 @@ func _build_hosting_controls() -> void:
 	costs_grid.add_child(_hosting_cost_value)
 
 
+func _build_marketing_controls() -> void:
+	var vbox := cash_value.get_parent().get_parent()
+	if vbox == null:
+		return
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	var title := Label.new()
+	title.text = "Marketing Budget"
+	title.add_theme_font_size_override("font_size", 12)
+	title.add_theme_color_override("font_color", Color(0.68, 0.72, 0.8))
+	row.add_child(title)
+
+	_marketing_picker = OptionButton.new()
+	_marketing_picker.custom_minimum_size = Vector2(170, ThemeManager.TOUCH_MIN_H)
+	for tier_name in MARKETING_TIER_NAMES:
+		_marketing_picker.add_item(tier_name)
+	_marketing_picker.item_selected.connect(_on_marketing_tier_selected)
+	row.add_child(_marketing_picker)
+
+	vbox.add_child(row)
+	vbox.move_child(row, cash_value.get_parent().get_index() + 6)
+
+	var marketing_title := Label.new()
+	marketing_title.text = "Marketing"
+	costs_grid.add_child(marketing_title)
+	_marketing_cost_value = Label.new()
+	_marketing_cost_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_marketing_cost_value.text = "$0"
+	costs_grid.add_child(_marketing_cost_value)
+
+
+func _on_marketing_tier_selected(index: int) -> void:
+	if GameState.company == null:
+		return
+	var tier_idx := clampi(index, 0, MARKETING_TIERS.size() - 1)
+	var new_budget: float = MARKETING_TIERS[tier_idx]
+	if is_equal_approx(GameState.company.marketing_budget, new_budget):
+		return
+	GameState.company.marketing_budget = new_budget
+	if not GameState.current_slot.is_empty():
+		GameState.auto_save()
+	_refresh()
+
+
 func _refresh() -> void:
 	if GameState.company == null:
 		return
@@ -178,7 +229,10 @@ func _refresh() -> void:
 	office_cost.text = "$%s" % SceneLoader.format_money(costs.get("office", 0.0))
 	if _hosting_cost_value:
 		_hosting_cost_value.text = "$%s" % SceneLoader.format_money(costs.get("hosting", 0.0))
+	if _marketing_cost_value:
+		_marketing_cost_value.text = "$%s" % SceneLoader.format_money(costs.get("marketing", 0.0))
 	_refresh_hosting_controls()
+	_refresh_marketing_controls()
 	_refresh_context_hints(rw)
 	_refresh_trend_chart()
 	_refresh_health_trend_chart()
@@ -255,6 +309,18 @@ func _refresh_hosting_controls() -> void:
 		_hosting_meta_label.add_theme_color_override("font_color", Color(0.62, 0.82, 0.62))
 
 
+func _refresh_marketing_controls() -> void:
+	if _marketing_picker == null or GameState.company == null:
+		return
+	var current_budget: float = GameState.company.marketing_budget
+	var best_idx: int = 0
+	for i in MARKETING_TIERS.size():
+		if current_budget >= MARKETING_TIERS[i]:
+			best_idx = i
+	if _marketing_picker.selected != best_idx:
+		_marketing_picker.select(best_idx)
+
+
 func _refresh_quarter_delta_hint() -> void:
 	if _quarter_delta_label == null:
 		return
@@ -297,6 +363,7 @@ func _refresh_drilldown_hint() -> void:
 	var infra_delta: float = _snapshot_cost(curr, "infrastructure_cost") - _snapshot_cost(prev, "infrastructure_cost")
 	var hosting_delta: float = _snapshot_cost(curr, "hosting_cost") - _snapshot_cost(prev, "hosting_cost")
 	var office_delta: float = _snapshot_cost(curr, "office_cost") - _snapshot_cost(prev, "office_cost")
+	var marketing_delta: float = _snapshot_cost(curr, "marketing_cost") - _snapshot_cost(prev, "marketing_cost")
 	var incidents: int = int(curr.get("hosting_incidents", 0))
 
 	var parts: Array[String] = []
@@ -305,6 +372,7 @@ func _refresh_drilldown_hint() -> void:
 	_append_cost_driver(parts, "Infra", infra_delta)
 	_append_cost_driver(parts, "Hosting", hosting_delta)
 	_append_cost_driver(parts, "Office", office_delta)
+	_append_cost_driver(parts, "Marketing", marketing_delta)
 	if incidents > 0:
 		parts.append("%d hosting incident%s" % [incidents, "s" if incidents != 1 else ""])
 	if parts.size() > 5:

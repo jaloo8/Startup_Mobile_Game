@@ -21,10 +21,10 @@ const ROUND_RANGES := {
 }
 
 const TIER_THRESHOLDS := {
-	"elite": 0.55,
-	"top": 0.40,
-	"mid": 0.25,
-	"emerging": 0.10,
+	"elite": 0.45,
+	"top": 0.30,
+	"mid": 0.15,
+	"emerging": 0.08,
 }
 
 const TIER_VALUATION_BONUS := {
@@ -86,7 +86,8 @@ static func _load_firms() -> void:
 			"check_max": entry.get("check_max", 0),
 		})
 
-	print("FundraisingEngine: loaded %d VC firms" % _firms.size())
+	if OS.is_debug_build():
+		print("FundraisingEngine: loaded %d VC firms" % _firms.size())
 
 
 static func next_round(state: Node) -> Round:

@@ -470,6 +470,29 @@ def validate_events(data: object) -> List[str]:
                     if not isinstance(niche, str) or not niche.strip():
                         errors.append(f"{pfx}.niches[{nidx}] must be a non-empty string")
 
+        # Stage must be a string (engine does str() comparison), not an array
+        stage = ev.get("stage", "any")
+        if not isinstance(stage, str):
+            errors.append(f"{pfx}.stage must be a string, got {type(stage).__name__}")
+
+        # Variations key must be "variations", not "description_variations"
+        if "description_variations" in ev:
+            errors.append(f"{pfx} uses 'description_variations' — should be 'variations'")
+
+        # Trigger condition keys must match context dictionary keys from EventEngine._build_context()
+        valid_trigger_keys = {
+            "quarter", "year", "total_quarters", "employee_count", "cash",
+            "users", "has_raised_funding", "tech_debt", "reputation", "bugs",
+            "stability", "company_type", "company_types", "niche_id",
+            "valuation", "features_shipped", "revenue",
+            "world_event_id", "world_event_title", "difficulty",
+        }
+        triggers = ev.get("trigger_conditions", {})
+        if isinstance(triggers, dict):
+            bad_keys = set(triggers.keys()) - valid_trigger_keys
+            if bad_keys:
+                errors.append(f"{pfx}.trigger_conditions has invalid keys {sorted(bad_keys)} — valid: {sorted(valid_trigger_keys)}")
+
     return errors
 
 
@@ -1229,6 +1252,45 @@ def validate_scene_loader_usage() -> List[str]:
     return errors
 
 
+def validate_serialization_coverage() -> List[str]:
+    """Ensure game_state.gd serialize/deserialize covers all @export fields in model files."""
+    errors: List[str] = []
+    gs_path = GAME_STATE_PATH
+    if not gs_path.exists():
+        errors.append("game_state.gd not found — cannot validate serialization coverage")
+        return errors
+    gs_src = gs_path.read_text(encoding="utf-8")
+
+    # Model files and the dict key used in _serialize()
+    model_checks = (
+        (ROOT / "src" / "models" / "company_data.gd", "company"),
+        (ROOT / "src" / "models" / "product_data.gd", "product"),
+        (ROOT / "src" / "models" / "financials_data.gd", "financials"),
+        (ROOT / "src" / "models" / "market_data.gd", "market"),
+    )
+    # Fields that are intentionally excluded from serialization (transient/derived)
+    skip_fields: Set[str] = set()
+
+    export_re = re.compile(r"@export\s+var\s+(\w+)")
+
+    for model_path, section_name in model_checks:
+        if not model_path.exists():
+            continue
+        model_src = model_path.read_text(encoding="utf-8")
+        exported = set(export_re.findall(model_src))
+        for field in sorted(exported - skip_fields):
+            # Check that the field name appears somewhere in game_state.gd serialization
+            # Look for the field as a dict key or as a property access
+            key_pattern = rf'"{field}"'
+            prop_pattern = rf"\.{field}\b"
+            if not re.search(key_pattern, gs_src) and not re.search(prop_pattern, gs_src):
+                rel = model_path.relative_to(ROOT)
+                errors.append(
+                    f"{rel} @export field '{field}' not found in game_state.gd serialization"
+                )
+    return errors
+
+
 def validate_scroll_contracts() -> List[str]:
     errors: List[str] = []
     contracts = (
@@ -1354,6 +1416,7 @@ def main() -> int:
     errors.extend(validate_button_script_contracts())
     errors.extend(validate_button_scene_contracts())
     errors.extend(validate_scroll_contracts())
+    errors.extend(validate_serialization_coverage())
 
     if errors:
         print("Backend smoke check FAILED")
@@ -1368,7 +1431,7 @@ def main() -> int:
         "+ visual presets + difficulty wiring + monetization stability gate + version constant "
         "+ event cooldown reset + history snapshots + SceneLoader usage "
         "+ glossary near-dupes + niche-competitor coverage + headline quality "
-        "+ UI button wiring + scroll contracts"
+        "+ UI button wiring + scroll contracts + serialization coverage"
     )
     return 0
 

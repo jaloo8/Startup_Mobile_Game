@@ -32,7 +32,8 @@
       "Bash(grep -n \"class CompanyData\\\\|class ProductData\\\\|class EmployeeData\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/models/*.gd)",
       "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --oneline -30)",
       "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --format=\"%H %ai\" --reverse)",
-      "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --format=\"%H %ai\")"
+      "Bash(git -C /Users/jloo/Documents/GitHub/startup_mobile_game log --format=\"%H %ai\")",
+      "Bash(ls -lh /Users/jloo/Documents/GitHub/startup_mobile_game/docs/*.md /Users/jloo/Documents/GitHub/startup_mobile_game/*.md)"
     ]
   }
 }

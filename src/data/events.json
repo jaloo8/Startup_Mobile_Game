@@ -2437,10 +2437,10 @@
   {
     "id": "press_feature_profile",
     "category": "market",
-    "stage": ["growth", "scale"],
+    "stage": "growth",
     "title": "Press Feature Request",
     "description_template": "A journalist from {outlet} is pitching a founder profile on {company_name}. They say it could reach 200K readers. Their angle: 'scrappy underdog beats the odds in {niche}.'",
-    "description_variations": [
+    "variations": [
       "A reporter at {outlet} wants to write the definitive piece on {company_name}. 'The startup that's quietly reshaping {niche},' they pitch. Publication date is flexible.",
       "You get an email from {outlet}. They're doing a deep-dive feature on breakout {niche} companies and {company_name} made their shortlist."
     ],
@@ -2484,8 +2484,8 @@
       }
     ],
     "trigger_conditions": {
-      "min_users": 1000,
-      "min_year": 2
+      "users": 1000,
+      "year": 2
     },
     "weight": 0.55,
     "one_time": false,
@@ -2494,10 +2494,10 @@
   {
     "id": "press_negative_hit_piece",
     "category": "market",
-    "stage": ["growth", "scale"],
+    "stage": "growth",
     "title": "Negative Press Incoming",
     "description_template": "A reporter at {outlet} is working on a story about 'startup culture gone wrong.' They've talked to a former employee. You have 48 hours to respond before it publishes.",
-    "description_variations": [
+    "variations": [
       "An investigative piece is circulating in drafts. A disgruntled ex-employee gave quotes. You find out through a contact at {outlet} before the story drops.",
       "{outlet} has a draft story with the headline: '{company_name} Culture Problems.' It may not be accurate. It is definitely happening."
     ],
@@ -2542,8 +2542,8 @@
       }
     ],
     "trigger_conditions": {
-      "min_employees": 5,
-      "min_year": 2
+      "employee_count": 5,
+      "year": 2
     },
     "weight": 0.45,
     "one_time": false,
@@ -2552,10 +2552,10 @@
   {
     "id": "press_acquisition_rumor",
     "category": "market",
-    "stage": ["scale"],
+    "stage": "scale",
     "title": "Acquisition Rumor Goes Public",
     "description_template": "{outlet} is reporting that {company_name} is 'in talks' with a large acquirer. This is not accurate. You have not spoken to anyone. The team is now asking questions.",
-    "description_variations": [
+    "variations": [
       "A reporter published speculation about a potential acquisition of {company_name}. The article has three unnamed sources and zero facts. Your Slack is lighting up.",
       "Someone at {outlet} connected dots that don't exist. The article says {company_name} is 'exploring strategic options.' Your investors are calling."
     ],
@@ -2599,11 +2599,54 @@
       }
     ],
     "trigger_conditions": {
-      "min_valuation": 2000000,
-      "min_year": 3
+      "valuation": 2000000,
+      "year": 3
     },
     "weight": 0.40,
     "one_time": false,
     "cooldown_quarters": 12
+  },
+  {
+    "id": "tutorial_angel_offer",
+    "title": "An Angel Appears",
+    "category": "money",
+    "stage": "early",
+    "description_template": "Your bank account is thinning and you haven't raised a dime yet. Then a DM lands from a former classmate who just exited their last company. 'I've been watching what you're building. I want in early.'",
+    "variations": [
+      "At a coffee meetup, someone taps your shoulder. 'I heard you're building something in the {company_type} space. I angel-invest in exactly this kind of thing. Got five minutes?' You've got all night.",
+      "Your college roommate — now running a small syndicate — texts out of the blue: 'I see you launched. I've got $50K set aside for friends building real things. Let's talk terms.'"
+    ],
+    "choices": [
+      {
+        "label": "Accept the angel check",
+        "effects": {
+          "cash": 50000,
+          "reputation": 5
+        },
+        "outcome_template": "A $50K angel check hits your account. It's not a lot, but it buys you breathing room. Time to use it wisely — hire, build, and get to a real fundraise.",
+        "outcome_variations": [
+          "$50K wired. Your runway extends by a few quarters. The angel says: 'Ship something great and I'll intro you to my VC friends.'",
+          "The check clears. $50K isn't life-changing, but it's the difference between dead and alive. Now go build something worth a real round."
+        ]
+      },
+      {
+        "label": "I'll bootstrap — no outside money",
+        "effects": {
+          "reputation": 3
+        },
+        "outcome_template": "You politely decline. 'Respect,' they say. 'Most founders aren't that disciplined.' Your reputation gets a small boost, but the clock is still ticking on your bank account.",
+        "outcome_variations": [
+          "They nod approvingly. 'The best companies I've seen were bootstrapped through the hard part.' You feel good about the decision — but your burn rate doesn't care about feelings.",
+          "You turn it down. It's the principled choice. Just make sure you can afford principles next quarter."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "total_quarters": 2,
+      "has_raised_funding": false
+    },
+    "weight": 8.0,
+    "one_time": true,
+    "cooldown_quarters": 0
   }
 ]

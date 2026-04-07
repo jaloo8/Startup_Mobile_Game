@@ -57,7 +57,7 @@ text = "Team: 0 / 4 (Garage)"
 [node name="HireButton" type="Button" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 46)
 text = "Post Job Listing"
 
 [node name="CandidatePanel" type="PanelContainer" parent="MarginContainer/VBox"]

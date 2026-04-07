@@ -3,6 +3,9 @@ extends PanelContainer
 ## Call  setup(company_type)  once when the product screen loads,
 ## then  refresh(shipped_feature_ids)  after each quarter advance.
 ## Newly-unlocked elements fade in automatically.
+## Tapping shipped features triggers a "Product Demo" effect.
+
+signal feature_tapped(feature_id: String)
 
 const FEATURE_IDLE_STYLES := {
 	# Consumer
@@ -44,6 +47,9 @@ var _consumer_tweens: Array[Tween] = []
 var _ken_burns_tweens: Array[Tween] = []  # slow-zoom loops on image cards
 var _shimmer_tweens: Dictionary = {}      # feature_id -> Tween (skeleton sweep)
 var _shimmer_nodes: Dictionary = {}       # feature_id -> ColorRect overlay
+var _tap_cooldowns: Dictionary = {}       # feature_id -> float (timestamp of last tap)
+var _tap_tooltips: Dictionary = {}        # feature_id -> Label (floating feedback)
+const TAP_COOLDOWN_SEC := 2.0             # seconds between taps on same feature
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Public API
@@ -73,6 +79,8 @@ func _exit_tree() -> void:
 	_clear_consumer_runtime()
 	_feature_map.clear()
 	_unlocked_features.clear()
+	_tap_cooldowns.clear()
+	_tap_tooltips.clear()
 	_preview_feature_id = ""
 	_company_type = -1
 
@@ -234,6 +242,7 @@ func _stop_shimmer(fid: String) -> void:
 
 func _reveal_feature(feature_id: String, node: Control) -> void:
 	_stop_shimmer(feature_id)   # remove skeleton sweep now that feature is real
+	_make_tappable(feature_id, node)
 	if _company_type == CompanyData.CompanyType.CONSUMER and _reveal_consumer_feature(feature_id, node):
 		return
 
@@ -493,6 +502,89 @@ func _start_idle_animation(feature_id: String, node: Control) -> void:
 			tw.tween_property(node, "modulate:a", 1.0, 0.95)
 
 	_idle_tweens[feature_id] = tw
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tap interaction — "Product Demo" mechanic
+# ─────────────────────────────────────────────────────────────────────────────
+
+func _make_tappable(feature_id: String, node: Control) -> void:
+	node.mouse_filter = Control.MOUSE_FILTER_STOP
+	node.gui_input.connect(_on_feature_tap.bind(feature_id, node))
+
+
+func _on_feature_tap(event: InputEvent, feature_id: String, node: Control) -> void:
+	if not event is InputEventMouseButton:
+		return
+	var mb := event as InputEventMouseButton
+	if not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if not _unlocked_features.get(feature_id, false):
+		return
+
+	var now: float = Time.get_ticks_msec() / 1000.0
+	var last_tap: float = _tap_cooldowns.get(feature_id, 0.0)
+	if now - last_tap < TAP_COOLDOWN_SEC:
+		return
+	_tap_cooldowns[feature_id] = now
+
+	_play_tap_bounce(feature_id, node)
+	_show_tap_tooltip(feature_id, node)
+	feature_tapped.emit(feature_id)
+
+
+func _play_tap_bounce(feature_id: String, node: Control) -> void:
+	# Briefly interrupt idle tween for a satisfying bounce
+	if _idle_tweens.has(feature_id):
+		var old_tw := _idle_tweens[feature_id] as Tween
+		if old_tw:
+			old_tw.kill()
+		_idle_tweens.erase(feature_id)
+
+	node.modulate.a = 1.0
+	node.pivot_offset = node.size * 0.5
+	var tw := create_tween()
+	tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(node, "scale", Vector2(1.15, 1.15), 0.08)
+	tw.tween_property(node, "scale", Vector2(0.96, 0.96), 0.06)
+	tw.tween_property(node, "scale", Vector2.ONE, 0.10)
+	tw.finished.connect(func() -> void:
+		if is_instance_valid(node):
+			_start_idle_animation(feature_id, node)
+	)
+
+
+func _show_tap_tooltip(feature_id: String, node: Control) -> void:
+	# Remove old tooltip if still visible
+	if _tap_tooltips.has(feature_id):
+		var old := _tap_tooltips[feature_id] as Label
+		if old and is_instance_valid(old):
+			old.queue_free()
+		_tap_tooltips.erase(feature_id)
+
+	var tip := Label.new()
+	tip.text = "Demo'd! ✨"
+	tip.add_theme_font_size_override("font_size", 10)
+	tip.add_theme_color_override("font_color", Color(1.0, 0.92, 0.40))
+	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tip.z_index = 50
+	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# Position above the tapped node
+	node.add_child(tip)
+	tip.position = Vector2(0, -16)
+	tip.modulate.a = 1.0
+	_tap_tooltips[feature_id] = tip
+
+	var tw := create_tween()
+	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(tip, "position:y", tip.position.y - 18.0, 0.8)
+	tw.parallel().tween_property(tip, "modulate:a", 0.0, 0.8).set_delay(0.3)
+	tw.finished.connect(func() -> void:
+		if is_instance_valid(tip):
+			tip.queue_free()
+		_tap_tooltips.erase(feature_id)
+	)
 
 
 func _set_preview_state(node: Control, progress_01: float) -> void:

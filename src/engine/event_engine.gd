@@ -87,7 +87,8 @@ static func load_events(path: String) -> void:
 
 		_all_events.append(ev)
 
-	print("EventEngine: loaded %d events" % _all_events.size())
+	if OS.is_debug_build():
+		print("EventEngine: loaded %d events" % _all_events.size())
 
 
 static func roll_quarter_events(state: Node) -> Array[EventData]:

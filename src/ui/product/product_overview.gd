@@ -79,6 +79,7 @@ var _showcase_enabled: bool = false
 var _prototype_picker: OptionButton
 var _prototype_hint: Label
 var _prototype_rows: Array[Dictionary] = []
+var _demo_count: int = 0   # diminishing returns on Product Demo taps per screen visit
 
 
 func _ready() -> void:
@@ -116,6 +117,8 @@ func _exit_tree() -> void:
 func _setup_product_visual() -> void:
 	if product_visual == null or GameState.company == null:
 		return
+	if product_visual.has_signal("feature_tapped") and not product_visual.feature_tapped.is_connected(_on_product_demo):
+		product_visual.feature_tapped.connect(_on_product_demo)
 	if product_visual.has_method("setup"):
 		product_visual.setup(GameState.company.type)
 	_refresh_product_visual()
@@ -136,7 +139,7 @@ func _refresh_product_visual() -> void:
 		if target.is_empty():
 			product_visual.set_build_preview("", 0.0)
 		else:
-			var cost: float = maxf(1.0, float(target.get("cost", 100)))
+			var cost: float = maxf(1.0, float(target.get("cost", 100)) * GameState.product.feature_cost_multiplier())
 			var progress_01: float = clampf(GameState.product.feature_progress / cost, 0.0, 1.0)
 			product_visual.set_build_preview(target.get("id", ""), progress_01)
 
@@ -616,7 +619,7 @@ func _refresh_build_status() -> void:
 				_eta_label.text += " (~%s effort/Q ready)" % str(qtr_output)
 				_eta_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
 	else:
-		var cost: float = float(target.get("cost", 100))
+		var cost: float = float(target.get("cost", 100)) * p.feature_cost_multiplier()
 		build_status.text = "Building: %s" % target.get("name", "???")
 		build_progress.max_value = cost
 		build_progress.value = p.feature_progress
@@ -636,7 +639,7 @@ func _build_eta_text(p: ProductData, target: Dictionary, engineer_count: int, to
 	if engineer_count == 0:
 		return "Nobody is assigned to Features — go to People to assign your team"
 
-	var cost: float = float(target.get("cost", 100))
+	var cost: float = float(target.get("cost", 100)) * p.feature_cost_multiplier()
 	var remaining: float = cost - p.feature_progress
 	var progress_per_quarter: float = total_output * 0.5  # mirrors SimulationEngine multiplier
 
@@ -800,6 +803,37 @@ func _play_visual_hook_flash() -> void:
 	)
 
 
+func _on_product_demo(feature_id: String) -> void:
+	if GameState.company == null:
+		return
+	SfxPlayer.play("button_tap")
+	_demo_count += 1
+	# Diminishing returns: first 3 taps give full bonus, then it tapers
+	var rep_bonus: int = maxi(1, 3 - (_demo_count / 3))
+	GameState.company.reputation = clampi(GameState.company.reputation + rep_bonus, 0, 100)
+	_refresh()
+
+	# Floating "+N Rep" label over the product mockup
+	if product_visual:
+		var float_lbl := Label.new()
+		float_lbl.text = "+%d Rep" % rep_bonus
+		float_lbl.add_theme_font_size_override("font_size", 13)
+		float_lbl.add_theme_color_override("font_color", Color(0.45, 0.95, 0.55))
+		float_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		float_lbl.z_index = 60
+		float_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		product_visual.add_child(float_lbl)
+		float_lbl.position = Vector2(product_visual.size.x * 0.3, product_visual.size.y * 0.5)
+		var tw := create_tween()
+		tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(float_lbl, "position:y", float_lbl.position.y - 30.0, 1.0)
+		tw.parallel().tween_property(float_lbl, "modulate:a", 0.0, 1.0).set_delay(0.4)
+		tw.finished.connect(func() -> void:
+			if is_instance_valid(float_lbl):
+				float_lbl.queue_free()
+		)
+
+
 func _on_pick_feature() -> void:
 	picker_panel.visible = not picker_panel.visible
 	if picker_panel.visible:
@@ -876,7 +910,7 @@ func _create_feature_card(fdef: Dictionary) -> PanelContainer:
 		vbox.add_child(fx_lbl)
 
 	var cost_lbl := Label.new()
-	cost_lbl.text = "Effort: %d points" % int(fdef.get("cost", 100))
+	cost_lbl.text = "Effort: %d points" % int(float(fdef.get("cost", 100)) * GameState.product.feature_cost_multiplier())
 	cost_lbl.add_theme_font_size_override("font_size", 11)
 	cost_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 	vbox.add_child(cost_lbl)

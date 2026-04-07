@@ -52,7 +52,8 @@ static func load_events(path: String = WORLD_EVENTS_PATH) -> void:
 			continue
 		_templates.append(row.duplicate(true))
 
-	print("WorldEventEngine: loaded %d world events" % _templates.size())
+	if OS.is_debug_build():
+		print("WorldEventEngine: loaded %d world events" % _templates.size())
 
 
 static func resolve_quarter(state: Node) -> void:

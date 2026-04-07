@@ -40,6 +40,7 @@ enum HostingPlan { MANAGED_CLOUD, HYBRID, IN_HOUSE }
 @export var hosting_optimization_level: int = 0
 @export var hosting_workload_profile: String = "General Cloud"
 @export var hosting_data_center_pressure: float = 0.0
+@export var marketing_budget: float = 0.0
 
 const OFFICE_CAPACITY := {0: 4, 1: 10, 2: 25, 3: 60}
 const OFFICE_NAMES := {0: "Garage", 1: "Small Office", 2: "Mid-Size Office", 3: "HQ"}
@@ -244,5 +245,6 @@ func clamp_all() -> void:
 	if hosting_workload_profile.is_empty():
 		hosting_workload_profile = "General Cloud"
 	hosting_data_center_pressure = clampf(hosting_data_center_pressure, 0.0, 3.0)
+	marketing_budget = clampf(marketing_budget, 0.0, 50_000.0)
 	for stat_key in ["technical", "finance", "people", "business"]:
 		founder_stats[stat_key] = clampi(int(founder_stats.get(stat_key, 5)), 1, 10)

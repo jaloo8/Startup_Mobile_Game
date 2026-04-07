@@ -150,7 +150,7 @@ layout_mode = 2
 [node name="PrivacyButton" type="Button" parent="MarginContainer/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 46)
 text = "View Privacy Policy"
 
 [node name="Sep3" type="HSeparator" parent="MarginContainer/VBox"]
@@ -213,5 +213,5 @@ theme_override_font_sizes/normal_font_size = 13
 [node name="ClosePrivacyButton" type="Button" parent="PrivacyPanel/PrivacyMargin/PrivacyVBox"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 46)
 text = "Close"

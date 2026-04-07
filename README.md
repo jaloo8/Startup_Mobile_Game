@@ -81,7 +81,8 @@ startup_mobile_game/
 │       ├── product_preview_prototypes.json
 │       └── world_events.json         # Macro event definitions
 ├── tools/
-│   └── backend_smoke.py              # Offline structural validation
+│   ├── backend_smoke.py              # Offline structural validation
+│   └── balance_sim.py                # Balance simulation runner (12-cell matrix)
 ├── docs/                             # GDD, roadmap, QA, guardrails
 └── assets/                           # Illustrations, icons, avatars
 ```
@@ -94,6 +95,7 @@ startup_mobile_game/
 - **Roadmap** — [`docs/roadmap.md`](docs/roadmap.md) — Development phases, priority checklist, workflow tips
 - **Current execution path** — [`docs/current-execution-path.md`](docs/current-execution-path.md) — Active quality-first plan (stability -> balance -> phone readiness -> internal beta)
 - **Monetization** — [`docs/monetization.md`](docs/monetization.md) — DLC strategy, pricing, release cadence, technical architecture for expansion packs
+- **Balance simulation report** — [`docs/balance-sim-report.md`](docs/balance-sim-report.md) — Automated balance findings from 108-run simulation (critical: early cash hemorrhage, user growth too slow, Consumer revenue model needs buff)
 - **Difficulty playtest matrix** — [`docs/difficulty-playtest-matrix.md`](docs/difficulty-playtest-matrix.md) — Manual run capture template for 12-run balance validation (all types x all difficulties)
 - **Dev edge-case matrix** — [`docs/dev-edge-case-test-matrix.md`](docs/dev-edge-case-test-matrix.md) — 5-slot repeatable test setup for regression and stress coverage
 - **Reference tone guardrails** — [`docs/reference-tone-guardrails.md`](docs/reference-tone-guardrails.md) — Writing safety rules for parody/world-event content
@@ -103,6 +105,10 @@ startup_mobile_game/
 
 ## Recent changes
 
+- **Interactive product mockup + idle-game progression** — Shipped features on the product phone-screen mockup are now tappable ("Product Demo" mechanic: bounce animation + floating tooltip + reputation bonus with diminishing returns). Feature costs now scale with an idle-game exponential curve (0.7x for first features, up to 4x for late features), creating the "easy early, grindy late" progression feel. All UI cost displays updated to show scaled costs.
+- **Balance simulation runner** — New `tools/balance_sim.py` runs a 108-cell automated playtest matrix (4 types x 3 difficulties x 3 strategies x 3 seeds) across multiple starting scenarios. Identified critical balance issues: early cash hemorrhage, fundraising dependency, sluggish user growth, unused `MARKETING_USER_MULT` constant. See `docs/balance-sim-report.md`.
+- **QA bug audit (7 fixes)** — Fixed SceneLoader transition race condition, OfflineSummary double-collect, Dashboard first-refresh false positive, PixelCharacter null guard, IdleEngine null company guard, Dashboard await safety, EventPopup scale reset.
+- **Developer tools panel** — Full-screen code-only dev overlay (gated behind `AdManager.is_dev_mode()`): state inspector, cash/user injection, time skip, god mode, difficulty swap, team management, product controls, fundraising tools, economy toggles, event triggers, 5-slot quick save/load.
 - **Comprehensive code audit + smoke test expansion** — Fixed 10 critical bugs (government grant effect, glossary dupes, headline templates, board patience logic, reputation bonus wiring, event cooldown leak, SceneLoader usage, null guards, office level clamping, paywall fallback), 3 data issues, 5 user-facing text issues, consolidated duplicated logic, added future-proofing clamps. Expanded `backend_smoke.py` with 7 new validators (glossary near-dupes, niche-competitor coverage, headline quality, version constant, event cooldown reset, history snapshots, SceneLoader-only enforcement). Added `docs/coding-conventions.md` as a reference for future sessions.
 - **Main-menu/button input regression fix** — Added runtime autoload bridges for `UITouchHelper` and `WorldEventEngine` (`src/autoload/ui_touch_helper_bridge.gd`, `src/autoload/world_event_engine_bridge.gd`) and wired them in `project.godot` so UI/button scripts compile reliably even when class-name cache metadata is stale.
 - **Role mesh + stage-aware responsibilities** — Work allocation now follows startup maturity: early teams stay cross-functional (non-feature lanes still provide partial feature support), while growth/scale runs require specialization. Dedicated `Bugs`, `Tech Debt`, `Infrastructure`, and `R&D` assignments now have stronger impact, and cross-role mesh bonuses reward balanced teams with better quality, steadier retention, and lower operational drag.

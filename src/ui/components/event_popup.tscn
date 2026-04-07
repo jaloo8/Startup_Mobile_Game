@@ -82,5 +82,5 @@ autowrap_mode = 2
 [node name="ContinueButton" type="Button" parent="Margin/VBox"]
 layout_mode = 2
 visible = false
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 46)
 text = "Continue"

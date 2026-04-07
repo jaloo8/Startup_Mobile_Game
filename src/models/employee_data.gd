@@ -28,7 +28,7 @@ enum Personality { STEADY, AMBITIOUS, PERFECTIONIST, TEAM_PLAYER, MENTOR, ADAPTA
 @export var quarter_history: Array[Dictionary] = []
 
 const SALARY_RANGES := {
-	Seniority.JUNIOR: Vector2(12_000, 20_000),
+	Seniority.JUNIOR: Vector2(9_000, 16_000),
 	Seniority.MID: Vector2(20_000, 32_000),
 	Seniority.SENIOR: Vector2(32_000, 52_000),
 	Seniority.LEAD: Vector2(48_000, 72_000),

@@ -30,9 +30,9 @@ static func _saas_revenue(product: ProductData) -> float:
 
 
 static func _consumer_revenue(product: ProductData) -> float:
-	var ad_revenue := product.dau * 0.025 * 90  # slightly higher CPM floor
-	var premium_pct := 0.04  # 4% premium conversion
-	var premium_revenue := product.users * premium_pct * 5.0 * 3
+	var ad_revenue := product.dau * 0.06 * 90  # realistic CPM for engaged mobile users
+	var premium_pct := 0.06  # 6% premium conversion
+	var premium_revenue := product.users * premium_pct * 8.0 * 3
 	return ad_revenue + premium_revenue
 
 

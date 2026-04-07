@@ -62,7 +62,8 @@ static func _load_pool() -> void:
 	if _pool.is_empty():
 		_pool = _fallback_pool()
 
-	print("CompetitorAI: loaded %d competitors from JSON" % _pool.size())
+	if OS.is_debug_build():
+		print("CompetitorAI: loaded %d competitors from JSON" % _pool.size())
 
 
 static func generate_starting_competitors(

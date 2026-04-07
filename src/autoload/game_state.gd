@@ -98,9 +98,9 @@ const SUSTAINABLE_REQUIREMENTS_BY_TYPE := {
 		"revenue_per_q": 220_000.0,
 	},
 	CompanyData.CompanyType.CONSUMER: {
-		"users": 16_000,
-		"features": 9,
-		"revenue_per_q": 240_000.0,
+		"users": 8_000,
+		"features": 7,
+		"revenue_per_q": 40_000.0,
 	},
 	CompanyData.CompanyType.MARKETPLACE: {
 		"users": 14_000,
@@ -364,7 +364,7 @@ func _seed_next_feature_progress(progress_ratio: float) -> void:
 		return
 	var target: Dictionary = available[0]
 	product.target_feature_id = str(target.get("id", "")).strip_edges()
-	var cost: float = maxf(1.0, float(target.get("cost", ProductData.FEATURE_COST)))
+	var cost: float = maxf(1.0, float(target.get("cost", ProductData.FEATURE_COST)) * product.feature_cost_multiplier())
 	product.feature_progress = clampf(cost * progress_ratio, 0.0, cost * 0.95)
 
 
@@ -648,7 +648,8 @@ func _take_snapshot() -> void:
 		"infrastructure_cost": infra_cost,
 		"hosting_cost": hosting_cost,
 		"office_cost": office_cost,
-		"net_income": financials.revenue - (salaries_cost + infra_cost + hosting_cost + office_cost),
+		"marketing_cost": float(cost_lines.get("marketing", 0.0)),
+		"net_income": financials.revenue - (salaries_cost + infra_cost + hosting_cost + office_cost + float(cost_lines.get("marketing", 0.0))),
 	})
 	if history.size() > MAX_HISTORY_SIZE:
 		history = history.slice(-MAX_HISTORY_SIZE)
@@ -1127,6 +1128,7 @@ func _serialize() -> Dictionary:
 		"company": {
 			"name": company.company_name,
 			"type": company.type,
+			"founded_quarter": company.founded_quarter,
 			"cash": company.cash,
 			"valuation": company.valuation,
 			"equity": company.equity_owned,
@@ -1159,6 +1161,7 @@ func _serialize() -> Dictionary:
 			"hosting_optimization_level": company.hosting_optimization_level,
 			"hosting_workload_profile": company.hosting_workload_profile,
 			"hosting_data_center_pressure": company.hosting_data_center_pressure,
+			"marketing_budget": company.marketing_budget,
 		},
 		"product": {
 			"features": product.features.duplicate(),
@@ -1186,6 +1189,7 @@ func _serialize() -> Dictionary:
 			"competitors": market.competitors.duplicate(true),
 			"trend": market.market_trend,
 			"economy": market.economy_state,
+			"pending_events": market.pending_events.duplicate(true),
 		},
 		"world_event": {
 			"id": active_world_event_id,
@@ -1222,6 +1226,7 @@ func _deserialize(data: Dictionary) -> bool:
 	var cd: Dictionary = _safe_dict(data.get("company", {}))
 	company.company_name = cd.get("name", "")
 	company.type = cd.get("type", 0)
+	company.founded_quarter = int(cd.get("founded_quarter", 1))
 	company.cash = cd.get("cash", 0.0)
 	company.valuation = cd.get("valuation", 0.0)
 	company.equity_owned = cd.get("equity", 100.0)
@@ -1256,6 +1261,7 @@ func _deserialize(data: Dictionary) -> bool:
 	company.hosting_optimization_level = int(cd.get("hosting_optimization_level", 0))
 	company.hosting_workload_profile = str(cd.get("hosting_workload_profile", "General Cloud"))
 	company.hosting_data_center_pressure = float(cd.get("hosting_data_center_pressure", 0.0))
+	company.marketing_budget = float(cd.get("marketing_budget", 0.0))
 	if company.niche_name.strip_edges().is_empty() and not company.niche_id.strip_edges().is_empty():
 		CompanyData.load_niche_catalog()
 		company.apply_niche(company.niche_id)
@@ -1289,6 +1295,7 @@ func _deserialize(data: Dictionary) -> bool:
 	market.competitors.assign(_dict_array(md.get("competitors", [])))
 	market.market_trend = md.get("trend", 0)
 	market.economy_state = md.get("economy", 0)
+	market.pending_events.assign(_dict_array(md.get("pending_events", [])))
 
 	var wd: Dictionary = _safe_dict(data.get("world_event", {}))
 	active_world_event_id = str(wd.get("id", ""))

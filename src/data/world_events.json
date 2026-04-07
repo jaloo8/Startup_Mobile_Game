@@ -32,6 +32,7 @@
     "id": "supply_chain_bottleneck",
     "title": "Supply Chain Bottleneck",
     "description": "Infrastructure vendors and service providers pass through delays and surcharges. Launches still happen, just with more friction.",
+    "economy": "bear",
     "weight": 0.95,
     "duration_min": 2,
     "duration_max": 3,

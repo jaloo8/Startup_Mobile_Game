@@ -127,6 +127,21 @@ func dev_speed_multiplier() -> float:
 	return 1.0
 
 
+## Idle-game progression: later features cost more based on how many are shipped.
+## Early features are discounted to hook the player; mid/late features escalate.
+func feature_cost_multiplier() -> float:
+	var shipped := features.size()
+	if shipped <= 1:
+		return 0.7
+	elif shipped == 2:
+		return 0.85
+	elif shipped == 3:
+		return 1.0
+	else:
+		# Exponential ramp: 1.2, 1.5, 1.9, 2.4, 3.0, 3.8, 4.8 ...
+		return 1.0 * pow(1.26, shipped - 3)
+
+
 func feature_count() -> int:
 	return features.size()
 

@@ -2,7 +2,7 @@ class_name SimulationEngine
 extends RefCounted
 ## Runs one quarter of simulation.
 
-const BASE_ORGANIC_USERS_PER_QUARTER := 20
+const BASE_ORGANIC_USERS_PER_QUARTER := 35
 const MARKETING_USER_MULT := 0.5
 const OFFICE_COST_BY_LEVEL := [0.0, 1_000.0, 4_000.0, 10_000.0]
 const HOSTING_BASE_CAPACITY_BY_OFFICE := [2_200.0, 7_500.0, 20_000.0, 52_000.0]
@@ -447,7 +447,7 @@ static func _apply_work_output(state: Node) -> void:
 					var available: Array[Dictionary] = state.product.available_features(state.company.type)
 					if available.is_empty():
 						continue
-				var cost: float = float(target_def.get("cost", ProductData.FEATURE_COST))
+				var cost: float = float(target_def.get("cost", ProductData.FEATURE_COST)) * state.product.feature_cost_multiplier()
 				state.product.feature_progress += output * 0.5 * feature_focus_mult * feature_mesh_mult
 				if state.product.feature_progress >= cost:
 					state.product.feature_progress -= cost
@@ -616,7 +616,13 @@ static func _calculate_user_growth(state: Node) -> void:
 	var growth_from_existing := ceili(state.product.users * organic_rate * biz_bonus)
 	var reputation_pull := ceili(base_new * reputation_bonus * biz_bonus)
 	var feature_bonus: int = state.product.user_growth_flat_bonus
-	var total_new := maxi(0, base_new + growth_from_existing + reputation_pull + feature_bonus)
+
+	# Marketing spend → user acquisition (diminishing returns via sqrt)
+	var marketing_new: int = 0
+	if state.company.marketing_budget > 0.0:
+		marketing_new = ceili(MARKETING_USER_MULT * sqrt(state.company.marketing_budget) * biz_bonus)
+
+	var total_new := maxi(0, base_new + growth_from_existing + reputation_pull + feature_bonus + marketing_new)
 
 	var econ_growth_mult: float
 	var econ_churn_mult: float
@@ -758,6 +764,8 @@ static func _calculate_costs(state: Node) -> void:
 	state.financials.costs_breakdown["office"] = OFFICE_COST_BY_LEVEL[
 		clampi(state.company.office_level, 0, OFFICE_COST_BY_LEVEL.size() - 1)
 	] * world_cost_mult
+
+	state.financials.costs_breakdown["marketing"] = state.company.marketing_budget * world_cost_mult
 
 	state.financials.burn_rate = state.financials.total_costs()
 
