@@ -21,6 +21,9 @@ config/icon="res://assets/app_icon.png"
 
 [autoload]
 
+ThemeManager="*res://src/autoload/theme_manager.gd"
+IdleEngine="*res://src/autoload/idle_engine.gd"
+CurrencyManager="*res://src/autoload/currency_manager.gd"
 GameState="*res://src/autoload/game_state.gd"
 SceneLoader="*res://src/autoload/scene_loader.gd"
 UITouchHelper="*res://src/autoload/ui_touch_helper_bridge.gd"

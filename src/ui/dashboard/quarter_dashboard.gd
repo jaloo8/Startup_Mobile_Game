@@ -90,6 +90,11 @@ var _office_worker_layer: Control
 var _finance_plain_label: Label
 var _key_metric_glossary_key: String = "valuation"
 
+# Idle engine / soft currency HUD
+var _chip_hud_label: Label
+var _passive_ticker_label: Label
+var _offline_summary_backdrop: ColorRect
+
 
 func _ready() -> void:
 	advance_btn.pressed.connect(_on_advance)
@@ -131,6 +136,12 @@ func _ready() -> void:
 	_build_office_worker_layer()
 	_build_finance_plain_label()
 	_move_nav_to_top()
+	_build_chip_hud()
+	_build_passive_ticker()
+
+	IdleEngine.passive_tick.connect(_on_passive_tick)
+	IdleEngine.offline_income_ready.connect(_show_offline_summary)
+	CurrencyManager.chips_changed.connect(_on_chips_changed)
 
 	_refresh(GameState.current_quarter)
 	UITouchHelper.harden_tree(self)
@@ -1114,7 +1125,12 @@ func _on_advance() -> void:
 	Analytics.track_quarter_advanced(GameState.current_year, GameState.current_quarter)
 	var prev_year: int = GameState.current_year
 	var prev_quarter: int = GameState.current_quarter
+	var was_profitable: bool = GameState.financials != null and GameState.financials.revenue > GameState.financials.burn_rate
 	GameState.advance_quarter()
+	# Deposit passive income and stamp timestamp before checking if we advanced.
+	IdleEngine.deposit_pending_income()
+	IdleEngine.stamp_active()
+	CurrencyManager.on_quarter_completed(was_profitable)
 	var did_advance: bool = (GameState.current_year != prev_year) or (GameState.current_quarter != prev_quarter)
 	if not did_advance:
 		advance_btn.disabled = false
@@ -1461,6 +1477,118 @@ func _on_menu() -> void:
 	if not GameState.current_slot.is_empty():
 		GameState.save_game(GameState.current_slot)
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+
+
+# ---------------------------------------------------------------------------
+# Idle engine & soft currency HUD
+# ---------------------------------------------------------------------------
+
+func _build_chip_hud() -> void:
+	# Small gold badge pinned to the top-right corner of the dashboard.
+	var badge := PanelContainer.new()
+	var style := ThemeManager._flat_box_static(
+		Color(0.18, 0.14, 0.05, 0.92),
+		ThemeManager.C_CHIP,
+		ThemeManager.CORNER_XL, 1)
+	badge.add_theme_stylebox_override("panel", style)
+	badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	badge.offset_top  = 8
+	badge.offset_right = -8
+	badge.offset_bottom = 8 + ThemeManager.TOUCH_MIN_H
+	badge.offset_left  = -120
+	badge.z_index = 20
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(badge)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left",  10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_top",    6)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	badge.add_child(margin)
+
+	_chip_hud_label = Label.new()
+	_chip_hud_label.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
+	_chip_hud_label.add_theme_color_override("font_color", ThemeManager.C_CHIP)
+	_chip_hud_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_chip_hud_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	margin.add_child(_chip_hud_label)
+	_update_chip_hud()
+
+
+func _build_passive_ticker() -> void:
+	# Subtle income-ticking label at the bottom of the dashboard.
+	_passive_ticker_label = Label.new()
+	_passive_ticker_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+	_passive_ticker_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+	_passive_ticker_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_passive_ticker_label.offset_bottom = -4
+	_passive_ticker_label.offset_left   = 8
+	_passive_ticker_label.offset_right  = 320
+	_passive_ticker_label.offset_top    = -22
+	_passive_ticker_label.z_index = 5
+	_passive_ticker_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_passive_ticker_label.text = ""
+	add_child(_passive_ticker_label)
+
+
+func _update_chip_hud() -> void:
+	if _chip_hud_label == null:
+		return
+	_chip_hud_label.text = "🪙 %d chips" % CurrencyManager.chips
+
+
+func _on_chips_changed(_new_total: int, delta: int) -> void:
+	_update_chip_hud()
+	# Flash green for earn, red for spend.
+	if _chip_hud_label and delta != 0:
+		var flash := ThemeManager.C_GREEN if delta > 0 else ThemeManager.C_RED
+		AnimHelper.flash_color(_chip_hud_label, flash)
+
+
+func _on_passive_tick(amount: float) -> void:
+	if _passive_ticker_label == null or not GameState.is_game_active:
+		return
+	if amount < 1.0:
+		_passive_ticker_label.text = ""
+		return
+	var mult := CurrencyManager.idle_multiplier()
+	var mult_str := " (2×)" if mult > 1.0 else ""
+	_passive_ticker_label.text = "+%s passive%s" % [SceneLoader.format_money(amount), mult_str]
+
+
+func _show_offline_summary(payload: Dictionary) -> void:
+	if not is_instance_valid(self):
+		return
+	var income: float = float(payload.get("income", 0.0))
+	var chips: int = int(payload.get("chips", 0))
+	var elapsed: float = float(payload.get("seconds", 0.0))
+
+	# Only show if there is meaningful income.
+	if income < 1.0 and chips <= 0:
+		return
+
+	_offline_summary_backdrop = AnimHelper.show_backdrop(self, 0.55)
+	_offline_summary_backdrop.z_index = 48
+
+	var panel := OfflineSummary.create(income, chips, elapsed)
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.z_index = 50
+	add_child(panel)
+
+	# Re-centre after layout pass.
+	await get_tree().process_frame
+	if is_instance_valid(panel):
+		panel.offset_left  = -panel.size.x * 0.5
+		panel.offset_right =  panel.size.x * 0.5
+		panel.offset_top   = -panel.size.y * 0.5
+		panel.offset_bottom =  panel.size.y * 0.5
+
+	panel.collected.connect(func(_inc: float, _ch: int) -> void:
+		AnimHelper.hide_backdrop(_offline_summary_backdrop)
+		_offline_summary_backdrop = null
+		_update_chip_hud()
+	)
 
 
 func _safe_disconnect(sig: Signal, callable: Callable) -> void:

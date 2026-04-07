@@ -1012,6 +1012,9 @@ def validate_runtime_bridges() -> List[str]:
 
     config_src = PROJECT_CONFIG_PATH.read_text(encoding="utf-8")
     required_autoload_lines = (
+        'ThemeManager="*res://src/autoload/theme_manager.gd"',
+        'IdleEngine="*res://src/autoload/idle_engine.gd"',
+        'CurrencyManager="*res://src/autoload/currency_manager.gd"',
         'UITouchHelper="*res://src/autoload/ui_touch_helper_bridge.gd"',
         'WorldEventEngine="*res://src/autoload/world_event_engine_bridge.gd"',
     )

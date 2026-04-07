@@ -493,7 +493,9 @@ func advance_quarter() -> void:
 	# Fire celebration signal if a new feature shipped this quarter
 	if product.feature_count() > features_before:
 		var newest: Dictionary = product.features.back()
-		feature_shipped.emit(newest.get("name", "Feature"), newest.get("quality", 0))
+		var shipped_quality: int = newest.get("quality", 0)
+		feature_shipped.emit(newest.get("name", "Feature"), shipped_quality)
+		CurrencyManager.on_feature_shipped(shipped_quality)
 
 	_take_snapshot()
 	current_quarter += 1
@@ -748,6 +750,7 @@ func _check_milestone_bonuses() -> void:
 			_milestones_hit.append(key)
 			company.cash += m["bonus"]
 			Analytics.track_milestone_bonus(key, m["bonus"])
+			CurrencyManager.on_milestone(key)
 			append_event_log({
 				"quarter": current_quarter,
 				"year": current_year,
