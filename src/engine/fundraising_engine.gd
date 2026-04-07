@@ -161,8 +161,9 @@ static func generate_offer(state: Node) -> Dictionary:
 	valuation *= lerpf(0.8, 1.3, quality_signal) * lerpf(0.94, 1.06, amount_mult)
 	valuation = snappedf(valuation, 50_000)
 
-	var dilution: float = (amount / (valuation + amount)) * 100.0
-	dilution = snappedf(dilution, 0.1)
+	var denom: float = valuation + amount
+	var dilution: float = (amount / maxf(1.0, denom)) * 100.0
+	dilution = clampf(snappedf(dilution, 0.1), 0.0, 99.9)
 
 	var wants_board_seat: bool = round_type >= Round.SERIES_A
 

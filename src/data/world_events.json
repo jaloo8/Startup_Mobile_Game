@@ -189,5 +189,149 @@
       "churn_mult": 1.06,
       "event_pressure_mult": 1.12
     }
+  },
+  {
+    "id": "global_tariff_shock",
+    "title": "Global Tariff Shock",
+    "description": "A wave of new trade restrictions hits hardware and cloud supply chains. Infrastructure costs tick up across the board as providers pass costs downstream.",
+    "weight": 0.55,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "cost_mult": 1.12,
+      "growth_mult": 0.94,
+      "fundraise_amount_mult": 0.90
+    }
+  },
+  {
+    "id": "data_privacy_regulation_wave",
+    "title": "Data Privacy Regulation Wave",
+    "description": "Sweeping new data privacy laws pass in multiple regions. Consumer-facing apps face compliance overhead; B2B SaaS companies with enterprise clients see procurement cycles lengthen.",
+    "weight": 0.60,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "churn_mult": 1.08,
+      "cost_mult": 1.07,
+      "event_pressure_mult": 1.15
+    }
+  },
+  {
+    "id": "geopolitical_instability_period",
+    "title": "Geopolitical Instability Period",
+    "description": "Rising tensions between major economies create uncertainty across global markets. Investor appetite shifts toward defensive assets; growth-stage funding slows noticeably.",
+    "weight": 0.50,
+    "duration_min": 2,
+    "duration_max": 5,
+    "effects": {
+      "fundraise_amount_mult": 0.80,
+      "growth_mult": 0.92,
+      "event_pressure_mult": 1.10
+    }
+  },
+  {
+    "id": "antitrust_scrutiny_wave",
+    "title": "Antitrust Scrutiny Wave",
+    "description": "Regulators worldwide launch investigations into platform monopolies. Big Tech spends heavily on lobbying. Startups in adjacent spaces benefit from the spotlight on alternatives.",
+    "weight": 0.52,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "growth_mult": 1.06,
+      "fundraise_amount_mult": 1.08,
+      "event_pressure_mult": 1.12
+    }
+  },
+  {
+    "id": "global_recession_signal",
+    "title": "Global Recession Signals",
+    "description": "Leading economic indicators flash warning signs. Consumer spending tightens, enterprise budgets freeze, and CFOs everywhere issue variance reports. Survival mode activates across the industry.",
+    "weight": 0.45,
+    "duration_min": 3,
+    "duration_max": 6,
+    "effects": {
+      "growth_mult": 0.82,
+      "churn_mult": 1.18,
+      "fundraise_amount_mult": 0.72,
+      "cost_mult": 0.96,
+      "revenue_mult": 0.90
+    }
+  },
+  {
+    "id": "currency_volatility_cycle",
+    "title": "Currency Volatility Cycle",
+    "description": "Fluctuating exchange rates ripple through international revenue. Companies with global user bases see unpredictable revenue swings quarter-to-quarter as currency markets stay choppy.",
+    "weight": 0.48,
+    "duration_min": 1,
+    "duration_max": 3,
+    "effects": {
+      "revenue_mult": 0.94,
+      "event_pressure_mult": 1.06
+    }
+  },
+  {
+    "id": "ai_regulation_uncertainty",
+    "title": "AI Regulation Uncertainty",
+    "description": "Governments debate landmark AI legislation with no clear outcome in sight. AI-adjacent products face compliance ambiguity; some enterprise buyers pause AI procurement until the dust settles.",
+    "weight": 0.58,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "growth_mult": 0.95,
+      "fundraise_amount_mult": 0.88,
+      "event_pressure_mult": 1.14
+    }
+  },
+  {
+    "id": "supply_chain_normalization",
+    "title": "Supply Chain Normalization",
+    "description": "Global logistics bottlenecks ease after a prolonged disruption cycle. Cloud infrastructure costs begin stabilizing, and hardware-dependent startups see margin relief.",
+    "weight": 0.65,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "cost_mult": 0.93,
+      "growth_mult": 1.05
+    }
+  },
+  {
+    "id": "interest_rate_cut_cycle",
+    "title": "Interest Rate Cut Cycle",
+    "description": "Central banks signal a rate-cutting cycle. Risk appetite returns to institutional investors, and growth-stage valuations begin recovering from the compression of the past year.",
+    "weight": 0.60,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "fundraise_amount_mult": 1.25,
+      "growth_mult": 1.07,
+      "event_pressure_mult": 0.92
+    }
+  },
+  {
+    "id": "big_tech_layoff_wave",
+    "title": "Big Tech Layoff Wave",
+    "description": "Major technology companies announce sweeping headcount reductions. The talent market floods with senior engineers and experienced PMs. Your hiring pipeline gets significantly stronger.",
+    "weight": 0.62,
+    "duration_min": 1,
+    "duration_max": 3,
+    "effects": {
+      "growth_mult": 1.02,
+      "cost_mult": 0.94,
+      "event_pressure_mult": 1.08
+    }
+  },
+  {
+    "id": "platform_policy_crackdown",
+    "title": "Platform Policy Crackdown",
+    "description": "A major app distribution platform tightens its developer policies. App review times double, new submission requirements add compliance overhead, and some monetization hooks get flagged.",
+    "weight": 0.50,
+    "stage": "growth",
+    "duration_min": 1,
+    "duration_max": 3,
+    "effects": {
+      "growth_mult": 0.91,
+      "cost_mult": 1.06,
+      "event_pressure_mult": 1.10
+    }
   }
 ]

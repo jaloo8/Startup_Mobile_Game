@@ -385,7 +385,22 @@ static func _assign_icon_texture(assignment: EmployeeData.Assignment) -> Texture
 
 func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _card_style)
+	# Apply a morale-tinted left border accent to the card.
+	var styled := StyleBoxFlat.new()
+	styled.bg_color = Color(0.12, 0.12, 0.16)
+	styled.set_corner_radius_all(8)
+	styled.content_margin_left = 12
+	styled.content_margin_right = 12
+	styled.content_margin_top = 10
+	styled.content_margin_bottom = 10
+	styled.border_width_left = 3
+	if emp.morale >= 70:
+		styled.border_color = Color(0.28, 0.82, 0.45)   # green
+	elif emp.morale >= 40:
+		styled.border_color = Color(0.92, 0.76, 0.22)   # gold
+	else:
+		styled.border_color = Color(0.88, 0.30, 0.30)   # red
+	panel.add_theme_stylebox_override("panel", styled)
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 4)
@@ -403,6 +418,15 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(name_label)
+
+	# High-stress warning badge
+	if emp.stress >= 70:
+		var stress_badge := Label.new()
+		stress_badge.text = "⚠ Burnout risk" if emp.stress >= 85 else "⚠ High stress"
+		stress_badge.add_theme_font_size_override("font_size", 11)
+		stress_badge.add_theme_color_override("font_color",
+			Color(0.92, 0.28, 0.28) if emp.stress >= 85 else Color(0.95, 0.62, 0.22))
+		title_row.add_child(stress_badge)
 
 	var busy_q := GameState.interviewer_busy_for(emp.employee_uid)
 	if busy_q > 0:
@@ -507,6 +531,7 @@ func _on_assign_direct(emp: EmployeeData, assignment: EmployeeData.Assignment) -
 
 func _on_fire(emp: EmployeeData) -> void:
 	Analytics.track_fire()
+	SfxPlayer.play("fire")
 	GameState.fire_employee(emp)
 	_update_hire_button()
 	_refresh_list()
@@ -1303,6 +1328,7 @@ func _complete_interview(
 func _on_hire_candidate(candidate: EmployeeData) -> void:
 	var ckey := _candidate_key(candidate)
 	if GameState.hire_employee(candidate):
+		SfxPlayer.play("hire")
 		Analytics.track_hire(
 			EmployeeData.SPECIALTY_NAMES.get(candidate.specialty, "unknown"),
 			EmployeeData.SENIORITY_NAMES.get(candidate.seniority, "unknown"),

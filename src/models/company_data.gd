@@ -244,3 +244,5 @@ func clamp_all() -> void:
 	if hosting_workload_profile.is_empty():
 		hosting_workload_profile = "General Cloud"
 	hosting_data_center_pressure = clampf(hosting_data_center_pressure, 0.0, 3.0)
+	for stat_key in ["technical", "finance", "people", "business"]:
+		founder_stats[stat_key] = clampi(int(founder_stats.get(stat_key, 5)), 1, 10)

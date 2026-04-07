@@ -467,18 +467,25 @@ func _refresh_trend_chart() -> void:
 
 	var cash_series: Array[float] = []
 	var revenue_series: Array[float] = []
+	var burn_series: Array[float] = []
 	var users_series: Array[float] = []
 	for p in points:
 		cash_series.append(float(p.get("cash", 0.0)))
 		revenue_series.append(float(p.get("revenue", 0.0)))
+		burn_series.append(float(p.get("burn_rate", GameState.financials.burn_rate)))
 		users_series.append(float(p.get("users", 0.0)))
 
 	if trend_chart.has_method("set_series"):
-		trend_chart.set_series(cash_series, revenue_series, users_series)
+		trend_chart.set_series(
+			cash_series,    Color(0.33, 0.80, 0.52), "Cash",
+			revenue_series, Color(0.37, 0.63, 0.95), "Revenue",
+			burn_series,    Color(0.92, 0.38, 0.38), "Burn",
+			users_series,   Color(0.96, 0.74, 0.31), "Users"
+		)
 
 	if trend_meta:
 		var n := points.size()
-		trend_meta.text = "Last %d quarter%s (normalized per metric)" % [n, "s" if n != 1 else ""]
+		trend_meta.text = "Last %d quarter%s · Cash / Revenue / Burn / Users" % [n, "s" if n != 1 else ""]
 
 
 func _refresh_health_trend_chart() -> void:
@@ -495,11 +502,15 @@ func _refresh_health_trend_chart() -> void:
 		morale_series.append(float(p.get("avg_morale", GameState.average_team_morale())))
 
 	if health_trend_chart.has_method("set_series"):
-		health_trend_chart.set_series(valuation_series, team_series, morale_series)
+		health_trend_chart.set_series(
+			valuation_series, Color(0.72, 0.45, 0.95), "Valuation",
+			team_series,      Color(0.42, 0.78, 0.95), "Team",
+			morale_series,    Color(0.55, 0.90, 0.60), "Morale"
+		)
 
 	if health_trend_meta:
 		var n := points.size()
-		health_trend_meta.text = "Last %d quarter%s (valuation / team / morale)" % [n, "s" if n != 1 else ""]
+		health_trend_meta.text = "Last %d quarter%s · Valuation / Team / Morale" % [n, "s" if n != 1 else ""]
 
 
 func _on_fundraise() -> void:

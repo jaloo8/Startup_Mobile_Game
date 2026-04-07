@@ -518,4 +518,47 @@ Full checklist: ~35 minutes in-editor, plus ~15 minutes on-device for Section 23
 
 ---
 
-*Last updated: March 2026. Covers all 6 autoloads, 13 UI screens, 11 engines, 6 data models, 9 JSON files, 7 code-quality validators, mobile QA, and pre-release gates.*
+---
+
+## 24. SFX System
+
+| # | Test | Expected | Source |
+|---|------|----------|--------|
+| 24.1 | Hire sound plays on hire | Short rising chime on "Welcome to the Team" badge | `sfx_player.gd` → `play("hire")`, `employee_list.gd` → `_on_hire_candidate()` |
+| 24.2 | Fire sound plays on fire | Low descending tone when firing an employee | `sfx_player.gd` → `play("fire")`, `employee_list.gd` → `_on_fire()` |
+| 24.3 | Event popup sound plays | Short two-tone notification chime when event modal appears | `sfx_player.gd` → `play("event_popup")`, `event_popup.gd` → `show_event()` |
+| 24.4 | Feature-ship sound plays | Brighter chime fires with confetti when a feature ships | `sfx_player.gd` → `play("feature_ship")`, `product_overview.gd` → `_on_feature_shipped()` |
+| 24.5 | Confetti quality-tinted correctly | Green confetti = clean ship (quality ≥ 70), gold = medium, red = low quality | `product_overview.gd` → `_fire_confetti()`, `_build_confetti_gradient()` |
+| 24.6 | Unknown SFX key is a no-op | Calling `SfxPlayer.play("nonexistent")` does not crash | `sfx_player.gd` → `play()` early return |
+| 24.7 | SFX plays in silent mode | No crash when device is silenced or audio bus is unavailable | `sfx_player.gd` → `_synth()` null playback guard |
+
+---
+
+## 25. Employee Bios & Aging
+
+| # | Test | Expected | Source |
+|---|------|----------|--------|
+| 25.1 | Hired candidates have a bio | Employee detail view shows non-empty bio text | `hiring_engine.gd` → `_pick_bio()`, `employee_detail.gd` |
+| 25.2 | Bio matches personality | Steady employees get Steady bios, Ambitious get Ambitious, etc. | `src/data/bios.json`, `hiring_engine.gd` |
+| 25.3 | Employee ages shown in detail view | Age field visible in profile label | `employee_detail.gd`, `employee_data.gd` |
+| 25.4 | Employee ages increment at Q4 | After advancing Q4, each employee's age increases by 1 | `simulation_engine.gd` → `_age_employees()` |
+| 25.5 | Retirement triggers for old employees | Employees aged 60+ have a chance to retire each Q4 | `employee_data.gd` → `retirement_check()`, `simulation_engine.gd` → `_process_employee_turnover()` |
+| 25.6 | Retirement logged separately from quitting | Event log entry reads "retired" not "quit" | `simulation_engine.gd` → `_process_employee_turnover()` |
+| 25.7 | Seniority prefix in bio (40% chance) | Some bios start with "Early in their career..." or "Independently drives..." prefix | `hiring_engine.gd` → `_pick_bio()` |
+
+---
+
+## 26. World Events
+
+| # | Test | Expected | Source |
+|---|------|----------|--------|
+| 26.1 | World event fires over multiple quarters | Active world event shown on dashboard; persists duration_min to duration_max quarters | `world_event_engine.gd`, `quarter_dashboard.gd` |
+| 26.2 | World event effects apply to simulation | e.g., "Rate Hike Shock" reduces fundraise_amount_mult; growth_mult visible in simulation | `world_event_engine.gd` → `get_active_effects()`, `simulation_engine.gd` |
+| 26.3 | Bear-economy events only fire in bear market | Events with `"economy": "bear"` don't appear during bull market runs | `world_event_engine.gd` → `_is_eligible()` |
+| 26.4 | World event expires correctly | After duration_max quarters, event clears and effects stop | `world_event_engine.gd` → `step()` decrement |
+| 26.5 | World event saves and loads correctly | Active event ID, title, quarters_left, effects all persist in save JSON | `game_state.gd` → serialize/deserialize world_event block |
+| 26.6 | Smoke test validates all world event effect keys | `python3 tools/backend_smoke.py` passes with no unknown effect key warnings | `tools/backend_smoke.py` → WORLD_EVENT_EFFECT_KEYS |
+
+---
+
+*Last updated: April 2026. Covers all 9 autoloads, 13 UI screens, 11 engines, 6 data models, 11 JSON files, 7 code-quality validators, mobile QA, pre-release gates, SFX, bios/aging, and world events.*

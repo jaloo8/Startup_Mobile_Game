@@ -2,7 +2,7 @@ class_name SimulationEngine
 extends RefCounted
 ## Runs one quarter of simulation.
 
-const BASE_ORGANIC_USERS_PER_QUARTER := 10
+const BASE_ORGANIC_USERS_PER_QUARTER := 20
 const MARKETING_USER_MULT := 0.5
 const OFFICE_COST_BY_LEVEL := [0.0, 1_000.0, 4_000.0, 10_000.0]
 const HOSTING_BASE_CAPACITY_BY_OFFICE := [2_200.0, 7_500.0, 20_000.0, 52_000.0]
@@ -244,6 +244,7 @@ static func process_quarter(state: Node) -> void:
 	_update_economy(state)
 	_roll_events(state)
 	_update_employee_morale(state)
+	_age_employees(state)
 	_process_employee_turnover(state)
 	_grow_employee_skills(state)
 	_record_employee_history(state)
@@ -1229,9 +1230,20 @@ static func _team_morale_pulse(state: Node) -> int:
 
 static func _process_employee_turnover(state: Node) -> void:
 	var quitters: Array[EmployeeData] = []
+	var retirees: Array[EmployeeData] = []
 	for emp: EmployeeData in state.employees:
-		if emp.quit_probability() > randf():
+		if emp.age > 0 and emp.retirement_check():
+			retirees.append(emp)
+		elif emp.quit_probability() > randf():
 			quitters.append(emp)
+	for emp in retirees:
+		state.employees.erase(emp)
+		state.append_event_log({
+			"quarter": state.current_quarter,
+			"year": state.current_year,
+			"event_id": "employee_retired",
+			"title": "%s retired" % emp.employee_name,
+		})
 	for emp in quitters:
 		state.employees.erase(emp)
 		state.append_event_log({
@@ -1240,6 +1252,15 @@ static func _process_employee_turnover(state: Node) -> void:
 			"event_id": "employee_quit",
 			"title": "%s resigned" % emp.employee_name,
 		})
+
+
+static func _age_employees(state: Node) -> void:
+	# Age employees once per year (every 4th quarter).
+	if state.current_quarter != 4:
+		return
+	for emp: EmployeeData in state.employees:
+		if emp.age > 0:
+			emp.age += 1
 
 
 static func _grow_employee_skills(state: Node) -> void:

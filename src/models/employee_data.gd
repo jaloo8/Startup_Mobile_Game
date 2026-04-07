@@ -23,14 +23,16 @@ enum Personality { STEADY, AMBITIOUS, PERFECTIONIST, TEAM_PLAYER, MENTOR, ADAPTA
 @export var assignment: Assignment = Assignment.UNASSIGNED
 @export var employment_type: EmploymentType = EmploymentType.FULL_TIME
 @export var personality: Personality = Personality.STEADY
+@export var bio: String = ""
+@export var age: int = 0
 @export var quarter_history: Array[Dictionary] = []
 
 const SALARY_RANGES := {
-	Seniority.JUNIOR: Vector2(15_000, 22_000),
-	Seniority.MID: Vector2(22_000, 35_000),
-	Seniority.SENIOR: Vector2(35_000, 55_000),
-	Seniority.LEAD: Vector2(50_000, 75_000),
-	Seniority.PRINCIPAL: Vector2(70_000, 100_000),
+	Seniority.JUNIOR: Vector2(12_000, 20_000),
+	Seniority.MID: Vector2(20_000, 32_000),
+	Seniority.SENIOR: Vector2(32_000, 52_000),
+	Seniority.LEAD: Vector2(48_000, 72_000),
+	Seniority.PRINCIPAL: Vector2(68_000, 98_000),
 }
 
 const SPECIALTY_NAMES := {
@@ -293,6 +295,18 @@ static func _generate_uid() -> String:
 	return "%d-%d-%d" % [Time.get_unix_time_from_system(), randi(), randi()]
 
 
+## Returns true if this employee should retire this quarter.
+## Employees aged 60-80 have an increasing probability of retiring each quarter.
+func retirement_check() -> bool:
+	if age < 60:
+		return false
+	if age >= 80:
+		return true
+	# Linear ramp from 3% at 60 to 25% at 80.
+	var chance := remap(float(age), 60.0, 80.0, 0.03, 0.25)
+	return randf() < chance
+
+
 func clamp_all() -> void:
 	ensure_uid()
 	skill = clampi(skill, 0, 100)
@@ -303,6 +317,10 @@ func clamp_all() -> void:
 	salary_per_quarter = maxf(0.0, salary_per_quarter)
 	employment_type = clampi(employment_type, 0, 2) as EmploymentType
 	personality = clampi(personality, 0, 5) as Personality
+	assignment = clampi(assignment, 0, Assignment.UNASSIGNED) as Assignment
+	age = clampi(age, 0, 99)
+	if bio.length() > 300:
+		bio = bio.substr(0, 300)
 	if quarter_history.size() > 36:
 		quarter_history = quarter_history.slice(-36)
 	var sanitized: Array[Dictionary] = []

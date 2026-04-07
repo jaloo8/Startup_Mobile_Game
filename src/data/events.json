@@ -2433,5 +2433,177 @@
     "weight": 0.61,
     "one_time": false,
     "cooldown_quarters": 7
+  },
+  {
+    "id": "press_feature_profile",
+    "category": "market",
+    "stage": ["growth", "scale"],
+    "title": "Press Feature Request",
+    "description_template": "A journalist from {outlet} is pitching a founder profile on {company_name}. They say it could reach 200K readers. Their angle: 'scrappy underdog beats the odds in {niche}.'",
+    "description_variations": [
+      "A reporter at {outlet} wants to write the definitive piece on {company_name}. 'The startup that's quietly reshaping {niche},' they pitch. Publication date is flexible.",
+      "You get an email from {outlet}. They're doing a deep-dive feature on breakout {niche} companies and {company_name} made their shortlist."
+    ],
+    "choices": [
+      {
+        "label": "Do the full interview",
+        "effects": {
+          "reputation": 5,
+          "users": 800,
+          "morale_all": 4
+        },
+        "outcome_template": "The piece runs glowing. Inbound hiring interest spikes, a few competitor execs DM you, and user sign-ups tick up.",
+        "outcome_variations": [
+          "It's a flattering profile. The team is proud. Organic signups lift noticeably over the following two weeks.",
+          "The article runs front page. Your next hiring post fills faster than any before it."
+        ]
+      },
+      {
+        "label": "Decline — too early to be this visible",
+        "effects": {
+          "reputation": 0,
+          "morale_all": -1
+        },
+        "outcome_template": "You pass. The journalist profiles a competitor instead. Staying quiet keeps competitors from knowing exactly how well you're doing.",
+        "outcome_variations": [
+          "Smart. The competitor who took the slot is now fielding hard questions about their growth numbers.",
+          "The piece runs without you. Low profile maintained. The team understands, mostly."
+        ]
+      },
+      {
+        "label": "Offer a limited background briefing only",
+        "effects": {
+          "reputation": 2,
+          "users": 200
+        },
+        "outcome_template": "The article mentions {company_name} briefly as a notable player to watch. Controlled exposure, minimal risk.",
+        "outcome_variations": [
+          "A paragraph in a positive light. Small signal, safe signal.",
+          "You shape the narrative without giving up too much. Modest bump in brand."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "min_users": 1000,
+      "min_year": 2
+    },
+    "weight": 0.55,
+    "one_time": false,
+    "cooldown_quarters": 8
+  },
+  {
+    "id": "press_negative_hit_piece",
+    "category": "market",
+    "stage": ["growth", "scale"],
+    "title": "Negative Press Incoming",
+    "description_template": "A reporter at {outlet} is working on a story about 'startup culture gone wrong.' They've talked to a former employee. You have 48 hours to respond before it publishes.",
+    "description_variations": [
+      "An investigative piece is circulating in drafts. A disgruntled ex-employee gave quotes. You find out through a contact at {outlet} before the story drops.",
+      "{outlet} has a draft story with the headline: '{company_name} Culture Problems.' It may not be accurate. It is definitely happening."
+    ],
+    "choices": [
+      {
+        "label": "Respond transparently and fast",
+        "effects": {
+          "reputation": -2,
+          "morale_all": -3,
+          "stress_all": 5
+        },
+        "outcome_template": "The story runs but your statement softens it. Most readers appreciate the directness. Trust damage is contained.",
+        "outcome_variations": [
+          "Transparency helps. The second-day coverage is more balanced.",
+          "You own the narrative early. Not a great week, but not a crater either."
+        ]
+      },
+      {
+        "label": "Lawyer up and send a correction demand",
+        "effects": {
+          "reputation": -5,
+          "morale_all": -6,
+          "cash": -8000
+        },
+        "outcome_template": "The legal threat backfires — the journalist publishes the demand letter too. Now the story is about suppression.",
+        "outcome_variations": [
+          "Streisand effect achieved. You've accidentally made this a bigger story.",
+          "The legal approach reads as guilty. It's an expensive mistake."
+        ]
+      },
+      {
+        "label": "Say nothing and let it blow over",
+        "effects": {
+          "reputation": -3,
+          "morale_all": -4
+        },
+        "outcome_template": "The story runs without your voice in it. Some team members read it. The silence becomes its own message internally.",
+        "outcome_variations": [
+          "It cycles through in a few days. The team has questions you don't answer.",
+          "External impact is limited. The internal morale hit is harder to shake."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "min_employees": 5,
+      "min_year": 2
+    },
+    "weight": 0.45,
+    "one_time": false,
+    "cooldown_quarters": 10
+  },
+  {
+    "id": "press_acquisition_rumor",
+    "category": "market",
+    "stage": ["scale"],
+    "title": "Acquisition Rumor Goes Public",
+    "description_template": "{outlet} is reporting that {company_name} is 'in talks' with a large acquirer. This is not accurate. You have not spoken to anyone. The team is now asking questions.",
+    "description_variations": [
+      "A reporter published speculation about a potential acquisition of {company_name}. The article has three unnamed sources and zero facts. Your Slack is lighting up.",
+      "Someone at {outlet} connected dots that don't exist. The article says {company_name} is 'exploring strategic options.' Your investors are calling."
+    ],
+    "choices": [
+      {
+        "label": "Deny publicly and clearly",
+        "effects": {
+          "reputation": 1,
+          "morale_all": 3
+        },
+        "outcome_template": "Clear denial lands well. The team settles. A few VCs reach out to ask 'just checking' questions. You spend a week on calls.",
+        "outcome_variations": [
+          "Straightforward denial kills the story quickly. Team focus returns.",
+          "You kill the rumor fast. It resurfaces three quarters later. That's fine."
+        ]
+      },
+      {
+        "label": "No comment — let the speculation run",
+        "effects": {
+          "reputation": 3,
+          "morale_all": -5,
+          "stress_all": 8
+        },
+        "outcome_template": "Ambiguity inflates the brand briefly. But team anxiety is real — people wonder if they should be updating their resumes.",
+        "outcome_variations": [
+          "The hype is useful for two weeks. The distraction costs you a quarter of focus.",
+          "Some engineers start interviewing elsewhere. Rumor management is expensive."
+        ]
+      },
+      {
+        "label": "Use it as leverage to start real talks",
+        "effects": {
+          "reputation": 4,
+          "morale_all": -3
+        },
+        "outcome_template": "You call a few strategic partners who might be interested now that the story is out there. Valuation perception ticks up.",
+        "outcome_variations": [
+          "You turn fake news into real optionality. A few conversations go somewhere.",
+          "Opportunistic and effective. Team trust takes a small hit when they figure out what happened."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "min_valuation": 2000000,
+      "min_year": 3
+    },
+    "weight": 0.40,
+    "one_time": false,
+    "cooldown_quarters": 12
   }
 ]

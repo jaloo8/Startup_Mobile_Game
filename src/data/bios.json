@@ -1,0 +1,95 @@
+{
+  "by_personality": {
+    "Steady": [
+      "Methodical and dependable. Shows up, ships code, and never creates drama.",
+      "Quiet contributor who delivers consistently, quarter after quarter.",
+      "Not flashy, but never a bottleneck. Teammates rely on them without thinking about it.",
+      "Prefers a clear backlog and a good pair of headphones. Gets things done.",
+      "The kind of engineer who makes the on-call rotation less stressful just by being on it.",
+      "Consistent output, low maintenance. Exactly what a growing team needs.",
+      "Measured, reliable, and genuinely okay with unglamorous work.",
+      "Solid baseline performer. Never skips the boring parts of the job.",
+      "Zero drama, high delivery. Rarely the loudest voice, but often the most useful.",
+      "Has strong opinions, loosely held. Anchoring when needed, adaptable when not.",
+      "Shows up every day and does what needs doing. Underrated quality at every stage.",
+      "Rarely the first to speak in a meeting, but always the first to deliver."
+    ],
+    "Ambitious": [
+      "Wants to own a roadmap by Q3. Brings serious energy when morale is solid.",
+      "The first to volunteer for high-stakes projects. Watch out when they're under-challenged.",
+      "Excellent when pointed at a hard problem. Needs a clear growth path or they'll find one elsewhere.",
+      "Driven by impact metrics, not just shipping velocity. Results-oriented to a fault.",
+      "Has a 5-year plan that includes your company's valuation doubling. Sometimes that's a good thing.",
+      "Thrives in pressure. Finds coasting more uncomfortable than crunch.",
+      "Ambitious without being cutthroat. Lifts the bar for everyone on the team.",
+      "High ceiling, high expectations. Give them a hard problem and get out of the way.",
+      "Moves fast, learns from failures, then moves faster. Has strong opinions on what good looks like.",
+      "Will join to grow. Will leave if growth stalls. Keep them challenged.",
+      "Treats every quarter as a new opportunity to outperform the last one.",
+      "Has already mapped out what their next title should be. Could be a good thing."
+    ],
+    "Perfectionist": [
+      "Finds the bug everyone else missed. Slightly slower than you'd like on green-field features.",
+      "The person who actually reads the RFC before building. Pays off in the long run.",
+      "Catches edge cases in code review that would have cost you users. Indispensable on quality-sensitive work.",
+      "Slower to ship features, but rarely ships problems. Great on reliability-critical paths.",
+      "Cannot let known technical debt exist without flagging it. A blessing and occasionally a bottleneck.",
+      "Holds the team to a high bar. Sometimes painfully so. Worth it.",
+      "Has opinions about error handling, logging, and observability. Surprisingly correct opinions.",
+      "Prefers to do it right over doing it fast. Good for systems that will matter in two years.",
+      "Will rewrite a function three times before they're satisfied. The third version is usually excellent.",
+      "The kind of engineer who writes the test first and means it.",
+      "Keeps tech debt honest. Will not pretend the workaround is a real fix.",
+      "Documentation is not an afterthought for them. The rest of the team thanks them later."
+    ],
+    "Team Player": [
+      "Makes every sprint slightly better just by being in it. Easy collaborator, natural unblocked.",
+      "Dependable across assignments and a genuine team-first attitude. Retention asset.",
+      "Not the highest individual output on paper, but the team performs better when they're around.",
+      "First to help unblock a stuck teammate. Reduces friction across the org.",
+      "Collaborative by nature, not policy. Great for teams that are scaling fast.",
+      "The glue between subteams. Reduces misalignment without being told to.",
+      "Balanced contributor. Never hoards context, always shares findings.",
+      "Builds cross-functional relationships naturally. Teams run smoother with them involved.",
+      "Great at translating between technical and non-technical stakeholders. Quietly valuable.",
+      "Puts the team's velocity before their own headline metrics. A genuine asset.",
+      "Keeps the team healthy when pressure builds. That's harder than it looks.",
+      "Invests in shared tooling and documentation others actually use. Rare."
+    ],
+    "Mentor": [
+      "Makes junior teammates better. Their influence compounds over time.",
+      "Experienced enough to have war stories, patient enough to share them constructively.",
+      "Slows their own output to bring up the people around them. Worth it at scale.",
+      "Has onboarded more junior engineers than they can count. Most of them flourished.",
+      "Invests in others' growth. The kind of person who makes your whole team stronger.",
+      "Not chasing seniority metrics. Genuinely cares about the people they work with.",
+      "Code reviews are thorough and educational, not ego-driven. Rare and valuable.",
+      "Will spend 20 minutes explaining a concept so a junior doesn't spend 4 hours confused.",
+      "Team multiplier. Individual output is good; team output is great when they're involved.",
+      "Institutional knowledge made human. Preserves context that would otherwise walk out the door.",
+      "Develops teammates the way a good coach develops players. Consistently.",
+      "The reason some of your best engineers didn't quit in their first year."
+    ],
+    "Adaptable": [
+      "Comfortable wearing different hats. Effective across more role types than their title suggests.",
+      "One of the fastest learners on any team they join. Picks up new stacks quickly.",
+      "Does not need a rigid job description. Fills gaps wherever the team needs it.",
+      "Moved across three different tech stacks in two years. Performed well in all of them.",
+      "Responds well to ambiguity. Good for early-stage environments where the scope shifts constantly.",
+      "Will pivot from feature work to incident response without losing composure.",
+      "Effective across Frontend, Backend, and DevOps depending on what the quarter demands.",
+      "Low resistance to change. Gets productive in new environments faster than almost anyone.",
+      "Thrives in companies that are still figuring out who does what. Great for your stage.",
+      "Good at figuring out what needs to be done without being told. Especially useful pre-PMF.",
+      "Doesn't mind when the plan changes. Usually the one who helps make the new plan.",
+      "Works well in ambiguity, executes well under clarity. Can handle both."
+    ]
+  },
+  "by_seniority_prefix": {
+    "Junior": ["Early in their career, but eager.", "Still finding their footing, but promising.", "Fresh to the industry."],
+    "Mid": ["A couple of years in, growing fast.", "Starting to own work end-to-end.", "Has shipped real product before."],
+    "Senior": ["Experienced across multiple product cycles.", "Independently drives complex work.", "Been around long enough to know what matters."],
+    "Lead": ["Multiplies the team around them.", "Has led projects from scoping to ship.", "Balances technical depth with team ownership."],
+    "Principal": ["Sets technical direction across the org.", "Has seen most problems before.", "Operates at the intersection of strategy and code."]
+  }
+}

@@ -72,8 +72,12 @@ and multiple text variations for replay variety.
 
 ## Employee Bio Schema
 
-Bios will live in `src/data/employee_bios.json`. Used by HiringEngine to give
-generated candidates personality and backstory.
+Bios live in `src/data/bios.json` (implemented). Used by `HiringEngine._pick_bio()` to
+assign generated candidates personality and backstory. Note: the actual file structure
+uses a `by_personality` dictionary keyed by personality name (Steady/Ambitious/
+Perfectionist/Team Player/Mentor/Adaptable) with string arrays, and a
+`by_seniority_prefix` dict for optional prefix prepending — not the array-of-objects
+format shown below. The schema below represents the originally planned format.
 
 ```json
 [
@@ -124,7 +128,7 @@ Output as JSON: [{"id": "...", "bio_template": "...", "personality": "...",
 
 ## News Headline Schema
 
-Headlines will live in `src/data/news_headlines.json`. Displayed in a news
+Headlines live in `src/data/headlines.json` (implemented). Displayed in a news
 ticker each quarter to create atmosphere and context.
 
 ```json
@@ -172,6 +176,10 @@ Output as JSON: [{"id": "...", "headline_template": "...",
 
 ## VC Dialogue Schema
 
+> **Status: Not yet implemented.** VC dialogue is planned for `src/data/vc_dialogue.json`.
+> Current fundraising flow uses procedural text from `FundraisingEngine`. This schema
+> documents the intended future structure.
+
 VC dialogue will live in `src/data/vc_dialogue.json`. Used during fundraising
 meetings and term sheet presentations.
 
@@ -200,7 +208,9 @@ meetings and term sheet presentations.
 
 ## Quarterly Report Narrative Schema
 
-Templates in `src/data/quarterly_reports.json` for the end-of-quarter summary.
+> **Status: Not yet implemented.** Quarterly reports currently use procedural narrative
+> generation in `src/engine/quarterly_report.gd`. This schema documents the intended
+> future data-driven format in `src/data/quarterly_reports.json`.
 
 ```json
 [
@@ -225,7 +235,9 @@ Templates in `src/data/quarterly_reports.json` for the end-of-quarter summary.
 
 ## Game Over Postmortem Schema
 
-Templates in `src/data/postmortems.json` for the game-over summary screen.
+> **Status: Not yet implemented.** Postmortem screen currently uses hardcoded text in
+> `src/ui/game_over/game_over_screen.gd`. This schema documents the planned
+> `src/data/postmortems.json` format.
 
 ```json
 [

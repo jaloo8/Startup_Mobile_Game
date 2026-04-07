@@ -46,6 +46,9 @@ func _exit_tree() -> void:
 
 
 func show_event(event: EventData) -> void:
+	if event == null:
+		push_error("EventPopup: received null event")
+		return
 	_current_event = event
 	_current_choice_index = -1
 
@@ -69,6 +72,7 @@ func show_event(event: EventData) -> void:
 			choices_container.add_child(btn)
 	UITouchHelper.harden_tree(self)
 
+	SfxPlayer.play("event_popup")
 	modulate.a = 0.0
 	visible = true
 	if _tween and _tween.is_running():
@@ -78,6 +82,9 @@ func show_event(event: EventData) -> void:
 
 
 func _on_choice(index: int) -> void:
+	if _current_event == null or index < 0 or index >= _current_event.choices.size():
+		push_error("EventPopup: invalid choice index %d" % index)
+		return
 	_current_choice_index = index
 	var choice: Dictionary = _current_event.choices[index]
 

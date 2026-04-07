@@ -53,9 +53,21 @@ func _refresh_profile() -> void:
 
 	title_label.text = _employee.employee_name
 	subtitle_label.text = _employee.display_title()
-	profile_label.text = "%s · %s" % [_employee.employment_label(), _employee.personality_label()]
-	tenure_label.text = "Tenure: %d quarter%s" % [_employee.tenure_quarters, "s" if _employee.tenure_quarters != 1 else ""]
-	assignment_label.text = "Current focus: %s" % EmployeeData.ASSIGNMENT_NAMES.get(_employee.assignment, "Unknown")
+
+	var profile_parts := [_employee.employment_label(), _employee.personality_label()]
+	if _employee.age > 0:
+		profile_parts.append("Age %d" % _employee.age)
+	profile_label.text = " · ".join(profile_parts)
+
+	var tenure_parts := ["Tenure: %d quarter%s" % [_employee.tenure_quarters, "s" if _employee.tenure_quarters != 1 else ""]]
+	if not _employee.bio.is_empty():
+		tenure_parts.append(_employee.bio)
+	tenure_label.text = "\n".join(tenure_parts)
+
+	assignment_label.text = "Current focus: %s · %s" % [
+		EmployeeData.ASSIGNMENT_NAMES.get(_employee.assignment, "Unknown"),
+		_employee.personality_effect_hint(),
+	]
 
 	_refresh_history_chart()
 	_refresh_history_rows()

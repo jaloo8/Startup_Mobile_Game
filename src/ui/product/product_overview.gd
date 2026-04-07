@@ -66,6 +66,8 @@ const VISUAL_PRESET_FEATURES := {
 var _eta_label: Label
 # Celebration banner shown when a feature ships
 var _celebration_panel: PanelContainer
+# Confetti particle system for feature ship moments
+var _confetti: GPUParticles2D
 var _visual_preset_panel: PanelContainer
 var _visual_preset_picker: OptionButton
 var _visual_preset_hint: Label
@@ -91,6 +93,7 @@ func _ready() -> void:
 
 	_build_eta_label()
 	_build_celebration_panel()
+	_build_confetti()
 	_build_visual_preset_controls()
 	_setup_product_visual()
 
@@ -509,19 +512,40 @@ func _refresh() -> void:
 	else:
 		features_label.text = "%d features shipped · avg quality %d/100" % [p.feature_count(), roundi(p.avg_feature_quality())]
 	tech_debt_bar.value = p.tech_debt
+	_tint_bar(tech_debt_bar, p.tech_debt, true)  # inverted: high debt = red
+
 	if p.bugs == 0:
 		bugs_label.text = "None"
+		bugs_label.add_theme_color_override("font_color", Color(0.45, 0.88, 0.55))
 	elif p.bugs == 1:
 		bugs_label.text = "1 known bug"
+		bugs_label.add_theme_color_override("font_color", Color(0.95, 0.80, 0.35))
 	else:
 		bugs_label.text = "%d known bugs" % p.bugs
+		var bug_col := Color(0.92, 0.42, 0.38) if p.bugs >= 5 else Color(0.95, 0.68, 0.30)
+		bugs_label.add_theme_color_override("font_color", bug_col)
+
 	stability_bar.value = p.stability
+	_tint_bar(stability_bar, p.stability, false)
+
 	ux_bar.value = p.ux_score
+	_tint_bar(ux_bar, p.ux_score, false)
+
 	if p.users == 0:
 		users_label.text = "No users yet"
+		users_label.add_theme_color_override("font_color", Color(0.55, 0.55, 0.60))
 	else:
 		users_label.text = "%s users · %s daily active" % [SceneLoader.format_number(p.users), SceneLoader.format_number(p.dau)]
-	churn_label.text = "%.1f%% per quarter" % (p.churn_rate * 100)
+		users_label.add_theme_color_override("font_color", Color(0.72, 0.88, 1.0))
+
+	var churn_pct := p.churn_rate * 100.0
+	churn_label.text = "%.1f%% per quarter" % churn_pct
+	if churn_pct >= 20.0:
+		churn_label.add_theme_color_override("font_color", Color(0.92, 0.38, 0.38))
+	elif churn_pct >= 10.0:
+		churn_label.add_theme_color_override("font_color", Color(0.95, 0.72, 0.30))
+	else:
+		churn_label.add_theme_color_override("font_color", Color(0.45, 0.88, 0.55))
 
 	_refresh_build_status()
 	_refresh_product_visual()
@@ -654,6 +678,56 @@ func _build_eta_text(p: ProductData, target: Dictionary, engineer_count: int, to
 	return base
 
 
+func _build_confetti() -> void:
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(0.0, 1.0, 0.0)
+	mat.spread = 80.0
+	mat.initial_velocity_min = 120.0
+	mat.initial_velocity_max = 320.0
+	mat.gravity = Vector3(0.0, 98.0, 0.0)
+	mat.scale_min = 6.0
+	mat.scale_max = 14.0
+	mat.color = Color.WHITE
+	mat.color_ramp = _build_confetti_gradient()
+
+	_confetti = GPUParticles2D.new()
+	_confetti.name = "ConfettiParticles"
+	_confetti.process_material = mat
+	_confetti.amount = 80
+	_confetti.lifetime = 2.2
+	_confetti.explosiveness = 0.92
+	_confetti.one_shot = true
+	_confetti.emitting = false
+	_confetti.z_index = 10
+
+	add_child(_confetti)
+
+
+func _build_confetti_gradient() -> Gradient:
+	var g := Gradient.new()
+	g.colors = PackedColorArray([
+		Color(1.0, 0.85, 0.1, 1.0),   # gold
+		Color(0.25, 0.85, 0.45, 1.0), # green
+		Color(0.35, 0.65, 1.0, 1.0),  # blue
+		Color(1.0, 0.35, 0.55, 1.0),  # pink
+		Color(0.85, 0.40, 1.0, 1.0),  # purple
+		Color(1.0, 0.6, 0.15, 1.0),   # orange
+	])
+	g.offsets = PackedFloat32Array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+	return g
+
+
+func _fire_confetti(quality_color: Color) -> void:
+	if _confetti == null:
+		return
+	var mat := _confetti.process_material as ParticleProcessMaterial
+	if mat:
+		mat.color = quality_color.lightened(0.3)
+	# Position at top-center of the screen.
+	_confetti.position = Vector2(size.x * 0.5, 60.0)
+	_confetti.emitting = true
+
+
 func _on_feature_shipped(feature_name: String, quality: int) -> void:
 	if _celebration_panel == null:
 		return
@@ -674,6 +748,9 @@ func _on_feature_shipped(feature_name: String, quality: int) -> void:
 	else:
 		quality_word = "Rough"
 		quality_color = Color(0.9, 0.55, 0.25)
+
+	_fire_confetti(quality_color)
+	SfxPlayer.play("feature_ship")
 
 	var lbl := _celebration_panel.get_node_or_null("CelebLabel") as Label
 	if lbl:
@@ -944,6 +1021,28 @@ func _get_next_milestones() -> Array[Dictionary]:
 	for i in mini(2, in_progress.size()):
 		final_list.append(in_progress[i])
 	return final_list
+
+
+## Tints a ProgressBar fill color based on its value.
+## inverted=true means high value is bad (e.g. tech debt).
+## inverted=false means high value is good (e.g. stability).
+func _tint_bar(bar: ProgressBar, val: float, inverted: bool) -> void:
+	if bar == null:
+		return
+	var ratio := clampf(val / 100.0, 0.0, 1.0)
+	var health := ratio if not inverted else (1.0 - ratio)
+	var fill_color: Color
+	if health >= 0.65:
+		fill_color = Color(0.28, 0.82, 0.45)     # green — healthy
+	elif health >= 0.35:
+		fill_color = Color(0.92, 0.76, 0.22)     # gold — warning
+	else:
+		fill_color = Color(0.88, 0.30, 0.30)     # red — critical
+
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = fill_color
+	fill_style.set_corner_radius_all(4)
+	bar.add_theme_stylebox_override("fill", fill_style)
 
 
 func _on_back() -> void:

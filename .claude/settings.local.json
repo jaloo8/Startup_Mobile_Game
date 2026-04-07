@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/jloo/Documents/GitHub/startup_mobile_game/src/data/*.json)",
+      "Bash(python3 tools/backend_smoke.py)",
+      "Bash(find /Users/jloo/Documents/GitHub/startup_mobile_game/src -type f ! -name \"*.uid\" -exec wc -l {} +)",
+      "Bash(find /Users/jloo/Documents/GitHub/startup_mobile_game/docs -type f -exec wc -l {} +)",
+      "Bash(wc -l /Users/jloo/Documents/GitHub/startup_mobile_game/src/autoload/*.gd)",
+      "Bash(find /Users/jloo/Documents/GitHub/startup_mobile_game/src/engine -type f ! -name \"*.uid\" -exec wc -l {} +)",
+      "Bash(find /Users/jloo/Documents/GitHub/startup_mobile_game/src/models -type f ! -name \"*.uid\" -exec wc -l {} +)",
+      "Bash(find /Users/jloo/Documents/GitHub/startup_mobile_game/src/ui -type f ! -name \"*.uid\" -exec wc -l {} +)",
+      "Bash(grep -v \"^src$\\\\|^docs$\\\\|^tools$\\\\|^assets$\\\\|^tests$\\\\|^addons$\")",
+      "Bash(python3:*)",
+      "Bash(grep -E \"\\\\.json$\")",
+      "Bash(grep -l \"employee_bios\\\\|bios\\\\.json\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/engine/*.gd)",
+      "Bash(grep -r \"news_headlines\\\\|quarterly_reports\\\\|postmortems\" /Users/jloo/Documents/GitHub/startup_mobile_game/src/data/*.json)"
+    ]
+  }
+}

@@ -29,6 +29,7 @@ Glossary="*res://src/autoload/glossary.gd"
 Analytics="*res://src/autoload/analytics.gd"
 AdManager="*res://src/autoload/ad_manager.gd"
 TutorialManager="*res://src/autoload/tutorial_manager.gd"
+SfxPlayer="*res://src/autoload/sfx_player.gd"
 
 [display]
 

@@ -2,6 +2,51 @@ class_name HiringEngine
 extends RefCounted
 ## Generates candidates and handles the hiring pipeline.
 
+static var _bio_pool: Dictionary = {}
+
+static func _ensure_bio_pool() -> void:
+	if not _bio_pool.is_empty():
+		return
+	var f := FileAccess.open("res://src/data/bios.json", FileAccess.READ)
+	if f == null:
+		return
+	var parsed := JSON.parse_string(f.get_as_text())
+	f.close()
+	if parsed is Dictionary:
+		_bio_pool = parsed.get("by_personality", {})
+
+
+static func _pick_bio(personality: EmployeeData.Personality, seniority: EmployeeData.Seniority) -> String:
+	_ensure_bio_pool()
+	var key: String = EmployeeData.PERSONALITY_NAMES.get(personality, "Steady")
+	var pool: Array = _bio_pool.get(key, [])
+	if pool.is_empty():
+		return ""
+	var base: String = pool.pick_random()
+	# Occasionally prepend a seniority-flavoured prefix for variety.
+	if randf() < 0.40:
+		var sen_key: String = EmployeeData.SENIORITY_NAMES.get(seniority, "Mid")
+		var f2 := FileAccess.open("res://src/data/bios.json", FileAccess.READ)
+		if f2 != null:
+			var parsed2 := JSON.parse_string(f2.get_as_text())
+			f2.close()
+			if parsed2 is Dictionary:
+				var prefixes: Array = parsed2.get("by_seniority_prefix", {}).get(sen_key, [])
+				if not prefixes.is_empty():
+					base = prefixes.pick_random() + " " + base
+	return base
+
+
+static func _age_for_seniority(seniority: EmployeeData.Seniority) -> int:
+	match seniority:
+		EmployeeData.Seniority.JUNIOR:  return randi_range(21, 28)
+		EmployeeData.Seniority.MID:     return randi_range(26, 35)
+		EmployeeData.Seniority.SENIOR:  return randi_range(30, 45)
+		EmployeeData.Seniority.LEAD:    return randi_range(35, 52)
+		EmployeeData.Seniority.PRINCIPAL: return randi_range(40, 62)
+	return 30
+
+
 static func generate_candidates(count: int, _market: MarketData, state: Node = null) -> Array[EmployeeData]:
 	var candidates: Array[EmployeeData] = []
 	for i in count:
@@ -24,6 +69,8 @@ static func generate_candidates(count: int, _market: MarketData, state: Node = n
 		emp.personality = _weighted_personality()
 		emp.culture_fit = randi_range(30, 90)
 		emp.morale = randi_range(60, 90)
+		emp.age = _age_for_seniority(emp.seniority)
+		emp.bio = _pick_bio(emp.personality, emp.seniority)
 		var salary_range: Vector2 = EmployeeData.SALARY_RANGES[emp.seniority]
 		emp.salary_per_quarter = _salary_for_candidate(salary_range, emp.employment_type, state)
 		candidates.append(emp)

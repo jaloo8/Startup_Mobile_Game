@@ -214,11 +214,11 @@ func _apply_starting_scenario() -> void:
 	var cash_mult: float = DIFFICULTY_MULTS.get(difficulty, {}).get("cash_mult", 1.0)
 	match starting_scenario:
 		"garage":
-			company.cash = 20_000.0 * cash_mult
+			company.cash = 60_000.0 * cash_mult
 			company.office_level = 0
 			company.hosting_plan = CompanyData.HostingPlan.MANAGED_CLOUD
 		"accelerator":
-			company.cash = 125_000.0 * cash_mult
+			company.cash = 150_000.0 * cash_mult
 			company.office_level = 0
 			company.hosting_plan = CompanyData.HostingPlan.MANAGED_CLOUD
 		"spinoff":
@@ -1106,6 +1106,8 @@ func _serialize() -> Dictionary:
 			"assignment": emp.assignment,
 			"employment_type": emp.employment_type,
 			"personality": emp.personality,
+			"bio": emp.bio,
+			"age": emp.age,
 			"quarter_history": emp.quarter_history.duplicate(true),
 		})
 
@@ -1273,7 +1275,7 @@ func _deserialize(data: Dictionary) -> bool:
 
 	market = MarketData.new()
 	var md: Dictionary = _safe_dict(data.get("market", {}))
-	market.competitors.assign(_safe_array(md.get("competitors", [])))
+	market.competitors.assign(_dict_array(md.get("competitors", [])))
 	market.market_trend = md.get("trend", 0)
 	market.economy_state = md.get("economy", 0)
 
@@ -1306,6 +1308,8 @@ func _deserialize(data: Dictionary) -> bool:
 		emp.assignment = ed.get("assignment", EmployeeData.Assignment.UNASSIGNED)
 		emp.employment_type = ed.get("employment_type", EmployeeData.EmploymentType.FULL_TIME)
 		emp.personality = ed.get("personality", EmployeeData.Personality.STEADY)
+		emp.bio = str(ed.get("bio", ""))
+		emp.age = clampi(int(ed.get("age", 0)), 0, 99)
 		emp.quarter_history.assign(_dict_array(ed.get("quarter_history", [])))
 		employees.append(emp)
 
@@ -1379,10 +1383,11 @@ func _clamp_deserialized_values() -> void:
 	product.ux_score = clampi(product.ux_score, 0, 100)
 	product.users = clampi(product.users, 0, 1_000_000_000)
 	product.dau = clampi(product.dau, 0, product.users)
-	product.churn_rate = clampf(product.churn_rate, 0.0, 1.0)
+	product.churn_rate = clampf(product.churn_rate, ProductData.CHURN_RATE_MIN, ProductData.CHURN_RATE_MAX)
 	product.feature_progress = clampf(product.feature_progress, 0.0, 1e9)
 	product.revenue_mult = clampf(product.revenue_mult, 0.01, 100.0)
 	product.dau_bonus = clampf(product.dau_bonus, 0.0, 1.0)
+	product.user_growth_flat_bonus = maxi(0, product.user_growth_flat_bonus)
 
 	financials.revenue = maxf(0.0, financials.revenue)
 	financials.burn_rate = maxf(0.0, financials.burn_rate)

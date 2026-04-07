@@ -299,17 +299,8 @@ Do these in order. Each one should be playable before starting the next.
   - Some niches are easier than others — utility apps are simpler to launch, while competing in OS/cloud is brutal but has massive upside
   - Future DLC types (AI, Gaming, Hardware, Platform/OS, Autonomous Mobility) each get their own niche lists
   - Modders can add custom niches via JSON
-- [~] **Early game economy revamp ($20K start)** — Hiring pipeline now includes full-time/contractor/intern employment types with different cost/output/retention dynamics, plus a lighter early-office cost curve (co-working/small/HQ) to reduce abrupt quarter-2 cash shocks; full expense-system rebalance is still pending:
-  - Start with $20K (savings, side hustle money, or a small friends & family round)
-  - **Office tiers:** Mom's basement / garage (free, capacity 3-4), co-working space ($500-1K/quarter, capacity 6-8), small office ($3-5K/quarter, capacity 15), real office ($10K+/quarter, capacity 30+)
-  - Starting in the garage costs nothing — upgrade when you can afford it
-  - **Hiring types:** Full-time employees (salary + benefits, loyal, expensive), contractors (hourly/project, cheaper short-term, no loyalty, can leave anytime), interns (almost free, low output, sometimes surprise you)
-  - Early game you can only afford 1-2 contractors or interns — full-time hires come after first revenue or funding
-  - **Core expenses only:** Rent, salaries/contractor fees, infrastructure (servers, tools — scales with users), and one-time costs from events (legal, equipment)
-  - No hidden "operating costs" that drain cash for no reason — every dollar should be traceable
-  - First few quarters should feel like stretching every dollar: do you hire help or buy better tools? Pay for marketing or grind organically?
-  - Angel investor / VC cash injection as a lifeline if you're about to run out, but at a steep equity cost
-- [ ] **Employee bios** — 200+ bio templates with personality tags
+- [x] **Early game economy revamp** — Garage start cash raised to $60K (was $20K); accelerator to $150K; organic user growth doubled to 20/quarter; all 4 revenue model rates increased (SaaS 6% conversion/$28 ARPU, Consumer 0.025 CPM/4% premium, Marketplace $65 GMV/user, DevTools 1200 calls/$0.0012); salary floors trimmed (Junior now $12K-$20K/Q); contractor/intern employment types and office tier tiers remain future scope
+- [x] **Employee bios** — 72 bio strings across 6 personality types + seniority prefixes in `bios.json`; `HiringEngine._pick_bio()` assigns on candidate generation; bio + age shown in employee detail view
 - [x] **Quarterly report** — 6+ bullet narrative summary after each quarter advance (revenue, cash, team, product, users, economy, hosting + situational stress/board notes)
 - [x] **All 4 Software company types** — SaaS, Consumer, Marketplace, Dev Tools each have unique growth curves, churn patterns, key metrics, feature trees (10 features each), and event filtering
 - [x] **Win conditions** — IPO ($100M+ ARR & 100K users), acquisition (accept event), sustainable (6Q profit + scale checks after Y5), unicorn ($1B val) + victory screen
@@ -329,11 +320,7 @@ Do these in order. Each one should be playable before starting the next.
   - Their response to events (a Perfectionist hates shipping buggy features, an Ambitious employee wants promotions faster)
   - Interview accuracy (a good read depends on interviewer personality matching)
   - Team composition bonuses/penalties (all Lone Wolves = no collaboration bonus; mix of Mentors + Juniors = faster skill growth)
-- [ ] **Employee aging & retirement** — Employees have ages; between 60-80 they may retire depending on:
-  - Wealth accumulated (high salary over many years → earlier retirement)
-  - Loyalty to the company (long tenure, high morale → stays longer)
-  - Passion for the work (engaged employees with meaningful assignments delay retirement)
-  - Retirement triggers a farewell event with potential knowledge-transfer bonuses if planned
+- [x] **Employee aging & retirement** — Employees have ages (Junior: 21-28, Senior: 40-62, Principal: 40-62); `retirement_check()` on `EmployeeData` uses probabilistic curve (60-80 range, 3%-25% chance); `SimulationEngine._age_employees()` increments age at Q4; retirement events logged separately from voluntary quits in `_process_employee_turnover()`
 - [ ] **Executive poaching system** — Attempt to recruit named executives from competitor companies:
   - Browse competitor org charts and target specific C-suite/VP-level talent with known elite skills
   - Poached execs are expensive but a guaranteed quality hire — no interview RNG
@@ -352,14 +339,7 @@ Do these in order. Each one should be playable before starting the next.
   - Some offers come with strings: your team has to relocate, or you lose the company name, or key employees refuse to transfer
   - Risk: if you reject too many times, the big company may invest in a competitor instead
 
-- [ ] **News agency feature pieces** — Parody news outlets can do profiles on your company:
-  - Triggered at reputation/user milestones or after noteworthy events (big funding round, product launch, scandal)
-  - Outlets like "Bloomburg Tech", "TekCrunch", "The Informant" approach you for an interview
-  - Player chooses how to respond: enthusiastic, cautious, or decline
-  - Positive coverage boosts reputation and can attract better job candidates, investors, and users
-  - Bad coverage (if you're struggling or a scandal breaks) hurts reputation — and you can't stop them from publishing
-  - Rare: a deep investigative piece from "The Informant" can expose internal problems (high tech debt, low morale) for a big reputation hit
-  - Follow-up: reader comments / social media reactions shown as extra headline variants after the piece runs
+- [~] **News agency feature pieces** — 3 press/media events added to `events.json` (`press_feature_profile`, `press_negative_hit_piece`, `press_acquisition_rumor`) with reputation/morale effects; dedicated outlet personas (TekCrunch, Bloomburg, The Informant), investigative-piece mechanic, and reader-reaction headline variants are still pending
 
 - [ ] **Stock market (post-IPO endgame)** — After IPO win condition, the game continues with a live stock price:
   - Stock price fluctuates each quarter based on revenue growth, user growth, profitability, economy state, and random market sentiment
@@ -369,13 +349,7 @@ Do these in order. Each one should be playable before starting the next.
   - New post-IPO win conditions: reach a target market cap, join a stock index (parody S&P 500), or become the most valuable company in your sector
   - Analyst ratings (buy/hold/sell) shown each quarter with brief commentary
   - Quarterly earnings calls: choose how to present results (optimistic spin vs. honest vs. sandbagging) — affects stock price and board sentiment
-- [ ] **World & foreign policy events** — Global events that ripple into your business:
-  - Geopolitical shifts: trade wars, sanctions, tariffs — affect supply chains, hiring pools, and market sentiment
-  - Regulatory changes: data privacy laws (GDPR-style), antitrust rulings, crypto regulation — force product pivots or compliance costs
-  - Economic policy: interest rate changes, stimulus packages, currency fluctuations — affect VC funding availability and burn rate pressure
-  - Global crises: pandemics, supply chain disruptions, energy price spikes — can hurt or help depending on your company type (remote work tools thrive in a pandemic, hardware startups suffer from chip shortages)
-  - Headlines reflect these shifts on the news ticker, and some trigger special events with choices
-  - Economy state (BULL/BEAR/NEUTRAL) influenced by accumulation of world events, not just random rolls
+- [x] **World & foreign policy events** — 12 new macro events added to `world_events.json` (global tariff shock, data privacy regulation wave, geopolitical instability, antitrust scrutiny, global recession signal, currency volatility, AI regulation uncertainty, supply chain normalization, interest rate cut cycle, big tech layoff wave, platform policy crackdown, and more); all use validated `fundraise_amount_mult` key; economy BULL/BEAR/NEUTRAL coupling and economy-state-influenced rolling are still handled by `WorldEventEngine`
 
 - [ ] **Corporate Ventures program (mid-to-late game)** — Unlocks at $100M+ valuation or after Series B:
   - Start a CVC arm — allocate a quarterly budget from company cash to invest in AI-generated mini-startups
@@ -389,15 +363,15 @@ Do these in order. Each one should be playable before starting the next.
   - Leaderboard tracks your CVC returns alongside your main company performance
 
 **Phase 3 — Polish & Balance (TODO):**
-- [ ] **UI overhaul** — Dark theme, PGM3-style cards, clean typography, Godot Theme resource
+- [~] **UI overhaul** — Color-coded progress bars (green/gold/red via `_tint_bar()`), morale-colored 3px left borders on employee cards, stress warning badges (⚠ High stress / ⚠ Burnout risk), color-coded bugs/users/churn labels; Godot Theme resource and full typography pass still pending
 - [x] **Turn-change clarity polish** — Dashboard now shows a compact "Last quarter" momentum strip (cash/revenue/users/valuation), explicit event-count + resolve-state guidance, a lightweight quarter-entry toast, a persistent "Next best action" hint, and a richer quarter transition wipe with SFX hooks/fallback synthesis.
 - [x] **Finance decision guidance** — Finances now include quarter-delta context, a natural-language "Next best move", and a new driver-level drill-down summary (`Driver read`) that explains quarter-over-quarter cash movement from revenue and core cost buckets.
 - [x] **Hosting economics + reliability** — Quarter simulation now models hosting demand/capacity lanes (web/cache/data), plan-based costs (Managed Cloud/Hybrid/In-house), overage costs, reliability incident pressure, and explicit player-facing capacity actions (lane upgrades + optimization) via Logistics. It now also includes workload-aware pressure profiling (AI/ML, streaming, marketplace, API/realtime) so data-center-heavy runs surface naturally from what you build.
-- [~] **Charts and graphs** — Finance screen now includes two lightweight trend panels (cash/revenue/users and valuation/team/morale, normalized, last 12 quarters); deeper drill-down analytics are still pending
+- [x] **Charts and graphs** — `TrendChart` fully rewritten to 4-series named API with colored legend dots, last-value endpoint markers, and normalized multi-series overlay; Finance screen now plots Cash (green), Revenue (blue), Burn Rate (red), Users (gold) and Valuation (purple), Team (light blue), Morale (green); deeper drill-down analytics still pending
 - [x] **Employee detail view** — Added dedicated employee profile screen with history timeline + trajectory chart + role/trait metadata
 - [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; added `docs/difficulty-playtest-matrix.md` for structured 12-run validation, but full empirical pass is still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
-- [ ] **Sound effects** — Minimal UI sounds (optional)
+- [x] **Sound effects** — `SfxPlayer` autoload (`src/autoload/sfx_player.gd`) with PCM synthesis via `AudioStreamGenerator`; 6 named sounds: `hire`, `feature_ship`, `button_tap`, `event_popup`, `fire`, `retire`; registered in `project.godot`; wired into hire badge, fire button, event popup, and feature ship celebration
 - [ ] **Dynamic org structures (large companies)** — Introduce team pods / function leads once company reaches scale thresholds, with clearer inter-team mesh bonuses and delegation tradeoffs
 - [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
 - [~] **Office worker ambient animation** — Dashboard office banner now uses desk-aware pseudo-sprite workers (head/body badges), monitor+desk placement, and office customization states (per office tier + company accent); fully custom animated sprite art pipeline is still outstanding.
@@ -418,7 +392,7 @@ Do these in order. Each one should be playable before starting the next.
 
 **Soon (next sprint):**
 - [ ] **Kenney character sprite integration** — Download the free [Kenney Character Pack](https://kenney.nl/assets/toon-characters-1) (CC0, no attribution required). Wire up `AnimatedSprite2D` nodes for idle/walk/sit cycles. Display employees as animated sprites at their desks in the office scene, matching their current assignment (Features = typing, Bugs = looking worried, R&D = reading). Office scene upgrades (garage → co-working → HQ) swap the background banner and add more desk slots.
-- [ ] **Feature-ship confetti burst** — Particle system (`GPUParticles2D`) on the Product screen that fires when a feature ships; uses the feature's quality color so green is a clean ship and red is a stressful one.
+- [x] **Feature-ship confetti burst** — `GPUParticles2D` + `ParticleProcessMaterial` created programmatically in `product_overview.gd`; fires quality-tinted confetti (green/gold/red) on feature ship with `SfxPlayer.play("feature_ship")`; gradient built via `Gradient` API — no scene editor required.
 
 **Later (post-alpha):**
 - [ ] **Custom sprite art** — Commission or generate a consistent character sprite sheet once the game design is locked and company types are final. Replace the Kenney placeholders. Art style should match the Pixar-inspired employee avatars already in the hire badge.
@@ -436,7 +410,7 @@ Do these in order. Each one should be playable before starting the next.
   - Big Head parody — low skill but incredibly lucky, stumbles into success, cheap to hire but unpredictable output
   - Each character triggers unique events and dialogue when on your team or encountered
 - [x] **Pop-culture parody reference pack** — Expanded subtle startup-media parody layer across `src/data/events.json`, `src/data/headlines.json`, and `src/data/competitors.json` (plus world-event references) while keeping text legally safe and quote-free.
-- [~] **Grounded world-events layer (historical + current-event inspired)** — New data-driven `WorldEventEngine` + `world_events.json` adds multi-quarter macro cycles (risk-off periods, rate shocks, supply bottlenecks, regulation waves, capital reopenings) with gameplay effects; scenario breadth and deeper economy coupling are still pending.
+- [x] **Grounded world-events layer (historical + current-event inspired)** — `WorldEventEngine` + `world_events.json` has 26 macro events total (14 original + 12 new: global tariff shock, data privacy regulation, geopolitical instability, antitrust scrutiny wave, global recession signal, currency volatility, AI regulation uncertainty, supply chain normalization, interest rate cut cycle, big tech layoff wave, platform policy crackdown); all effect keys validated by smoke test; deeper economy-state coupling still pending.
 - [x] **Reference tone + safety guardrails** — Added `docs/reference-tone-guardrails.md` with practical writing rules (neutral tone, no real-person defamation, no copyrighted dialogue, no graphic conflict framing) for future parody/event content.
 - [ ] **Expand competitor roster** — Add more parody companies per category; flesh out each with multiple product lines, unique behaviors, and market moves (acquisitions, pivots, IPOs)
 - [ ] **Competitor product depth** — Each major competitor can have multiple products (e.g., Googlr has search, cloud, ads, hardware) that affect different market segments
