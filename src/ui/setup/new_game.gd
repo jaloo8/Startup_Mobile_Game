@@ -13,7 +13,7 @@ extends Control
 @onready var back_btn: Button = %BackButton
 @onready var type_illustration: TextureRect = %TypeIllustration
 
-const TYPE_ILLUSTRATION_PATHS := {
+const TYPE_ILLUSTRATION_PATHS: Dictionary = {
 	CompanyData.CompanyType.SAAS:        "res://assets/illustrations/company_type_saas.png",
 	CompanyData.CompanyType.CONSUMER:    "res://assets/illustrations/company_type_consumer.png",
 	CompanyData.CompanyType.MARKETPLACE: "res://assets/illustrations/company_type_marketplace.png",
@@ -21,12 +21,12 @@ const TYPE_ILLUSTRATION_PATHS := {
 }
 
 # Difficulty plain-English descriptions shown below the selector
-const DIFFICULTY_DESCS := {
+const DIFFICULTY_DESCS: Dictionary = {
 	0: "Sandbox — Extra starting cash, slower competitors, forgiving market. Great for learning the game with no pressure.",
 	1: "Normal — Realistic startup economics. Tight budget, real competition. Recommended for most players.",
 	2: "Hardcore — Minimal runway, aggressive competitors, realistic failure rates. For experienced players.",
 }
-const START_SCENARIOS := [
+const START_SCENARIOS: Array = [
 	{
 		"id": "garage",
 		"label": "Garage Bootstrapper ($20K)",
@@ -67,6 +67,7 @@ var _scenario_desc_label: Label
 
 func _ready() -> void:
 	CompanyData.load_niche_catalog()
+	name_input.max_length = 28
 	_populate_type_selector()
 	_populate_difficulty_selector()
 	_populate_scenario_selector()
@@ -89,6 +90,7 @@ func _ready() -> void:
 	_on_difficulty_changed(1)   # Normal is the default
 	_on_scenario_changed(0)
 	UITouchHelper.harden_tree(self)
+	AnimHelper.fade_in(self, 0.0, 0.18)
 
 
 func _load_type_illustration(type_id: int) -> void:
@@ -162,6 +164,8 @@ func _on_type_changed(_idx: int) -> void:
 			_type_hint_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
 		_:
 			_type_hint_label.text = ""
+	if not _type_hint_label.text.is_empty():
+		AnimHelper.fade_in(_type_hint_label, 0.0, 0.15)
 
 
 func _populate_niche_selector(type_id: int) -> void:
@@ -220,6 +224,8 @@ func _on_difficulty_changed(idx: int) -> void:
 	if _difficulty_desc_label == null:
 		return
 	_difficulty_desc_label.text = DIFFICULTY_DESCS.get(idx, "")
+	if not _difficulty_desc_label.text.is_empty():
+		AnimHelper.fade_in(_difficulty_desc_label, 0.0, 0.15)
 
 
 func _on_scenario_changed(_idx: int) -> void:
@@ -230,6 +236,8 @@ func _on_scenario_changed(_idx: int) -> void:
 		return
 	var safe_idx: int = clampi(scenario_selector.selected, 0, START_SCENARIOS.size() - 1)
 	_scenario_desc_label.text = str(START_SCENARIOS[safe_idx].get("desc", ""))
+	if not _scenario_desc_label.text.is_empty():
+		AnimHelper.fade_in(_scenario_desc_label, 0.0, 0.15)
 
 
 func _populate_type_selector() -> void:
@@ -289,7 +297,7 @@ func _on_start() -> void:
 		start_btn.disabled = false
 		return
 
-	var difficulties := ["sandbox", "normal", "hardcore"]
+	var difficulties: Array = ["sandbox", "normal", "hardcore"]
 
 	var diff_idx := clampi(difficulty_selector.selected, 0, difficulties.size() - 1)
 	var scen_idx := clampi(scenario_selector.selected, 0, START_SCENARIOS.size() - 1)
@@ -307,7 +315,7 @@ func _on_start() -> void:
 		if meta != null:
 			niche_id = str(meta)
 
-	var config := {
+	var config: Dictionary = {
 		"name": name_input.text.strip_edges() if not name_input.text.strip_edges().is_empty() else "My Startup",
 		"type": type_selector.get_selected_id(),
 		"niche_id": niche_id,

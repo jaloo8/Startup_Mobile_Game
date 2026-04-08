@@ -2,6 +2,7 @@ extends Node
 ## Holds all game state. Access via GameState.
 
 const GAME_VERSION := "0.1.0"
+const SAVE_FORMAT_VERSION := 1
 
 signal quarter_advanced(quarter_number: int)
 signal game_over(reason: String)
@@ -47,7 +48,7 @@ var _achieved_wins: Array[String] = []
 var interviewer_busy_quarters: Dictionary = {}  # employee_uid -> quarters remaining
 
 const SAVE_DIR := "user://saves/"
-const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
+const SLOT_NAMES: Array = ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
 
 
 static func _safe_array(value) -> Array:
@@ -86,16 +87,16 @@ const SAVE_TMP_SUFFIX := ".tmp"
 # extending run length. Feature build speed stays unchanged.
 const SUSTAINABLE_MIN_QUARTERS := 20
 const SUSTAINABLE_PROFIT_STREAK := 6
-const SUSTAINABLE_DEFAULT_REQUIREMENTS := {
+const SUSTAINABLE_DEFAULT_REQUIREMENTS: Dictionary = {
 	"users": 12_000,
 	"features": 8,
 	"revenue_per_q": 250_000.0,
 }
-const SUSTAINABLE_REQUIREMENTS_BY_TYPE := {
+const SUSTAINABLE_REQUIREMENTS_BY_TYPE: Dictionary = {
 	CompanyData.CompanyType.SAAS: {
 		"users": 10_000,
 		"features": 8,
-		"revenue_per_q": 220_000.0,
+		"revenue_per_q": 140_000.0,
 	},
 	CompanyData.CompanyType.CONSUMER: {
 		"users": 8_000,
@@ -108,14 +109,14 @@ const SUSTAINABLE_REQUIREMENTS_BY_TYPE := {
 		"revenue_per_q": 260_000.0,
 	},
 	CompanyData.CompanyType.DEV_TOOLS: {
-		"users": 9_000,
+		"users": 12_000,
 		"features": 8,
-		"revenue_per_q": 210_000.0,
+		"revenue_per_q": 120_000.0,
 	},
 }
 # Centralized difficulty knobs consumed by simulation, fundraising, and events.
 # Keep these in one place so balancing passes stay predictable.
-const DIFFICULTY_MULTS := {
+const DIFFICULTY_MULTS: Dictionary = {
 	"sandbox": {
 		"cash_mult": 2.0,
 		"churn_mult": 0.5,
@@ -153,6 +154,7 @@ func _ready() -> void:
 	if err != OK and err != ERR_ALREADY_EXISTS:
 		push_error("GameState: failed to create save directory (%d)" % err)
 	_save_mutex = Mutex.new()
+	_cleanup_orphaned_tmp_files()
 
 
 func _notification(what: int) -> void:
@@ -193,6 +195,7 @@ func new_game(config: Dictionary) -> void:
 	pending_events.clear()
 	clear_world_event_state()
 	EventEngine.reset_cooldowns()
+	SynergyEngine.reset()
 	_milestones_hit.clear()
 	_achieved_wins.clear()
 	interviewer_busy_quarters.clear()
@@ -206,6 +209,9 @@ func new_game(config: Dictionary) -> void:
 	current_quarter = 1
 	current_year = 1
 	_apply_starting_scenario()
+
+	# Apply any unlocked prestige perks for this run.
+	PrestigeManager.apply_perks(self)
 
 	is_game_active = true
 
@@ -375,7 +381,7 @@ func _seed_financial_snapshot_for_scenario() -> void:
 		salary_total += emp.salary_per_quarter
 	var finance_discount: float = 1.0 - company.founder_stat("finance") * 0.02
 	var infra_cost := maxf(10.0, product.users * 0.006) * maxf(0.6, finance_discount)
-	var office_costs := [0.0, 1_000.0, 4_000.0, 10_000.0]
+	var office_costs: Array = [0.0, 1_000.0, 4_000.0, 10_000.0]
 	var office_idx: int = clampi(company.office_level, 0, office_costs.size() - 1)
 	financials.costs_breakdown["salaries"] = salary_total
 	financials.costs_breakdown["infrastructure"] = infra_cost
@@ -496,6 +502,7 @@ func advance_quarter() -> void:
 		var shipped_quality: int = newest.get("quality", 0)
 		feature_shipped.emit(newest.get("name", "Feature"), shipped_quality)
 		CurrencyManager.on_feature_shipped(shipped_quality)
+		SynergyEngine.check_synergies(self)
 
 	_take_snapshot()
 	current_quarter += 1
@@ -734,7 +741,7 @@ func _emit_victory(win_type: String) -> void:
 	game_won.emit(win_type)
 
 
-const MILESTONES := {
+const MILESTONES: Dictionary = {
 	"100_users": {"threshold_users": 100, "bonus": 25_000.0, "title": "Milestone: 100 users — investors released a $25K tranche"},
 	"1k_users": {"threshold_users": 1000, "bonus": 50_000.0, "title": "Milestone: 1K users — investors released a $50K tranche"},
 	"first_revenue": {"threshold_revenue": 1.0, "bonus": 15_000.0, "title": "First revenue! Investors released a $15K bonus"},
@@ -798,7 +805,7 @@ func append_event_log(entry: Dictionary) -> void:
 	if title_val.length() > MAX_EVENT_TITLE_LEN:
 		title_val = title_val.substr(0, MAX_EVENT_TITLE_LEN)
 
-	var normalized := {
+	var normalized: Dictionary = {
 		"quarter": quarter_val,
 		"year": year_val,
 		"event_id": event_id_val,
@@ -902,7 +909,9 @@ func save_game(slot_name: String) -> bool:
 		return false
 	if _save_thread and _save_thread.is_started():
 		_save_thread.wait_to_finish()
+	_save_mutex.lock()
 	var data := _serialize()
+	_save_mutex.unlock()
 	if data.is_empty():
 		save_error.emit("Could not save — game state not initialized")
 		return false
@@ -914,6 +923,21 @@ func save_game(slot_name: String) -> bool:
 
 static func _slot_path(slot_name: String) -> String:
 	return SAVE_DIR + slot_name + ".json"
+
+
+## Remove orphaned .tmp files left by interrupted saves (e.g., app crash
+## mid-write). Called once on startup to prevent gradual disk bloat.
+func _cleanup_orphaned_tmp_files() -> void:
+	var dir := DirAccess.open(SAVE_DIR)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var fname := dir.get_next()
+	while not fname.is_empty():
+		if fname.ends_with(SAVE_TMP_SUFFIX):
+			var full_path := SAVE_DIR + fname
+			DirAccess.remove_absolute(full_path)
+		fname = dir.get_next()
 
 
 static func _backup_path(path: String) -> String:
@@ -947,7 +971,7 @@ static func _copy_file(src_path: String, dst_path: String) -> bool:
 static func _atomic_write(path: String, data: Dictionary) -> bool:
 	var payload_text := JSON.stringify(data, "\t")
 	var checksum := payload_text.sha256_text()
-	var wrapper := {
+	var wrapper: Dictionary = {
 		"_schema": 1,
 		"_saved_at_unix": Time.get_unix_time_from_system(),
 		"_checksum": checksum,
@@ -1124,7 +1148,7 @@ func _serialize() -> Dictionary:
 		})
 
 	return {
-		"version": 1,
+		"version": SAVE_FORMAT_VERSION,
 		"company": {
 			"name": company.company_name,
 			"type": company.type,
@@ -1213,14 +1237,36 @@ func _serialize() -> Dictionary:
 		"profit_streak": profit_streak,
 		"founder_energy": founder_energy,
 		"board_patience": board_patience,
+		"synergy_fired_ids": SynergyEngine.get_fired_ids(),
 	}
+
+
+## Step-by-step save migration.  When SAVE_FORMAT_VERSION is bumped, add a
+## new `if from_v == N:` block that patches the dictionary from N to N+1.
+## Each block should be minimal — just set missing keys to sensible defaults.
+func _migrate_save(data: Dictionary, from_v: int) -> Dictionary:
+	var v := from_v
+	# Example for future use:
+	# if v == 1:
+	#     data["new_top_level_key"] = "default"
+	#     var cd: Dictionary = _safe_dict(data.get("company", {}))
+	#     cd["new_company_field"] = 0
+	#     data["company"] = cd
+	#     v = 2
+	data["version"] = SAVE_FORMAT_VERSION
+	if OS.is_debug_build():
+		push_warning("GameState: migrated save from v%d to v%d" % [from_v, SAVE_FORMAT_VERSION])
+	return data
 
 
 func _deserialize(data: Dictionary) -> bool:
 	var version := int(data.get("version", 0))
-	if version != 1:
-		push_error("GameState: unsupported save version")
+	if version < 1 or version > SAVE_FORMAT_VERSION:
+		push_error("GameState: unsupported save version %d (expected 1–%d)" % [version, SAVE_FORMAT_VERSION])
 		return false
+	# Migrate older save versions forward one step at a time.
+	if version < SAVE_FORMAT_VERSION:
+		data = _migrate_save(data, version)
 
 	company = CompanyData.new()
 	var cd: Dictionary = _safe_dict(data.get("company", {}))
@@ -1345,6 +1391,9 @@ func _deserialize(data: Dictionary) -> bool:
 	profit_streak = data.get("profit_streak", 0)
 	founder_energy = data.get("founder_energy", 100)
 	board_patience = data.get("board_patience", 4)
+
+	# Restore synergy state from the save.
+	SynergyEngine.restore_fired(_safe_array(data.get("synergy_fired_ids", [])))
 
 	_clamp_deserialized_values()
 	is_game_active = true
@@ -1487,7 +1536,7 @@ func _clamp_deserialized_values() -> void:
 	interviewer_busy_quarters = cleaned_busy
 
 	var dedup_wins: Dictionary = {}
-	var valid_wins := ["ipo", "unicorn", "sustainable", "acquisition"]
+	var valid_wins: Array = ["ipo", "unicorn", "sustainable", "acquisition"]
 	for w in _achieved_wins:
 		var key := str(w).strip_edges().to_lower()
 		if key in valid_wins:

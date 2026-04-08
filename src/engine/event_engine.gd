@@ -6,7 +6,7 @@ static var _all_events: Array[EventData] = []
 static var _cooldowns: Dictionary = {}  # event_id -> quarters_remaining
 
 const STAGE_ANY := "any"
-const NICHE_EVENT_CATEGORY_MULTS := {
+const NICHE_EVENT_CATEGORY_MULTS: Dictionary = {
 	"streaming_service": {"market": 1.35, "product": 1.15, "money": 0.92},
 	"fitness_companion": {"people": 1.18, "product": 1.12, "culture": 1.08},
 	"local_discovery": {"market": 1.28, "culture": 1.10, "product": 1.05},
@@ -20,17 +20,17 @@ const NICHE_EVENT_CATEGORY_MULTS := {
 	"ci_automation": {"product": 1.20, "people": 1.10},
 	"cloud_cost_tools": {"money": 1.28, "product": 1.18, "market": 1.06},
 }
-const STAGE_CATEGORY_MULTS := {
+const STAGE_CATEGORY_MULTS: Dictionary = {
 	"early": {"people": 1.15, "product": 1.10, "culture": 1.08, "market": 0.84, "money": 0.88},
 	"growth": {"people": 1.02, "product": 1.04, "culture": 1.00, "market": 1.04, "money": 1.02},
 	"late": {"people": 0.90, "product": 0.96, "culture": 0.92, "market": 1.14, "money": 1.10},
 }
-const DIFFICULTY_CATEGORY_MULTS := {
+const DIFFICULTY_CATEGORY_MULTS: Dictionary = {
 	"sandbox": {"people": 1.05, "product": 1.05, "culture": 1.06, "market": 0.86, "money": 0.84},
 	"normal": {},
 	"hardcore": {"people": 0.98, "product": 1.02, "culture": 0.95, "market": 1.09, "money": 1.10},
 }
-const CATEGORY_ALIASES := {
+const CATEGORY_ALIASES: Dictionary = {
 	"finance": "money",
 }
 const SAME_CATEGORY_PICK_DAMPING := 0.72
@@ -87,8 +87,6 @@ static func load_events(path: String) -> void:
 
 		_all_events.append(ev)
 
-	if OS.is_debug_build():
-		print("EventEngine: loaded %d events" % _all_events.size())
 
 
 static func roll_quarter_events(state: Node) -> Array[EventData]:
@@ -135,7 +133,7 @@ static func roll_quarter_events(state: Node) -> Array[EventData]:
 	var count := randi_range(pick_min, pick_max)
 	var picked: Array[EventData] = []
 	var remaining := eligible.duplicate()
-	var picked_category_counts := {}
+	var picked_category_counts: Dictionary = {}
 
 	for _i in count:
 		if remaining.is_empty():

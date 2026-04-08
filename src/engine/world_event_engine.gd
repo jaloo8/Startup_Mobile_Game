@@ -3,13 +3,13 @@ extends RefCounted
 
 const WORLD_EVENTS_PATH := "res://src/data/world_events.json"
 const STAGE_ANY := "any"
-const TYPE_TO_KEY := {
+const TYPE_TO_KEY: Dictionary = {
 	CompanyData.CompanyType.SAAS: "saas",
 	CompanyData.CompanyType.CONSUMER: "consumer",
 	CompanyData.CompanyType.MARKETPLACE: "marketplace",
 	CompanyData.CompanyType.DEV_TOOLS: "dev_tools",
 }
-const ALLOWED_EFFECT_KEYS := {
+const ALLOWED_EFFECT_KEYS: Dictionary = {
 	"growth_mult": true,
 	"churn_mult": true,
 	"revenue_mult": true,
@@ -52,8 +52,6 @@ static func load_events(path: String = WORLD_EVENTS_PATH) -> void:
 			continue
 		_templates.append(row.duplicate(true))
 
-	if OS.is_debug_build():
-		print("WorldEventEngine: loaded %d world events" % _templates.size())
 
 
 static func resolve_quarter(state: Node) -> void:
@@ -289,7 +287,7 @@ static func _activate_event(state: Node, row: Dictionary) -> void:
 
 static func _sanitize_effects(raw) -> Dictionary:
 	var src: Dictionary = raw if raw is Dictionary else {}
-	var out := {}
+	var out: Dictionary = {}
 	for raw_key in src.keys():
 		var key := str(raw_key).strip_edges()
 		if key.is_empty() or not ALLOWED_EFFECT_KEYS.has(key):

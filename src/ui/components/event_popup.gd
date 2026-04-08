@@ -4,7 +4,7 @@ extends PanelContainer
 
 signal event_resolved(event: EventData, choice_index: int)
 
-const KNOWN_EFFECT_KEYS := {
+const KNOWN_EFFECT_KEYS: Dictionary = {
 	"cash": true,
 	"morale_all": true,
 	"stress_all": true,
@@ -29,6 +29,7 @@ const KNOWN_EFFECT_KEYS := {
 var _current_event: EventData
 var _current_choice_index: int = -1
 var _tween: Tween
+var _skip_btn: Button
 
 
 func _ready() -> void:
@@ -60,6 +61,7 @@ func show_event(event: EventData) -> void:
 	continue_btn.visible = false
 
 	SceneLoader.free_children(choices_container)
+	_skip_btn = null
 	if event.choices.is_empty():
 		continue_btn.visible = true
 	else:
@@ -70,6 +72,8 @@ func show_event(event: EventData) -> void:
 			btn.custom_minimum_size = Vector2(0, 46)
 			btn.pressed.connect(_on_choice.bind(i))
 			choices_container.add_child(btn)
+		_add_skip_button()
+		AnimHelper.stagger_list(choices_container, 0.06, 0.16, 18.0)
 	UITouchHelper.harden_tree(self)
 
 	SfxPlayer.play("event_popup")
@@ -87,6 +91,45 @@ func show_event(event: EventData) -> void:
 		.set_ease(Tween.EASE_OUT)
 
 
+func _add_skip_button() -> void:
+	var cost: int = CurrencyManager.COST_REROLL_EVENT
+	if not CurrencyManager.can_afford(cost):
+		return
+	_skip_btn = Button.new()
+	_skip_btn.text = "Skip Event (%d chips)" % cost
+	_skip_btn.custom_minimum_size = Vector2(0, 40)
+	_skip_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	_skip_btn.add_theme_color_override("font_color", ThemeManager.C_CHIP)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.10, 0.12, 0.20, 0.5)
+	style.set_corner_radius_all(ThemeManager.CORNER_MD)
+	style.set_content_margin_all(6.0)
+	_skip_btn.add_theme_stylebox_override("normal", style)
+	var hover := style.duplicate() as StyleBoxFlat
+	hover.bg_color = style.bg_color.lightened(0.08)
+	_skip_btn.add_theme_stylebox_override("hover", hover)
+	_skip_btn.add_theme_stylebox_override("pressed", style)
+	_skip_btn.pressed.connect(_on_skip_event)
+	choices_container.add_child(_skip_btn)
+
+
+func _on_skip_event() -> void:
+	if not CurrencyManager.spend_reroll_event():
+		return
+	# Disable all choice buttons (including skip) to prevent double-tap.
+	for child in choices_container.get_children():
+		if child is Button:
+			child.disabled = true
+	_current_choice_index = -1
+	outcome_label.text = "You spent chips to dodge this one. Back to work."
+	outcome_label.visible = true
+	continue_btn.visible = true
+	AnimHelper.float_text(self, "-%d chips" % CurrencyManager.COST_REROLL_EVENT,
+		ThemeManager.C_CHIP, Vector2(size.x * 0.5, 0))
+	SfxPlayer.play("chip_spend")
+	AnimHelper.haptic(&"light")
+
+
 func _on_choice(index: int) -> void:
 	if _current_event == null or index < 0 or index >= _current_event.choices.size():
 		push_error("EventPopup: invalid choice index %d" % index)
@@ -102,7 +145,9 @@ func _on_choice(index: int) -> void:
 	outcome_label.visible = true
 	continue_btn.visible = true
 
-	_apply_effects(choice.get("effects", {}))
+	var effects: Dictionary = choice.get("effects", {})
+	_apply_effects(effects)
+	_play_effect_juice(effects)
 
 
 func _apply_effects(effects: Dictionary) -> void:
@@ -142,6 +187,38 @@ func _apply_effects(effects: Dictionary) -> void:
 	if effects.has("game_win"):
 		GameState.is_game_active = false
 		GameState.game_won.emit(str(effects["game_win"]))
+
+
+func _play_effect_juice(effects: Dictionary) -> void:
+	if effects.is_empty():
+		return
+	# Cash effects — floating number + sound.
+	if effects.has("cash"):
+		var cash_val := float(effects["cash"])
+		AnimHelper.float_money(self, cash_val, Vector2(size.x * 0.5, 0))
+		if cash_val > 0:
+			SfxPlayer.play("cash_gain")
+		else:
+			SfxPlayer.play("cash_loss")
+	# Reputation boost.
+	if effects.has("reputation") and int(effects["reputation"]) > 0:
+		AnimHelper.float_text(self, "+%d rep" % int(effects["reputation"]),
+			ThemeManager.C_PURPLE, Vector2(size.x * 0.5, 20))
+	# User gain.
+	if effects.has("users") and int(effects["users"]) > 0:
+		AnimHelper.float_text(self, "+%s users" % SceneLoader.format_number(int(effects["users"])),
+			ThemeManager.C_TEAL, Vector2(size.x * 0.5, 40))
+	# Negative events — shake.
+	var is_negative := false
+	if effects.has("cash") and float(effects["cash"]) < -10_000:
+		is_negative = true
+	if effects.has("lose_best_engineer") and bool(effects.get("lose_best_engineer", false)):
+		is_negative = true
+	if is_negative:
+		AnimHelper.screen_shake(get_tree(), 0.25, 0.25)
+		AnimHelper.haptic(&"medium")
+	else:
+		AnimHelper.haptic(&"light")
 
 
 func _warn_unknown_effect_keys(effects: Dictionary) -> void:
@@ -200,7 +277,7 @@ func _apply_fundraising_opportunity() -> void:
 func _best_engineer_candidate() -> EmployeeData:
 	if GameState.employees.is_empty():
 		return null
-	var technical_specialties := {
+	var technical_specialties: Dictionary = {
 		EmployeeData.Specialty.FRONTEND: true,
 		EmployeeData.Specialty.BACKEND: true,
 		EmployeeData.Specialty.MOBILE: true,

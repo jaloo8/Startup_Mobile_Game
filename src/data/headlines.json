@@ -72,7 +72,7 @@
     "template": "{competitor} opens new office in Austin"
   },
   {
-    "template": "{competitor} CEO gives controversial keynote at TechCrunch Disrupt"
+    "template": "{competitor} CEO gives controversial keynote at major tech conference"
   },
   {
     "template": "{competitor} quietly shuts down underperforming product line"
@@ -81,7 +81,7 @@
     "template": "Study: {type_label} spending up 23% year-over-year"
   },
   {
-    "template": "Enterprise {type_label} adoption accelerates post-pandemic"
+    "template": "Enterprise {type_label} adoption accelerates as budgets shift to digital"
   },
   {
     "template": "New regulation could reshape the {type_label} landscape"
@@ -153,7 +153,7 @@
     "template": "The rise of the solo GP micro fund"
   },
   {
-    "template": "What Y Combinator's latest batch says about the market"
+    "template": "What the latest accelerator batch says about the market"
   },
   {
     "template": "Local startup {company_name} making waves in {type_label}",

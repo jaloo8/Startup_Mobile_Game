@@ -161,6 +161,30 @@ func _animate_in() -> void:
 	_tween.tween_property(self, "scale", Vector2.ONE, 0.26) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
+	# Stagger child elements for dramatic reveal.
+	var vbox: VBoxContainer = _find_vbox()
+	if vbox:
+		var delay := 0.3
+		for child in vbox.get_children():
+			if child is Control:
+				child.modulate.a = 0.0
+				var tw := child.create_tween()
+				tw.tween_property(child, "modulate:a", 1.0, 0.18) \
+					.set_delay(delay).set_ease(Tween.EASE_OUT)
+				delay += 0.12
+	# Sound for the return moment.
+	SfxPlayer.play("cash_gain")
+	AnimHelper.haptic(&"medium")
+
+
+func _find_vbox() -> VBoxContainer:
+	for child in get_children():
+		if child is MarginContainer:
+			for sub in child.get_children():
+				if sub is VBoxContainer:
+					return sub as VBoxContainer
+	return null
+
 
 func _animate_out(callback: Callable) -> void:
 	if _tween and _tween.is_running():

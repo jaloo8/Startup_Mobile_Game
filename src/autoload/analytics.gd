@@ -273,7 +273,7 @@ func track_error(severity: String, message: String) -> void:
 func _design(event_id: String, value: float = NAN) -> void:
 	if not _consent or not _sdk_available:
 		return
-	var params := {"eventId": event_id}
+	var params: Dictionary = {"eventId": event_id}
 	if not is_nan(value):
 		params["value"] = value
 	_ga.addDesignEvent(params)
@@ -282,7 +282,7 @@ func _design(event_id: String, value: float = NAN) -> void:
 func _progression(status: String, p01: String, p02: String = "", p03: String = "", score: float = NAN) -> void:
 	if not _consent or not _sdk_available:
 		return
-	var params := {"progressionStatus": status, "progression01": p01}
+	var params: Dictionary = {"progressionStatus": status, "progression01": p01}
 	if not p02.is_empty():
 		params["progression02"] = p02
 	if not p03.is_empty():

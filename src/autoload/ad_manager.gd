@@ -62,6 +62,8 @@ func _ready() -> void:
 		return
 	_ad_sdk_available = _detect_ad_sdk()
 	_setup_iap_provider()
+	if _iap_provider == null and not _is_desktop_platform():
+		push_warning("AdManager: no IAP bridge found (InAppStore / GodotGooglePlayBilling). Purchases will fail on this build.")
 
 
 func is_premium() -> bool:

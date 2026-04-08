@@ -62,7 +62,7 @@
     "niches": ["api_observability", "cloud_cost_tools", "ci_automation"],
     "description_template": "An unoptimized database query has been running in production for weeks. Your cloud bill doubled this quarter. That's money you didn't budget for.",
     "variations": [
-      "Your CFO (you — there is no CFO) opens the AWS console and nearly spills coffee on the keyboard. Some engineer left a debug loop running in production. The bill is double what you budgeted.",
+      "Your CFO (you — there is no CFO) opens the cloud console and nearly spills coffee on the keyboard. Some engineer left a debug loop running in production. The bill is double what you budgeted.",
       "You get an email from your cloud provider: 'Your usage has exceeded your billing alert threshold by 200%.' Someone forgot to add pagination to a database query that's been scanning your entire users table every 30 seconds.",
       "Friday afternoon. You're about to close your laptop when you see the notification. Cloud costs: 2x last quarter. You spend the weekend tracing it to a logging pipeline that was writing every API request to an unindexed table."
     ],
@@ -82,9 +82,10 @@
       {
         "label": "Pay the bill and move on",
         "effects": {
-          "cash": -15000
+          "cash": -12000,
+          "morale_all": 2
         },
-        "outcome_template": "Expensive lesson. At least nothing else broke. You make a mental note to set up billing alerts... eventually.",
+        "outcome_template": "Expensive lesson. But the team kept shipping without interruption. You make a mental note to set up billing alerts... eventually.",
         "outcome_variations": [
           "You eat the cost. The query is still running. Next quarter will be just as bad unless someone fixes it.",
           "The bill hurts but you can't afford to pull anyone off feature work right now. Priorities."
@@ -104,7 +105,7 @@
     "category": "market",
     "stage": "growth",
     "niches": ["streaming_service", "local_discovery"],
-    "description_template": "Someone posted a TikTok about {company_name} and it's blowing up. +50K signups in 48 hours. Can your infrastructure handle it?",
+    "description_template": "Someone posted a TikTok about {company_name} and it's blowing up. Thousands of signups in 48 hours. Can your infrastructure handle it?",
     "variations": [
       "Your phone won't stop buzzing. A creator with 2M followers just posted a video using {company_name} and it has 500K views in 3 hours. Your signup endpoint is already responding slowly.",
       "A college student made a meme about {company_name} and it hit the front page of Reddit. Your Slack #alerts channel is a wall of red. Signups are 100x normal. The server is sweating.",
@@ -115,7 +116,7 @@
         "label": "Scale up infrastructure immediately",
         "effects": {
           "cash": -20000,
-          "users": 50000
+          "users": 8000
         },
         "outcome_template": "Servers held. You captured the wave. {company_name} is trending. Users are flooding in and retention looks decent.",
         "outcome_variations": [
@@ -126,7 +127,7 @@
       {
         "label": "Hope for the best",
         "effects": {
-          "users": 15000,
+          "users": 2500,
           "stability": -20,
           "reputation": -5
         },
@@ -205,7 +206,7 @@
     "stage": "growth",
     "description_template": "A user found a security vulnerability in {company_name} and posted it on Twitter. The clock is ticking — you need to respond before the press picks it up.",
     "variations": [
-      "Your Slack explodes at 7am. A security researcher tweeted a thread about an SQL injection vulnerability in your API. They tagged TechCrunch. You have maybe 4 hours before this is a headline.",
+      "Your Slack explodes at 7am. A security researcher tweeted a thread about an SQL injection vulnerability in your API. They tagged a major tech outlet. You have maybe 4 hours before this is a headline.",
       "A white-hat hacker DMed your support email: 'I found something bad. Real bad. You have 24 hours before I go public.' Attached is a proof-of-concept that dumps your entire user table.",
       "Someone on Hacker News posted: '{company_name} stores passwords in plaintext.' It's not exactly true — you use weak hashing — but the thread has 500 upvotes and climbing."
     ],
@@ -249,8 +250,8 @@
     "stage": "early",
     "description_template": "A partner at a well-known VC firm reached out for a casual coffee chat. Could lead to a funding round. Or it could be a fishing expedition for intel to give to their portfolio company.",
     "variations": [
-      "A DM on Twitter from a Sequoia partner: 'Love what you're doing with {company_name}. Coffee?' You've heard these can lead to term sheets. You've also heard they can lead to nothing but wasted time.",
-      "An intro email lands from a friend: 'My partner at a16z wants to chat about {company_name}.' The email is warm but vague. Is this real interest or just deal flow homework?",
+      "A DM from a partner at a top-tier VC firm: 'Love what you're doing with {company_name}. Coffee?' You've heard these can lead to term sheets. You've also heard they can lead to nothing but wasted time.",
+      "An intro email lands from a friend: 'My partner at a top-tier VC firm wants to chat about {company_name}.' The email is warm but vague. Is this real interest or just deal flow homework?",
       "A VC slides into your LinkedIn DMs. Their fund just closed at $500M and they're 'actively looking at your space.' Classic VC speak. But the firm is legit."
     ],
     "choices": [
@@ -291,7 +292,7 @@
     "stage": "growth",
     "description_template": "{competitor_name} just raised $50M and is offering their product for free. Users are comparing you. Twitter is full of 'Why would I pay for {company_name} when {competitor_name} is free?'",
     "variations": [
-      "You open TechCrunch and your stomach drops. {competitor_name}: 'Series B: $50M. And we're making our product free for everyone.' Your paid users are already asking questions.",
+      "You open a tech news site and your stomach drops. {competitor_name}: 'Series B: $50M. And we're making our product free for everyone.' Your paid users are already asking questions.",
       "{competitor_name} just made everything free. Your support inbox has 12 emails that all say some version of 'Are you going to match their pricing?' You are not going to match their pricing.",
       "A user tweets: 'Just switched from {company_name} to {competitor_name}. Same features, zero cost. Sorry {company_name}, it was nice while it lasted.' It has 2K likes."
     ],
@@ -323,7 +324,8 @@
       {
         "label": "Slash prices 50%",
         "effects": {
-          "users": 500
+          "users": 500,
+          "cash": -5000
         },
         "outcome_template": "Keeps you competitive but your margins just got thin. You'll need to grow faster to make the math work.",
         "outcome_variations": [
@@ -441,20 +443,22 @@
       {
         "label": "Respond publicly and professionally",
         "effects": {
-          "reputation": 5
+          "reputation": 5,
+          "stress_all": 6
         },
-        "outcome_template": "Mature response. You acknowledge the feedback and outline specific changes you're making. Candidates notice you handle criticism well.",
+        "outcome_template": "Mature response. Drafting it took more emotional energy than expected. Candidates notice you handle criticism well.",
         "outcome_variations": [
           "Your response goes semi-viral on LinkedIn. 'This is how a founder should handle negative feedback.' Recruiting pipeline actually improves.",
           "You write a thoughtful response without being defensive. It doesn't undo the review, but it shows candidates you listen."
         ]
       },
       {
-        "label": "Ignore it",
+        "label": "Ignore it — don't feed the drama",
         "effects": {
-          "reputation": -5
+          "reputation": -3,
+          "stress_all": -3
         },
-        "outcome_template": "It lingers. Your next three candidates all mention they saw it. One turns down your offer citing 'culture concerns.'",
+        "outcome_template": "It lingers for a while. A few candidates mention they saw it. But the news cycle moves on and your work speaks louder.",
         "outcome_variations": [
           "The review sits unanswered for months. More reviews trickle in — some good, but the bad one is still the most visible. Recruiting gets harder.",
           "You tell yourself it doesn't matter. Then a journalist writing about startup culture screenshots it for an article. Context is not on your side."
@@ -469,26 +473,27 @@
     "cooldown_quarters": 4
   },
   {
-    "id": "ross_hahneman_visit",
+    "id": "angel_whale_visit",
     "title": "Billionaire Drop-In",
     "category": "money",
     "stage": "any",
-    "description_template": "A McLaren with vertical doors just parked sideways across your parking lot. Ross Hahneman — Three Comma Club billionaire — walks in like he owns the place. 'I put radio on the internet,' he says by way of introduction. 'What do you guys do?'",
+    "description_template": "A supercar just parked sideways across your lot. A tech billionaire you vaguely recognize from podcast clips walks in like he owns the place. 'I heard you're building something. Tell me about it,' he says, already pulling out his phone.",
     "variations": [
-      "You hear a car engine that costs more than your office. Ross Hahneman kicks open your door wearing a blazer with no shirt underneath. 'I heard about {company_name}. You need money? I have money. Three commas worth.'",
-      "Your intern comes running: 'There's a guy in the parking lot doing donuts in a McLaren.' Ross Hahneman strolls in, aviators on, and tosses his keys to nobody in particular. 'So, {company_name}. Pitch me. You have sixty seconds.'",
-      "A LinkedIn message from Ross Hahneman: 'Saw {company_name} on my feed. I'm in the area. By area I mean I flew here on my jet. Coming by in 20.' He's not asking."
+      "You hear a car engine that costs more than your office. A billionaire angel investor kicks open your door wearing a vest with no shirt underneath. 'I heard about {company_name}. You need money? I have money. Lots of it.'",
+      "Your intern comes running: 'There's a guy in the parking lot doing donuts in a supercar.' A well-known tech investor strolls in, aviators on, and tosses his keys to nobody in particular. 'So, {company_name}. Pitch me. You have sixty seconds.'",
+      "A LinkedIn message from a billionaire angel: 'Saw {company_name} on my feed. I'm in the area. By area I mean I flew here. Coming by in 20.' He's not asking."
     ],
     "choices": [
       {
         "label": "Take his money",
         "effects": {
           "cash": 75000,
-          "reputation": -5
+          "reputation": -8,
+          "morale_all": -3
         },
         "outcome_template": "He writes a check on the spot. Literally on the spot — he pulls out a checkbook. The money is real but he's already texting his publicist about it. Your credible investors are rolling their eyes.",
         "outcome_variations": [
-          "Deal done. He insists on a photo for his Instagram. Caption: 'Just invested in the next billion-dollar company. Three Comma Club stays winning.' Your board is not amused.",
+          "Deal done in minutes. He insists on a photo for his Instagram. Caption: 'Just invested in the next billion-dollar company.' Your board is not amused.",
           "He wires the money before you've even signed paperwork. 'Contracts are for people who don't trust each other. I trust me.' Somehow, the money clears."
         ]
       },
@@ -497,10 +502,10 @@
         "effects": {
           "reputation": 5
         },
-        "outcome_template": "'Your loss,' he shrugs, revving the McLaren so loud your office windows rattle. He peels out. Your team watches in stunned silence. At least your cap table is clean.",
+        "outcome_template": "'Your loss,' he shrugs, revving his supercar so loud your office windows rattle. He peels out. Your team watches in stunned silence. At least your cap table is clean.",
         "outcome_variations": [
-          "He takes it surprisingly well. 'Respect the hustle.' He gives you a fist bump and leaves. His McLaren sets off three car alarms on the way out.",
-          "He seems confused that someone said no to him. 'Do you know who I am? I have three commas.' You hold firm. He'll be back."
+          "He takes it surprisingly well. 'Respect the hustle.' He gives you a fist bump and leaves. His exhaust sets off three car alarms on the way out.",
+          "He seems genuinely confused that someone said no to him. 'Do you know who I am?' You hold firm. He'll probably be back."
         ]
       },
       {
@@ -512,7 +517,7 @@
         "outcome_template": "He laughs so hard he spills his green juice on your whiteboard. 'I like you. Bold.' He doubles the check. Your investors are furious but the runway is looking real comfortable.",
         "outcome_variations": [
           "'Nobody's ever asked me for MORE,' he says, genuinely delighted. He writes a bigger check and immediately tweets about it. Your brand takes a hit but your bank account doesn't care.",
-          "He stares at you for a long second. Then grins. 'That's Three Comma energy right there.' The wire hits your account before he's left the parking lot."
+          "He stares at you for a long second. Then grins. 'Audacious. I'm in.' The wire hits your account before he's left the parking lot."
         ]
       }
     ],
@@ -738,7 +743,7 @@
     "stage": "growth",
     "description_template": "You overheard two employees talking about 'organizing' in the kitchen. Could be nothing. Could be the start of a labor movement at {company_name}.",
     "variations": [
-      "A shared Google Doc titled 'Employee Concerns' is making the rounds. It has bullet points about pay transparency, overtime, and PTO. Seven people have edited it.",
+      "A shared doc titled 'Employee Concerns' is making the rounds. It has bullet points about pay transparency, overtime, and PTO. Seven people have edited it.",
       "Someone anonymously posted on Blind about working conditions at {company_name}. The replies are mostly supportive. Your head of people is concerned."
     ],
     "choices": [
@@ -750,7 +755,7 @@
         },
         "outcome_template": "You call an all-hands and go through every concern. You raise the PTO minimum and commit to pay bands. Expensive, but trust is restored.",
         "outcome_variations": [
-          "Transparency wins. The Google Doc gets archived. People feel heard. It costs money but the alternative was worse.",
+          "Transparency wins. The shared doc gets archived. People feel heard. It costs money but the alternative was worse.",
           "You publish salary bands, add 5 PTO days, and commit to quarterly feedback. The organizing energy redirects into actual productivity."
         ]
       },
@@ -773,7 +778,7 @@
         },
         "outcome_template": "Across-the-board 10% raises. It's expensive but the organizing energy dissolves overnight. People feel valued.",
         "outcome_variations": [
-          "Money talks. The raises land well. The Google Doc gets deleted. But your burn rate just jumped significantly.",
+          "Money talks. The raises land well. The shared doc gets deleted. But your burn rate just jumped significantly.",
           "Everyone's happy. For now. You'll need to sustain this pay level going forward. But the crisis is averted."
         ]
       }
@@ -800,7 +805,8 @@
         "label": "Celebrate it publicly",
         "effects": {
           "morale_all": 5,
-          "reputation": 5
+          "reputation": 5,
+          "tech_debt": 3
         },
         "outcome_template": "You tweet about it. '{company_name} is proud to have builders like {employee_name}.' The team loves that you support side projects. Recruiting gets easier.",
         "outcome_variations": [
@@ -909,7 +915,8 @@
       {
         "label": "Reach out privately",
         "effects": {
-          "morale_all": 3
+          "morale_all": 3,
+          "stress_all": 5
         },
         "outcome_template": "You DM them within minutes. A call happens. They're embarrassed. They agree to a proper exit. The team respects how you handled it.",
         "outcome_variations": [
@@ -920,7 +927,8 @@
       {
         "label": "Let them go, do damage control",
         "effects": {
-          "morale_all": -5
+          "morale_all": -5,
+          "reputation": 2
         },
         "outcome_template": "You delete the message (after everyone screenshot it) and send a short note to the team. 'We wish them well.' The team is shaken.",
         "outcome_variations": [
@@ -1062,7 +1070,9 @@
         "label": "Open-source part of your own product",
         "effects": {
           "users": 1500,
-          "reputation": 10
+          "reputation": 10,
+          "cash": -8000,
+          "tech_debt": 3
         },
         "outcome_template": "You open-source the core and keep premium features paid. The developer community applauds. Contributions start flowing in.",
         "outcome_variations": [
@@ -1111,7 +1121,7 @@
         },
         "outcome_template": "The whole team monitors comments, answers questions, fixes bugs in real-time. You finish #1 for the day. Signups explode.",
         "outcome_variations": [
-          "Product of the Day. The team is exhausted but euphoric. 3,000 new signups. TechCrunch picks up the story.",
+          "Product of the Day. The team is exhausted but euphoric. 3,000 new signups. A major tech publication picks up the story.",
           "Intense 18 hours. Every comment answered within minutes. Users are impressed by the responsiveness. You finish in the top 3."
         ]
       },
@@ -1173,9 +1183,10 @@
       {
         "label": "Appeal the decision",
         "effects": {
-          "stress_all": 3
+          "stress_all": 3,
+          "users": -200
         },
-        "outcome_template": "You write a detailed appeal. Three days later, a human reviews it and approves the original build. It was a mistake. Wasted a week.",
+        "outcome_template": "You write a detailed appeal. Three days later, a human reviews it and approves the original build. But the delay cost you users waiting for the update.",
         "outcome_variations": [
           "Appeal works. The reviewer made an error. You get an apology email. Three days wasted but the code is clean.",
           "After a back-and-forth with app review, they approve it unchanged. The system is broken but at least you didn't hack your code."
@@ -1475,9 +1486,11 @@
       {
         "label": "Consider it seriously",
         "effects": {
-          "cash": 80000
+          "cash": 80000,
+          "morale_all": -12,
+          "reputation": -8
         },
-        "outcome_template": "You negotiate hard. The payout is good. Some of your team would get life-changing money. But {company_name} would cease to exist.",
+        "outcome_template": "You negotiate hard. The payout is decent. But word gets out you were considering selling. Key people start wondering if the ship is sinking.",
         "outcome_variations": [
           "The numbers make sense on paper. But shutting down the company you built from nothing? The calculator says yes. Your gut says wait.",
           "You run the math. Per-person, it's generous. But you'd be giving up equity in something that could be worth 100x this. Hard call."
@@ -1538,7 +1551,8 @@
       {
         "label": "Hire a grant writer",
         "effects": {
-          "cash": -3000
+          "cash": 80000,
+          "stress_all": 2
         },
         "outcome_template": "You pay a specialist to handle the application. They know the system. Two months later: approved. Best $3K you ever spent.",
         "outcome_variations": [
@@ -1561,7 +1575,7 @@
     "stage": "growth",
     "description_template": "The Fed raised rates again. Tech stocks are cratering. VCs are tightening. The era of free money is over. {company_name} needs to adapt.",
     "variations": [
-      "CNBC headline: 'Tech Layoffs Accelerate as Recession Fears Mount.' Your investors are suddenly very interested in your path to profitability.",
+      "Financial news headline: 'Tech Layoffs Accelerate as Recession Fears Mount.' Your investors are suddenly very interested in your path to profitability.",
       "Three of your enterprise customers just froze their software budgets. 'We'll revisit next quarter.' Revenue projections need updating. Downward."
     ],
     "choices": [
@@ -1659,8 +1673,8 @@
     "stage": "growth",
     "description_template": "{competitor_name} just IPO'd. Their stock popped 40% on day one. Your investors are calling. Your employees are asking questions.",
     "variations": [
-      "CNBC is covering {competitor_name}'s IPO live. $2B valuation. Your lead engineer mutters: 'We could have done that.' Your investor calls within the hour.",
-      "{competitor_name} rings the bell at NYSE. LinkedIn is flooded with their employees celebrating. Your team is watching. Morale is... complicated."
+      "Financial news is covering {competitor_name}'s IPO live. $2B valuation. Your lead engineer mutters: 'We could have done that.' Your investor calls within the hour.",
+      "{competitor_name} rings the opening bell. Social media is flooded with their employees celebrating. Your team is watching. Morale is... complicated."
     ],
     "choices": [
       {
@@ -1710,7 +1724,7 @@
     "title": "Big Tech Enters Your Space",
     "category": "market",
     "stage": "growth",
-    "description_template": "A FAANG company just announced a product that competes directly with {company_name}. It's free for their existing users. Your phone is ringing.",
+    "description_template": "A Big Tech company just announced a product that competes directly with {company_name}. It's free for their existing users. Your phone is ringing.",
     "variations": [
       "The keynote just ended. Slide 47: a new product that does exactly what {company_name} does. Built into their existing platform. For free. Your Slack is on fire.",
       "Blog post from Big Tech: 'Introducing [Product] — built natively into our platform.' It's your product. With a trillion-dollar marketing budget behind it."
@@ -1952,7 +1966,7 @@
           "cash": -5000,
           "morale_all": 3
         },
-        "outcome_template": "WeWork-style setup. Flexible, no long commitment, free coffee. You bump into other startups. Networking happens naturally.",
+        "outcome_template": "Co-working chain setup. Flexible, no long commitment, free coffee. You bump into other startups. Networking happens naturally.",
         "outcome_variations": [
           "Co-working gives you space without the lease. The team likes the energy of being around other startups. It's buzzy.",
           "Flexible space. Scale up or down month-to-month. Smart for a company that doesn't know how big it'll be next quarter."
@@ -2037,7 +2051,7 @@
     "stage": "any",
     "description_template": "A reporter from a major tech publication wants to profile {company_name}. Great exposure, but anything you say is on the record.",
     "variations": [
-      "Email from a TechCrunch reporter: 'I'm writing about emerging startups in your space. Can we schedule an interview?' The article will reach 2 million readers.",
+      "Email from a reporter at a major tech publication: 'I'm writing about emerging startups in your space. Can we schedule an interview?' The article will reach 2 million readers.",
       "A podcast producer reaches out: 'We'd love to feature {company_name} on our show. 500K monthly listeners.' Your PR strategy has been hoping for exactly this."
     ],
     "choices": [
@@ -2045,7 +2059,8 @@
         "label": "Do the interview",
         "effects": {
           "reputation": 8,
-          "users": 800
+          "users": 800,
+          "stress_all": 5
         },
         "outcome_template": "The article drops. Great headline. Fair coverage. Your inbox floods with investor and customer interest. Press works.",
         "outcome_variations": [
@@ -2055,7 +2070,9 @@
       },
       {
         "label": "Decline — stay under the radar",
-        "effects": {},
+        "effects": {
+          "stress_all": -3
+        },
         "outcome_template": "You pass. The reporter profiles {competitor_name} instead. They get all the press. Being stealth has its costs.",
         "outcome_variations": [
           "Silence. The reporter moves on. Your competitor gets the feature. Their signups spike. You stayed focused. Worth it?",
@@ -2439,10 +2456,10 @@
     "category": "market",
     "stage": "growth",
     "title": "Press Feature Request",
-    "description_template": "A journalist from {outlet} is pitching a founder profile on {company_name}. They say it could reach 200K readers. Their angle: 'scrappy underdog beats the odds in {niche}.'",
+    "description_template": "A journalist from a major tech publication is pitching a founder profile on {company_name}. They say it could reach 200K readers. Their angle: 'scrappy underdog beats the odds in {company_type}.'",
     "variations": [
-      "A reporter at {outlet} wants to write the definitive piece on {company_name}. 'The startup that's quietly reshaping {niche},' they pitch. Publication date is flexible.",
-      "You get an email from {outlet}. They're doing a deep-dive feature on breakout {niche} companies and {company_name} made their shortlist."
+      "A reporter at a major tech publication wants to write the definitive piece on {company_name}. 'The startup that's quietly reshaping {company_type},' they pitch. Publication date is flexible.",
+      "You get an email from a major tech publication. They're doing a deep-dive feature on breakout {company_type} companies and {company_name} made their shortlist."
     ],
     "choices": [
       {
@@ -2496,10 +2513,10 @@
     "category": "market",
     "stage": "growth",
     "title": "Negative Press Incoming",
-    "description_template": "A reporter at {outlet} is working on a story about 'startup culture gone wrong.' They've talked to a former employee. You have 48 hours to respond before it publishes.",
+    "description_template": "A reporter at a major tech publication is working on a story about 'startup culture gone wrong.' They've talked to a former employee. You have 48 hours to respond before it publishes.",
     "variations": [
-      "An investigative piece is circulating in drafts. A disgruntled ex-employee gave quotes. You find out through a contact at {outlet} before the story drops.",
-      "{outlet} has a draft story with the headline: '{company_name} Culture Problems.' It may not be accurate. It is definitely happening."
+      "An investigative piece is circulating in drafts. A disgruntled ex-employee gave quotes. You find out through a contact at a major tech publication before the story drops.",
+      "A major tech publication has a draft story with the headline: '{company_name} Culture Problems.' It may not be accurate. It is definitely happening."
     ],
     "choices": [
       {
@@ -2552,12 +2569,12 @@
   {
     "id": "press_acquisition_rumor",
     "category": "market",
-    "stage": "scale",
+    "stage": "late",
     "title": "Acquisition Rumor Goes Public",
-    "description_template": "{outlet} is reporting that {company_name} is 'in talks' with a large acquirer. This is not accurate. You have not spoken to anyone. The team is now asking questions.",
+    "description_template": "A major tech publication is reporting that {company_name} is 'in talks' with a large acquirer. This is not accurate. You have not spoken to anyone. The team is now asking questions.",
     "variations": [
       "A reporter published speculation about a potential acquisition of {company_name}. The article has three unnamed sources and zero facts. Your Slack is lighting up.",
-      "Someone at {outlet} connected dots that don't exist. The article says {company_name} is 'exploring strategic options.' Your investors are calling."
+      "Someone at a major tech publication connected dots that don't exist. The article says {company_name} is 'exploring strategic options.' Your investors are calling."
     ],
     "choices": [
       {
@@ -2646,6 +2663,712 @@
       "has_raised_funding": false
     },
     "weight": 8.0,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "tech_debt_reckoning",
+    "title": "The Rewrite Conversation",
+    "category": "product",
+    "stage": "growth",
+    "description_template": "Your senior engineer pulls you into a meeting room and closes the door. 'We need to talk about the codebase. If we don't rewrite the billing module soon, we won't be able to ship anything new for two quarters.'",
+    "variations": [
+      "Deploys are taking 4 hours. Tests pass locally, fail in CI. A 'quick fix' last month introduced a race condition that corrupts session data once every 500 requests. Your CTO stares at a dependency graph on the whiteboard and says: 'We need to talk.'",
+      "Your backend is a monument to every shortcut taken in the first year. Spaghetti auth, hand-rolled ORM, environment variables stored in three different places. A new hire spent their entire first week just trying to get the dev environment running.",
+      "Friday deploy went sideways again. Third time this month. The root cause is always the same legacy module nobody wants to touch. Your lead engineer submits a proposal: 'Operation Clean Slate.'"
+    ],
+    "choices": [
+      {
+        "label": "Dedicate a full sprint to tech debt",
+        "effects": {
+          "tech_debt": -20,
+          "stability": 10,
+          "stress_all": -5
+        },
+        "outcome_template": "Two weeks of zero feature work. The board is nervous. But deploys go from 4 hours to 12 minutes. Test suite passes consistently. The team exhales for the first time in months.",
+        "outcome_variations": [
+          "Worth every minute. The rewrite eliminates three recurring outage causes. Your on-call rotation goes from dreaded to boring. That's the goal.",
+          "The sprint feels slow from the outside — no visible features shipped. But internally, everything is faster now. Your engineers stop updating their resumes."
+        ]
+      },
+      {
+        "label": "Incremental fixes — ship features alongside",
+        "effects": {
+          "tech_debt": -8,
+          "stability": 3,
+          "bugs": 2
+        },
+        "outcome_template": "The Boy Scout rule: leave the code better than you found it. Progress is slow but visible. Some patches introduce new bugs. Classic refactor-while-flying.",
+        "outcome_variations": [
+          "Gradual improvement. Each PR is a little cleaner. But the core rot is still there, growing slowly beneath the surface.",
+          "You split every sprint 70/30 between features and debt. Both move forward. Neither as fast as you'd like."
+        ]
+      },
+      {
+        "label": "Defer — features come first",
+        "effects": {
+          "tech_debt": 5,
+          "bugs": 4,
+          "stress_all": 8
+        },
+        "outcome_template": "The codebase gets worse. Deploys get slower. Your best engineer quietly starts a side project. When you ask about it, they shrug: 'Just need to write clean code somewhere.'",
+        "outcome_variations": [
+          "You ship features on schedule. Sort of. Every new feature takes 30% longer because of the debt. The irony is lost on nobody.",
+          "Features ship. Bugs multiply. On-call becomes punishment. Two engineers ask to switch to the infrastructure team. There is no infrastructure team."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 4
+    },
+    "weight": 0.9,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "yc_acceptance",
+    "title": "Accelerator Acceptance",
+    "category": "money",
+    "stage": "early",
+    "description_template": "The email you've been refreshing for: '{company_name} has been accepted into the upcoming batch.' Three months of intense building, mentorship, and a demo day that could change everything.",
+    "variations": [
+      "You read it three times. Then a fourth. 'Congratulations — {company_name} has been selected.' You forward it to your co-founder. They call immediately. Neither of you can form sentences.",
+      "The acceptance email arrives at 6:47 PM on a Tuesday. You don't sleep that night. The program starts in 3 weeks. You need to move to SF, pause everything else, and commit completely."
+    ],
+    "choices": [
+      {
+        "label": "Accept — all in",
+        "effects": {
+          "cash": 80000,
+          "reputation": 12,
+          "stress_all": 12
+        },
+        "outcome_template": "Three months of the hardest work of your life. Weekly office hours that rewire how you think about growth. Demo day goes well — investors are lined up. You emerge battle-hardened with an $80K check, a batch network, and a demo day buzz that money can't buy.",
+        "outcome_variations": [
+          "The batch is transformative. Your product pivots twice in three months. Demo day raises your profile overnight. Three term sheets land within a week.",
+          "Brutal pace. Inspiring peers. You ship more in 12 weeks than you did in the previous 6 months. The alumni network alone is worth the equity."
+        ]
+      },
+      {
+        "label": "Decline — we're on our own path",
+        "effects": {
+          "morale_all": 3,
+          "reputation": 2
+        },
+        "outcome_template": "You say no. The accelerator partner is surprised. 'Nobody declines.' You explain that your trajectory doesn't need the structure. Bold. Possibly correct.",
+        "outcome_variations": [
+          "You decline and double down on your current momentum. Six months later a batch mate asks for advice. The tables turn.",
+          "Turning down an accelerator feels terrifying. But you keep 7% more equity and don't have to move to SF. Your growth rate makes the case for you."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 3,
+      "users": 150
+    },
+    "weight": 0.25,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "first_enterprise_client",
+    "title": "Your First Enterprise Deal",
+    "category": "money",
+    "stage": "growth",
+    "niches": ["vertical_crm", "compliance_ops", "workflow_automation", "api_observability"],
+    "description_template": "A Fortune 1000 company wants to pilot {company_name}. Real revenue. Real contract. Real procurement process. The legal review alone might take longer than your entire product development so far.",
+    "variations": [
+      "The Head of Engineering emails: 'We'd like to run a 90-day proof of concept.' You look them up. 12,000 employees. You have 7. This is either the biggest break of your career or a 3-month distraction.",
+      "A procurement manager calls. They found {company_name} through a blog post your engineer wrote. 'We need SOC 2, a vendor security questionnaire, and three reference customers.' You have none of these things."
+    ],
+    "choices": [
+      {
+        "label": "Go all-in on the deal",
+        "effects": {
+          "cash": 40000,
+          "stress_all": 12,
+          "tech_debt": 5
+        },
+        "outcome_template": "Six weeks of security questionnaires, custom SSO integration, and a demo that crashes once (they didn't notice). Contract signed. Your first real enterprise customer. ARR just got interesting.",
+        "outcome_variations": [
+          "The deal closes. Your MRR doubles overnight. The team celebrates. Then the support tickets start rolling in. Enterprise customers have expectations.",
+          "Contract signed after a month of legal back-and-forth. The procurement process taught you more about sales than any book could. Revenue is real."
+        ]
+      },
+      {
+        "label": "Too early for enterprise — stay focused on SMB",
+        "effects": {
+          "reputation": 3
+        },
+        "outcome_template": "You pass. It hurts. But chasing one whale would've consumed your entire team for a quarter. You're not ready for enterprise yet.",
+        "outcome_variations": [
+          "Smart call. You hear later that the POC requirements would have included on-prem deployment. You don't even have a DevOps person.",
+          "You decline politely and they respect it. 'Come back when you're ready,' they say. You will."
+        ]
+      },
+      {
+        "label": "Negotiate a paid pilot with limited scope",
+        "effects": {
+          "cash": 15000,
+          "stress_all": 6
+        },
+        "outcome_template": "A $15K paid pilot with a narrow scope. Smart move — you get revenue and validation without betting the company on one deal. If it works, the full contract follows.",
+        "outcome_variations": [
+          "The paid pilot works. Limited scope means limited risk. They're impressed enough to talk about a full rollout. Pipeline building.",
+          "Pilot runs for 60 days. Some hiccups but the champion inside their org fights for you. The expansion conversation starts."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 2000,
+      "employee_count": 3
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "compliance_audit",
+    "title": "Compliance Crunch",
+    "category": "product",
+    "stage": "growth",
+    "niches": ["compliance_ops", "vertical_crm", "fintech_infra"],
+    "description_template": "A potential enterprise customer requires SOC 2 Type II compliance before they'll sign. Your current security posture is... aspirational.",
+    "variations": [
+      "The audit checklist arrives. 147 items. You scan it. 'Do you have a documented incident response plan?' No. 'Is access logged and reviewed quarterly?' Also no. 'Is production access restricted to authorized personnel?' Everyone has production access.",
+      "Your biggest prospect's CISO sends a vendor security questionnaire. Page 1 of 12. Question 1: 'Describe your encryption at rest implementation.' You look at your database. It is not encrypted at rest."
+    ],
+    "choices": [
+      {
+        "label": "Fast-track SOC 2 — hire a compliance consultant",
+        "effects": {
+          "cash": -25000,
+          "reputation": 10,
+          "stress_all": 8
+        },
+        "outcome_template": "Three months and $25K later, you're SOC 2 Type II certified. Enterprise doors that were closed are now open. Every future deal moves faster.",
+        "outcome_variations": [
+          "The consultant is worth every dollar. They know exactly which controls matter and which are theater. You pass the audit first try.",
+          "Painful but transformative. Your security posture goes from 'startup vibes' to 'enterprise ready.' The badge on your website converts prospects."
+        ]
+      },
+      {
+        "label": "DIY compliance — assign an engineer",
+        "effects": {
+          "cash": -5000,
+          "stress_all": 10,
+          "tech_debt": 3
+        },
+        "outcome_template": "Your most senior engineer spends 6 weeks reading compliance docs instead of shipping features. They pass the audit but the process was brutal. They ask for a raise.",
+        "outcome_variations": [
+          "Engineer-led compliance works but it's held together with shell scripts and Notion docs. Good enough for the audit. Barely.",
+          "They pull it off. Barely. The audit passes with minor findings. Your engineer now has 'compliance' on their LinkedIn. They didn't want that."
+        ]
+      },
+      {
+        "label": "Skip it — we'll deal with compliance later",
+        "effects": {
+          "reputation": -5
+        },
+        "outcome_template": "You lose the deal. And the next two enterprise deals that ask the same question. The market is telling you something.",
+        "outcome_variations": [
+          "No compliance, no enterprise. Simple as that. You're leaving six-figure deals on the table.",
+          "You save money now and lose it later. Every enterprise prospect asks the same question. You don't have the answer."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 3000,
+      "year": 2
+    },
+    "weight": 0.5,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "burnout_founder",
+    "title": "Founder Burnout",
+    "category": "culture",
+    "stage": "any",
+    "description_template": "You wake up and stare at the ceiling for 20 minutes before reaching for your phone. The Slack notifications feel heavier than usual. You used to love Mondays. Now you dread them.",
+    "variations": [
+      "You can't remember the last time you took a full day off. Your partner mentions they haven't seen you at dinner in two weeks. Your eye has been twitching since Thursday. The product is growing but you're shrinking.",
+      "Three AM. You're still at your desk. Not because there's a crisis — because you don't know what else to do. Sleep feels like a waste of time. Everything feels like a waste of time. You need to stop before you break."
+    ],
+    "choices": [
+      {
+        "label": "Take a real week off",
+        "effects": {
+          "morale_all": 5,
+          "stress_all": -10
+        },
+        "outcome_template": "You disappear for a week. No Slack, no email, no laptop. The team handles everything. You come back and realize: the company doesn't need you for every decision. That's actually great news.",
+        "outcome_variations": [
+          "Best decision you've made in months. You come back with fresh eyes and immediately see three problems you'd been blind to. Rest is a competitive advantage.",
+          "A week off. The company survives. You sleep for the first time in months. When you return, your thinking is sharper. The team noticed you were burning out before you did."
+        ]
+      },
+      {
+        "label": "Push through — the company needs me",
+        "effects": {
+          "stress_all": 10,
+          "morale_all": -5
+        },
+        "outcome_template": "You keep going. For now. But your decision-making gets worse. You snap at someone in a meeting. The team starts walking on eggshells around the founder. This isn't sustainable.",
+        "outcome_variations": [
+          "You grind through another month. Output drops. Creativity disappears. You make a hiring decision you'll regret. The company needed a healthy founder, not a present one.",
+          "Power through. Survive. But you're running on empty and the team can tell. An engineer asks if you're okay during a 1:1. You say yes. It's not convincing."
+        ]
+      },
+      {
+        "label": "Restructure — delegate more, work less",
+        "effects": {
+          "cash": -8000,
+          "stress_all": -8,
+          "morale_all": 3
+        },
+        "outcome_template": "You promote your most trusted person to a leadership role and offload 40% of your decisions. It costs a raise and requires trust. It also saves your sanity and the company.",
+        "outcome_variations": [
+          "Delegation changes everything. You focus on strategy and high-leverage decisions. Your new lead handles operations. The company runs better than when you were doing everything.",
+          "You hire an operations person to handle the day-to-day. Expensive, but you stop being the bottleneck. Your mental health improves. So does the company."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "quarter": 5
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 8
+  },
+  {
+    "id": "open_source_contribution",
+    "title": "Open Source Request",
+    "category": "product",
+    "stage": "any",
+    "description_template": "A developer opens an issue on your GitHub: 'Would {company_name} consider open-sourcing the SDK? I'd contribute documentation and tests for free.' The community wants in.",
+    "variations": [
+      "Your SDK repo has 400 stars and growing. A developer submits a detailed RFC for an open-source version with a plugin architecture. The proposal is better designed than your internal version.",
+      "A thread on Hacker News: 'Wish {company_name} would open-source their client library. Would save my team months.' Twenty-three upvotes and a comment from a maintainer of a popular framework: 'I'd help maintain it.'"
+    ],
+    "choices": [
+      {
+        "label": "Open-source the SDK",
+        "effects": {
+          "reputation": 8,
+          "users": 1200,
+          "bugs": -3,
+          "cash": -5000
+        },
+        "outcome_template": "The SDK goes public. Within two weeks you have 12 external contributors fixing bugs you didn't know existed. The community does QA for free. Developer love translates to adoption.",
+        "outcome_variations": [
+          "Open source pays off immediately. External devs find and fix edge cases your team missed. Stars climb. Your SDK becomes the standard integration.",
+          "The community rallies. Pull requests flow in. Documentation improves. Your DevRel budget just became optional."
+        ]
+      },
+      {
+        "label": "Keep it closed — protect the IP",
+        "effects": {
+          "reputation": -3
+        },
+        "outcome_template": "You keep it proprietary. The developer moves on. A competitor open-sources their SDK instead and captures the developer mindshare.",
+        "outcome_variations": [
+          "Closed source. Your SDK stays mediocre. A competitor releases an open-source alternative. Developers flock to it.",
+          "IP protected. Community disappointed. The Hacker News thread turns into a critique of {company_name}'s developer experience."
+        ]
+      },
+      {
+        "label": "Open-source with a commercial license",
+        "effects": {
+          "reputation": 5,
+          "users": 600,
+          "cash": 8000
+        },
+        "outcome_template": "Source-available with a commercial license for enterprise. Developers can read and contribute. Companies pay for production use. Best of both worlds.",
+        "outcome_variations": [
+          "The BSL approach works. Devs get transparency. Enterprise pays. You thread the needle between open and closed.",
+          "Smart licensing. The community is mostly happy. A few purists complain on Twitter but your pipeline grows."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 1500,
+      "employee_count": 3
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "pmf_moment",
+    "title": "Product-Market Fit Signal",
+    "category": "product",
+    "stage": "growth",
+    "description_template": "Something just shifted. Support tickets are coming in faster but they're feature requests, not complaints. Users are recommending {company_name} without being asked. Your NPS jumped 20 points in one quarter.",
+    "variations": [
+      "You run the Sean Ellis survey: 'How would you feel if {company_name} no longer existed?' 47% say 'Very disappointed.' You stare at the number. That's it. That's product-market fit.",
+      "A customer emails: 'I recommended {company_name} to three other companies this month. Just thought you should know.' Word of mouth is doing what your marketing couldn't."
+    ],
+    "choices": [
+      {
+        "label": "Pour fuel on the fire — accelerate growth",
+        "effects": {
+          "cash": -20000,
+          "users": 5000,
+          "stress_all": 8
+        },
+        "outcome_template": "You hit the gas. Marketing spend goes up. Hiring accelerates. The growth curve goes parabolic. You're now racing to scale infrastructure before it collapses under the weight of success.",
+        "outcome_variations": [
+          "Growth mode activated. Users pour in. Revenue follows. Your infrastructure team is sweating but it's the best kind of problem to have.",
+          "You invest aggressively and the numbers respond. The next fundraise will be at a completely different valuation. This is the moment investors talk about."
+        ]
+      },
+      {
+        "label": "Strengthen before scaling — fix everything first",
+        "effects": {
+          "stability": 8,
+          "tech_debt": -10,
+          "users": 1500
+        },
+        "outcome_template": "You resist the temptation to scale prematurely. Infrastructure gets hardened. The product gets polished. Growth is slower but sustainable. When you do hit the gas, nothing breaks.",
+        "outcome_variations": [
+          "Patience over panic. You invest in reliability and onboarding. When growth accelerates naturally, you're ready. No firefighting.",
+          "Smart restraint. Your competitors scale fast and break things. You scale slow and build trust. Your retention is 3x theirs."
+        ]
+      },
+      {
+        "label": "Raise a round now — maximize leverage",
+        "effects": {
+          "cash": 100000,
+          "reputation": 8,
+          "stress_all": 6
+        },
+        "outcome_template": "PMF is the single best moment to raise. Investors can feel the momentum. Term sheets appear fast. You raise at a valuation that would've seemed delusional six months ago.",
+        "outcome_variations": [
+          "You raise while the numbers are singing. The round is oversubscribed. Three funds fight over the lead. This is what PMF fundraising feels like.",
+          "Perfect timing. Metrics tell the story better than any deck. The round closes in two weeks. Your runway extends to three years."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "users": 4000,
+      "quarter": 6
+    },
+    "weight": 0.4,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "standup_culture_war",
+    "title": "The Standup Debate",
+    "category": "culture",
+    "stage": "any",
+    "description_template": "Your daily standup meeting just hit 45 minutes. It was supposed to be 10. Half the team thinks standups are essential. The other half thinks they're performance theater.",
+    "variations": [
+      "A senior engineer posts in #engineering: 'I lose 45 minutes of deep work every morning to a meeting where I say the same thing as yesterday. Can we not?' Three emoji reactions appear instantly: 💯, 👎, and 🍿.",
+      "Someone anonymously submitted to your retro board: 'Standups are where productivity goes to die at {company_name}.' The post has 8 upvotes. You have 10 engineers."
+    ],
+    "choices": [
+      {
+        "label": "Async standups — written updates in Slack",
+        "effects": {
+          "morale_all": 5,
+          "stress_all": -3
+        },
+        "outcome_template": "You move standups to a Slack bot. Everyone posts their update by 10am. Engineers get their mornings back. Managers lose the face-time. Net positive.",
+        "outcome_variations": [
+          "Async works. Deep work improves. Some people stop posting after a week — you'll need to enforce it. But the vocal opponents of standups are finally quiet.",
+          "The Slack standup bot becomes the team's heartbeat. Written updates are actually more useful than verbal ones because people think before typing."
+        ]
+      },
+      {
+        "label": "Keep standups but enforce the 10-minute rule",
+        "effects": {
+          "morale_all": 2
+        },
+        "outcome_template": "Timer set. Anyone who goes over gets gently cut off. The meeting is tighter. Some people are annoyed at being interrupted. Most are relieved it's shorter.",
+        "outcome_variations": [
+          "Strict time-boxing works. Standups are crisp again. The real conversations happen afterwards, 1:1, as they should.",
+          "Ten minutes, hard stop. People learn to be concise. The meeting is useful again. Your lead engineer admits standups aren't that bad anymore."
+        ]
+      },
+      {
+        "label": "Kill standups entirely — trust the team",
+        "effects": {
+          "morale_all": 7,
+          "bugs": 3
+        },
+        "outcome_template": "No more standups. Engineers are thrilled. Managers are nervous. Two weeks in, someone is working on a cancelled feature because nobody told them. Communication costs don't disappear — they just move.",
+        "outcome_variations": [
+          "Freedom. The team loves it. Productivity spikes. Then a critical bug ships because the person who would've mentioned it in standup didn't mention it anywhere.",
+          "Radical trust. Works for senior teams. You notice coordination gaps within a month. Some form of sync will come back — just not called 'standup.'"
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 6
+    },
+    "weight": 0.65,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "dependency_disaster",
+    "title": "Supply Chain Attack",
+    "category": "product",
+    "stage": "any",
+    "description_template": "A popular open-source package in your dependency tree just published a compromised version. It's already in your production build. Twitter found out before you did.",
+    "variations": [
+      "Your npm audit just lit up red. A package four levels deep in your dependency tree was compromised overnight. The maintainer's account was hijacked. Your latest deploy includes the malicious version.",
+      "GitHub sends an advisory: critical vulnerability in a transitive dependency. You check your lockfile. You're affected. So is half the internet, but that doesn't make your CEO feel better."
+    ],
+    "choices": [
+      {
+        "label": "Emergency rollback and patch",
+        "effects": {
+          "stability": 5,
+          "stress_all": 10,
+          "reputation": 3
+        },
+        "outcome_template": "You roll back production in 20 minutes, audit the impact, and post a transparent customer advisory within 2 hours. Security researchers praise the response. No user data was exposed.",
+        "outcome_variations": [
+          "Fast response. Your incident response plan (that nobody believed would be needed) just proved its worth. Clean rollback, thorough audit, honest communication.",
+          "The rollback breaks two features temporarily but prevents the compromise from spreading. Your postmortem becomes a reference for other startups."
+        ]
+      },
+      {
+        "label": "Audit first — understand what happened before acting",
+        "effects": {
+          "stress_all": 12,
+          "reputation": -3,
+          "bugs": -3
+        },
+        "outcome_template": "You spend 6 hours auditing before acting. The investigation is thorough but by the time you respond, three customers have already noticed. Your timeline looks bad.",
+        "outcome_variations": [
+          "The audit reveals no data was exfiltrated. Good news. But the 6-hour response time is a bad look. Speed matters in incident response.",
+          "Thorough but slow. A journalist asks why your advisory came hours after other companies'. You have a good answer. It still looks bad."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 2,
+      "quarter": 3
+    },
+    "weight": 0.5,
+    "one_time": false,
+    "cooldown_quarters": 8
+  },
+  {
+    "id": "hiring_freeze_debate",
+    "title": "Hiring Freeze or Full Steam",
+    "category": "culture",
+    "stage": "growth",
+    "description_template": "Your runway is 6 quarters. Your roadmap needs 4 more engineers. The math doesn't add up unless revenue grows 40% this quarter. Time to make a call.",
+    "variations": [
+      "Finance review day. Your spreadsheet shows two futures: hire and bet on growth, or freeze and bet on efficiency. Both paths have a 50/50 chance of working. Neither path has a 50/50 chance of keeping everyone happy.",
+      "Your head of engineering needs 4 hires to hit next quarter's roadmap. Your bank account needs 4 fewer salaries to survive the quarter after that. You can't have both."
+    ],
+    "choices": [
+      {
+        "label": "Freeze hiring — extend the runway",
+        "effects": {
+          "morale_all": -6,
+          "stress_all": 5
+        },
+        "outcome_template": "Hiring freeze announced. The team reads between the lines. Two engineers who were excited about expanding their teams are now wondering if the company is in trouble. It's not — but perception matters.",
+        "outcome_variations": [
+          "Freeze in effect. Runway extends. But the roadmap slips and the team works harder to compensate. Burnout risk rises.",
+          "Conservative call. The market shifts two months later and you're glad you have the cash. Sometimes boring is brilliant."
+        ]
+      },
+      {
+        "label": "Hire — bet on growth",
+        "effects": {
+          "cash": -40000,
+          "morale_all": 5
+        },
+        "outcome_template": "You hire 4 engineers. The team is energized. The roadmap accelerates. Your runway shortens to 4 quarters. The bet is placed. Now you need to win.",
+        "outcome_variations": [
+          "New hires ramp up fast. Velocity doubles. Revenue starts catching up. The bet might pay off. The next two quarters will tell.",
+          "Four new engineers means four ramp-up months. Short-term velocity actually drops. Your board asks uncomfortable questions. By quarter 3, the new team is firing on all cylinders."
+        ]
+      },
+      {
+        "label": "Hire contractors — stay flexible",
+        "effects": {
+          "cash": -20000,
+          "morale_all": 2
+        },
+        "outcome_template": "Contractors fill the gap without the long-term commitment. More expensive per hour but cheaper per quarter. If revenue grows, you convert them to full-time. If not, you let the contracts expire.",
+        "outcome_variations": [
+          "Contractors ship code fast but don't fully gel with the team. Knowledge transfer is a challenge. But the flexibility is worth it.",
+          "Two of the four contractors are excellent. You'll convert them. The other two delivered but aren't a cultural fit. Clean endings."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 5,
+      "year": 2
+    },
+    "weight": 0.55,
+    "one_time": false,
+    "cooldown_quarters": 6
+  },
+  {
+    "id": "ai_hype_wave",
+    "title": "The AI Question",
+    "category": "market",
+    "stage": "growth",
+    "description_template": "Every investor, customer, and journalist is asking the same question: 'What's {company_name}'s AI strategy?' You didn't have one until everyone started asking.",
+    "variations": [
+      "Your investor sends a one-line email: 'What's your AI story?' Your competitor just added 'AI-powered' to their landing page. Nothing else changed. Their traffic doubled.",
+      "A customer asks during a demo: 'Does {company_name} use AI?' You freeze for half a second. 'We're exploring several approaches,' you say, which is founder-speak for 'no.'"
+    ],
+    "choices": [
+      {
+        "label": "Ship a real AI feature — invest in the tech",
+        "effects": {
+          "cash": -18000,
+          "users": 2000,
+          "reputation": 8
+        },
+        "outcome_template": "You spend 6 weeks building an AI feature that actually works — not a wrapper, a real product improvement. Users notice the difference. Press covers it. Your AI story writes itself.",
+        "outcome_variations": [
+          "The AI feature ships and it's genuinely useful. Not a gimmick. Users love it. Your engineering team is proud. The investor's question is answered.",
+          "Real AI integration. It takes longer than expected and costs more than budgeted. But the result is a moat that competitors can't replicate with a landing page change."
+        ]
+      },
+      {
+        "label": "Add AI to the marketing — it's about perception",
+        "effects": {
+          "users": 800,
+          "reputation": -2
+        },
+        "outcome_template": "You add 'AI-enhanced' to the website and sprinkle some ML buzzwords in the pitch deck. Traffic bumps. Savvy customers see through it. But most don't.",
+        "outcome_variations": [
+          "AI-washed. It works for marketing. It doesn't work when a technical buyer asks pointed questions. Risky but effective in the short term.",
+          "The landing page update drives clicks. A Hacker News commenter calls it out: '{company_name} just added AI to their tagline but the product is the same.' 200 upvotes."
+        ]
+      },
+      {
+        "label": "Stay honest — AI isn't our play right now",
+        "effects": {
+          "reputation": 3,
+          "users": -300
+        },
+        "outcome_template": "You write a blog post: 'Why {company_name} isn't chasing AI hype.' It resonates with a niche audience who's tired of AI-washing. You lose trend-followers and gain loyalists.",
+        "outcome_variations": [
+          "Contrarian stance. Some investors pass. The ones who stay respect the conviction. Your product stays focused. When AI actually makes sense, you'll build it.",
+          "Honest and refreshing. A few customers leave for AI-buzzword competitors. They come back two months later when the AI features turn out to be demos."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "year": 2,
+      "users": 1000
+    },
+    "weight": 0.6,
+    "one_time": true,
+    "cooldown_quarters": 0
+  },
+  {
+    "id": "deploy_friday_disaster",
+    "title": "Friday Deploy",
+    "category": "product",
+    "stage": "any",
+    "description_template": "Someone shipped to production at 4:47 PM on a Friday. The deploy broke checkout. It's now 5:15 PM and half the team has already left for the weekend.",
+    "variations": [
+      "Slack alert: 'Payment processing error rate: 100%.' You check the deploy log. Last push: 4:47 PM. Author: the new hire. They're already on the train home. Their phone is off.",
+      "A customer tweets: 'Hey @{company_name}, your checkout page just shows a blank screen?' You check. It shows a blank screen for everyone. The deploy was 28 minutes ago. Nobody is in the office."
+    ],
+    "choices": [
+      {
+        "label": "Emergency rollback — you handle it yourself",
+        "effects": {
+          "stress_all": 5,
+          "stability": 3
+        },
+        "outcome_template": "You rollback from your phone in a parking lot. Production is restored in 12 minutes. Monday morning, you institute a 'no Friday deploys' rule. The team applauds.",
+        "outcome_variations": [
+          "Rollback from the Uber. Production up in 8 minutes. Total downtime: 40 minutes. Revenue impact: minimal. Pride impact: significant. New rule: no deploys after 2 PM on Fridays.",
+          "You fix it solo while the team enjoys their Friday evenings. Monday standup includes a new agenda item: deploy windows. Nobody argues."
+        ]
+      },
+      {
+        "label": "Page the on-call team — follow the process",
+        "effects": {
+          "morale_all": -3,
+          "stability": 5
+        },
+        "outcome_template": "You activate the incident response process. Two engineers drop their Friday plans. The fix takes 90 minutes because they investigate properly instead of just rolling back. Thorough but disruptive.",
+        "outcome_variations": [
+          "On-call responds. Friday plans ruined. But the root cause is found and fixed, not just patched. The fix includes a test that prevents recurrence.",
+          "Incident response works as designed. The team is annoyed but professional. The postmortem reveals three other latent issues. Valuable pain."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 3
+    },
+    "weight": 0.7,
+    "one_time": false,
+    "cooldown_quarters": 5
+  },
+  {
+    "id": "culture_doc_viral",
+    "title": "Culture Deck Goes Viral",
+    "category": "culture",
+    "stage": "growth",
+    "description_template": "An employee shared {company_name}'s internal culture doc on LinkedIn. It has 50K impressions and climbing. The comments are 80% positive, 20% brutal.",
+    "variations": [
+      "Your internal values doc — the one with the honest 'what we're bad at' section — is suddenly all over LinkedIn. A thought leader shared it with the caption: 'This is how you build culture.' Your recruiting inbox explodes.",
+      "Someone posted the internal culture doc. The transparency about comp bands and decision-making is being praised. The section about 'disagree and commit' is being roasted. Welcome to public culture."
+    ],
+    "choices": [
+      {
+        "label": "Lean in — make it your official culture page",
+        "effects": {
+          "reputation": 10,
+          "users": 400,
+          "morale_all": 5,
+          "stress_all": 4
+        },
+        "outcome_template": "You polish it slightly and publish it officially. Recruiting applications triple. Candidates cite it in interviews. Your culture becomes a competitive advantage for hiring.",
+        "outcome_variations": [
+          "The culture page becomes your best recruiting tool. Every candidate mentions it. The team is proud that outsiders want to work here because of the values.",
+          "Public culture doc attracts people who actually align with your values. Interview signal-to-noise ratio improves dramatically."
+        ]
+      },
+      {
+        "label": "Ask them to take it down — internal docs are internal",
+        "effects": {
+          "morale_all": -4,
+          "reputation": -2
+        },
+        "outcome_template": "You ask the employee to delete the post. They comply but the team is confused. 'If we're proud of our culture, why hide it?' Fair question.",
+        "outcome_variations": [
+          "The post comes down but screenshots survive. The Streisand effect kicks in mildly. The employee who posted it feels punished for enthusiasm.",
+          "Deleted. But the team saw the reaction. They know the culture doc resonated with outsiders. Hiding it feels incongruent."
+        ]
+      },
+      {
+        "label": "Engage with the criticism publicly",
+        "effects": {
+          "reputation": 6,
+          "morale_all": 3
+        },
+        "outcome_template": "You reply to the critics directly. 'You're right — we're still figuring this out. Here's what we're changing.' The willingness to be wrong in public earns more respect than the original doc.",
+        "outcome_variations": [
+          "Engaging with criticism is nerve-wracking but effective. The conversation shifts from attack to dialogue. People respect founders who listen.",
+          "You address the valid critiques and thank the people who pushed back. The thread becomes a case study in handling public feedback."
+        ]
+      }
+    ],
+    "trigger_conditions": {
+      "employee_count": 8,
+      "year": 2
+    },
+    "weight": 0.45,
     "one_time": true,
     "cooldown_quarters": 0
   }

@@ -1,108 +1,142 @@
 # Venture — Privacy Policy
 
-**Effective date:** March 7, 2026
-**Last updated:** March 7, 2026
-**Version:** 1.0
+**Effective date:** April 7, 2026
+**Last updated:** April 7, 2026
+**Version:** 2.0
 
 ---
 
 ## 1. Introduction
 
-This Privacy Policy describes how the mobile game Venture ("the Game," "we," "us," or "our") collects, uses, stores, and discloses information from and about users ("you" or "players"). By downloading, installing, or using the Game, you acknowledge that you have read and understood this Privacy Policy.
+This Privacy Policy describes how the mobile game Venture ("the Game") collects, uses, stores, and discloses information from and about users ("you" or "players"). By downloading, installing, or using the Game, you acknowledge that you have read and understood this Privacy Policy.
 
 If you do not agree with any part of this Privacy Policy, please do not download, install, or use the Game.
 
+The Game is a premium mobile startup simulation game available for a one-time purchase of $2.99 USD (or local equivalent) through the Apple App Store and Google Play Store. A free trial period is available (first 8 quarters of gameplay).
+
 ## 2. Data Controller
 
-**Developer:** [Your Legal Name / Studio Name]
-**Contact email:** [your-email@example.com]
-**Address:** [Your business address — required for GDPR if you process EU data]
+**Developer:** [YOUR_LEGAL_NAME]
+**Contact email:** [YOUR_EMAIL]
+**Mailing address:** [YOUR_ADDRESS]
 
-*(Replace all bracketed fields before publishing.)*
+## 3. Information We Collect
 
-## 3. What Data We Collect
+### 3.1 Local Save Data (Stored on Your Device Only)
 
-### 3.1 Anonymous Analytics Data (with your consent or legitimate interest)
+The Game stores your game progress, settings, and preferences locally on your device within the application sandbox. This data includes:
 
-When analytics are enabled, we collect **anonymous, non-personally-identifiable gameplay telemetry**, including:
+- Game save files (company state, employees, financials, game progress, quarter history)
+- User preferences (difficulty, sound settings, tutorial completion status)
+- Analytics consent preference
+- Age confirmation status
+- Premium unlock status
+
+This data **never leaves your device**. It is not uploaded to any server, cloud service, or third party. It is accessible only to the Game application and is deleted when you uninstall the Game or clear its app data.
+
+### 3.2 Anonymous Analytics Data (Free Trial Users Only, With Consent)
+
+During the free trial period, and only after you confirm you are 13 or older and consent to data collection, we collect anonymous, non-personally-identifiable gameplay telemetry:
 
 | Category | Examples | Purpose |
 |----------|----------|---------|
 | Session data | Session start/end timestamps, session duration | Understand play patterns |
-| Progression data | Quarter/year reached, game outcome (win/loss reason) | Identify difficulty spikes and drop-off points |
-| Feature usage | Screen visits, button interactions (hiring, fundraising, assigning employees) | Understand which features are used and valued |
-| Economy data | Aggregate in-game cash flow (revenue, expenses, fundraising amounts) | Balance game difficulty and economy |
-| Technical errors | Error type and message (no stack traces containing personal data) | Fix bugs and improve stability |
-| Device metadata | Operating system, OS version, device model, screen resolution, app version | Ensure compatibility and optimize performance |
+| Progression data | Quarter/year reached, game outcome (win/loss and reason) | Identify difficulty spikes and drop-off points |
+| Feature usage | Screen visits, button interactions (hiring, fundraising, assignments, event choices) | Understand which features are used and valued |
+| Economy data | Aggregate in-game cash flow (revenue, fundraising, milestone bonuses) | Balance game difficulty and economy |
+| Technical errors | Error type, severity, and message (no stack traces containing personal data) | Fix bugs and improve stability |
+| Device metadata | OS, OS version, device model, screen resolution, app version, language/locale | Ensure compatibility and optimize performance |
 
-### 3.2 Data We Do NOT Collect
+**Premium users** (those who have purchased the full game) do **NOT** have analytics collected under any circumstances. Purchasing the game automatically and permanently disables analytics.
 
-We want to be explicit about what we do **not** collect, process, or store:
+### 3.3 Installation Identifier
 
-- **No personal identifiers** — no real names, usernames, email addresses, phone numbers, or mailing addresses
-- **No account data** — the Game does not require or support user accounts or logins
-- **No financial data** — all purchases are handled entirely by the platform app store (Apple App Store, Google Play). We never see, process, or store payment card numbers, bank accounts, or billing information
-- **No location data** — no GPS, IP-based geolocation, or cell tower data
-- **No device contents** — no access to your photos, contacts, files, camera, microphone, or other device sensors
-- **No advertising identifiers** — we do not collect IDFA (iOS) or GAID (Android) for analytics purposes
-- **No social media data** — no integration with social media accounts
-- **No cross-app tracking** — we do not track your activity across other apps or websites
-- **No biometric data** — no fingerprints, face scans, or voice recordings
-- **No health data** — no health, fitness, or medical information
+When analytics are enabled, GameAnalytics (our analytics processor) generates a random installation identifier. This identifier:
 
-### 3.3 Data Collected by Platform App Stores
+- Is randomly generated and unique to your app installation
+- Is **NOT** linked to your Apple ID, Google account, real identity, or any personal account
+- Cannot be used to identify you personally
+- Is deleted when raw analytics events expire (90 days)
 
-When you download, purchase, or review the Game through Apple App Store or Google Play, those platforms may collect data subject to their own privacy policies. We do not control and are not responsible for their data practices:
+### 3.4 Data We Do NOT Collect
+
+We explicitly do **not** collect:
+
+- **No personal identifiers** -- no real names, usernames, email addresses, phone numbers, or mailing addresses
+- **No account data** -- the Game does not require or support user accounts or logins
+- **No financial or payment data** -- all purchases are handled entirely by the platform app stores; we never see, process, or store payment card numbers, bank accounts, or billing information
+- **No location data** -- no GPS, IP geolocation, cell tower data, or Wi-Fi location
+- **No device contents** -- no access to photos, contacts, files, calendar, camera, microphone, or device sensors
+- **No advertising identifiers** -- no IDFA (iOS) or GAID (Android)
+- **No social media data** or social graph information
+- **No cross-app or cross-site tracking**
+- **No biometric data** -- no fingerprints, face scans, or voice data
+- **No health or fitness data**
+- **No browsing or search history**
+- **No user-generated content** -- the Game has no chat, forums, or content sharing features
+
+### 3.5 In-App Purchase Records
+
+When you purchase the full game ($2.99 USD), the transaction is processed entirely by Apple App Store or Google Play Store. We do not receive, process, or store your payment information. We only receive a purchase confirmation signal from the platform to unlock premium features on your device. This confirmation is stored locally on your device as a boolean flag and is not transmitted to us or any third party.
+
+### 3.6 Data Collected by Platform App Stores
+
+Downloads, purchases, ratings, and reviews through Apple App Store or Google Play are subject to their respective privacy policies, which we do not control:
 
 - Apple: https://www.apple.com/legal/privacy/
 - Google: https://policies.google.com/privacy
 
-### 3.4 Automatically Collected Technical Data
+## 4. How We Use Your Information
 
-GameAnalytics (our analytics processor — see Section 5) automatically collects the following technical data when analytics are enabled:
+We use the anonymous analytics data described in Section 3.2 exclusively for the following purposes:
 
-- A **randomly generated installation identifier** (not linked to your real identity, Apple ID, Google account, or any other personal identifier)
-- Operating system name and version
-- Device model
-- App version
-- Language/locale setting
+- Improving game balance and difficulty tuning
+- Identifying and fixing bugs and crashes
+- Understanding which features players use and enjoy
+- Measuring overall game health and session metrics
+- Optimizing device compatibility and performance
 
-This data is used solely for analytics aggregation and cannot be used to identify you personally.
+We do **NOT** use your data for:
 
-## 4. Legal Basis for Processing (GDPR — EU/EEA/UK Users)
+- Advertising or ad targeting
+- Profiling or behavioral analysis of individuals
+- Sale or transfer to third parties
+- Marketing communications
+- Automated decision-making affecting individuals
 
-If you are located in the European Union, European Economic Area, or the United Kingdom, we rely on the following legal bases under the General Data Protection Regulation (GDPR):
+## 5. Legal Basis for Processing (GDPR -- EU/EEA/UK)
 
-| Processing activity | Legal basis | GDPR Article |
-|---------------------|------------|-------------|
-| Analytics (Free-to-Play version) | Legitimate interest in improving the Game | Art. 6(1)(f) |
-| Analytics (Premium version) | N/A — no analytics collected from premium users | N/A |
-| Error/crash reporting | Legitimate interest in maintaining product stability | Art. 6(1)(f) |
+If you are in the EU, EEA, or UK, we process data under the following legal bases:
 
-**Legitimate interest assessment:** We have conducted a balancing test and determined that our interest in collecting anonymous, aggregated gameplay data to improve the Game does not override your fundamental rights and freedoms, because: (a) the data is anonymous and cannot identify you, (b) collection has no adverse effect on your gameplay experience, (c) you can opt out at any time without consequence, and (d) the data is used solely for product improvement.
+| Processing Activity | Legal Basis | GDPR Article |
+|---------------------|-------------|-------------|
+| Analytics (Free trial) | Legitimate interest in improving the Game | Art. 6(1)(f) |
+| Analytics (Premium/Paid) | N/A -- no analytics collected from premium users | N/A |
+| Error reporting | Legitimate interest in product stability | Art. 6(1)(f) |
 
-## 5. Third-Party Data Processors
+**Legitimate interest assessment:** We have conducted a balancing test and determined that our interest in collecting anonymous, aggregated gameplay data does not override your rights and freedoms because: (a) the data is anonymous and cannot identify you, (b) collection has no adverse effect on gameplay, (c) you can opt out at any time with no penalty, and (d) the data is used solely for product improvement.
+
+## 6. Third-Party Data Processors
 
 We use the following third-party service provider to process analytics data on our behalf:
 
 ### GameAnalytics ApS
 
 - **Purpose:** Process and aggregate anonymous gameplay analytics
-- **Data processed:** All data described in Section 3.1 and 3.4
-- **Data location:** EU (GameAnalytics is headquartered in Copenhagen, Denmark)
-- **Retention:** See Section 8
+- **Data processed:** All data described in Sections 3.2 and 3.3
+- **Location:** Pilestrede 58, 1112 Copenhagen, Denmark (EU)
+- **Retention:** See Section 9
 - **Privacy policy:** https://gameanalytics.com/privacy
-- **GDPR compliance:** GameAnalytics acts as a data processor under GDPR and maintains appropriate technical and organizational measures
+- **GDPR compliance:** Acts as data processor under GDPR Article 28
+- **DPA:** We maintain a Data Processing Agreement with GameAnalytics as required by GDPR Article 28
 
-We have a Data Processing Agreement (DPA) with GameAnalytics as required by GDPR Article 28.
+**We do not sell, rent, lease, share, or trade your data with any other third party.** There are no advertising networks, no social media SDKs, no attribution services, and no other data recipients integrated into the Game.
 
-**We do not share, sell, rent, lease, or trade your data with any other third party.** There are no other data recipients.
+## 7. Your Rights and Choices
 
-## 6. Your Rights and Choices
+### 7.1 Analytics Opt-Out (All Users)
 
-### 6.1 Analytics Opt-Out (All Users)
-
-You can disable analytics at any time:
+Disable analytics at any time:
 
 1. Open the Game
 2. Go to **Settings** (accessible from the main menu)
@@ -110,152 +144,192 @@ You can disable analytics at any time:
 
 When disabled:
 - No new data is collected or transmitted
-- The Game continues to function identically — no features, content, or functionality are withheld
-- Previously collected data is subject to the retention policy in Section 8
+- The Game functions identically -- nothing is withheld
+- Previously collected data follows the retention policy in Section 9
 
-### 6.2 Default Settings
+### 7.2 Default Settings
 
-| Version | Analytics | Reason |
-|---------|-----------|--------|
-| Free-to-Play | Enabled after age confirmation (13+) | Players must confirm age, are informed on first launch, and can disable anytime |
-| Premium | Not available | No analytics data is collected from premium users under any circumstances |
+| Version | Analytics Default | Details |
+|---------|-------------------|---------|
+| Free trial | Enabled after age confirmation (13+) | Players must confirm age, are informed about data collection, and can disable anytime in Settings |
+| Premium (purchased) | Not available | No analytics data is collected from premium users under any circumstances |
 
-### 6.2a Age Verification (Free-to-Play)
+### 7.3 Age Verification
 
-Before any analytics data is collected in the Free-to-Play version, players are asked to confirm they are 13 years of age or older. If a player indicates they are under 13, analytics are permanently disabled for that installation and no data is collected.
+Before any analytics data is collected, players are asked to confirm they are 13 years of age or older. If a player indicates they are under 13:
 
-### 6.3 Rights Under GDPR (EU/EEA/UK Users)
+- Analytics are permanently disabled for that installation
+- No data is collected or transmitted
+- The Game remains fully playable
 
-If you are located in the EU, EEA, or UK, you have the following rights under GDPR:
+### 7.4 Delete Local Save Data
 
-- **Right of access** (Art. 15) — Request a copy of any personal data we hold about you
-- **Right to rectification** (Art. 16) — Request correction of inaccurate data
-- **Right to erasure** (Art. 17) — Request deletion of your data ("right to be forgotten")
-- **Right to restrict processing** (Art. 18) — Request that we limit how we use your data
-- **Right to data portability** (Art. 20) — Receive your data in a structured, machine-readable format
-- **Right to object** (Art. 21) — Object to processing based on legitimate interest
-- **Right to withdraw consent** (Art. 7(3)) — Withdraw consent at any time (for Premium users who opted in)
-- **Right to lodge a complaint** — File a complaint with your local Data Protection Authority (DPA)
+To delete all locally stored data (save files, settings, preferences):
+
+- **iOS:** Delete the app, or go to Settings > General > iPhone Storage > Venture > Delete App
+- **Android:** Delete the app, or go to Settings > Apps > Venture > Storage > Clear Data
+
+### 7.5 Rights Under GDPR (EU/EEA/UK Users)
+
+You have the right to:
+
+- **Right of access** (Art. 15) -- request a copy of any personal data we hold about you
+- **Right to rectification** (Art. 16) -- request correction of inaccurate data
+- **Right to erasure** (Art. 17) -- request deletion of your data ("right to be forgotten")
+- **Right to restrict processing** (Art. 18) -- request that we limit how we use your data
+- **Right to data portability** (Art. 20) -- receive your data in a structured, machine-readable format
+- **Right to object** (Art. 21) -- object to processing based on legitimate interest
+- **Right to withdraw consent** (Art. 7(3)) -- withdraw consent at any time
+- **Right to lodge a complaint** -- file a complaint with your local Data Protection Authority (DPA)
 
 Because our analytics data is anonymous and cannot be linked to an identifiable individual, we may be unable to fulfill access, rectification, or portability requests (GDPR Art. 11). In such cases, we will explain why and offer to delete all data associated with your installation identifier upon request.
 
-To exercise any of these rights, contact us at: **[your-email@example.com]**
+**Contact:** [YOUR_EMAIL]
+**Response time:** within 30 days
 
-We will respond within **30 days** as required by GDPR.
+### 7.6 Rights Under CCPA/CPRA (California Users)
 
-### 6.4 Rights Under CCPA/CPRA (California Users)
+You have the right to:
 
-If you are a California resident, you have the following rights under the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA):
+- **Right to know** -- request what personal information we collect and how we use it
+- **Right to delete** -- request deletion of your personal information
+- **Right to correct** -- request correction of inaccurate personal information
+- **Right to opt-out of sale/sharing** -- we do **not** sell or share your personal information as defined by CCPA/CPRA. No opt-out is necessary.
+- **Right to non-discrimination** -- we will not discriminate against you for exercising your rights
+- **Right to limit use of sensitive personal information** -- we do not collect sensitive personal information as defined by CPRA
 
-- **Right to know** — Request what personal information we collect and how we use it
-- **Right to delete** — Request deletion of your personal information
-- **Right to correct** — Request correction of inaccurate personal information
-- **Right to opt-out of sale/sharing** — We do **not** sell or share your personal information as defined by CCPA/CPRA. No opt-out is necessary because no sale or sharing occurs
-- **Right to non-discrimination** — We will not discriminate against you for exercising your rights
+Categories of personal information collected in the preceding 12 months: Internet or electronic network activity information (anonymous gameplay telemetry as described in Section 3.2). No personal information is sold or shared for cross-context behavioral advertising.
 
-To exercise your rights, contact us at: **[your-email@example.com]**
+**Contact:** [YOUR_EMAIL]
+**Response time:** within 45 days (extendable by 45 days with notice)
 
-We will respond within **45 days** as required by CCPA.
+### 7.7 Rights Under Other Jurisdictions
 
-### 6.5 Rights Under Other Jurisdictions
-
-- **Canada (PIPEDA):** You have the right to access and challenge the accuracy of your personal information. Contact us at the email above.
-- **Brazil (LGPD):** You have rights to confirmation, access, correction, anonymization, portability, deletion, and information about sharing. Contact us at the email above.
+- **Canada (PIPEDA):** Right to access and challenge accuracy of personal information.
+- **Brazil (LGPD):** Rights to confirmation, access, correction, anonymization, portability, deletion, and information about sharing.
+- **Australia (Privacy Act 1988):** Right to access and correct personal information.
+- **South Korea (PIPA):** Right to access, correct, delete, and suspend processing of personal information.
+- **Japan (APPI):** Right to disclosure, correction, and cessation of use of personal information.
 - **Other jurisdictions:** We respect privacy rights under all applicable local laws. Contact us with any request.
 
-## 7. International Data Transfers
+## 8. International Data Transfers
 
-Analytics data is processed by GameAnalytics, headquartered in the **European Union** (Denmark). If you are located outside the EU, your data may be transferred to the EU for processing. GameAnalytics maintains Standard Contractual Clauses (SCCs) and appropriate safeguards for any data transfers as required by applicable law.
+Analytics data is processed by GameAnalytics in the **European Union** (Denmark). If you are located outside the EU, your data may be transferred to the EU for processing.
 
-We do not transfer data to any country that has not been deemed adequate by the European Commission without appropriate safeguards in place.
+GameAnalytics maintains Standard Contractual Clauses (SCCs) and appropriate safeguards for international data transfers as required by applicable law. We do not transfer data to any country without adequate protection or appropriate safeguards in place.
 
-## 8. Data Retention
+## 9. Data Retention
 
-| Data type | Retention period | Stored by |
+| Data Type | Retention Period | Stored By |
 |-----------|-----------------|-----------|
 | Raw analytics events | 90 days from collection | GameAnalytics |
 | Aggregated statistics | Indefinitely (fully anonymous, cannot identify individuals) | GameAnalytics |
 | Installation identifier | Deleted when raw events expire | GameAnalytics |
+| Local save data | Until you delete the app or clear app data | Your device |
 
-We do **not** maintain our own database, server, or backup of player data. All data resides exclusively within GameAnalytics' infrastructure.
+We do **not** maintain our own database, server, or backup of player analytics data. All analytics data resides exclusively within GameAnalytics' infrastructure.
 
 When you disable analytics, no new data is collected. Previously collected raw data is automatically deleted after the 90-day retention period.
 
-## 9. Data Security
+## 10. Data Security
 
-- All data is transmitted using **TLS 1.2+ encryption** (HTTPS)
+- All analytics data is transmitted using **TLS 1.2+ encryption** (HTTPS)
 - GameAnalytics maintains SOC 2 Type II compliance and implements industry-standard security measures including encryption at rest, access controls, and regular security audits
-- We do not store any analytics data on our own servers — all data resides within GameAnalytics' secure infrastructure
+- We do not store any analytics data on our own servers
 - The Game does not transmit data over unencrypted channels
+- Local save data is stored within the app sandbox, protected by the mobile operating system's application isolation
 
-## 10. Children's Privacy
+While we implement reasonable measures to protect data, no method of electronic transmission or storage is 100% secure.
 
-### 10.1 COPPA Compliance (United States)
+## 11. Children's Privacy
 
-Venture is **not directed at children under 13 years of age.** We do not knowingly collect, use, or disclose personal information from children under 13.
+### 11.1 COPPA Compliance (United States)
 
-If we learn that we have inadvertently collected data from a child under 13, we will take immediate steps to delete that data and terminate the associated analytics identifier.
+Venture is **not directed at children under 13 years of age**. We do not knowingly collect, use, or disclose personal information from children under 13.
 
-If you are a parent or guardian and believe your child under 13 has provided data through the Game, please contact us immediately at **[your-email@example.com]** and we will delete it within **48 hours**.
+The Game requires age confirmation before any data is collected. If a user indicates they are under 13, analytics are permanently disabled and no data is collected.
 
-### 10.2 EU Age Requirements
+If we learn that we have inadvertently collected data from a child under 13, we will delete it immediately and terminate the associated analytics identifier.
 
-For users in the EU/EEA, the minimum age for data processing consent varies by member state (generally 13-16 years old under GDPR Art. 8). If you are below the applicable age in your jurisdiction, please do not enable analytics without parental consent.
+**Parents and guardians:** if you believe your child under 13 has provided data through the Game, contact [YOUR_EMAIL] and we will delete it within **48 hours**.
 
-### 10.3 Age Rating
+### 11.2 EU Age Requirements (GDPR Article 8)
 
-The Game's age rating is determined by the platform app stores (Apple App Store, Google Play) based on content, not data practices. Regardless of the assigned age rating, our data collection practices comply with COPPA and GDPR requirements for minors.
+The minimum age for data processing consent varies by EU member state (generally 13 to 16 years old). If you are below the applicable age in your jurisdiction, do not enable analytics without parental or guardian consent.
 
-## 11. Advertising (Free-to-Play Version)
+### 11.3 Age Rating
 
-The free version of the Game may in the future display advertisements. If and when advertising is implemented:
+The Game is intended for users aged 13 and older. The Game's store age rating is determined by the platform app stores based on content classification. Regardless of the assigned rating, our data collection practices comply with COPPA and GDPR requirements for minors.
 
+## 12. Advertising
+
+As of this version, the Game contains **no advertising SDK** and collects **no ad-related data**. The Game is a premium paid product.
+
+If advertising is implemented in a future version:
 - This Privacy Policy will be updated **before** any ad SDK is integrated
-- The specific ad networks, their data practices, and opt-out mechanisms will be disclosed
-- Ad-related data collection will be separate from gameplay analytics
-- You will be notified of the change via an in-game notice
+- Specific ad networks and their opt-out mechanisms will be fully disclosed
+- You will be notified via an in-game notice before the change takes effect
 
-As of the current version, **no advertising SDK is active** and **no ad-related data is collected.**
-
-## 12. Do Not Track / Global Privacy Control
+## 13. Do Not Track / Global Privacy Control
 
 The Game respects your device-level privacy settings:
 
-- **iOS App Tracking Transparency (ATT):** The Game does not trigger the ATT prompt because we do not engage in tracking as defined by Apple
-- **Android privacy settings:** The Game does not access advertising identifiers
-- **Global Privacy Control (GPC):** If your device or browser sends a GPC signal, we treat it as a valid opt-out request
+- **iOS ATT (App Tracking Transparency):** The Game does not trigger the ATT prompt because we do not engage in tracking as defined by Apple's App Tracking Transparency framework
+- **Android:** The Game does not access advertising identifiers (GAID)
+- **Global Privacy Control (GPC):** If your device sends a GPC signal, we treat it as a valid opt-out of analytics data collection
+- **Do Not Track (DNT):** We honor DNT browser signals as an opt-out request where applicable
 
-## 13. Changes to This Privacy Policy
+## 14. Apple App Store Privacy Details
 
-We may update this Privacy Policy from time to time to reflect changes in our practices, legal requirements, or the Game's features. When we make changes:
+For Apple's App Privacy labels (required for App Store submissions), Venture declares:
 
-- The "Last updated" date at the top will be revised
-- **Material changes** (new data collection, new third parties, changes to rights) will be communicated through an **in-game notice** before they take effect
-- The previous version of this policy will be archived and available upon request
-- Continued use of the Game after changes take effect constitutes acceptance of the updated policy
+- **Data Linked to You:** None
+- **Data Used to Track You:** None
+- **Data Not Linked to You:** Diagnostics (crash data), Usage Data (anonymous gameplay analytics) -- collected only during the free trial period with consent
 
-## 14. Dispute Resolution
+## 15. Google Play Data Safety
 
-If you have a concern about our data practices that we have not adequately addressed, you may:
+For Google Play's Data Safety section, Venture declares:
 
-1. Contact us directly at **[your-email@example.com]**
-2. File a complaint with your local Data Protection Authority:
+- **Data shared with third parties:** Anonymous analytics data shared with GameAnalytics for product improvement (free trial only)
+- **Data collected:** App activity (anonymous gameplay events), App info and performance (crash logs, diagnostics)
+- **Security practices:** Data is encrypted in transit (TLS 1.2+), data deletion can be requested, data is not sold
+
+## 16. Changes to This Policy
+
+When we update this policy:
+
+- The "Last updated" date will be revised
+- The version number will be incremented
+- Material changes will be communicated via in-game notice before they take effect
+- Previous versions will be available upon request
+- Continued use after changes constitutes acceptance
+
+## 17. Dispute Resolution
+
+If you have a concern about our data practices:
+
+1. Contact us at [YOUR_EMAIL]
+2. File a complaint with your local DPA:
    - EU: https://edpb.europa.eu/about-edpb/about-edpb/members_en
    - UK: https://ico.org.uk/make-a-complaint/
    - California: https://oag.ca.gov/privacy
-3. If applicable, pursue binding arbitration or litigation under your local laws
+3. Pursue binding arbitration or litigation under applicable local laws
 
-We commit to resolving complaints within **30 days** of receipt.
+We commit to acknowledging complaints within 72 hours and providing a substantive resolution within 30 days.
 
-## 15. Contact Information
+## 18. Contact
 
-For any questions, concerns, data access requests, or deletion requests regarding this Privacy Policy or our data practices:
+For questions, concerns, data access requests, or deletion requests:
 
-**Email:** [your-email@example.com]
+**Developer:** [YOUR_LEGAL_NAME]
+**Email:** [YOUR_EMAIL]
+**Mailing address:** [YOUR_ADDRESS]
 **Subject line:** "Venture Privacy Inquiry"
 
-We will acknowledge your request within **72 hours** and provide a substantive response within **30 days**.
+Acknowledgment: within 72 hours
+Substantive response: within 30 days
 
 ---
 
-*This Privacy Policy is provided for informational purposes. We recommend consulting with a qualified legal professional to ensure compliance with all applicable laws in your jurisdiction before publishing.*
+*This Privacy Policy is provided for informational purposes. We recommend consulting with a qualified legal professional to ensure full compliance with all applicable laws in your jurisdiction before publishing.*

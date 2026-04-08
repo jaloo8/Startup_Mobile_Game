@@ -14,6 +14,7 @@
 			"id": "workflow_automation",
 			"name": "Workflow Automation",
 			"description": "Operational tooling with broad demand and steady adoption.",
+			"recommended": true,
 			"modifiers": {
 				"growth_mult": 1.03,
 				"churn_mult": 0.97,
@@ -79,6 +80,7 @@
 			"id": "resale_goods",
 			"name": "Resale Goods",
 			"description": "Peer-to-peer listings with viral loops and seasonal demand swings.",
+			"recommended": true,
 			"modifiers": {
 				"growth_mult": 1.06,
 				"churn_mult": 1.02,
@@ -111,6 +113,7 @@
 			"id": "ci_automation",
 			"name": "CI Automation",
 			"description": "Build and deploy acceleration with broad developer adoption.",
+			"recommended": true,
 			"modifiers": {
 				"growth_mult": 1.04,
 				"churn_mult": 0.96,

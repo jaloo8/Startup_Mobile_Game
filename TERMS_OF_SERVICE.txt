@@ -1,231 +1,499 @@
 VENTURE — TERMS OF SERVICE
-Effective date: April 6, 2026
-Last updated: April 6, 2026
-Version: 1.0
+Effective date: April 7, 2026
+Last updated: April 7, 2026
+Version: 2.0
 
 ============================================================
 1. ACCEPTANCE OF TERMS
 ============================================================
 
-These Terms of Service ("Terms") govern your use of the mobile
-game Venture ("the Game") developed by [Your Legal Name /
-Studio Name] ("we", "us", "our"). By downloading, installing,
-or using the Game, you agree to be bound by these Terms.
+These Terms of Service ("Terms") govern your use of the
+mobile game Venture ("the Game") developed by [YOUR_LEGAL_NAME]
+("we", "us", "our"). By downloading, installing, or using
+the Game, you agree to be bound by these Terms and our
+Privacy Policy.
 
 If you do not agree to these Terms, do not download, install,
 or use the Game.
+
+These Terms constitute a legally binding agreement between
+you and us. Please read them carefully.
 
 ============================================================
 2. ELIGIBILITY
 ============================================================
 
-You must be at least 13 years old to use the Game. If you are
-under 18 (or the age of majority in your jurisdiction), you
-represent that you have your parent or legal guardian's
-permission to use the Game.
+2.1 You must be at least 13 years old to use the Game.
+
+2.2 If you are between 13 and 18 years old (or between 13
+and the age of majority in your jurisdiction), you represent
+that your parent or legal guardian has reviewed and agreed to
+these Terms on your behalf and consents to your use of the
+Game.
+
+2.3 If you are a parent or guardian who has consented to
+your child's use of the Game, you agree to be bound by these
+Terms with respect to your child's use.
+
+2.4 If you are under 13 years old, you may not download,
+install, or use the Game.
 
 ============================================================
 3. LICENSE GRANT
 ============================================================
 
-We grant you a limited, non-exclusive, non-transferable,
-revocable license to download, install, and use the Game on
-a compatible mobile device that you own or control, solely
-for your personal, non-commercial use.
+3.1 Subject to your compliance with these Terms, we grant
+you a limited, non-exclusive, non-transferable, revocable
+license to download, install, and use the Game on compatible
+mobile devices that you own or control, solely for your
+personal, non-commercial entertainment.
 
-You may NOT:
-  - Copy, modify, or distribute the Game or its content
-  - Reverse engineer, decompile, or disassemble the Game
-  - Sell, rent, lease, or sublicense the Game
+3.2 This license does not grant you any ownership interest
+in the Game or its content. All rights not expressly granted
+are reserved by us.
+
+3.3 You may NOT:
+  - Copy, modify, adapt, or create derivative works of the
+    Game or any of its content
+  - Reverse engineer, decompile, disassemble, or attempt to
+    derive the source code of the Game
+  - Sell, rent, lease, sublicense, distribute, or otherwise
+    transfer the Game or your license
   - Use the Game for any commercial or illegal purpose
-  - Remove, alter, or obscure any proprietary notices
-  - Use automated tools, bots, or scripts to interact
-    with the Game
+  - Remove, alter, or obscure any copyright, trademark, or
+    other proprietary notices in the Game
+  - Use automated tools, bots, scripts, or other mechanical
+    means to interact with the Game
+  - Attempt to circumvent any technological measures designed
+    to control access to or features of the Game, including
+    the free-trial limitation or premium paywall
+  - Exploit bugs, glitches, or design flaws for any purpose
+    other than reporting them to us
 
 ============================================================
-4. IN-APP PURCHASES
+4. THE GAME
 ============================================================
 
-4.1 The Game may offer in-app purchases ("IAP") including
-a premium unlock. All purchases are processed through the
+4.1 DESCRIPTION
+
+Venture is a single-player startup simulation game in which
+you manage a fictional technology company. All companies,
+characters, events, and scenarios in the Game are fictional.
+Any resemblance to real persons, companies, or events is
+coincidental and intended as parody or satire.
+
+4.2 FREE TRIAL AND PREMIUM UNLOCK
+
+The Game offers a free trial period covering the first 8
+quarters (approximately 2 in-game years) of gameplay. After
+the free trial period, continued play requires a one-time
+premium purchase of $2.99 USD (or local equivalent) through
+the platform app store.
+
+The premium unlock provides:
+  - Unlimited gameplay through IPO, acquisition, or
+    other game endings
+  - Expanded save slot capacity (5 slots vs. 2 in free)
+  - No advertisements (now or in any future version)
+
+4.3 GAME UPDATES
+
+We may release updates to the Game that modify, add, or
+remove features, content, or functionality. Updates may be
+required for continued use of the Game. We are not obligated
+to provide updates, maintenance, or support for the Game.
+
+4.4 AVAILABILITY
+
+The Game is provided for offline single-player use and does
+not require an internet connection for core gameplay. An
+internet connection may be required for the initial download,
+updates, in-app purchases, and analytics transmission (if
+enabled during the free trial).
+
+============================================================
+5. IN-APP PURCHASES
+============================================================
+
+5.1 All in-app purchases ("IAP") are processed through the
 Apple App Store or Google Play Store and are subject to their
-respective terms.
+respective terms of service and payment policies.
 
-4.2 All purchases are FINAL. We do not offer refunds except
-as required by applicable law or the policies of the platform
-through which you made the purchase.
+5.2 The current IAP offered is a one-time premium game
+unlock at $2.99 USD (or local equivalent). We do not offer
+subscriptions, loot boxes, virtual currency purchases, or
+any form of randomized paid content.
 
-4.3 Refund requests should be directed to:
+5.3 All purchases are FINAL. We do not process refunds
+directly. Refund requests must be directed to the platform
+through which you made the purchase:
   - Apple: https://support.apple.com/en-us/HT204084
   - Google: https://support.google.com/googleplay/answer/2479637
 
-4.4 We reserve the right to modify pricing at any time. Price
-changes will not affect previously completed purchases.
+5.4 You may restore a previously completed purchase on a
+new device or after reinstalling the Game by using the
+"Restore Purchase" option in the Game's settings or paywall
+screen. Restoration requires the same Apple ID or Google
+account used for the original purchase.
+
+5.5 We reserve the right to modify pricing at any time.
+Price changes will not affect previously completed purchases.
+
+5.6 We are not responsible for any charges incurred through
+unauthorized use of your app store account.
 
 ============================================================
-5. INTELLECTUAL PROPERTY
+6. INTELLECTUAL PROPERTY
 ============================================================
 
-5.1 The Game, including all content, graphics, text, audio,
-code, design, and game mechanics, is owned by us or our
-licensors and is protected by copyright, trademark, and other
-intellectual property laws.
+6.1 The Game, including but not limited to all software code,
+graphics, illustrations, animations, text, audio, game
+mechanics, data files, character designs, UI design, and
+documentation, is the intellectual property of
+[YOUR_LEGAL_NAME] or its licensors, and is protected by
+copyright, trademark, trade secret, and other intellectual
+property laws.
 
-5.2 "Venture" and related logos are trademarks of
-[Your Legal Name / Studio Name]. All rights reserved.
+6.2 "Venture" and related logos, names, and visual elements
+are trademarks of [YOUR_LEGAL_NAME]. All rights reserved.
 
-5.3 Nothing in these Terms grants you any right, title, or
-interest in any intellectual property of the Game.
+6.3 Nothing in these Terms grants you any right, title, or
+interest in any intellectual property of the Game beyond the
+limited license described in Section 3.
+
+6.4 The Game may contain parody references to real-world
+technology industry concepts, business terminology, and
+startup culture. Such references are protected expression
+and do not imply endorsement by or affiliation with any
+real-world entity.
 
 ============================================================
-6. USER CONDUCT
+7. USER CONDUCT
 ============================================================
 
 You agree not to:
-  - Use the Game in any way that violates any applicable law
+  - Use the Game in any way that violates any applicable
+    federal, state, local, or international law or regulation
   - Attempt to gain unauthorized access to any portion of
-    the Game, its servers, or connected systems
-  - Interfere with or disrupt the Game or its infrastructure
-  - Exploit bugs or glitches for purposes other than
-    reporting them to us
-  - Use the Game to harass, abuse, or harm others
+    the Game, our systems, or any connected infrastructure
+  - Interfere with or disrupt the Game, our servers, or
+    networks connected to the Game
+  - Exploit bugs, glitches, or unintended behavior for
+    purposes other than reporting them to us
+  - Distribute, publish, or share modified versions of the
+    Game or its data files
+  - Use the Game to develop competing products or services
+  - Misrepresent your identity or age when using the Game
 
 ============================================================
-7. SAVE DATA AND GAME PROGRESS
+8. SAVE DATA AND GAME PROGRESS
 ============================================================
 
-7.1 Game progress is stored locally on your device. We are
-not responsible for loss of save data due to device failure,
-uninstallation, operating system updates, or any other cause.
+8.1 All game progress and save data is stored locally on
+your device within the application sandbox. We do not store
+your game progress on any server and cannot access, recover,
+or transfer your save data.
 
-7.2 We recommend using your device's backup features to
-protect your game data.
+8.2 You are solely responsible for backing up your game data
+using your device's backup features (iCloud, Google backup,
+or manual backup).
 
-7.3 We do not store your game progress on our servers and
-cannot recover lost save data.
+8.3 We are not responsible for loss of save data due to:
+  - Device failure, theft, loss, or damage
+  - App uninstallation or reinstallation
+  - Operating system updates or factory resets
+  - Data corruption (though the Game includes automatic
+    backup and recovery mechanisms)
+  - Any other cause beyond our reasonable control
+
+8.4 Save data is not transferable between platforms (iOS to
+Android or vice versa).
 
 ============================================================
-8. PRIVACY
+9. PRIVACY
 ============================================================
 
 Your use of the Game is also governed by our Privacy Policy,
-available at PRIVACY_POLICY.txt and within the Game's settings.
-The Privacy Policy is incorporated into these Terms by
-reference.
+which is available at PRIVACY_POLICY.txt, within the Game's
+settings, and at our support page. The Privacy Policy is
+incorporated into these Terms by reference. By agreeing to
+these Terms, you also acknowledge and accept our Privacy
+Policy.
 
 ============================================================
-9. DISCLAIMER OF WARRANTIES
+10. DISCLAIMER OF WARRANTIES
 ============================================================
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
 
 THE GAME IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT
 WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING
 BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.
 
 WE DO NOT WARRANT THAT:
   - THE GAME WILL BE UNINTERRUPTED, ERROR-FREE, OR SECURE
-  - DEFECTS WILL BE CORRECTED
-  - THE GAME WILL MEET YOUR EXPECTATIONS
-  - THE GAME WILL BE COMPATIBLE WITH ALL DEVICES
+  - DEFECTS WILL BE CORRECTED IN ANY SPECIFIC TIMEFRAME
+  - THE GAME WILL MEET YOUR SPECIFIC EXPECTATIONS
+  - THE GAME WILL BE COMPATIBLE WITH ALL DEVICES OR
+    OPERATING SYSTEM VERSIONS
+  - GAME BALANCE, DIFFICULTY, OR CONTENT WILL REMAIN
+    UNCHANGED BETWEEN UPDATES
+  - SAVE DATA WILL BE PRESERVED ACROSS ALL UPDATES
+
+SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED
+WARRANTIES. IN SUCH JURISDICTIONS, THE ABOVE EXCLUSIONS
+APPLY ONLY TO THE MAXIMUM EXTENT PERMITTED BY LAW.
 
 ============================================================
-10. LIMITATION OF LIABILITY
+11. LIMITATION OF LIABILITY
 ============================================================
 
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO
-EVENT SHALL WE BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
-SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS
-OF PROFITS, DATA, USE, OR GOODWILL, ARISING OUT OF OR IN
-CONNECTION WITH YOUR USE OF THE GAME.
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
 
-OUR TOTAL LIABILITY FOR ALL CLAIMS ARISING FROM YOUR USE OF
-THE GAME SHALL NOT EXCEED THE AMOUNT YOU PAID FOR THE GAME
-IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.
+11.1 IN NO EVENT SHALL WE, OUR OFFICERS, DIRECTORS,
+EMPLOYEES, AGENTS, OR LICENSORS BE LIABLE FOR ANY INDIRECT,
+INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE
+DAMAGES, OR ANY LOSS OF PROFITS, DATA, USE, GOODWILL, OR
+OTHER INTANGIBLE LOSSES, ARISING OUT OF OR IN CONNECTION
+WITH:
+  - YOUR USE OF OR INABILITY TO USE THE GAME
+  - ANY CHANGES, UPDATES, OR DISCONTINUATION OF THE GAME
+  - ANY UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR DATA
+  - LOSS OF SAVE DATA OR GAME PROGRESS
+  - ANY OTHER MATTER RELATING TO THE GAME
 
-SOME JURISDICTIONS DO NOT ALLOW LIMITATIONS ON IMPLIED
-WARRANTIES OR EXCLUSION OF CERTAIN DAMAGES. IN SUCH
-JURISDICTIONS, OUR LIABILITY IS LIMITED TO THE MAXIMUM EXTENT
-PERMITTED BY LAW.
+11.2 OUR TOTAL AGGREGATE LIABILITY FOR ALL CLAIMS ARISING
+FROM OR RELATING TO YOUR USE OF THE GAME SHALL NOT EXCEED
+THE GREATER OF: (A) THE AMOUNT YOU ACTUALLY PAID FOR THE
+GAME IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM, OR
+(B) FIVE DOLLARS ($5.00 USD).
 
-============================================================
-11. INDEMNIFICATION
-============================================================
+11.3 SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR
+LIMITATION OF CERTAIN DAMAGES. IN SUCH JURISDICTIONS, OUR
+LIABILITY IS LIMITED TO THE MAXIMUM EXTENT PERMITTED BY LAW.
 
-You agree to indemnify, defend, and hold harmless us and our
-officers, directors, employees, agents, and licensors from
-any claims, damages, losses, liabilities, and expenses
-(including reasonable legal fees) arising out of your use of
-the Game or violation of these Terms.
-
-============================================================
-12. TERMINATION
-============================================================
-
-12.1 We may terminate or suspend your access to the Game at
-any time, with or without cause, with or without notice.
-
-12.2 Upon termination, your license to use the Game is
-immediately revoked. You must delete all copies of the Game
-from your devices.
-
-12.3 Sections 5, 9, 10, 11, 13, and 14 survive termination.
+11.4 THE LIMITATIONS IN THIS SECTION APPLY REGARDLESS OF
+THE LEGAL THEORY ON WHICH THE CLAIM IS BASED, WHETHER
+CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY,
+OR OTHERWISE, AND EVEN IF WE HAVE BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES.
 
 ============================================================
-13. GOVERNING LAW AND DISPUTES
+12. INDEMNIFICATION
 ============================================================
 
-13.1 These Terms are governed by the laws of [Your
-State/Country], without regard to conflict of law principles.
+To the maximum extent permitted by applicable law, you agree
+to indemnify, defend, and hold harmless [YOUR_LEGAL_NAME]
+and its officers, directors, employees, agents, and licensors
+from and against any claims, damages, losses, liabilities,
+costs, and expenses (including reasonable attorneys' fees)
+arising out of or relating to:
+  - Your use or misuse of the Game
+  - Your violation of these Terms
+  - Your violation of any applicable law or regulation
+  - Your violation of any third-party rights
 
-13.2 Any dispute arising from these Terms or your use of the
-Game shall be resolved through binding arbitration in
-accordance with the rules of the American Arbitration
-Association, except where prohibited by law.
-
-13.3 You agree to waive any right to participate in a class
-action lawsuit or class-wide arbitration.
-
-13.4 Notwithstanding the above, either party may seek
-injunctive relief in any court of competent jurisdiction.
-
-============================================================
-14. GENERAL PROVISIONS
-============================================================
-
-14.1 ENTIRE AGREEMENT: These Terms, together with the Privacy
-Policy, constitute the entire agreement between you and us
-regarding the Game.
-
-14.2 SEVERABILITY: If any provision of these Terms is found
-to be unenforceable, the remaining provisions remain in full
-force and effect.
-
-14.3 WAIVER: Our failure to enforce any right or provision
-of these Terms does not constitute a waiver of that right
-or provision.
-
-14.4 ASSIGNMENT: You may not assign or transfer these Terms.
-We may assign our rights and obligations without restriction.
+This indemnification obligation will survive the termination
+of these Terms and your use of the Game.
 
 ============================================================
-15. MODIFICATIONS
+13. DISPUTE RESOLUTION AND ARBITRATION
+============================================================
+
+PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL
+RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT.
+
+13.1 INFORMAL RESOLUTION
+
+Before initiating any formal dispute resolution, you agree
+to first contact us at [YOUR_EMAIL] and attempt to resolve
+the dispute informally for at least 30 days.
+
+13.2 BINDING ARBITRATION
+
+If we cannot resolve a dispute informally, any dispute,
+claim, or controversy arising out of or relating to these
+Terms or the Game (except for claims described in Section
+13.5) shall be resolved by binding individual arbitration
+administered by the American Arbitration Association ("AAA")
+under its Consumer Arbitration Rules, or by JAMS under its
+Streamlined Arbitration Rules, at your election.
+
+The arbitration shall be conducted in the English language.
+The arbitrator's decision shall be final and binding and may
+be entered as a judgment in any court of competent
+jurisdiction.
+
+13.3 ARBITRATION FEES
+
+If you initiate arbitration, we will promptly reimburse your
+filing fee unless the arbitrator determines your claim is
+frivolous. Each party shall bear its own attorneys' fees
+unless the arbitrator awards fees to the prevailing party.
+
+13.4 CLASS ACTION WAIVER
+
+YOU AND WE EACH AGREE THAT ANY DISPUTE RESOLUTION
+PROCEEDINGS WILL BE CONDUCTED ONLY ON AN INDIVIDUAL BASIS
+AND NOT IN A CLASS, CONSOLIDATED, OR REPRESENTATIVE ACTION.
+
+You agree to waive any right to participate in a class action
+lawsuit, class-wide arbitration, or any other representative
+proceeding.
+
+If this class action waiver is found to be unenforceable,
+then the entirety of this arbitration provision shall be
+null and void, and the dispute shall proceed in court.
+
+13.5 EXCEPTIONS
+
+Notwithstanding the above, either party may:
+  - Seek injunctive or equitable relief in any court of
+    competent jurisdiction to protect intellectual property
+    rights
+  - Bring claims in small claims court if the claim qualifies
+
+13.6 OPT-OUT
+
+You may opt out of this arbitration provision by sending
+written notice to [YOUR_EMAIL] within 30 days of first
+downloading or using the Game. The notice must include your
+name and a clear statement that you wish to opt out of the
+arbitration provision. If you opt out, you may pursue claims
+in court.
+
+13.7 GOVERNING LAW
+
+These Terms shall be governed by and construed in accordance
+with the laws of the State of Delaware, United States,
+without regard to its conflict of law principles, except
+where preempted by federal law.
+
+For users outside the United States, these Terms shall not
+deprive you of any mandatory consumer protections afforded
+by the laws of your country of residence. In the event of
+a conflict between these Terms and mandatory local consumer
+protection laws, the local laws shall prevail to the extent
+of the conflict.
+
+13.8 STATUTE OF LIMITATIONS
+
+Any claim arising from these Terms or your use of the Game
+must be filed within one (1) year after the cause of action
+arises, or such claim is permanently barred. This limitation
+applies regardless of the discovery date.
+
+============================================================
+14. TERMINATION
+============================================================
+
+14.1 We may terminate or suspend your license to use the
+Game at any time, with or without cause, with or without
+notice, if we reasonably believe you have violated these
+Terms.
+
+14.2 You may terminate these Terms at any time by
+uninstalling the Game and all copies from your devices.
+
+14.3 Upon termination:
+  - Your license to use the Game is immediately revoked
+  - You must delete all copies of the Game from your devices
+  - Your locally stored save data may be retained on your
+    device until you manually delete it or uninstall the Game
+  - We have no obligation to provide any refund for the
+    premium purchase
+
+14.4 The following sections survive termination: 6 (IP),
+10 (Warranties), 11 (Liability), 12 (Indemnification),
+13 (Disputes), and 15 (General Provisions).
+
+============================================================
+15. GENERAL PROVISIONS
+============================================================
+
+15.1 ENTIRE AGREEMENT
+These Terms, together with the Privacy Policy, constitute
+the entire agreement between you and us regarding the Game
+and supersede all prior agreements, representations, and
+understandings.
+
+15.2 SEVERABILITY
+If any provision of these Terms is found to be invalid,
+illegal, or unenforceable by a court of competent
+jurisdiction, that provision shall be enforced to the maximum
+extent permissible, and the remaining provisions shall
+continue in full force and effect.
+
+15.3 WAIVER
+Our failure to enforce any right or provision of these Terms
+shall not constitute a waiver of that right or provision.
+Any waiver must be in writing and signed by us.
+
+15.4 ASSIGNMENT
+You may not assign or transfer these Terms or your rights
+under these Terms without our prior written consent. We may
+assign our rights and obligations under these Terms without
+restriction or notice.
+
+15.5 FORCE MAJEURE
+We shall not be liable for any failure or delay in
+performance due to causes beyond our reasonable control,
+including but not limited to acts of God, natural disasters,
+pandemics, government actions, or internet service failures.
+
+15.6 THIRD-PARTY BENEFICIARIES
+These Terms do not create any third-party beneficiary rights,
+except that Apple Inc. and Google LLC are intended third-party
+beneficiaries of these Terms to the extent required by their
+respective app store terms.
+
+15.7 APPLE-SPECIFIC TERMS
+If you downloaded the Game from the Apple App Store, you
+acknowledge that: (a) these Terms are between you and
+[YOUR_LEGAL_NAME], not Apple; (b) Apple has no obligation
+to furnish maintenance or support services for the Game;
+(c) in the event of any failure of the Game to conform to
+any applicable warranty, Apple's sole obligation is the
+refund of the purchase price (if any); (d) Apple is not
+responsible for any claims relating to the Game; and
+(e) Apple and its subsidiaries are third-party beneficiaries
+of these Terms.
+
+15.8 ELECTRONIC COMMUNICATIONS
+By using the Game, you consent to receiving electronic
+communications from us (via in-game notices) relating to
+these Terms or the Game. These electronic communications
+satisfy any legal requirement that communications be in
+writing.
+
+15.9 HEADINGS
+Section headings are for convenience only and do not affect
+the interpretation of these Terms.
+
+============================================================
+16. MODIFICATIONS TO THESE TERMS
 ============================================================
 
 We may update these Terms at any time. When we do:
   - The "Last updated" date will be revised
-  - Material changes will be communicated via in-game notice
-  - Continued use of the Game after changes constitutes
-    acceptance of the updated Terms
-  - If you disagree with the changes, you must stop using
-    the Game
+  - The version number will be incremented
+  - Material changes will be communicated via in-game
+    notice before they take effect
+  - Continued use of the Game after changes take effect
+    constitutes acceptance of the updated Terms
+  - If you disagree with the changes, your sole remedy is
+    to stop using and uninstall the Game
 
 ============================================================
-16. CONTACT
+17. CONTACT
 ============================================================
 
 For questions about these Terms:
 
-Email: [your-email@example.com]
+Developer: [YOUR_LEGAL_NAME]
+Email: [YOUR_EMAIL]
+Mailing address: [YOUR_ADDRESS]
 Subject line: "Venture Terms of Service Inquiry"
 
 ============================================================

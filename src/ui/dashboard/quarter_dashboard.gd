@@ -40,21 +40,21 @@ const MAX_VISIBLE_EVENTS := 10
 const HEADLINE_ROTATE_SECONDS := 4.0
 const DASHBOARD_REPORT_BULLET_LIMIT := 5
 
-const OFFICE_BANNER_PATHS := [
+const OFFICE_BANNER_PATHS: Array = [
 	"res://assets/office/office_0_garage.png",
 	"res://assets/office/office_1_coworking.png",
 	"res://assets/office/office_2_small.png",
 	"res://assets/office/office_3_hq.png",
 ]
-const QUARTER_TRANSITION_WHOOSH_PATHS := [
+const QUARTER_TRANSITION_WHOOSH_PATHS: Array = [
 	"res://assets/audio/sfx/quarter_whoosh.ogg",
 	"res://assets/audio/sfx/quarter_whoosh.wav",
 ]
-const QUARTER_TRANSITION_DING_PATHS := [
+const QUARTER_TRANSITION_DING_PATHS: Array = [
 	"res://assets/audio/sfx/quarter_ding.ogg",
 	"res://assets/audio/sfx/quarter_ding.wav",
 ]
-const OFFICE_WORKSPACE_STYLES := {
+const OFFICE_WORKSPACE_STYLES: Dictionary = {
 	0: {"rows": 1, "per_row": 3, "base_y_ratio": 0.70, "row_gap": 14.0, "desk_w": 16.0, "desk_h": 4.0},
 	1: {"rows": 1, "per_row": 5, "base_y_ratio": 0.66, "row_gap": 14.0, "desk_w": 17.0, "desk_h": 4.0},
 	2: {"rows": 2, "per_row": 5, "base_y_ratio": 0.60, "row_gap": 15.0, "desk_w": 18.0, "desk_h": 4.0},
@@ -93,6 +93,7 @@ var _key_metric_glossary_key: String = "valuation"
 # Idle engine / soft currency HUD
 var _chip_hud_label: Label
 var _passive_ticker_label: Label
+var _boost_idle_btn: Button
 var _offline_summary_backdrop: ColorRect
 
 # Previous stat values for animated counter rolls.
@@ -153,6 +154,7 @@ func _ready() -> void:
 	_refresh(GameState.current_quarter)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("dashboard")
+	AnimHelper.fade_in(self, 0.0, 0.16)
 
 	_build_dev_button()
 
@@ -391,7 +393,7 @@ func _play_synth_transition_sfx(freq_hz: float, duration_s: float, amp: float, d
 		playback.push_frame(Vector2(sample, sample))
 
 
-func _play_quarter_transition_placeholder() -> float:
+func _play_quarter_transition() -> float:
 	if quarter_transition_tint == null:
 		return 0.0
 	if _transition_tween != null and is_instance_valid(_transition_tween):
@@ -603,6 +605,7 @@ func _refresh(_q: int) -> void:
 	else:
 		runway_label.text = "~%d quarters" % roundi(rw)
 
+	_colorize_health_indicators(rw)
 	_refresh_deltas()
 	_refresh_headlines()
 	_refresh_ticker_strip()
@@ -657,6 +660,68 @@ func _apply_delta(lbl: Label, delta: float, higher_is_good: bool) -> void:
 		lbl.add_theme_color_override("font_color", Color(0.35, 0.85, 0.45))
 	else:
 		lbl.add_theme_color_override("font_color", Color(0.9, 0.4, 0.35))
+
+
+## Tint stat labels based on company health — instant visual feedback.
+func _colorize_health_indicators(runway_q: float) -> void:
+	# Cash coloring: green when healthy, gold when cautious, red when critical.
+	var cash: float = GameState.company.cash
+	var burn: float = maxf(GameState.financials.burn_rate, 1.0)
+	var comfort_cash: float = burn * 6.0  # 6 quarters of runway = comfortable
+
+	if cash <= 0:
+		cash_label.add_theme_color_override("font_color", ThemeManager.C_RED)
+	elif cash < burn * 2.0:
+		cash_label.add_theme_color_override("font_color", ThemeManager.C_RED)
+	elif cash < comfort_cash:
+		cash_label.add_theme_color_override("font_color", ThemeManager.C_GOLD)
+	else:
+		cash_label.add_theme_color_override("font_color", ThemeManager.C_GREEN)
+
+	# Runway coloring.
+	if runway_q == INF:
+		runway_label.add_theme_color_override("font_color", ThemeManager.C_GREEN)
+	elif runway_q < 0:
+		runway_label.add_theme_color_override("font_color", ThemeManager.C_RED)
+	elif runway_q < 2.0:
+		runway_label.add_theme_color_override("font_color", ThemeManager.C_RED)
+	elif runway_q < 4.0:
+		runway_label.add_theme_color_override("font_color", ThemeManager.C_GOLD)
+	else:
+		runway_label.add_theme_color_override("font_color", ThemeManager.C_GREEN)
+
+	# User count coloring: based on quarter-over-quarter growth trend.
+	var hist: Array = GameState.history
+	if hist.size() >= 2:
+		var prev_users: int = int(hist[-2].get("users", 0))
+		var curr_users: int = GameState.product.users
+		if curr_users > prev_users:
+			users_label.add_theme_color_override("font_color", ThemeManager.C_GREEN)
+		elif curr_users < prev_users:
+			users_label.add_theme_color_override("font_color", ThemeManager.C_RED)
+		else:
+			users_label.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+	else:
+		users_label.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+
+	# Revenue vs burn: green if profitable, gold if close, red if heavy losses.
+	var revenue: float = GameState.financials.revenue
+	if revenue >= burn:
+		revenue_label.add_theme_color_override("font_color", ThemeManager.C_GREEN)
+	elif revenue >= burn * 0.5:
+		revenue_label.add_theme_color_override("font_color", ThemeManager.C_GOLD)
+	elif revenue > 0:
+		revenue_label.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+	else:
+		revenue_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+
+	# Burn rate: red when high relative to cash, normal otherwise.
+	if burn > cash * 0.5 and cash > 0:
+		burn_label.add_theme_color_override("font_color", ThemeManager.C_RED)
+	elif burn > cash * 0.25 and cash > 0:
+		burn_label.add_theme_color_override("font_color", ThemeManager.C_GOLD)
+	else:
+		burn_label.add_theme_color_override("font_color", ThemeManager.C_TEXT)
 
 
 func _refresh_turn_summary() -> void:
@@ -894,6 +959,38 @@ func _show_advance_toast() -> void:
 	)
 
 
+func _show_quarter_juice() -> void:
+	var hist: Array = GameState.history
+	if hist.size() < 2:
+		return
+	var prev: Dictionary = _as_dict(hist[hist.size() - 2])
+	var curr: Dictionary = _as_dict(hist[hist.size() - 1])
+	var cash_delta: float = float(curr.get("cash", 0.0)) - float(prev.get("cash", 0.0))
+	var users_delta: int = int(curr.get("users", 0)) - int(prev.get("users", 0))
+
+	# Floating money delta near cash display.
+	if cash_label != null and absf(cash_delta) >= 100.0:
+		AnimHelper.float_money(cash_label, cash_delta)
+
+	# Floating users delta near the key metric area.
+	if key_metric_label != null and users_delta != 0:
+		AnimHelper.float_users(key_metric_label, users_delta)
+
+	# Screen shake on significant cash drops (losing > $20K) or big fundraise (gaining > $100K).
+	if cash_delta < -20_000.0:
+		AnimHelper.screen_shake(get_tree(), 0.3, 0.3)
+		AnimHelper.haptic(&"medium")
+	elif cash_delta > 100_000.0:
+		AnimHelper.screen_shake(get_tree(), 0.2, 0.25)
+		AnimHelper.haptic(&"medium")
+		SfxPlayer.play("cash_gain")
+	elif cash_delta > 0:
+		AnimHelper.haptic(&"light")
+
+	# Medium haptic on quarter advance.
+	AnimHelper.haptic(&"medium")
+
+
 func _delta_money_text(delta: float) -> String:
 	if absf(delta) < 1.0:
 		return "$0"
@@ -1089,10 +1186,11 @@ func _on_feature_shipped_dashboard(feature_name: String, quality: int) -> void:
 		return
 	var q_word := "great" if quality >= 70 else ("decent" if quality >= 45 else "rough")
 	_feature_banner.text = "Feature shipped: %s  (%s quality, %d/100) — check Product for details" % [feature_name, q_word, quality]
-	_feature_banner.modulate.a = 1.0
+	_feature_banner.modulate.a = 0.0
 	_feature_banner.visible = true
 	var tw := create_tween()
-	tw.tween_interval(5.0)
+	tw.tween_property(_feature_banner, "modulate:a", 1.0, 0.25).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(4.8)
 	tw.tween_property(_feature_banner, "modulate:a", 0.0, 0.8)
 	tw.tween_callback(func() -> void: _feature_banner.visible = false)
 
@@ -1148,7 +1246,7 @@ func _on_advance() -> void:
 	advance_btn.disabled = true
 	_set_advance_hint("Simulating quarter...", Color(0.6, 0.78, 0.95))
 	_update_advance_button_label()
-	var transition_hold: float = _play_quarter_transition_placeholder()
+	var transition_hold: float = _play_quarter_transition()
 	if transition_hold > 0.0:
 		await get_tree().create_timer(transition_hold).timeout
 	SceneLoader.free_children(event_log_container)
@@ -1174,6 +1272,7 @@ func _on_advance() -> void:
 		return
 	_play_transition_sfx("resolve")
 	_show_advance_toast()
+	_show_quarter_juice()
 	Analytics.track_revenue(GameState.financials.revenue)
 
 	_show_quarterly_report()
@@ -1226,13 +1325,6 @@ func _on_event_resolved(_event: EventData, _choice_index: int) -> void:
 	_update_advance_button_label()
 	_show_next_event()
 
-
-const GAME_OVER_MESSAGES := {
-	"bankruptcy": "Out of Money",
-	"dead_product": "No Users Left",
-	"founder_burnout": "Founder Burnout",
-	"board_takeover": "Board Replaced You",
-}
 
 func _on_game_over(reason: String) -> void:
 	Analytics.track_game_over(reason, GameState.current_year, GameState.current_quarter)
@@ -1364,22 +1456,6 @@ func _office_accent_color() -> Color:
 			return base
 
 
-func _assignment_color(assignment: int) -> Color:
-	match assignment:
-		EmployeeData.Assignment.FEATURES:
-			return Color(0.38, 0.88, 0.52, 0.95)
-		EmployeeData.Assignment.BUGS:
-			return Color(0.95, 0.58, 0.42, 0.95)
-		EmployeeData.Assignment.TECH_DEBT:
-			return Color(0.9, 0.78, 0.35, 0.95)
-		EmployeeData.Assignment.INFRA:
-			return Color(0.42, 0.72, 0.96, 0.95)
-		EmployeeData.Assignment.RND:
-			return Color(0.74, 0.56, 0.95, 0.95)
-		_:
-			return Color(0.7, 0.7, 0.75, 0.9)
-
-
 func _refresh_team() -> void:
 	SceneLoader.free_children(team_container)
 
@@ -1439,7 +1515,7 @@ func _show_quarterly_report() -> void:
 		var b: String = bullets[i]
 		lines.append("• " + b)
 	if bullets.size() > DASHBOARD_REPORT_BULLET_LIMIT:
-		lines.append("• ...more notes available next quarter as conditions evolve")
+		lines.append("• ...and %d more items (check Finances for the full picture)" % [bullets.size() - DASHBOARD_REPORT_BULLET_LIMIT])
 	report_body.text = "\n".join(lines)
 	report_panel.visible = true
 
@@ -1525,12 +1601,52 @@ func _build_passive_ticker() -> void:
 	_passive_ticker_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_passive_ticker_label.offset_bottom = -4
 	_passive_ticker_label.offset_left   = 8
-	_passive_ticker_label.offset_right  = 320
+	_passive_ticker_label.offset_right  = 240
 	_passive_ticker_label.offset_top    = -22
 	_passive_ticker_label.z_index = 5
 	_passive_ticker_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_passive_ticker_label.text = ""
 	add_child(_passive_ticker_label)
+	_build_boost_idle_button()
+
+
+func _build_boost_idle_button() -> void:
+	var cost: int = CurrencyManager.COST_DOUBLE_IDLE
+	_boost_idle_btn = Button.new()
+	_boost_idle_btn.text = "2× (%d)" % cost
+	_boost_idle_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+	_boost_idle_btn.add_theme_color_override("font_color", ThemeManager.C_CHIP)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.10, 0.12, 0.20, 0.7)
+	style.set_corner_radius_all(ThemeManager.CORNER_SM)
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	style.content_margin_top = 2
+	style.content_margin_bottom = 2
+	_boost_idle_btn.add_theme_stylebox_override("normal", style)
+	var hover := style.duplicate() as StyleBoxFlat
+	hover.bg_color = style.bg_color.lightened(0.08)
+	_boost_idle_btn.add_theme_stylebox_override("hover", hover)
+	_boost_idle_btn.add_theme_stylebox_override("pressed", style)
+	_boost_idle_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_boost_idle_btn.offset_left = 244
+	_boost_idle_btn.offset_right = 320
+	_boost_idle_btn.offset_bottom = -2
+	_boost_idle_btn.offset_top = -24
+	_boost_idle_btn.z_index = 6
+	_boost_idle_btn.visible = false
+	_boost_idle_btn.pressed.connect(_on_boost_idle)
+	add_child(_boost_idle_btn)
+
+
+func _on_boost_idle() -> void:
+	if not CurrencyManager.spend_double_idle():
+		return
+	AnimHelper.float_text(self, "2× income for 1 hour!",
+		ThemeManager.C_CHIP, Vector2(size.x * 0.5, size.y - 40))
+	SfxPlayer.play("chip_spend")
+	AnimHelper.haptic(&"light")
+	_update_boost_idle_visibility()
 
 
 func _update_chip_hud() -> void:
@@ -1552,10 +1668,21 @@ func _on_passive_tick(amount: float) -> void:
 		return
 	if amount < 1.0:
 		_passive_ticker_label.text = ""
+		_update_boost_idle_visibility()
 		return
 	var mult := CurrencyManager.idle_multiplier()
 	var mult_str := " (2×)" if mult > 1.0 else ""
 	_passive_ticker_label.text = "+%s passive%s" % [SceneLoader.format_money(amount), mult_str]
+	_update_boost_idle_visibility()
+
+
+func _update_boost_idle_visibility() -> void:
+	if _boost_idle_btn == null:
+		return
+	var has_revenue: bool = GameState.financials != null and GameState.financials.revenue > 0.0
+	var boost_active: bool = CurrencyManager.double_idle_remaining() > 0
+	var can_pay: bool = CurrencyManager.can_afford(CurrencyManager.COST_DOUBLE_IDLE)
+	_boost_idle_btn.visible = has_revenue and not boost_active and can_pay and GameState.is_game_active
 
 
 func _show_offline_summary(payload: Dictionary) -> void:

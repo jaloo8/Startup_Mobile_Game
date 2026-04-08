@@ -1,0 +1,286 @@
+VENTURE — SUPPORT AND FREQUENTLY ASKED QUESTIONS
+Last updated: April 7, 2026
+
+============================================================
+CONTACT US
+============================================================
+
+Developer: [YOUR_LEGAL_NAME]
+Email: [YOUR_EMAIL]
+Subject line: "Venture Support"
+
+We aim to respond to all inquiries within 72 hours.
+
+============================================================
+ABOUT VENTURE
+============================================================
+
+Venture is a premium mobile startup simulation game where
+you build a tech company from a garage to IPO. Make strategic
+decisions about hiring, product development, fundraising,
+and operations across 20-40 quarters of gameplay.
+
+  Platform: iOS and Android
+  Price: Free trial (8 quarters), then $2.99 one-time unlock
+  Age rating: 13+
+  Internet required: No (offline single-player)
+  Accounts required: No (no login or registration needed)
+
+============================================================
+FREQUENTLY ASKED QUESTIONS
+============================================================
+
+------------------------------------------------------------
+GETTING STARTED
+------------------------------------------------------------
+
+Q: How do I start playing?
+
+A: Download Venture from the App Store or Google Play. Tap
+"New Game" on the main menu, choose your company type (SaaS,
+Consumer App, Marketplace, or Dev Tools), select a difficulty,
+and start building your startup. A short tutorial will guide
+you through the basics on your first run.
+
+
+Q: Is the game free?
+
+A: Venture offers a free trial covering the first 8 quarters
+(2 in-game years) of gameplay. After that, a one-time
+purchase of $2.99 unlocks the full game permanently. There
+are no subscriptions, no additional purchases, and no ads.
+
+
+Q: What age is the game for?
+
+A: Venture is intended for players aged 13 and older. The
+game involves business strategy concepts like hiring,
+fundraising, and financial management.
+
+------------------------------------------------------------
+PURCHASES AND PAYMENT
+------------------------------------------------------------
+
+Q: How do I unlock the full game?
+
+A: When you reach the end of the free trial (Year 2,
+Quarter 4), you will see a screen offering the full game
+unlock for $2.99. Tap "Unlock Full Game" to purchase through
+your device's app store (Apple App Store or Google Play).
+
+
+Q: I already purchased the game but it is showing as locked.
+   How do I fix this?
+
+A: Go to the Game's Settings screen or the paywall screen
+and tap "Restore Purchase." Make sure you are signed into
+the same Apple ID or Google account you used for the original
+purchase. If the issue persists, try the following:
+
+  1. Ensure you have an internet connection
+  2. Sign out and back into your app store account
+  3. Restart the Game
+  4. Restart your device
+
+If none of these steps work, contact us at [YOUR_EMAIL] with
+your purchase receipt (available in your app store purchase
+history).
+
+
+Q: Can I get a refund?
+
+A: We do not process refunds directly. Refunds are handled
+by the platform where you made your purchase:
+
+  Apple App Store:
+  https://support.apple.com/en-us/HT204084
+
+  Google Play Store:
+  https://support.google.com/googleplay/answer/2479637
+
+
+Q: Can I transfer my purchase between iOS and Android?
+
+A: No. Purchases made on the Apple App Store cannot be
+transferred to Google Play, and vice versa. Each platform
+manages purchases independently.
+
+------------------------------------------------------------
+SAVE DATA AND GAME PROGRESS
+------------------------------------------------------------
+
+Q: Where is my game data stored?
+
+A: All save data is stored locally on your device. We do not
+store your game data on any server or cloud service.
+
+
+Q: How do I back up my save data?
+
+A: Use your device's built-in backup features:
+  - iOS: Enable iCloud backup or connect to a computer
+    and back up through Finder/iTunes
+  - Android: Enable Google backup in your device settings
+
+
+Q: I lost my save data. Can you recover it?
+
+A: Unfortunately, no. Because all data is stored locally on
+your device, we cannot access or recover your save data. The
+Game does include automatic backup and recovery for save file
+corruption, but if the app is uninstalled or the device is
+reset, the data cannot be recovered.
+
+
+Q: How many save slots do I have?
+
+A: Free trial users have 2 save slots. Premium users (after
+purchasing the full game) have 5 save slots.
+
+------------------------------------------------------------
+GAMEPLAY
+------------------------------------------------------------
+
+Q: How long is a full game?
+
+A: A typical game runs 20-40 quarters (5-10 in-game startup
+years). Each quarter takes roughly 5-15 minutes to play,
+so a full game takes several hours spread across multiple
+sessions.
+
+
+Q: What are the different company types?
+
+A: You can build one of four types of startup:
+  - SaaS (Software as a Service): B2B subscription software
+  - Consumer App: Consumer-facing mobile/web application
+  - Marketplace: Two-sided marketplace platform
+  - Dev Tools: Developer-focused tools and APIs
+
+Each type has unique revenue models, growth dynamics, and
+strategic considerations.
+
+
+Q: How do I win?
+
+A: You can achieve victory by reaching a sustainable scale
+with 6 consecutive profitable quarters after Year 5, meeting
+type-specific growth thresholds. You can also continue
+playing after victory in sandbox mode.
+
+
+Q: The game seems too hard / too easy. What can I do?
+
+A: Venture offers three difficulty levels:
+  - Sandbox: Relaxed mode for learning the mechanics
+  - Normal: Balanced challenge
+  - Hardcore: Demanding survival mode
+
+You can also try different company types and niches, which
+each present unique strategic challenges.
+
+------------------------------------------------------------
+PRIVACY AND DATA
+------------------------------------------------------------
+
+Q: What data does the game collect?
+
+A: For premium users (paid): NONE. No data is collected.
+
+For free trial users: Anonymous gameplay analytics only,
+with your consent and after age confirmation (13+). This
+includes things like how far you get in the game, which
+features you use, and basic device info. No personal
+information is ever collected. You can disable analytics
+anytime in Settings. See our full Privacy Policy for details.
+
+
+Q: Does the game have ads?
+
+A: No. Venture is a premium game with no advertisements.
+
+
+Q: Does the game track me across other apps?
+
+A: No. We do not engage in any cross-app or cross-site
+tracking. We do not use advertising identifiers.
+
+
+Q: How do I disable analytics?
+
+A: Go to Settings from the main menu and toggle off
+"Share anonymous gameplay data." Analytics can also be
+permanently disabled by purchasing the full game.
+
+------------------------------------------------------------
+TECHNICAL ISSUES
+------------------------------------------------------------
+
+Q: The game is crashing. What should I do?
+
+A: Try the following steps:
+  1. Close the Game completely and reopen it
+  2. Restart your device
+  3. Ensure your device's operating system is up to date
+  4. Ensure you have the latest version of Venture installed
+  5. If the issue persists, contact us at [YOUR_EMAIL]
+     with your device model, OS version, and a description
+     of when the crash occurs
+
+
+Q: The game runs slowly on my device. What can I do?
+
+A: Venture is designed to run well on a wide range of
+devices. If you experience performance issues:
+  1. Close other apps running in the background
+  2. Restart your device
+  3. Make sure you are running the latest version of the Game
+  4. Contact us if the issue persists
+
+
+Q: The game is not available in my country.
+
+A: Venture is intended to be available worldwide. If you
+cannot find it in your local app store, it may be due to
+regional availability restrictions set by the platform.
+Please contact us and we will look into it.
+
+------------------------------------------------------------
+FEEDBACK AND BUG REPORTS
+------------------------------------------------------------
+
+Q: How do I report a bug?
+
+A: Send an email to [YOUR_EMAIL] with the subject line
+"Venture Bug Report" and include:
+  - Your device model (e.g., iPhone 14, Galaxy S24)
+  - Your operating system version (e.g., iOS 18.2,
+    Android 15)
+  - The version of Venture you are running (found in
+    the Settings screen)
+  - A description of what happened and when
+  - Steps to reproduce the issue, if possible
+
+
+Q: Can I suggest a feature?
+
+A: Absolutely! We welcome feedback and feature suggestions.
+Send an email to [YOUR_EMAIL] with the subject line
+"Venture Feature Suggestion" and describe your idea.
+
+============================================================
+LEGAL
+============================================================
+
+Privacy Policy: Available in the Game (Settings screen) and
+  as PRIVACY_POLICY.txt in the app bundle
+Terms of Service: Available as TERMS_OF_SERVICE.txt in the
+  app bundle
+
+For privacy-related inquiries, data access, or deletion
+requests, email [YOUR_EMAIL] with the subject line
+"Venture Privacy Inquiry."
+
+============================================================
+
+Thank you for playing Venture!

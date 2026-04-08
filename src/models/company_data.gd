@@ -42,25 +42,25 @@ enum HostingPlan { MANAGED_CLOUD, HYBRID, IN_HOUSE }
 @export var hosting_data_center_pressure: float = 0.0
 @export var marketing_budget: float = 0.0
 
-const OFFICE_CAPACITY := {0: 4, 1: 10, 2: 25, 3: 60}
-const OFFICE_NAMES := {0: "Garage", 1: "Small Office", 2: "Mid-Size Office", 3: "HQ"}
+const OFFICE_CAPACITY: Dictionary = {0: 4, 1: 10, 2: 25, 3: 60}
+const OFFICE_NAMES: Dictionary = {0: "Garage", 1: "Small Office", 2: "Mid-Size Office", 3: "HQ"}
 const HOSTING_LANE_UPGRADE_MAX := 6
 const HOSTING_OPTIMIZATION_MAX := 4
 
-const TYPE_NAMES := {
+const TYPE_NAMES: Dictionary = {
 	CompanyType.SAAS: "SaaS B2B",
 	CompanyType.CONSUMER: "Consumer App",
 	CompanyType.MARKETPLACE: "Marketplace",
 	CompanyType.DEV_TOOLS: "Dev Tools",
 }
-const HOSTING_PLAN_NAMES := {
+const HOSTING_PLAN_NAMES: Dictionary = {
 	HostingPlan.MANAGED_CLOUD: "Managed Cloud",
 	HostingPlan.HYBRID: "Hybrid",
 	HostingPlan.IN_HOUSE: "In-house",
 }
 
 const NICHES_PATH := "res://src/data/niches.json"
-const DEFAULT_NICHE_MODIFIERS := {
+const DEFAULT_NICHE_MODIFIERS: Dictionary = {
 	"growth_mult": 1.0,
 	"churn_mult": 1.0,
 	"revenue_mult": 1.0,
@@ -68,7 +68,7 @@ const DEFAULT_NICHE_MODIFIERS := {
 
 static var _niche_catalog: Dictionary = {}
 
-const FOUNDER_ARCHETYPES := {
+const FOUNDER_ARCHETYPES: Dictionary = {
 	FounderBackground.ENGINEER: {
 		"name": "Engineer",
 		"desc": "Technical founder — ships fast, writes code, knows the product inside out.",
@@ -91,7 +91,7 @@ const FOUNDER_ARCHETYPES := {
 	},
 }
 
-const FOUNDER_BACKGROUND_NAMES := {
+const FOUNDER_BACKGROUND_NAMES: Dictionary = {
 	FounderBackground.ENGINEER: "Engineer",
 	FounderBackground.FINANCE: "Finance",
 	FounderBackground.RECRUITER: "Recruiter",

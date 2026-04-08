@@ -20,18 +20,18 @@ extends Control
 
 const MAX_VISIBLE_FEATURES := 50
 
-const VISUAL_PRESET_LABELS := [
+const VISUAL_PRESET_LABELS: Array = [
 	"Live run",
 	"Starter shell",
 	"Engagement core",
 	"Monetization",
 	"Fully built",
 ]
-const SHOWCASE_PRESET_ORDER := [1, 2, 3, 4]
+const SHOWCASE_PRESET_ORDER: Array = [1, 2, 3, 4]
 const SHOWCASE_STEP_SECONDS := 2.8
 const PRODUCT_PREVIEW_PROTOTYPES_PATH := "res://src/data/product_preview_prototypes.json"
 
-const VISUAL_PRESET_FEATURES := {
+const VISUAL_PRESET_FEATURES: Dictionary = {
 	CompanyData.CompanyType.CONSUMER: [
 		[],
 		["profile_pages", "push_notifications"],
@@ -64,6 +64,8 @@ const VISUAL_PRESET_FEATURES := {
 
 # Dynamically created ETA + team info label below the build bar
 var _eta_label: Label
+# Chip-spend boost button below the ETA label
+var _boost_btn: Button
 # Celebration banner shown when a feature ships
 var _celebration_panel: PanelContainer
 # Confetti particle system for feature ship moments
@@ -159,6 +161,43 @@ func _build_eta_label() -> void:
 		var idx := build_progress.get_index()
 		parent.add_child(_eta_label)
 		parent.move_child(_eta_label, idx + 1)
+	_build_boost_button()
+
+
+func _build_boost_button() -> void:
+	var cost: int = CurrencyManager.COST_FEATURE_BOOST
+	_boost_btn = Button.new()
+	_boost_btn.text = "Boost +10%% (%d chips)" % cost
+	_boost_btn.custom_minimum_size = Vector2(0, 40)
+	_boost_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	_boost_btn.add_theme_color_override("font_color", ThemeManager.C_CHIP)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.10, 0.12, 0.20, 0.5)
+	style.set_corner_radius_all(ThemeManager.CORNER_MD)
+	style.set_content_margin_all(6.0)
+	_boost_btn.add_theme_stylebox_override("normal", style)
+	var hover := style.duplicate() as StyleBoxFlat
+	hover.bg_color = style.bg_color.lightened(0.08)
+	_boost_btn.add_theme_stylebox_override("hover", hover)
+	_boost_btn.add_theme_stylebox_override("pressed", style)
+	_boost_btn.pressed.connect(_on_feature_boost)
+	_boost_btn.visible = false
+	if _eta_label:
+		var parent := _eta_label.get_parent()
+		if parent:
+			var idx := _eta_label.get_index()
+			parent.add_child(_boost_btn)
+			parent.move_child(_boost_btn, idx + 1)
+
+
+func _on_feature_boost() -> void:
+	if not CurrencyManager.spend_feature_boost():
+		return
+	AnimHelper.float_text(build_progress, "+10%%",
+		ThemeManager.C_GREEN, Vector2(build_progress.size.x * 0.5, 0))
+	SfxPlayer.play("chip_spend")
+	AnimHelper.haptic(&"light")
+	_refresh_build_status()
 
 
 func _product_root_vbox() -> VBoxContainer:
@@ -308,7 +347,7 @@ func _load_product_preview_prototypes() -> Array[Dictionary]:
 		return _fallback_product_preview_prototypes()
 
 	var root: Dictionary = json.data
-	var rows = root.get(type_key, [])
+	var rows: Variant = root.get(type_key, [])
 	if not (rows is Array):
 		return _fallback_product_preview_prototypes()
 
@@ -586,6 +625,55 @@ func _refresh() -> void:
 		lbl.add_theme_color_override("font_color", color)
 		feature_list_container.add_child(lbl)
 
+	_build_synergy_section()
+
+
+func _build_synergy_section() -> void:
+	var all_synergies: Array[Dictionary] = SynergyEngine.get_all_with_status()
+	if all_synergies.is_empty():
+		return
+
+	var fired_count: int = 0
+	for syn: Dictionary in all_synergies:
+		if syn.get("fired", false):
+			fired_count += 1
+
+	# Only show the section once the player has shipped at least 2 features.
+	if GameState.product == null or GameState.product.feature_count() < 2:
+		return
+
+	# Separator before synergies.
+	var sep := HSeparator.new()
+	sep.add_theme_color_override("color", Color(0.20, 0.24, 0.40, 0.6))
+	feature_list_container.add_child(sep)
+
+	var header := Label.new()
+	header.text = "Synergies  %d / %d" % [fired_count, all_synergies.size()]
+	header.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	header.add_theme_color_override("font_color", ThemeManager.C_PURPLE)
+	feature_list_container.add_child(header)
+
+	for syn: Dictionary in all_synergies:
+		var row := Label.new()
+		var icon: String = syn.get("icon", "✨")
+		var sname: String = syn.get("name", "Unknown")
+		var desc: String = syn.get("description", "")
+		var is_fired: bool = syn.get("fired", false)
+
+		if is_fired:
+			row.text = "%s %s — %s" % [icon, sname, desc]
+			row.add_theme_font_size_override("font_size", 13)
+			row.add_theme_color_override("font_color", ThemeManager.C_GOLD)
+		else:
+			# Show locked synergies with hints about required features.
+			var req: Array = syn.get("required_features", []) if syn.get("required_features") is Array else []
+			row.text = "🔒 %s — %d features required" % [sname, req.size()]
+			row.add_theme_font_size_override("font_size", 13)
+			row.add_theme_color_override("font_color", Color(0.38, 0.40, 0.48))
+
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		feature_list_container.add_child(row)
+
 
 func _refresh_build_status() -> void:
 	var p: ProductData = GameState.product
@@ -606,6 +694,8 @@ func _refresh_build_status() -> void:
 		build_progress.max_value = 100
 		pick_btn.text = "Choose Next Feature"
 		pick_btn.disabled = false
+		if _boost_btn:
+			_boost_btn.visible = false
 		if _eta_label:
 			if engineers_on_features == 0:
 				_eta_label.text = "Tip: assign your team to Features (in People) to start building"
@@ -633,6 +723,9 @@ func _refresh_build_status() -> void:
 				_eta_label.add_theme_color_override("font_color", Color(0.9, 0.5, 0.3))
 			else:
 				_eta_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
+		if _boost_btn:
+			var can_boost: bool = p.feature_progress < cost and CurrencyManager.can_afford(CurrencyManager.COST_FEATURE_BOOST)
+			_boost_btn.visible = can_boost
 
 
 func _build_eta_text(p: ProductData, target: Dictionary, engineer_count: int, total_output: float) -> String:
@@ -759,6 +852,9 @@ func _on_feature_shipped(feature_name: String, quality: int) -> void:
 
 	_fire_confetti(quality_color)
 	SfxPlayer.play("feature_ship")
+	AnimHelper.haptic(&"medium")
+	ToastManager.show("Feature shipped: %s!" % feature_name, "🚀", ThemeManager.C_GREEN)
+	AnimHelper.screen_shake(get_tree(), 0.15, 0.2)
 
 	var lbl := _celebration_panel.get_node_or_null("CelebLabel") as Label
 	if lbl:
@@ -783,7 +879,26 @@ func _on_feature_shipped(feature_name: String, quality: int) -> void:
 	tw.tween_property(_celebration_panel, "modulate:a", 0.0, 0.5)
 	tw.tween_callback(func() -> void: _celebration_panel.visible = false)
 
+	# Show synergy near-miss hints after a feature ships.
+	_show_synergy_hints()
+
 	_refresh()
+
+
+func _show_synergy_hints() -> void:
+	# Show a toast if the player is one feature away from a synergy combo.
+	var near_misses: Array[Dictionary] = SynergyEngine.get_near_misses(GameState)
+	if near_misses.is_empty():
+		return
+	# Only hint for the first near-miss to avoid toast spam.
+	var hint: Dictionary = near_misses[0]
+	var icon: String = hint.get("icon", "✨")
+	var name: String = hint.get("name", "Synergy")
+	var missing: String = hint.get("missing_feature", "one more feature")
+	# Delayed toast so it appears after the feature-ship celebration fades.
+	get_tree().create_timer(4.5).timeout.connect(func() -> void:
+		ToastManager.show("Almost there: %s needs %s" % [name, missing], icon, ThemeManager.C_PURPLE)
+	)
 
 
 func _play_visual_hook_flash() -> void:
@@ -835,9 +950,12 @@ func _on_product_demo(feature_id: String) -> void:
 
 
 func _on_pick_feature() -> void:
-	picker_panel.visible = not picker_panel.visible
 	if picker_panel.visible:
-		_refresh_picker()
+		AnimHelper.pop_out(picker_panel, 0.16, func() -> void: picker_panel.visible = false)
+		return
+	picker_panel.visible = true
+	_refresh_picker()
+	AnimHelper.pop_in(picker_panel, 0.0, 0.22)
 
 
 func _refresh_picker() -> void:
@@ -856,6 +974,7 @@ func _refresh_picker() -> void:
 		var card := _create_feature_card(fdef)
 		picker_container.add_child(card)
 	UITouchHelper.harden_tree(picker_panel)
+	AnimHelper.stagger_list(picker_container)
 
 
 func _create_feature_card(fdef: Dictionary) -> PanelContainer:
@@ -927,8 +1046,10 @@ func _create_feature_card(fdef: Dictionary) -> PanelContainer:
 func _on_select_feature(fdef: Dictionary) -> void:
 	GameState.product.target_feature_id = fdef.get("id", "")
 	GameState.product.feature_progress = 0.0
-	picker_panel.visible = false
-	_refresh()
+	AnimHelper.pop_out(picker_panel, 0.14, func() -> void:
+		picker_panel.visible = false
+		_refresh()
+	)
 
 
 func _refresh_milestone_roadmap() -> void:
@@ -1005,7 +1126,7 @@ func _get_next_milestones() -> Array[Dictionary]:
 	var features: int = p.feature_count()
 
 	# User milestones
-	var user_targets := [100, 1_000, 10_000, 50_000, 100_000]
+	var user_targets: Array = [100, 1_000, 10_000, 50_000, 100_000]
 	for target in user_targets:
 		if users < target:
 			result.append({
@@ -1022,7 +1143,7 @@ func _get_next_milestones() -> Array[Dictionary]:
 			})
 
 	# Feature milestones
-	var feat_targets := [1, 3, 5, 8, 10]
+	var feat_targets: Array = [1, 3, 5, 8, 10]
 	for target in feat_targets:
 		if features < target:
 			result.append({
@@ -1040,7 +1161,7 @@ func _get_next_milestones() -> Array[Dictionary]:
 
 	# Revenue milestone
 	var rev: float = GameState.financials.revenue
-	var rev_targets := [1.0, 1_000.0, 10_000.0, 100_000.0, 1_000_000.0]
+	var rev_targets: Array = [1.0, 1_000.0, 10_000.0, 100_000.0, 1_000_000.0]
 	for target in rev_targets:
 		if rev < target:
 			result.append({

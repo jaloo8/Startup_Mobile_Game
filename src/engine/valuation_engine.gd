@@ -19,7 +19,8 @@ static func estimate(state: Node) -> float:
 	var estimated: float = base * growth_mult * economy_mult * reputation_mult * team_mult
 	estimated = maxf(0.0, snappedf(estimated, 10_000.0))
 
-	var fundraise_floor: float = _fundraise_floor(financials)
+	var total_q: int = int(state.current_quarter) + (int(state.current_year) - 1) * 4
+	var fundraise_floor: float = _fundraise_floor(financials, total_q)
 	return maxf(estimated, fundraise_floor)
 
 
@@ -30,8 +31,13 @@ static func _base_valuation(type: CompanyData.CompanyType, product: ProductData,
 		CompanyData.CompanyType.SAAS:
 			return arr * 12.0
 		CompanyData.CompanyType.CONSUMER:
-			var per_user := lerpf(5.0, 20.0, clampf(product.dau / maxf(1.0, float(product.users)), 0.0, 1.0))
-			return product.users * per_user
+			# Consumer valuations blend per-user value (engagement-weighted) with
+			# an ARR component so revenue-generating consumer apps aren't punished.
+			var dau_ratio: float = clampf(product.dau / maxf(1.0, float(product.users)), 0.0, 1.0)
+			var per_user: float = lerpf(8.0, 35.0, dau_ratio)
+			var user_val: float = product.users * per_user
+			var revenue_val: float = arr * 8.0
+			return maxf(user_val, revenue_val)
 		CompanyData.CompanyType.MARKETPLACE:
 			var gmv_run_rate: float = product.users * 50.0 * 4.0
 			return gmv_run_rate * 2.5 + product.users * 3.0
@@ -76,10 +82,18 @@ static func _economy_multiplier(economy: MarketData.EconomyState) -> float:
 	return 1.0
 
 
-static func _fundraise_floor(financials: FinancialsData) -> float:
+static func _fundraise_floor(financials: FinancialsData, total_quarter: int) -> float:
 	if financials.funding_rounds.is_empty():
 		return 0.0
 	var last_round: Dictionary = financials.funding_rounds[-1]
 	var last_val: float = last_round.get("valuation", 0.0)
 	var last_amount: float = last_round.get("amount", 0.0)
-	return last_val + last_amount
+	var floor_val: float = last_val + last_amount
+	# Fundraise floor decays gently over time — stale rounds shouldn't prop up
+	# a failing company forever.  Lose ~8% of floor per quarter after 4 quarters.
+	var round_quarter: int = int(last_round.get("quarter", 0))
+	var quarters_since: int = maxi(0, total_quarter - round_quarter)
+	if quarters_since > 4:
+		var decay: float = pow(0.92, float(quarters_since - 4))
+		floor_val *= clampf(decay, 0.3, 1.0)
+	return floor_val

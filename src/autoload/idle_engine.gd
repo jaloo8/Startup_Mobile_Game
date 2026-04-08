@@ -55,6 +55,8 @@ var _tick_timer: float = 0.0
 
 ## True once the "while you were away" flow has been triggered this session.
 var _offline_processed: bool = false
+## Guard against re-entering _process_offline_income (e.g. rapid focus changes).
+var _offline_calculated: bool = false
 
 
 # ---------------------------------------------------------------------------
@@ -148,7 +150,8 @@ func _passive_rate_per_sec() -> float:
 		return 0.0
 	var quarterly_rev := maxf(0.0, GameState.financials.revenue)
 	# Quarterly = 3 months ≈ 91.25 days ≈ 7,884,000 seconds
-	return (quarterly_rev * OFFLINE_RATE_PER_HOUR) / 3_600.0
+	var base_rate := (quarterly_rev * OFFLINE_RATE_PER_HOUR) / 3_600.0
+	return base_rate * CurrencyManager.idle_multiplier()
 
 
 func _offline_elapsed_seconds() -> float:
@@ -159,6 +162,10 @@ func _offline_elapsed_seconds() -> float:
 
 
 func _process_offline_income() -> void:
+	if _offline_calculated:
+		return
+	_offline_calculated = true
+
 	var elapsed_sec := _offline_elapsed_seconds()
 	if elapsed_sec < 60.0:
 		# Less than a minute — not worth showing a summary.
@@ -171,13 +178,15 @@ func _process_offline_income() -> void:
 		return
 
 	var quarterly_rev := maxf(0.0, GameState.financials.revenue)
-	var offline_income := quarterly_rev * OFFLINE_RATE_PER_HOUR * elapsed_hours
+	var offline_income := quarterly_rev * OFFLINE_RATE_PER_HOUR * elapsed_hours * CurrencyManager.idle_multiplier()
 	offline_income = snappedf(offline_income, 1.0)
 
 	if offline_income > 1.0:
 		pending_income += offline_income
 		# Signal will be picked up by the dashboard to show the summary panel.
 		call_deferred("_emit_offline_ready")
+	else:
+		_offline_processed = true
 
 
 func _emit_offline_ready() -> void:
@@ -218,7 +227,7 @@ func _load_settings_dict() -> Dictionary:
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
 		return {}
-	var parsed = JSON.parse_string(f.get_as_text())
+	var parsed: Variant = JSON.parse_string(f.get_as_text())
 	if parsed is Dictionary:
 		return parsed
 	return {}

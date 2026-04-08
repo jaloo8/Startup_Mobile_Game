@@ -4,7 +4,7 @@ extends Control
 @onready var back_btn: Button = %BackButton
 @onready var slot_container: VBoxContainer = %SlotContainer
 
-const SLOT_NAMES := ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
+const SLOT_NAMES: Array = ["slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
 
 var _card_style: StyleBoxFlat
 var _empty_style: StyleBoxFlat

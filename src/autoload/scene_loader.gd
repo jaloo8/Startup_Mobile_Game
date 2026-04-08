@@ -15,7 +15,7 @@ const WIPE_COLOR := Color(0.02, 0.04, 0.08, 1.0)
 const WIPE_FADE_OUT := 0.14  # seconds to fade to black
 const WIPE_FADE_IN  := 0.20  # seconds to fade from black
 
-const PRELOAD_SCENES := [
+const PRELOAD_SCENES: Array = [
 	"res://src/ui/main_menu/main_menu.tscn",
 	"res://src/ui/setup/new_game.tscn",
 	"res://src/ui/dashboard/quarter_dashboard.tscn",

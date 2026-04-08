@@ -12,14 +12,14 @@ extends Control
 @onready var restart_btn: Button = %RestartButton
 @onready var menu_btn: Button = %MenuButton
 
-const GAME_OVER_MESSAGES := {
+const GAME_OVER_MESSAGES: Dictionary = {
 	"bankruptcy": "You Ran Out of Money",
 	"dead_product": "Nobody's Using Your Product",
 	"founder_burnout": "Founder Burnout",
 	"board_takeover": "The Board Replaced You",
 }
 
-const ANGELS := [
+const ANGELS: Array = [
 	{
 		"name": "Peer Gregor",
 		"firm": "Gregor Ventures",
@@ -83,6 +83,10 @@ func _ready() -> void:
 		GameState.employees.size(),
 		GameState.product.feature_count() if GameState.product else 0,
 	]
+
+	_build_founder_score()
+	_build_prestige_summary()
+	SfxPlayer.play("game_over")
 
 	if GameState.angel_bailout_used:
 		angel_panel.visible = false
@@ -156,6 +160,135 @@ func _on_restart() -> void:
 
 func _on_menu() -> void:
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+
+
+func _build_founder_score() -> void:
+	var result: Dictionary = ScoringEngine.calculate(GameState)
+	var grade: String = result.get("grade", "F")
+	var score: int = result.get("score", 0)
+	var grade_color: Color = result.get("grade_color", Color.WHITE)
+	var summary: String = result.get("summary", "")
+
+	# Add score section after stats.
+	var score_section := VBoxContainer.new()
+	score_section.add_theme_constant_override("separation", 6)
+
+	var divider := HSeparator.new()
+	score_section.add_child(divider)
+
+	var header := Label.new()
+	header.text = "FOUNDER SCORE"
+	header.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	header.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_section.add_child(header)
+
+	var grade_label := Label.new()
+	grade_label.text = "%s  (%d/100)" % [grade, score]
+	grade_label.add_theme_font_size_override("font_size", 36)
+	grade_label.add_theme_color_override("font_color", grade_color)
+	grade_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_section.add_child(grade_label)
+
+	var summary_lbl := Label.new()
+	summary_lbl.text = summary
+	summary_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	summary_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+	summary_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	score_section.add_child(summary_lbl)
+
+	# Breakdown bars — shows what the player did well (or poorly) across axes.
+	var breakdown: Dictionary = result.get("breakdown", {})
+	for key in ["finances", "growth", "product", "team", "speed", "reputation"]:
+		if not breakdown.has(key):
+			continue
+		var axis: Dictionary = breakdown[key]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+
+		var axis_label := Label.new()
+		axis_label.text = axis.get("label", key)
+		axis_label.add_theme_font_size_override("font_size", 11)
+		axis_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+		axis_label.custom_minimum_size.x = 120
+		row.add_child(axis_label)
+
+		var bar := ProgressBar.new()
+		bar.min_value = 0
+		bar.max_value = 100
+		bar.value = axis.get("score", 0)
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 12)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		ThemeManager.tint_bar(bar, bar.value, 100.0)
+		row.add_child(bar)
+
+		var val_label := Label.new()
+		val_label.text = "%d" % int(axis.get("score", 0))
+		val_label.add_theme_font_size_override("font_size", 11)
+		val_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+		val_label.custom_minimum_size.x = 28
+		val_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(val_label)
+
+		score_section.add_child(row)
+
+	# Insert after stats_label.
+	var parent := stats_label.get_parent()
+	if parent:
+		var idx := stats_label.get_index() + 1
+		parent.add_child(score_section)
+		parent.move_child(score_section, idx)
+
+
+func _build_prestige_summary() -> void:
+	var level: int = PrestigeManager.get_level()
+	var xp: int = PrestigeManager.get_xp()
+	var xp_next: int = PrestigeManager.get_xp_for_next()
+	var progress: float = PrestigeManager.get_level_progress()
+
+	var section := VBoxContainer.new()
+	section.add_theme_constant_override("separation", 4)
+
+	var divider := HSeparator.new()
+	section.add_child(divider)
+
+	var header := Label.new()
+	header.text = "FOUNDER LEVEL"
+	header.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	header.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	section.add_child(header)
+
+	var level_lbl := Label.new()
+	level_lbl.text = "Level %d" % level
+	level_lbl.add_theme_font_size_override("font_size", 20)
+	level_lbl.add_theme_color_override("font_color", ThemeManager.C_PURPLE)
+	level_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	section.add_child(level_lbl)
+
+	if xp_next > 0:
+		var bar := ProgressBar.new()
+		bar.min_value = 0.0
+		bar.max_value = 1.0
+		bar.value = progress
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 8)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		section.add_child(bar)
+
+		var xp_lbl := Label.new()
+		xp_lbl.text = "%d / %d XP" % [xp, xp_next]
+		xp_lbl.add_theme_font_size_override("font_size", 11)
+		xp_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
+		xp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		section.add_child(xp_lbl)
+
+	# Insert after the score section.
+	var parent := stats_label.get_parent()
+	if parent:
+		parent.add_child(section)
 
 
 func _animate_entrance() -> void:

@@ -22,7 +22,7 @@ static func _strip_unresolved(text: String) -> String:
 
 
 static func build_context(state: Node, extra: Dictionary = {}) -> Dictionary:
-	var ctx := {
+	var ctx: Dictionary = {
 		"company_name": state.company.company_name,
 		"company_type": state.company.type_name(),
 		"cash": "$" + SceneLoader.format_money(state.company.cash),
@@ -56,7 +56,7 @@ static func build_context(state: Node, extra: Dictionary = {}) -> Dictionary:
 static func pick_variation(base_template: String, variations: Array) -> String:
 	if variations.is_empty():
 		return base_template
-	var pool := [base_template]
+	var pool: Array = [base_template]
 	pool.append_array(variations)
 	return pool.pick_random()
 

@@ -54,9 +54,9 @@
     }
   },
   {
-    "id": "privacy_regulation_wave",
-    "title": "Privacy Regulation Wave",
-    "description": "New compliance requirements hit growth channels, but trust in serious operators improves over time.",
+    "id": "ad_channel_compliance_cycle",
+    "title": "Ad Channel Compliance Cycle",
+    "description": "New compliance requirements hit paid growth channels, but trust in serious operators improves over time.",
     "weight": 0.85,
     "duration_min": 2,
     "duration_max": 3,
@@ -167,8 +167,8 @@
     }
   },
   {
-    "id": "founder_docuseries_cycle",
-    "title": "Founder Docuseries Cycle",
+    "id": "founder_narrative_surge",
+    "title": "Founder Narrative Surge",
     "description": "A flashy startup mini-series dominates the feed. Users romanticize builder culture, and sign-up intent spikes for product-led teams.",
     "stage": "early",
     "weight": 0.62,
@@ -223,7 +223,7 @@
     "description": "Rising tensions between major economies create uncertainty across global markets. Investor appetite shifts toward defensive assets; growth-stage funding slows noticeably.",
     "weight": 0.50,
     "duration_min": 2,
-    "duration_max": 5,
+    "duration_max": 4,
     "effects": {
       "fundraise_amount_mult": 0.80,
       "growth_mult": 0.92,
@@ -249,7 +249,7 @@
     "description": "Leading economic indicators flash warning signs. Consumer spending tightens, enterprise budgets freeze, and CFOs everywhere issue variance reports. Survival mode activates across the industry.",
     "weight": 0.45,
     "duration_min": 3,
-    "duration_max": 6,
+    "duration_max": 4,
     "effects": {
       "growth_mult": 0.82,
       "churn_mult": 1.18,
@@ -333,6 +333,90 @@
       "growth_mult": 0.91,
       "cost_mult": 1.06,
       "event_pressure_mult": 1.10
+    }
+  },
+  {
+    "id": "enterprise_ai_adoption_wave",
+    "title": "Enterprise AI Adoption Wave",
+    "description": "Large companies accelerate procurement of AI-adjacent tooling and infrastructure. Budgets expand for products that can demonstrate measurable automation gains.",
+    "economy": "bull",
+    "stage": "growth",
+    "min_quarter": 5,
+    "weight": 0.78,
+    "duration_min": 2,
+    "duration_max": 4,
+    "effects": {
+      "revenue_mult": 1.10,
+      "growth_mult": 1.08,
+      "fundraise_amount_mult": 1.12
+    }
+  },
+  {
+    "id": "developer_conference_season",
+    "title": "Developer Conference Season",
+    "description": "A wave of developer conferences generates product buzz and organic inbound interest. Teams that shipped recently get outsized attention from buyers and press.",
+    "weight": 0.72,
+    "duration_min": 1,
+    "duration_max": 2,
+    "effects": {
+      "growth_mult": 1.12,
+      "event_pressure_mult": 0.94
+    }
+  },
+  {
+    "id": "vertical_saas_breakout",
+    "title": "Vertical SaaS Breakout",
+    "description": "Industry reports highlight vertical software as the fastest-growing segment. Niche-focused products see renewed buyer interest and faster sales cycles.",
+    "economy": "bull",
+    "company_types": ["saas", "marketplace"],
+    "weight": 0.68,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "growth_mult": 1.10,
+      "revenue_mult": 1.06,
+      "churn_mult": 0.96
+    }
+  },
+  {
+    "id": "talent_market_crunch",
+    "title": "Talent Market Crunch",
+    "description": "Competition for engineers intensifies as multiple well-funded startups scale hiring simultaneously. Recruiters are ghosting you. Offer-to-accept rates drop across the industry.",
+    "economy": "bull",
+    "weight": 0.65,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "cost_mult": 1.10,
+      "growth_mult": 0.94,
+      "churn_mult": 1.06
+    }
+  },
+  {
+    "id": "consumer_confidence_surge",
+    "title": "Consumer Confidence Surge",
+    "description": "Consumer spending rises sharply. Subscription willingness is up, app store revenue climbs industry-wide, and churn drops as users feel less pressure to cut discretionary spending.",
+    "economy": "bull",
+    "weight": 0.58,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "revenue_mult": 1.10,
+      "growth_mult": 1.06,
+      "churn_mult": 0.92
+    }
+  },
+  {
+    "id": "sector_security_incident",
+    "title": "Industry Security Breach",
+    "description": "A high-profile data breach at a major company shakes customer trust across the sector. Users scrutinize security practices and demand transparency. Products with strong reliability records fare better.",
+    "weight": 0.52,
+    "duration_min": 2,
+    "duration_max": 3,
+    "effects": {
+      "churn_mult": 1.12,
+      "cost_mult": 1.06,
+      "growth_mult": 0.93
     }
   }
 ]

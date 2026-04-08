@@ -1,0 +1,422 @@
+{
+  "_mod_info": "Achievement definitions. Checked each quarter by AchievementManager. 'condition' is evaluated against game state context dict.",
+  "_format": {
+    "id": "Unique achievement ID (required)",
+    "title": "Display title (required)",
+    "description": "How to unlock (required)",
+    "icon": "Emoji icon (required)",
+    "category": "One of: milestone, financial, team, product, challenge, secret",
+    "condition": "Dict of context_key: threshold pairs. All must be met.",
+    "tier": "bronze, silver, gold, platinum — affects visual styling",
+    "reward_chips": "VC Chips reward on unlock (optional, default 0)",
+    "hidden": "If true, description hidden until unlocked (secret achievements)"
+  },
+
+  "achievements": [
+    {
+      "id": "first_hire",
+      "title": "Team Builder",
+      "description": "Hire your first employee",
+      "icon": "👤",
+      "category": "milestone",
+      "condition": {"employee_count_gte": 1},
+      "tier": "bronze",
+      "reward_chips": 1
+    },
+    {
+      "id": "full_team",
+      "title": "Squad Goals",
+      "description": "Have 5 or more employees at once",
+      "icon": "👥",
+      "category": "team",
+      "condition": {"employee_count_gte": 5},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "big_team",
+      "title": "Scaling Up",
+      "description": "Have 10 or more employees at once",
+      "icon": "🏢",
+      "category": "team",
+      "condition": {"employee_count_gte": 10},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "first_feature",
+      "title": "Shipped It!",
+      "description": "Ship your first product feature",
+      "icon": "📦",
+      "category": "product",
+      "condition": {"features_shipped_gte": 1},
+      "tier": "bronze",
+      "reward_chips": 1
+    },
+    {
+      "id": "five_features",
+      "title": "Feature Factory",
+      "description": "Ship 5 product features",
+      "icon": "🏭",
+      "category": "product",
+      "condition": {"features_shipped_gte": 5},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "ten_features",
+      "title": "Product Machine",
+      "description": "Ship 10 product features",
+      "icon": "⚙️",
+      "category": "product",
+      "condition": {"features_shipped_gte": 10},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "first_dollar",
+      "title": "First Dollar",
+      "description": "Earn any revenue in a quarter",
+      "icon": "💵",
+      "category": "financial",
+      "condition": {"revenue_gte": 1},
+      "tier": "bronze",
+      "reward_chips": 1
+    },
+    {
+      "id": "ramen_profitable",
+      "title": "Ramen Profitable",
+      "description": "Have a profitable quarter (revenue > burn)",
+      "icon": "🍜",
+      "category": "financial",
+      "condition": {"is_profitable": true},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "hundred_k_cash",
+      "title": "Six Figures",
+      "description": "Have $100K or more cash on hand",
+      "icon": "💰",
+      "category": "financial",
+      "condition": {"cash_gte": 100000},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "million_cash",
+      "title": "Millionaire",
+      "description": "Have $1M or more cash on hand",
+      "icon": "🤑",
+      "category": "financial",
+      "condition": {"cash_gte": 1000000},
+      "tier": "gold",
+      "reward_chips": 5
+    },
+    {
+      "id": "first_fundraise",
+      "title": "Funded!",
+      "description": "Close your first funding round",
+      "icon": "🤝",
+      "category": "financial",
+      "condition": {"funding_rounds_gte": 1},
+      "tier": "bronze",
+      "reward_chips": 2
+    },
+    {
+      "id": "series_b",
+      "title": "Growth Stage",
+      "description": "Close 3 or more funding rounds",
+      "icon": "📈",
+      "category": "financial",
+      "condition": {"funding_rounds_gte": 3},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "hundred_users",
+      "title": "Early Adopters",
+      "description": "Reach 100 users",
+      "icon": "🌱",
+      "category": "milestone",
+      "condition": {"users_gte": 100},
+      "tier": "bronze",
+      "reward_chips": 1
+    },
+    {
+      "id": "thousand_users",
+      "title": "Traction",
+      "description": "Reach 1,000 users",
+      "icon": "🚀",
+      "category": "milestone",
+      "condition": {"users_gte": 1000},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "ten_k_users",
+      "title": "Product-Market Fit",
+      "description": "Reach 10,000 users",
+      "icon": "🎯",
+      "category": "milestone",
+      "condition": {"users_gte": 10000},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "hundred_k_users",
+      "title": "Viral Growth",
+      "description": "Reach 100,000 users",
+      "icon": "🔥",
+      "category": "milestone",
+      "condition": {"users_gte": 100000},
+      "tier": "platinum",
+      "reward_chips": 5
+    },
+    {
+      "id": "million_users",
+      "title": "Unicorn Users",
+      "description": "Reach 1,000,000 users",
+      "icon": "🦄",
+      "category": "milestone",
+      "condition": {"users_gte": 1000000},
+      "tier": "platinum",
+      "reward_chips": 10
+    },
+    {
+      "id": "year_one",
+      "title": "Year One",
+      "description": "Survive your first full year (4 quarters)",
+      "icon": "📅",
+      "category": "milestone",
+      "condition": {"total_quarters_gte": 4},
+      "tier": "bronze",
+      "reward_chips": 1
+    },
+    {
+      "id": "year_three",
+      "title": "The Long Game",
+      "description": "Survive 3 full years (12 quarters)",
+      "icon": "🏗️",
+      "category": "milestone",
+      "condition": {"total_quarters_gte": 12},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "year_five",
+      "title": "Veteran Founder",
+      "description": "Survive 5 full years (20 quarters)",
+      "icon": "🎖️",
+      "category": "milestone",
+      "condition": {"total_quarters_gte": 20},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "valuation_1m",
+      "title": "Seven Figures",
+      "description": "Reach a $1M valuation",
+      "icon": "📊",
+      "category": "financial",
+      "condition": {"valuation_gte": 1000000},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "valuation_10m",
+      "title": "Venture Scale",
+      "description": "Reach a $10M valuation",
+      "icon": "💎",
+      "category": "financial",
+      "condition": {"valuation_gte": 10000000},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "valuation_100m",
+      "title": "Nine Figures",
+      "description": "Reach a $100M valuation",
+      "icon": "👑",
+      "category": "financial",
+      "condition": {"valuation_gte": 100000000},
+      "tier": "platinum",
+      "reward_chips": 5
+    },
+    {
+      "id": "valuation_1b",
+      "title": "Unicorn",
+      "description": "Reach a $1B valuation",
+      "icon": "🦄",
+      "category": "financial",
+      "condition": {"valuation_gte": 1000000000},
+      "tier": "platinum",
+      "reward_chips": 10
+    },
+    {
+      "id": "high_rep",
+      "title": "Industry Leader",
+      "description": "Reach 90+ reputation",
+      "icon": "⭐",
+      "category": "milestone",
+      "condition": {"reputation_gte": 90},
+      "tier": "gold",
+      "reward_chips": 3
+    },
+    {
+      "id": "zero_bugs",
+      "title": "Bug Free",
+      "description": "Have 0 bugs with 5+ features shipped",
+      "icon": "🐛",
+      "category": "product",
+      "condition": {"bugs_eq": 0, "features_shipped_gte": 5},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "high_stability",
+      "title": "Rock Solid",
+      "description": "Reach 95+ stability",
+      "icon": "🪨",
+      "category": "product",
+      "condition": {"stability_gte": 95},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "win_ipo",
+      "title": "IPO Day",
+      "description": "Win the game via IPO",
+      "icon": "🔔",
+      "category": "challenge",
+      "condition": {"win_type_eq": "ipo"},
+      "tier": "platinum",
+      "reward_chips": 10
+    },
+    {
+      "id": "win_acquisition",
+      "title": "Acquired!",
+      "description": "Win the game via acquisition",
+      "icon": "🏦",
+      "category": "challenge",
+      "condition": {"win_type_eq": "acquisition"},
+      "tier": "gold",
+      "reward_chips": 5
+    },
+    {
+      "id": "win_sustainable",
+      "title": "Sustainable Business",
+      "description": "Win via sustained profitability",
+      "icon": "🌿",
+      "category": "challenge",
+      "condition": {"win_type_eq": "sustainable"},
+      "tier": "gold",
+      "reward_chips": 5
+    },
+    {
+      "id": "win_unicorn",
+      "title": "Unicorn Status",
+      "description": "Win by reaching unicorn valuation",
+      "icon": "🦄",
+      "category": "challenge",
+      "condition": {"win_type_eq": "unicorn"},
+      "tier": "platinum",
+      "reward_chips": 10
+    },
+    {
+      "id": "angel_saved",
+      "title": "Guardian Angel",
+      "description": "Accept the angel bailout when near bankruptcy",
+      "icon": "😇",
+      "category": "milestone",
+      "condition": {"angel_bailout_used": true},
+      "tier": "bronze",
+      "reward_chips": 1
+    },
+    {
+      "id": "profit_streak_3",
+      "title": "Momentum",
+      "description": "Achieve a 3-quarter profit streak",
+      "icon": "📈",
+      "category": "financial",
+      "condition": {"profit_streak_gte": 3},
+      "tier": "silver",
+      "reward_chips": 2
+    },
+    {
+      "id": "profit_streak_6",
+      "title": "Cash Machine",
+      "description": "Achieve a 6-quarter profit streak",
+      "icon": "💸",
+      "category": "financial",
+      "condition": {"profit_streak_gte": 6},
+      "tier": "gold",
+      "reward_chips": 5
+    },
+    {
+      "id": "bootstrap_king",
+      "title": "Bootstrap King",
+      "description": "Reach profitability without ever raising funding",
+      "icon": "👢",
+      "category": "challenge",
+      "condition": {"is_profitable": true, "funding_rounds_eq": 0},
+      "tier": "platinum",
+      "reward_chips": 10,
+      "hidden": true
+    },
+    {
+      "id": "lean_machine",
+      "title": "Lean Machine",
+      "description": "Ship 5 features with 3 or fewer employees",
+      "icon": "🏋️",
+      "category": "challenge",
+      "condition": {"features_shipped_gte": 5, "employee_count_lte": 3},
+      "tier": "gold",
+      "reward_chips": 5,
+      "hidden": true
+    },
+    {
+      "id": "night_owl",
+      "title": "Night Owl",
+      "description": "Play between midnight and 5am",
+      "icon": "🦉",
+      "category": "secret",
+      "condition": {"is_night_owl": true},
+      "tier": "bronze",
+      "reward_chips": 1,
+      "hidden": true
+    },
+    {
+      "id": "speed_runner",
+      "title": "Speed Runner",
+      "description": "Win any game in under 12 quarters",
+      "icon": "⚡",
+      "category": "challenge",
+      "condition": {"has_won": true, "total_quarters_lte": 12},
+      "tier": "platinum",
+      "reward_chips": 10,
+      "hidden": true
+    },
+    {
+      "id": "all_types",
+      "title": "Diversified Portfolio",
+      "description": "Win with all 4 company types",
+      "icon": "🎲",
+      "category": "challenge",
+      "condition": {"unique_win_types_gte": 4},
+      "tier": "platinum",
+      "reward_chips": 15,
+      "hidden": true
+    },
+    {
+      "id": "marketing_whale",
+      "title": "Growth Hacker",
+      "description": "Spend $20K/quarter on marketing",
+      "icon": "📣",
+      "category": "milestone",
+      "condition": {"marketing_budget_gte": 20000},
+      "tier": "silver",
+      "reward_chips": 2
+    }
+  ]
+}

@@ -168,11 +168,11 @@ static func _stat_for_seniority(seniority: EmployeeData.Seniority) -> int:
 
 
 static func _random_name() -> String:
-	var firsts := ["Alex", "Jordan", "Sam", "Morgan", "Riley", "Casey",
+	var firsts: Array = ["Alex", "Jordan", "Sam", "Morgan", "Riley", "Casey",
 		"Taylor", "Avery", "Quinn", "Blake", "Drew", "Reese",
 		"Sage", "Parker", "Rowan", "Skyler", "Jamie", "Ellis",
 		"Finley", "Hayden", "Emery", "Micah", "Noel", "Ari"]
-	var lasts := ["Chen", "Patel", "Kim", "Garcia", "Nguyen", "Lee",
+	var lasts: Array = ["Chen", "Patel", "Kim", "Garcia", "Nguyen", "Lee",
 		"Williams", "Singh", "Brown", "Martinez", "Davis", "Wilson",
 		"Anderson", "Thomas", "Jackson", "White", "Harris", "Clark",
 		"Okafor", "Sato", "Muller", "Costa", "Johansson", "Ali"]

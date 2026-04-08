@@ -73,10 +73,10 @@ GROWTH_BALANCE = {
 }
 
 SUSTAINABLE_WIN = {
-    "saas":        {"users": 10_000, "features": 8, "revenue": 220_000},
+    "saas":        {"users": 10_000, "features": 8, "revenue": 140_000},
     "consumer":    {"users": 8_000,  "features": 7, "revenue": 40_000},
     "marketplace": {"users": 14_000, "features": 8, "revenue": 260_000},
-    "dev_tools":   {"users": 9_000,  "features": 8, "revenue": 210_000},
+    "dev_tools":   {"users": 12_000, "features": 8, "revenue": 120_000},
 }
 
 BASE_ORGANIC_USERS_PER_QUARTER = 35
@@ -114,6 +114,8 @@ class Product:
     revenue_mult: float = 1.0
     feature_progress: float = 0.0
     target_feature_idx: int = 0
+    user_growth_flat_bonus: int = 0
+    dau_bonus: float = 0.0
 
     def feature_count(self) -> int:
         return len(self.features)
@@ -272,7 +274,8 @@ def calculate_user_growth(state: SimState) -> int:
     if c.marketing_budget > 0:
         marketing_new = math.ceil(MARKETING_USER_MULT * math.sqrt(c.marketing_budget) * biz_bonus)
 
-    total_new = max(0, base_new + growth_from_existing + reputation_pull + marketing_new)
+    feature_bonus = state.product.user_growth_flat_bonus
+    total_new = max(0, base_new + growth_from_existing + reputation_pull + feature_bonus + marketing_new)
 
     # Maturity damping
     if p.users > gb["maturity_start"]:
@@ -373,6 +376,10 @@ def apply_work(state: SimState):
                     state.product.revenue_mult = min(5.0, state.product.revenue_mult * float(effects["revenue_mult"]))
                 if "reputation_bonus" in effects:
                     state.company.reputation = min(100, state.company.reputation + int(effects["reputation_bonus"]))
+                if "user_growth_bonus" in effects:
+                    state.product.user_growth_flat_bonus += int(effects["user_growth_bonus"])
+                if "dau_bonus" in effects:
+                    state.product.dau_bonus += float(effects["dau_bonus"])
 
                 if state.first_feature_q == 0:
                     state.first_feature_q = state.quarter
@@ -422,7 +429,8 @@ def update_product_metrics(state: SimState):
 def update_users(state: SimState):
     net = calculate_user_growth(state)
     state.product.users = max(0, state.product.users + net)
-    state.product.dau = max(0, int(state.product.users * 0.35))
+    dau_ratio = 0.30 + state.product.dau_bonus
+    state.product.dau = max(0, int(state.product.users * max(0.05, min(0.7, dau_ratio))))
 
 
 def update_cash(state: SimState):

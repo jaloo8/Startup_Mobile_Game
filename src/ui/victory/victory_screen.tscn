@@ -39,7 +39,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 140)
 color = Color(0.08, 0.12, 0.08, 1)
 
-[node name="PlaceholderLabel" type="Label" parent="MarginContainer/ScrollContainer/VBox/VictoryIllustration"]
+[node name="HeaderGlyph" type="Label" parent="MarginContainer/ScrollContainer/VBox/VictoryIllustration"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -47,12 +47,12 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -80.0
-offset_top = -8.0
+offset_top = -20.0
 offset_right = 80.0
-offset_bottom = 8.0
-text = "Victory Illustration"
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.3, 0.5, 0.3, 1)
+offset_bottom = 20.0
+text = "V"
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(0.15, 0.35, 0.15, 0.6)
 horizontal_alignment = 1
 
 [node name="WinTitle" type="Label" parent="MarginContainer/ScrollContainer/VBox"]

@@ -40,8 +40,8 @@ var _drilldown_label: Label
 var _marketing_picker: OptionButton
 var _marketing_cost_value: Label
 
-const MARKETING_TIERS := [0.0, 1_000.0, 3_000.0, 6_000.0, 12_000.0, 20_000.0]
-const MARKETING_TIER_NAMES := ["None ($0)", "Minimal ($1K)", "Light ($3K)", "Moderate ($6K)", "Aggressive ($12K)", "Heavy ($20K)"]
+const MARKETING_TIERS: Array = [0.0, 1_000.0, 3_000.0, 6_000.0, 12_000.0, 20_000.0]
+const MARKETING_TIER_NAMES: Array = ["None ($0)", "Minimal ($1K)", "Light ($3K)", "Moderate ($6K)", "Aggressive ($12K)", "Heavy ($20K)"]
 
 
 func _ready() -> void:
@@ -239,6 +239,9 @@ func _refresh() -> void:
 
 	if GameState.financials.funding_rounds.is_empty():
 		board_label.visible = false
+	elif not board_label.visible:
+		board_label.visible = true
+		AnimHelper.fade_in(board_label, 0.0, 0.2)
 	else:
 		board_label.visible = true
 		var bp: int = GameState.board_patience
@@ -502,7 +505,7 @@ func _trend_points(limit: int = 12) -> Array[Dictionary]:
 		if item is Dictionary:
 			points.append(item)
 
-	var live_point := {
+	var live_point: Dictionary = {
 		"quarter": GameState.current_quarter,
 		"year": GameState.current_year,
 		"cash": GameState.company.cash,
@@ -604,6 +607,7 @@ func _on_fundraise() -> void:
 		accept_btn.visible = false
 		decline_btn.text = "Back to It"
 		offer_panel.visible = true
+		AnimHelper.pop_in(offer_panel, 0.0, 0.22)
 		fundraise_btn.visible = false
 		return
 
@@ -637,6 +641,7 @@ func _on_fundraise() -> void:
 	accept_btn.visible = true
 	decline_btn.text = "Walk Away"
 	offer_panel.visible = true
+	AnimHelper.pop_in(offer_panel, 0.0, 0.22)
 	fundraise_btn.visible = false
 
 
@@ -647,18 +652,26 @@ func _on_accept_offer() -> void:
 	var amount: float = _current_offer.get("amount", 0.0)
 	Analytics.track_fundraise_result(true, firm_name, amount)
 	FundraisingEngine.accept_offer(GameState, _current_offer)
-	offer_panel.visible = false
-	fundraise_btn.visible = true
-	fundraise_btn.text = "Raise Another Round"
-	_refresh()
+	SfxPlayer.play("fundraise")
+	AnimHelper.haptic(&"heavy")
+	ToastManager.show("Raised $%s! 🎉" % SceneLoader.format_money(amount), "💰", ThemeManager.C_GOLD)
+	AnimHelper.screen_shake(get_tree(), 0.3, 0.3)
+	AnimHelper.pop_out(offer_panel, 0.16, func() -> void:
+		offer_panel.visible = false
+		fundraise_btn.visible = true
+		fundraise_btn.text = "Raise Another Round"
+		_refresh()
+	)
 
 
 func _on_decline_offer() -> void:
 	var firm_name: String = _current_offer.get("firm_name", "unknown")
 	Analytics.track_fundraise_result(false, firm_name, 0.0)
-	offer_panel.visible = false
-	fundraise_btn.visible = true
-	fundraise_btn.text = "Talk to Investors"
+	AnimHelper.pop_out(offer_panel, 0.14, func() -> void:
+		offer_panel.visible = false
+		fundraise_btn.visible = true
+		fundraise_btn.text = "Talk to Investors"
+	)
 
 
 func _on_back() -> void:

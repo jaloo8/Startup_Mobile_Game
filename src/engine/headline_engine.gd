@@ -4,13 +4,13 @@ extends RefCounted
 
 static var _templates: Array[Dictionary] = []
 
-const TYPE_TO_KEY := {
+const TYPE_TO_KEY: Dictionary = {
 	CompanyData.CompanyType.SAAS: "saas",
 	CompanyData.CompanyType.CONSUMER: "consumer",
 	CompanyData.CompanyType.MARKETPLACE: "marketplace",
 	CompanyData.CompanyType.DEV_TOOLS: "dev_tools",
 }
-const NICHE_HEADLINE_KEYWORDS := {
+const NICHE_HEADLINE_KEYWORDS: Dictionary = {
 	"streaming_service": ["stream", "video", "creator", "subscription", "content"],
 	"fitness_companion": ["fitness", "wellness", "habit", "health", "subscription"],
 	"local_discovery": ["local", "neighborhood", "events", "city", "community"],
@@ -25,7 +25,7 @@ const NICHE_HEADLINE_KEYWORDS := {
 	"cloud_cost_tools": ["cloud", "cost", "infrastructure", "spend", "optimization"],
 }
 
-const NEWS_SOURCES := [
+const NEWS_SOURCES: Array = [
 	"Bloomburg Tech",
 	"TekCrunch",
 	"The Verj",

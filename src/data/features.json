@@ -126,8 +126,8 @@
       "id": "sharing",
       "name": "Share to Social",
       "description": "Let users share content to other platforms. Free marketing.",
-      "cost": 70,
-      "effects": {"user_growth_bonus": 20, "reputation_bonus": 3},
+      "cost": 90,
+      "effects": {"user_growth_bonus": 18, "reputation_bonus": 3},
       "prerequisites": []
     },
     {
@@ -240,8 +240,8 @@
       "id": "referral_program",
       "name": "Referral Program",
       "description": "Reward users for inviting friends. Marketplace growth flywheel.",
-      "cost": 90,
-      "effects": {"user_growth_bonus": 25},
+      "cost": 120,
+      "effects": {"user_growth_bonus": 20, "churn_reduction": 0.005},
       "prerequisites": []
     }
   ],

@@ -27,7 +27,7 @@ enum Personality { STEADY, AMBITIOUS, PERFECTIONIST, TEAM_PLAYER, MENTOR, ADAPTA
 @export var age: int = 0
 @export var quarter_history: Array[Dictionary] = []
 
-const SALARY_RANGES := {
+const SALARY_RANGES: Dictionary = {
 	Seniority.JUNIOR: Vector2(9_000, 16_000),
 	Seniority.MID: Vector2(20_000, 32_000),
 	Seniority.SENIOR: Vector2(32_000, 52_000),
@@ -35,7 +35,7 @@ const SALARY_RANGES := {
 	Seniority.PRINCIPAL: Vector2(68_000, 98_000),
 }
 
-const SPECIALTY_NAMES := {
+const SPECIALTY_NAMES: Dictionary = {
 	Specialty.FRONTEND: "Frontend",
 	Specialty.BACKEND: "Backend",
 	Specialty.MOBILE: "Mobile",
@@ -47,7 +47,7 @@ const SPECIALTY_NAMES := {
 	Specialty.OPERATIONS: "Operations",
 }
 
-const SENIORITY_NAMES := {
+const SENIORITY_NAMES: Dictionary = {
 	Seniority.JUNIOR: "Junior",
 	Seniority.MID: "Mid",
 	Seniority.SENIOR: "Senior",
@@ -55,7 +55,7 @@ const SENIORITY_NAMES := {
 	Seniority.PRINCIPAL: "Principal",
 }
 
-const ASSIGNMENT_NAMES := {
+const ASSIGNMENT_NAMES: Dictionary = {
 	Assignment.FEATURES: "Features",
 	Assignment.BUGS: "Bug Fixes",
 	Assignment.TECH_DEBT: "Tech Debt",
@@ -64,13 +64,13 @@ const ASSIGNMENT_NAMES := {
 	Assignment.UNASSIGNED: "Unassigned",
 }
 
-const EMPLOYMENT_TYPE_NAMES := {
+const EMPLOYMENT_TYPE_NAMES: Dictionary = {
 	EmploymentType.FULL_TIME: "Full-time",
 	EmploymentType.CONTRACTOR: "Contractor",
 	EmploymentType.INTERN: "Intern",
 }
 
-const PERSONALITY_NAMES := {
+const PERSONALITY_NAMES: Dictionary = {
 	Personality.STEADY: "Steady",
 	Personality.AMBITIOUS: "Ambitious",
 	Personality.PERFECTIONIST: "Perfectionist",

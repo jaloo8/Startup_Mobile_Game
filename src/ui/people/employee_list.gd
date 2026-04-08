@@ -23,7 +23,7 @@ enum SortKey { NAME, SKILL, MORALE, SALARY, ASSIGNMENT }
 var _current_sort: SortKey = SortKey.NAME
 var _sort_ascending: bool = true
 
-const SORT_LABELS := {
+const SORT_LABELS: Dictionary = {
 	SortKey.NAME: "Name",
 	SortKey.SKILL: "Skill",
 	SortKey.MORALE: "Morale",
@@ -38,14 +38,14 @@ const INTERVIEW_ROLE_DIRECTOR := "Director"
 const INTERVIEW_ROLE_MANAGER := "Manager"
 const INTERVIEW_ROLE_ENGINEER := "Engineer"
 const INTERVIEW_ROLE_FOUNDER := "Founder"
-const INTERVIEW_COST_BY_ROLE := {
+const INTERVIEW_COST_BY_ROLE: Dictionary = {
 	INTERVIEW_ROLE_FOUNDER: 1_500.0,
 	INTERVIEW_ROLE_VP: 6_000.0,
 	INTERVIEW_ROLE_DIRECTOR: 3_500.0,
 	INTERVIEW_ROLE_MANAGER: 2_000.0,
 	INTERVIEW_ROLE_ENGINEER: 750.0,
 }
-const INTERVIEW_LOCK_BY_ROLE := {
+const INTERVIEW_LOCK_BY_ROLE: Dictionary = {
 	INTERVIEW_ROLE_FOUNDER: 0,  # founder has energy cost, no assignment lock
 	INTERVIEW_ROLE_VP: 2,
 	INTERVIEW_ROLE_DIRECTOR: 1,
@@ -58,14 +58,14 @@ const INTERVIEW_LATE_VALUATION := 250_000_000.0
 const INTERVIEW_COST_MULT_EARLY := 0.72
 const INTERVIEW_COST_MULT_MID := 1.0
 const INTERVIEW_COST_MULT_LATE := 1.22
-const INTERVIEW_COST_DIFF_MULT := {
+const INTERVIEW_COST_DIFF_MULT: Dictionary = {
 	"sandbox": 0.90,
 	"normal": 1.00,
 	"hardcore": 1.10,
 }
 
 const AVATAR_COUNT := 8
-const ASSIGNMENT_ICON_PATHS := {
+const ASSIGNMENT_ICON_PATHS: Dictionary = {
 	EmployeeData.Assignment.FEATURES:  "res://assets/icons/assign_features.png",
 	EmployeeData.Assignment.BUGS:      "res://assets/icons/assign_bugs.png",
 	EmployeeData.Assignment.TECH_DEBT: "res://assets/icons/assign_techdebt.png",
@@ -73,7 +73,7 @@ const ASSIGNMENT_ICON_PATHS := {
 	EmployeeData.Assignment.RND:       "res://assets/icons/assign_rnd.png",
 }
 
-const ASSIGNMENT_DESCRIPTIONS := {
+const ASSIGNMENT_DESCRIPTIONS: Dictionary = {
 	EmployeeData.Assignment.FEATURES: "Build new product features.\nMore features attract users.",
 	EmployeeData.Assignment.BUGS: "Squash bugs.\nFewer bugs means less churn.",
 	EmployeeData.Assignment.TECH_DEBT: "Clean up messy code.\nHigh tech debt slows everyone down.",
@@ -582,6 +582,7 @@ func _on_hire_pressed() -> void:
 	_interview_reports.clear()
 	_negotiated.clear()
 	candidate_panel.visible = true
+	AnimHelper.pop_in(candidate_panel, 0.0, 0.2)
 	_update_hire_button()
 	_refresh_candidates()
 
@@ -768,8 +769,47 @@ func _refresh_candidates() -> void:
 		btn_row.add_child(pass_btn)
 
 		candidate_container.add_child(card)
+	_add_extra_candidate_button()
+	AnimHelper.stagger_list(candidate_container, 0.05, 0.04, 22.0)
 	_refresh_sort_hint()
 	UITouchHelper.harden_tree(candidate_panel)
+
+
+func _add_extra_candidate_button() -> void:
+	var cost: int = CurrencyManager.COST_EXTRA_CANDIDATE
+	if not CurrencyManager.can_afford(cost):
+		return
+	# Don't offer if already at office capacity.
+	if GameState.employees.size() + _candidates.size() >= GameState.company.office_capacity():
+		return
+	var btn := Button.new()
+	btn.text = "Reveal Extra Candidate (%d chips)" % cost
+	btn.custom_minimum_size = Vector2(0, 46)
+	btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	btn.add_theme_color_override("font_color", ThemeManager.C_CHIP)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.10, 0.12, 0.20, 0.5)
+	style.set_corner_radius_all(ThemeManager.CORNER_MD)
+	style.set_content_margin_all(8.0)
+	btn.add_theme_stylebox_override("normal", style)
+	var hover := style.duplicate() as StyleBoxFlat
+	hover.bg_color = style.bg_color.lightened(0.08)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", style)
+	btn.pressed.connect(_on_extra_candidate)
+	candidate_container.add_child(btn)
+
+
+func _on_extra_candidate() -> void:
+	if not CurrencyManager.spend_extra_candidate():
+		return
+	var extras: Array[EmployeeData] = HiringEngine.generate_candidates(
+		1, GameState.market, GameState)
+	_candidates.append_array(extras)
+	AnimHelper.float_text(candidate_panel, "-%d chips" % CurrencyManager.COST_EXTRA_CANDIDATE,
+		ThemeManager.C_CHIP, Vector2(candidate_panel.size.x * 0.5, 0))
+	SfxPlayer.play("chip_spend")
+	_refresh_candidates()
 
 
 func _show_office_upgrade_hint() -> void:
@@ -818,8 +858,12 @@ func _on_negotiate_salary(candidate: EmployeeData) -> void:
 		# They walked
 		_interview_reports.erase(_candidate_key(candidate))
 		_candidates.erase(candidate)
-		candidate_panel.visible = not _candidates.is_empty()
-		_refresh_candidates()
+		if _candidates.is_empty():
+			AnimHelper.pop_out(candidate_panel, 0.14, func() -> void:
+				candidate_panel.visible = false
+			)
+		else:
+			_refresh_candidates()
 		_show_temp_message("They declined and pulled out of the process.")
 	else:
 		candidate.salary_per_quarter = maxf(1000.0, candidate.salary_per_quarter * 0.85)
@@ -1633,8 +1677,12 @@ func _on_pass_candidate(candidate: EmployeeData) -> void:
 	_interview_reports.erase(ckey)
 	_negotiated.erase(ckey)
 	_candidates.erase(candidate)
-	candidate_panel.visible = not _candidates.is_empty()
-	_refresh_candidates()
+	if _candidates.is_empty():
+		AnimHelper.pop_out(candidate_panel, 0.14, func() -> void:
+			candidate_panel.visible = false
+		)
+	else:
+		_refresh_candidates()
 
 
 func _on_back() -> void:

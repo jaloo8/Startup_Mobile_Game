@@ -221,6 +221,164 @@ static func screen_wipe(root: CanvasLayer, on_peak: Callable,
 	tw.tween_callback(rect.queue_free)
 
 
+# ---------------------------------------------------------------------------
+# Button press feedback — squash/stretch on tap
+# ---------------------------------------------------------------------------
+
+## Press-down effect: brief squash. Call from button_down signal.
+static func button_press(node: Control) -> Tween:
+	node.pivot_offset = node.size * 0.5
+	var tw := node.create_tween()
+	tw.tween_property(node, "scale", Vector2(0.95, 0.95), 0.06) \
+		.set_ease(Tween.EASE_OUT)
+	return tw
+
+
+## Release effect: stretch back with spring overshoot. Call from button_up signal.
+static func button_release(node: Control) -> Tween:
+	node.pivot_offset = node.size * 0.5
+	var tw := node.create_tween()
+	tw.tween_property(node, "scale", Vector2(1.03, 1.03), 0.08) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(node, "scale", Vector2.ONE, 0.10) \
+		.set_ease(Tween.EASE_OUT)
+	return tw
+
+
+## Full press cycle: squash → release → settle. Convenience for pressed signal.
+static func button_bounce(node: Control) -> Tween:
+	node.pivot_offset = node.size * 0.5
+	var tw := node.create_tween()
+	tw.tween_property(node, "scale", Vector2(0.92, 0.92), 0.05) \
+		.set_ease(Tween.EASE_OUT)
+	tw.tween_property(node, "scale", Vector2(1.06, 1.06), 0.10) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(node, "scale", Vector2.ONE, 0.08) \
+		.set_ease(Tween.EASE_OUT)
+	return tw
+
+
+# ---------------------------------------------------------------------------
+# Floating number pop-up — "+$50K" rising and fading
+# ---------------------------------------------------------------------------
+
+## Spawn a floating label that drifts upward and fades out.
+## Attaches to parent_node's tree position.
+static func float_text(parent: Control, text: String, color: Color,
+		offset: Vector2 = Vector2.ZERO, duration: float = 1.2) -> void:
+	if not is_instance_valid(parent):
+		return
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", color)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.position = offset + Vector2(-40, -20)
+	label.z_index = 50
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(label)
+
+	var tw := label.create_tween().set_parallel(true)
+	tw.tween_property(label, "position:y", label.position.y - 60.0, duration) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
+	tw.tween_property(label, "modulate:a", 0.0, duration * 0.4) \
+		.set_delay(duration * 0.6).set_ease(Tween.EASE_IN)
+	# Scale up briefly then settle.
+	tw.tween_property(label, "scale", Vector2(1.15, 1.15), duration * 0.15) \
+		.set_ease(Tween.EASE_OUT)
+	tw.tween_property(label, "scale", Vector2.ONE, duration * 0.2) \
+		.set_delay(duration * 0.15).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_callback(label.queue_free)
+
+
+## Float a money change: green for gains, red for losses.
+static func float_money(parent: Control, amount: float,
+		offset: Vector2 = Vector2.ZERO) -> void:
+	if absf(amount) < 1.0:
+		return
+	var text: String
+	var color: Color
+	if amount >= 0:
+		text = "+$%s" % SceneLoader.format_money(amount)
+		color = ThemeManager.C_GREEN
+	else:
+		text = "-$%s" % SceneLoader.format_money(absf(amount))
+		color = ThemeManager.C_RED
+	float_text(parent, text, color, offset)
+
+
+## Float a user count change.
+static func float_users(parent: Control, count: int,
+		offset: Vector2 = Vector2.ZERO) -> void:
+	if count == 0:
+		return
+	var text: String
+	var color: Color
+	if count > 0:
+		text = "+%s users" % SceneLoader.format_number(count)
+		color = ThemeManager.C_TEAL
+	else:
+		text = "%s users" % SceneLoader.format_number(count)
+		color = ThemeManager.C_RED
+	float_text(parent, text, color, offset)
+
+
+# ---------------------------------------------------------------------------
+# Screen shake — trauma-based for impact on major events
+# ---------------------------------------------------------------------------
+
+## Shake the entire screen by offsetting the root viewport.
+## Intensity 1.0 = strong (funding round), 0.5 = medium, 0.2 = subtle.
+static func screen_shake(tree: SceneTree, intensity: float = 0.5,
+		duration: float = 0.35) -> void:
+	var root := tree.root
+	if root == null:
+		return
+	var original_offset := root.canvas_transform.origin
+	var steps := 8
+	var step_time := duration / float(steps)
+
+	var tw := tree.create_tween()
+	for i in steps:
+		var dampen := 1.0 - (float(i) / float(steps))
+		var offset := Vector2(
+			randf_range(-1.0, 1.0) * intensity * 12.0 * dampen,
+			randf_range(-1.0, 1.0) * intensity * 8.0 * dampen,
+		)
+		tw.tween_callback(func() -> void:
+			root.canvas_transform.origin = original_offset + offset
+		)
+		tw.tween_interval(step_time)
+	tw.tween_callback(func() -> void:
+		root.canvas_transform.origin = original_offset
+	)
+
+
+# ---------------------------------------------------------------------------
+# Haptic feedback — mobile vibration
+# ---------------------------------------------------------------------------
+
+## Fire a haptic vibration. Light=30ms, medium=80ms, heavy=150ms.
+## Respects the global haptic preference in SfxPlayer. Silently no-ops on desktop.
+static func haptic(strength: StringName = &"light") -> void:
+	var sfx: Node = Engine.get_singleton("SfxPlayer") if Engine.has_singleton("SfxPlayer") else null
+	if sfx == null:
+		sfx = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("SfxPlayer") if Engine.get_main_loop() is SceneTree else null
+	if sfx != null and not bool(sfx.get("haptic_enabled")):
+		return
+	var ms: int
+	match strength:
+		&"light":  ms = 30
+		&"medium": ms = 80
+		&"heavy":  ms = 150
+		_:         ms = 30
+	Input.vibrate_handheld(ms)
+
+
+# ---------------------------------------------------------------------------
+# Backdrop overlay for modals
+# ---------------------------------------------------------------------------
+
 ## Backdrop overlay for modals — semi-transparent dark fill.
 static func show_backdrop(root: Control, alpha: float = 0.60) -> ColorRect:
 	var backdrop := ColorRect.new()

@@ -1,6 +1,10 @@
 class_name QuarterlyReport
 extends RefCounted
 ## Builds a short narrative summary for the quarter.
+##
+## Lines rotate phrasing each quarter to avoid repetition during long runs.
+## The quarter number seeds a simple index so the same quarter always shows
+## the same variant (deterministic but varied).
 
 
 static func generate(state: Node) -> Array[String]:
@@ -26,6 +30,10 @@ static func generate(state: Node) -> Array[String]:
 	if not board_line.is_empty():
 		bullets.append(board_line)
 
+	var synergy_line := _synergy_line(state)
+	if not synergy_line.is_empty():
+		bullets.append(synergy_line)
+
 	return bullets
 
 
@@ -36,11 +44,20 @@ static func _revenue_line(state: Node, history: Array[Dictionary]) -> String:
 		if prev_rev > 0 and rev > 0:
 			var pct: float = ((rev - prev_rev) / prev_rev) * 100.0
 			if pct > 5:
-				return "Revenue up %.0f%% to $%s this quarter" % [pct, SceneLoader.format_money(rev)]
+				return _pick([
+					"Revenue up %.0f%% to $%s this quarter" % [pct, SceneLoader.format_money(rev)],
+					"$%s revenue — that's %.0f%% growth over last quarter" % [SceneLoader.format_money(rev), pct],
+				] as Array[String], state)
 			elif pct < -5:
-				return "Revenue down %.0f%% to $%s — need more users or better pricing" % [absf(pct), SceneLoader.format_money(rev)]
+				return _pick([
+					"Revenue down %.0f%% to $%s — need more users or better pricing" % [absf(pct), SceneLoader.format_money(rev)],
+					"$%s revenue, off %.0f%% from last quarter. Watch that trend" % [SceneLoader.format_money(rev), absf(pct)],
+				] as Array[String], state)
 			else:
-				return "Revenue flat at $%s" % SceneLoader.format_money(rev)
+				return _pick([
+					"Revenue flat at $%s" % SceneLoader.format_money(rev),
+					"$%s revenue — holding steady but not growing" % SceneLoader.format_money(rev),
+				] as Array[String], state)
 		elif rev > 0 and prev_rev <= 0:
 			return "First revenue! $%s this quarter" % SceneLoader.format_money(rev)
 	if rev > 0:
@@ -50,17 +67,24 @@ static func _revenue_line(state: Node, history: Array[Dictionary]) -> String:
 
 static func _cash_line(state: Node) -> String:
 	var cash: float = state.company.cash
-	var burn: float = state.financials.burn_rate
 	var rw: float = state.financials.runway_quarters(cash)
 
 	if rw == INF:
-		return "$%s in the bank — profitable and self-sustaining" % SceneLoader.format_money(cash)
+		return _pick([
+			"$%s in the bank — profitable and self-sustaining" % SceneLoader.format_money(cash),
+			"Self-sustaining with $%s cash. Revenue covers all costs" % SceneLoader.format_money(cash),
+		] as Array[String], state)
+	elif cash <= 0.0:
+		return "Cash is gone — bankruptcy hits if you can't raise or cut costs immediately"
 	elif rw < 1.0:
-		return "Cash critical — less than 1 quarter of runway left"
+		return "Cash critical at $%s — less than 1 quarter of runway. Raise now or shut down" % SceneLoader.format_money(cash)
 	elif rw < 3.0:
-		return "$%s in the bank. ~%d quarters of runway. Time is running out" % [SceneLoader.format_money(cash), roundi(rw)]
+		return "$%s in the bank. ~%d quarters of runway — clock is ticking" % [SceneLoader.format_money(cash), roundi(rw)]
 	else:
-		return "$%s in the bank. About %d quarters of runway" % [SceneLoader.format_money(cash), roundi(rw)]
+		return _pick([
+			"$%s in the bank. About %d quarters of runway" % [SceneLoader.format_money(cash), roundi(rw)],
+			"$%s cash on hand — roughly %d quarters of runway at current burn" % [SceneLoader.format_money(cash), roundi(rw)],
+		] as Array[String], state)
 
 
 static func _team_line(state: Node, history: Array[Dictionary]) -> String:
@@ -69,12 +93,22 @@ static func _team_line(state: Node, history: Array[Dictionary]) -> String:
 		var prev_size: int = history[-2].get("employees", 0)
 		var diff: int = current_size - prev_size
 		if diff > 0:
-			return "Hired %d new team member%s — now %d strong" % [diff, "s" if diff != 1 else "", current_size]
+			return _pick([
+				"Hired %d new team member%s — now %d strong" % [diff, "s" if diff != 1 else "", current_size],
+				"Team grew by %d — %d people on the roster now" % [diff, current_size],
+			] as Array[String], state)
 		elif diff < 0:
-			return "Lost %d team member%s — down to %d" % [absi(diff), "s" if absi(diff) != 1 else "", current_size]
+			return _pick([
+				"Lost %d team member%s — down to %d" % [absi(diff), "s" if absi(diff) != 1 else "", current_size],
+				"%d team member%s departed. Headcount is %d" % [absi(diff), "s" if absi(diff) != 1 else "", current_size],
+			] as Array[String], state)
 	if current_size == 0:
 		return "Flying solo — visit People to hire your first employee"
-	return "Team of %d holding steady" % current_size
+	return _pick([
+		"Team of %d holding steady" % current_size,
+		"%d employees, no changes this quarter" % current_size,
+		"Headcount stable at %d" % current_size,
+	] as Array[String], state)
 
 
 static func _product_line(state: Node) -> String:
@@ -92,11 +126,15 @@ static func _product_line(state: Node) -> String:
 		parts.append("%d bugs outstanding — users are noticing" % bugs)
 	elif bugs > 0:
 		parts.append("%d bug%s in the backlog" % [bugs, "s" if bugs != 1 else ""])
+	elif features >= 5:
+		parts.append("zero bugs — clean codebase")
 
 	if td > 60:
 		parts.append("tech debt is slowing everything down")
 	elif td > 40:
 		parts.append("tech debt building up")
+	elif td <= 10 and features >= 5:
+		parts.append("tech debt under control")
 
 	var stage: String = _responsibility_stage(state)
 	if stage != "early":
@@ -112,7 +150,11 @@ static func _product_line(state: Node) -> String:
 		if not missing.is_empty():
 			parts.append("specialization gap: no coverage in %s" % ", ".join(missing))
 		else:
-			parts.append("roles are meshing well — balanced coverage is protecting quality and retention")
+			parts.append(_pick([
+				"roles are meshing well — balanced coverage is protecting quality and retention",
+				"all specializations covered — your team is running like a real engineering org",
+				"strong coverage across all roles. That discipline pays dividends",
+			] as Array[String], state))
 
 	return ". ".join(parts)
 
@@ -135,22 +177,49 @@ static func _user_line(state: Node, history: Array[Dictionary]) -> String:
 		var prev_users: int = history[-2].get("users", 0)
 		var diff: int = users - prev_users
 		if diff > 0:
-			return "%s new users this quarter — total %s" % [SceneLoader.format_number(diff), SceneLoader.format_number(users)]
+			return _pick([
+				"%s new users this quarter — total %s" % [SceneLoader.format_number(diff), SceneLoader.format_number(users)],
+				"User base grew by %s to %s total" % [SceneLoader.format_number(diff), SceneLoader.format_number(users)],
+				"Added %s users. Now at %s and climbing" % [SceneLoader.format_number(diff), SceneLoader.format_number(users)],
+			] as Array[String], state)
 		elif diff < 0:
-			return "Lost %s users this quarter — down to %s" % [SceneLoader.format_number(absi(diff)), SceneLoader.format_number(users)]
+			return _pick([
+				"Lost %s users this quarter — down to %s" % [SceneLoader.format_number(absi(diff)), SceneLoader.format_number(users)],
+				"Churn hit hard: %s users gone, %s remaining" % [SceneLoader.format_number(absi(diff)), SceneLoader.format_number(users)],
+			] as Array[String], state)
 	if users > 0:
 		return "%s users total" % SceneLoader.format_number(users)
 	return "No users yet — ship features and they'll come"
 
 
+static func _pick(variants: Array[String], state: Node) -> String:
+	var idx: int = (state.current_quarter + state.current_year * 4) % variants.size()
+	return variants[idx]
+
+
 static func _economy_line(state: Node) -> String:
 	match state.market.economy_state:
 		MarketData.EconomyState.BULL:
-			return "Markets are hot — investors and users are more open right now"
+			return _pick([
+				"Markets are hot — investors and users are more open right now",
+				"Bull market energy everywhere. Fundraising windows don't stay open forever",
+				"VCs are writing checks fast — great time to raise if you need runway",
+				"Optimism in the market is lifting growth rates across the board",
+			] as Array[String], state)
 		MarketData.EconomyState.BEAR:
-			return "Markets are rough — growth is harder and VCs are cautious"
+			return _pick([
+				"Markets are rough — growth is harder and VCs are cautious",
+				"Bear market. Extend your runway and focus on unit economics",
+				"Funding has dried up — survival mode until sentiment shifts",
+				"Layoff headlines everywhere. Investors want profitability, not growth",
+			] as Array[String], state)
 		_:
-			return "The market is steady — no strong tailwinds or headwinds"
+			return _pick([
+				"The market is steady — no strong tailwinds or headwinds",
+				"Neutral macro conditions — your execution matters more than the market",
+				"Economy is flat. Not great, not terrible — focus on what you can control",
+				"Steady-state market. No free tailwinds, but no panic either",
+			] as Array[String], state)
 
 
 static func _world_event_line(state: Node) -> String:
@@ -204,6 +273,8 @@ static func _hosting_line(state: Node) -> String:
 		return "Hosting looked strained (%.1f%% reliability) under %s workload. Consider adding Infra staff or switching plan" % [reliability, workload_profile]
 	if overage_cost >= 200.0:
 		return "Hosting overage: $%s this quarter on %s (%s workload)" % [SceneLoader.format_money(overage_cost), plan_name, workload_profile]
+	if reliability < 98.0 and reliability >= 96.0:
+		return "Hosting at %.1f%% reliability — approaching incident risk. Upgrade capacity or add Infra staff soon" % reliability
 	if pressure >= 2.2:
 		return "Workload is now data-center-heavy (%s). Keep Data/Cache capacity ahead of growth" % workload_profile
 	if total_upgrades > 0 or optimization_level > 0:
@@ -220,9 +291,15 @@ static func _hosting_line(state: Node) -> String:
 static func _energy_line(state: Node) -> String:
 	var e: int = state.founder_energy
 	if e < 20:
-		return "You're burning out — one more bad quarter and you might have to walk away"
+		return _pick([
+			"You're burning out — one more bad quarter and you might have to walk away",
+			"Burnout is real. You can barely focus. Something has to change",
+		] as Array[String], state)
 	elif e < 40:
-		return "The stress is mounting. You need a win soon"
+		return _pick([
+			"The stress is mounting. You need a win soon",
+			"Long hours are taking a toll. A good quarter would help",
+		] as Array[String], state)
 	return ""
 
 
@@ -231,11 +308,33 @@ static func _board_line(state: Node) -> String:
 	if bp > 4 or state.financials.funding_rounds.is_empty():
 		return ""
 	if bp <= 1:
-		return "Your board is furious — they're discussing replacing you as CEO"
+		return _pick([
+			"Your board is furious — they're discussing replacing you as CEO",
+			"Board meeting was brutal. You're one bad quarter from getting ousted",
+		] as Array[String], state)
 	if bp <= 2:
-		return "Investors are losing patience — you need to show results"
+		return _pick([
+			"Investors are losing patience — you need to show results",
+			"Your lead investor called twice this week. That's not a good sign",
+		] as Array[String], state)
 	if bp <= 3:
-		return "Your board expects better numbers next quarter"
+		return _pick([
+			"Your board expects better numbers next quarter",
+			"Board wants to see momentum. Keep pushing",
+		] as Array[String], state)
 	return ""
+
+
+static func _synergy_line(state: Node) -> String:
+	# Show near-miss synergy hints in the quarterly report to nudge discovery.
+	var near: Array[Dictionary] = SynergyEngine.get_near_misses(state)
+	if near.is_empty():
+		return ""
+	var hint: Dictionary = near[0]
+	var sname: String = hint.get("name", "")
+	var missing: String = hint.get("missing_feature", "")
+	if sname.is_empty() or missing.is_empty():
+		return ""
+	return "Your team is close to unlocking a synergy: ship %s to activate %s" % [missing, sname]
 
 

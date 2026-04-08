@@ -4,8 +4,8 @@ extends RefCounted
 
 const BASE_ORGANIC_USERS_PER_QUARTER := 35
 const MARKETING_USER_MULT := 0.5
-const OFFICE_COST_BY_LEVEL := [0.0, 1_000.0, 4_000.0, 10_000.0]
-const HOSTING_BASE_CAPACITY_BY_OFFICE := [2_200.0, 7_500.0, 20_000.0, 52_000.0]
+const OFFICE_COST_BY_LEVEL: Array = [0.0, 1_000.0, 4_000.0, 10_000.0]
+const HOSTING_BASE_CAPACITY_BY_OFFICE: Array = [2_200.0, 7_500.0, 20_000.0, 52_000.0]
 const HOSTING_WEB_CAPACITY_PER_UPGRADE := 0.16
 const HOSTING_CACHE_CAPACITY_PER_UPGRADE := 0.14
 const HOSTING_DATA_CAPACITY_PER_UPGRADE := 0.18
@@ -15,7 +15,7 @@ const HOSTING_CACHE_MAINTENANCE_PER_UPGRADE := 78.0
 const HOSTING_DATA_MAINTENANCE_PER_UPGRADE := 118.0
 const HOSTING_OPTIMIZATION_MAINTENANCE_PER_LEVEL := 135.0
 
-const HOSTING_PROFILE_BY_TYPE := {
+const HOSTING_PROFILE_BY_TYPE: Dictionary = {
 	CompanyData.CompanyType.SAAS: {
 		"demand_web": 0.95,
 		"demand_cache": 0.80,
@@ -50,7 +50,7 @@ const HOSTING_PROFILE_BY_TYPE := {
 	},
 }
 
-const HOSTING_PLAN_CONFIG := {
+const HOSTING_PLAN_CONFIG: Dictionary = {
 	CompanyData.HostingPlan.MANAGED_CLOUD: {
 		"fixed_cost": 350.0,
 		"usage_cost_per_cu": 0.020,
@@ -74,7 +74,7 @@ const HOSTING_PLAN_CONFIG := {
 	},
 }
 
-const HOSTING_WORKLOAD_KEYWORDS := {
+const HOSTING_WORKLOAD_KEYWORDS: Dictionary = {
 	"ai_ml": [
 		"ai",
 		"ml",
@@ -133,7 +133,7 @@ const HOSTING_WORKLOAD_KEYWORDS := {
 	],
 }
 
-const DEFAULT_GROWTH_BALANCE := {
+const DEFAULT_GROWTH_BALANCE: Dictionary = {
 	"maturity_start_users": 25_000.0,
 	"maturity_full_users": 500_000.0,
 	"maturity_target_mult": 0.62,
@@ -144,7 +144,7 @@ const DEFAULT_GROWTH_BALANCE := {
 	"late_churn_penalty_rate": 0.003,
 }
 
-const GROWTH_BALANCE_BY_TYPE := {
+const GROWTH_BALANCE_BY_TYPE: Dictionary = {
 	CompanyData.CompanyType.SAAS: {
 		"maturity_start_users": 35_000.0,
 		"maturity_full_users": 480_000.0,
@@ -190,7 +190,7 @@ const GROWTH_BALANCE_BY_TYPE := {
 # Team responsibility model:
 # - Early: small crews share hats, and non-feature lanes still help feature momentum.
 # - Growth/Scale: specialization becomes critical and neglected lanes add real pressure.
-const RESPONSIBILITY_PROFILE := {
+const RESPONSIBILITY_PROFILE: Dictionary = {
 	"early": {
 		"specialization_strength": 0.35,
 		"cross_support_features_share": 0.30,
@@ -213,13 +213,13 @@ const RESPONSIBILITY_PROFILE := {
 		"ops_pressure_mult": 1.42,
 	},
 }
-const RESPONSIBILITY_MESH_STAGE_MULT := {
+const RESPONSIBILITY_MESH_STAGE_MULT: Dictionary = {
 	"early": 0.55,
 	"growth": 1.0,
 	"scale": 1.25,
 }
 
-static var _feature_names := [
+static var _feature_names: Array = [
 	"User Dashboard", "Search", "Notifications", "Analytics",
 	"API v2", "Mobile View", "Export", "Integrations",
 	"Admin Panel", "Onboarding Flow", "Settings Page", "Reports",
@@ -290,7 +290,7 @@ static func _responsibility_profile(state: Node) -> Dictionary:
 
 
 static func _active_assignment_counts(state: Node) -> Dictionary:
-	var counts := {
+	var counts: Dictionary = {
 		"features": 0,
 		"bugs": 0,
 		"debt": 0,
@@ -1071,6 +1071,10 @@ static func _simulate_hosting(state: Node, finance_discount: float) -> Dictionar
 
 static func _update_cash(state: Node) -> void:
 	state.company.cash += state.financials.net_income()
+	# Prevent arbitrarily deep negative cash — once you're $500K in the hole,
+	# the game-over check will fire long before this matters, but clamping
+	# avoids floating-point precision issues in extreme edge cases.
+	state.company.cash = maxf(-500_000.0, state.company.cash)
 
 
 static func _run_competitor_ai(state: Node) -> void:

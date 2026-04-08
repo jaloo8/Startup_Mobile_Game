@@ -886,7 +886,7 @@ def validate_product_preview_prototypes(data: object) -> List[str]:
 
 
 def _extract_visual_preset_ids(source: str) -> Set[str]:
-    marker = "const VISUAL_PRESET_FEATURES := {"
+    marker = "const VISUAL_PRESET_FEATURES: Dictionary = {"
     start = source.find(marker)
     if start == -1:
         return set()
@@ -1040,6 +1040,7 @@ def validate_runtime_bridges() -> List[str]:
         'CurrencyManager="*res://src/autoload/currency_manager.gd"',
         'UITouchHelper="*res://src/autoload/ui_touch_helper_bridge.gd"',
         'WorldEventEngine="*res://src/autoload/world_event_engine_bridge.gd"',
+        'RunHistory="*res://src/autoload/run_history.gd"',
     )
     for line in required_autoload_lines:
         if line not in config_src:
@@ -1357,6 +1358,57 @@ def validate_scroll_contracts() -> List[str]:
     return errors
 
 
+def validate_achievements(data: object) -> List[str]:
+    """Validate achievements.json structure and conditions."""
+    errors: List[str] = []
+    if not isinstance(data, dict):
+        errors.append("achievements.json root must be a dict")
+        return errors
+    achievements = data.get("achievements", [])
+    if not isinstance(achievements, list):
+        errors.append("achievements.achievements must be a list")
+        return errors
+
+    seen_ids: Set[str] = set()
+    valid_categories = {"milestone", "financial", "team", "product", "challenge", "secret"}
+    valid_tiers = {"bronze", "silver", "gold", "platinum"}
+
+    for i, ach in enumerate(achievements):
+        pfx = f"achievements[{i}]"
+        if not isinstance(ach, dict):
+            errors.append(f"{pfx} must be a dict")
+            continue
+
+        aid = ach.get("id", "")
+        if not aid:
+            errors.append(f"{pfx} missing 'id'")
+        elif aid in seen_ids:
+            errors.append(f"{pfx} duplicate id: {aid}")
+        else:
+            seen_ids.add(aid)
+
+        for field in ("title", "description", "icon"):
+            if not ach.get(field):
+                errors.append(f"{pfx} ({aid}) missing '{field}'")
+
+        cat = ach.get("category", "")
+        if cat and cat not in valid_categories:
+            errors.append(f"{pfx} ({aid}) invalid category: {cat}")
+
+        tier = ach.get("tier", "")
+        if tier and tier not in valid_tiers:
+            errors.append(f"{pfx} ({aid}) invalid tier: {tier}")
+
+        condition = ach.get("condition", {})
+        if not isinstance(condition, dict) or not condition:
+            errors.append(f"{pfx} ({aid}) missing or empty 'condition'")
+
+    if len(achievements) < 10:
+        errors.append(f"achievements.json has only {len(achievements)} entries (expected 10+)")
+
+    return errors
+
+
 def main() -> int:
     errors: List[str] = []
 
@@ -1370,6 +1422,8 @@ def main() -> int:
         "competitors": DATA_DIR / "competitors.json",
         "niches": DATA_DIR / "niches.json",
         "product_preview_prototypes": DATA_DIR / "product_preview_prototypes.json",
+        "achievements": DATA_DIR / "achievements.json",
+        "feature_synergies": DATA_DIR / "feature_synergies.json",
     }
     for p in paths.values():
         _require_file(p, errors)
@@ -1388,6 +1442,7 @@ def main() -> int:
         competitors_data = _load_json(paths["competitors"])
         niches_data = _load_json(paths["niches"])
         product_preview_prototypes_data = _load_json(paths["product_preview_prototypes"])
+        achievements_data = _load_json(paths["achievements"])
     except Exception as exc:
         print(f"[FAIL] JSON load error: {exc}")
         return 1
@@ -1405,6 +1460,7 @@ def main() -> int:
     errors.extend(validate_niches(niches_data))
     errors.extend(validate_niche_competitor_coverage(niches_data, competitors_data))
     errors.extend(validate_product_preview_prototypes(product_preview_prototypes_data))
+    errors.extend(validate_achievements(achievements_data))
     errors.extend(validate_visual_presets(feature_ids))
     errors.extend(validate_difficulty_contracts())
     errors.extend(validate_monetization_gate())
@@ -1431,7 +1487,7 @@ def main() -> int:
         "+ visual presets + difficulty wiring + monetization stability gate + version constant "
         "+ event cooldown reset + history snapshots + SceneLoader usage "
         "+ glossary near-dupes + niche-competitor coverage + headline quality "
-        "+ UI button wiring + scroll contracts + serialization coverage"
+        "+ UI button wiring + scroll contracts + serialization coverage + achievements"
     )
     return 0
 

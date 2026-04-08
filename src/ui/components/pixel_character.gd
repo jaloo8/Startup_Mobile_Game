@@ -44,7 +44,7 @@ const HAIR_COLORS: Array[Color] = [
 ## 0=short crop, 1=medium side-part, 2=long, 3=spiky, 4=bun
 const HAIR_STYLE_COUNT := 5
 
-const SHIRT_COLORS := {
+const SHIRT_COLORS: Dictionary = {
 	0: Color(0.32, 0.72, 0.44),  # FEATURES
 	1: Color(0.88, 0.50, 0.35),  # BUGS
 	2: Color(0.82, 0.70, 0.30),  # TECH_DEBT
@@ -92,7 +92,7 @@ static func create(emp: EmployeeData, display_height: float = 20.0) -> PixelChar
 	var h := absi(hash(emp.employee_uid))
 	var skin  := SKIN_TONES[h % SKIN_TONES.size()]
 	var hair  := _pick_hair(h, emp.age)
-	var shirt := SHIRT_COLORS.get(emp.assignment, SHIRT_COLORS[5])
+	var shirt: Color = SHIRT_COLORS.get(emp.assignment, SHIRT_COLORS[5])
 	var style := (h / 7) % HAIR_STYLE_COUNT
 	var glasses: bool = (h / 31) % 5 == 0  # ~20% chance
 

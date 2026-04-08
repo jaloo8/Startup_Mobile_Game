@@ -41,7 +41,7 @@ const COST_OFFICE_THEME     := 10
 
 ## Earn amounts
 const EARN_QUARTER_POSITIVE := 1
-const EARN_FEATURE_QUALITY  := {0: 1, 1: 1, 2: 2}  # low/mid/high quality
+const EARN_FEATURE_QUALITY: Dictionary  = {0: 1, 1: 1, 2: 2}  # low/mid/high quality
 const EARN_MILESTONE_SMALL  := 2
 const EARN_MILESTONE_LARGE  := 5
 
@@ -109,7 +109,7 @@ func on_feature_shipped(quality: int) -> void:
 
 ## Called by GameState when a milestone is hit.
 func on_milestone(milestone_id: String) -> void:
-	var big_milestones := ["ipo", "unicorn", "acquisition", "first_1k_users",
+	var big_milestones: Array = ["ipo", "unicorn", "acquisition", "first_1k_users",
 		"first_10k_users", "first_100k_users", "first_revenue"]
 	var amount := EARN_MILESTONE_LARGE if milestone_id in big_milestones else EARN_MILESTONE_SMALL
 	earn(amount, "milestone_%s" % milestone_id)

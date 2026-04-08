@@ -7,7 +7,7 @@ extends PanelContainer
 
 signal feature_tapped(feature_id: String)
 
-const FEATURE_IDLE_STYLES := {
+const FEATURE_IDLE_STYLES: Dictionary = {
 	# Consumer
 	"push_notifications": "ping",
 	"stories": "ping",

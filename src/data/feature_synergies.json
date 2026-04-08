@@ -1,0 +1,100 @@
+{
+  "synergies": [
+    {
+      "id": "full_stack_analytics",
+      "name": "Full-Stack Analytics",
+      "description": "Dashboard + Analytics + Custom Reports = deep product insights. Users stay longer.",
+      "required_features": ["user_dashboard", "analytics", "custom_reports"],
+      "effects": {"churn_reduction": 0.015, "ux_bonus": 8},
+      "icon": "📊"
+    },
+    {
+      "id": "enterprise_ready",
+      "name": "Enterprise Ready",
+      "description": "SSO + Admin Panel + Audit Log = enterprise compliance. Big contracts incoming.",
+      "required_features": ["sso_login", "admin_panel", "audit_log"],
+      "effects": {"revenue_mult": 1.25, "reputation_bonus": 8},
+      "icon": "🏢"
+    },
+    {
+      "id": "developer_platform",
+      "name": "Developer Platform",
+      "description": "API v2 + Integrations = developers build on your platform.",
+      "required_features": ["api_v2", "integrations"],
+      "effects": {"user_growth_bonus": 15, "reputation_bonus": 5},
+      "icon": "🔌"
+    },
+    {
+      "id": "growth_engine",
+      "name": "Growth Engine",
+      "description": "Push Notifications + Sharing + Recommendations = viral growth loop.",
+      "required_features": ["push_notifications", "sharing", "recommendations"],
+      "effects": {"user_growth_bonus": 12, "churn_reduction": 0.01},
+      "icon": "🚀"
+    },
+    {
+      "id": "monetization_machine",
+      "name": "Monetization Machine",
+      "description": "Billing + Multi-tenancy + Admin Panel = scalable revenue.",
+      "required_features": ["billing", "multi_tenancy", "admin_panel"],
+      "effects": {"revenue_mult": 1.3},
+      "icon": "💰"
+    },
+    {
+      "id": "social_loop",
+      "name": "Social Loop",
+      "description": "Stories + Recommendations + Push Notifications = users bring friends.",
+      "required_features": ["stories", "recommendations", "push_notifications"],
+      "effects": {"user_growth_bonus": 20, "dau_bonus": 0.05},
+      "icon": "🔄"
+    },
+    {
+      "id": "content_flywheel",
+      "name": "Content Flywheel",
+      "description": "Social Feed + Stories + Live Chat = endless engagement. Users never leave.",
+      "required_features": ["social_feed", "stories", "live_chat"],
+      "effects": {"churn_reduction": 0.02, "dau_bonus": 0.08},
+      "icon": "♾️"
+    },
+    {
+      "id": "trust_engine",
+      "name": "Trust & Safety",
+      "description": "Ratings + Disputes + Payment Escrow = marketplace trust.",
+      "required_features": ["ratings", "disputes", "payment_escrow"],
+      "effects": {"reputation_bonus": 10, "churn_reduction": 0.01},
+      "icon": "🛡️"
+    },
+    {
+      "id": "liquidity_loop",
+      "name": "Liquidity Loop",
+      "description": "Search Filters + Seller Onboarding + Payment Escrow = frictionless transactions.",
+      "required_features": ["search_filters", "seller_onboarding", "payment_escrow"],
+      "effects": {"revenue_mult": 1.2, "user_growth_bonus": 10},
+      "icon": "⚡"
+    },
+    {
+      "id": "devops_pipeline",
+      "name": "CI/CD Pipeline",
+      "description": "CLI + SDK + CI/CD Integration = developers ship faster with your tools.",
+      "required_features": ["cli_tool", "sdk", "cicd_integration"],
+      "effects": {"user_growth_bonus": 15, "reputation_bonus": 8},
+      "icon": "⚙️"
+    },
+    {
+      "id": "observability_suite",
+      "name": "Observability Suite",
+      "description": "Usage Dashboard + Webhooks + Rate Limiting = complete visibility stack.",
+      "required_features": ["usage_dashboard", "webhooks", "rate_limiting"],
+      "effects": {"churn_reduction": 0.015, "reputation_bonus": 6},
+      "icon": "👁️"
+    },
+    {
+      "id": "self_serve_platform",
+      "name": "Self-Serve Platform",
+      "description": "Seller Onboarding + Seller Analytics + Categories = sellers help themselves.",
+      "required_features": ["seller_onboarding", "seller_analytics", "categories"],
+      "effects": {"churn_reduction": 0.01, "ux_bonus": 10},
+      "icon": "🎯"
+    }
+  ]
+}

@@ -4,7 +4,7 @@ extends RefCounted
 
 enum Round { PRE_SEED, SEED, SERIES_A, SERIES_B, GROWTH }
 
-const ROUND_NAMES := {
+const ROUND_NAMES: Dictionary = {
 	Round.PRE_SEED: "Pre-Seed",
 	Round.SEED: "Seed",
 	Round.SERIES_A: "Series A",
@@ -12,7 +12,7 @@ const ROUND_NAMES := {
 	Round.GROWTH: "Growth",
 }
 
-const ROUND_RANGES := {
+const ROUND_RANGES: Dictionary = {
 	Round.PRE_SEED: {"min": 50_000, "max": 250_000, "val_mult": 3.0},
 	Round.SEED: {"min": 250_000, "max": 2_000_000, "val_mult": 4.0},
 	Round.SERIES_A: {"min": 2_000_000, "max": 15_000_000, "val_mult": 5.0},
@@ -20,21 +20,21 @@ const ROUND_RANGES := {
 	Round.GROWTH: {"min": 30_000_000, "max": 100_000_000, "val_mult": 7.0},
 }
 
-const TIER_THRESHOLDS := {
+const TIER_THRESHOLDS: Dictionary = {
 	"elite": 0.45,
 	"top": 0.30,
 	"mid": 0.15,
 	"emerging": 0.08,
 }
 
-const TIER_VALUATION_BONUS := {
+const TIER_VALUATION_BONUS: Dictionary = {
 	"elite": 1.4,
 	"top": 1.2,
 	"mid": 1.0,
 	"emerging": 0.85,
 }
 
-const TIER_ROUND_MATCH := {
+const TIER_ROUND_MATCH: Dictionary = {
 	"emerging": [Round.PRE_SEED, Round.SEED],
 	"mid": [Round.SEED, Round.SERIES_A],
 	"top": [Round.SERIES_A, Round.SERIES_B],
@@ -42,7 +42,7 @@ const TIER_ROUND_MATCH := {
 }
 
 const VCS_PATH := "res://src/data/vcs.json"
-const TYPE_TO_FOCUS := {
+const TYPE_TO_FOCUS: Dictionary = {
 	CompanyData.CompanyType.SAAS: "saas",
 	CompanyData.CompanyType.CONSUMER: "consumer",
 	CompanyData.CompanyType.MARKETPLACE: "marketplace",
@@ -86,8 +86,6 @@ static func _load_firms() -> void:
 			"check_max": entry.get("check_max", 0),
 		})
 
-	if OS.is_debug_build():
-		print("FundraisingEngine: loaded %d VC firms" % _firms.size())
 
 
 static func next_round(state: Node) -> Round:

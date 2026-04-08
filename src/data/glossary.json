@@ -238,5 +238,35 @@
     "term": "Feature Tree",
     "short": "The set of features you can build, specific to your company type",
     "tip": "Each company type has its own feature tree with 10 features. Some require prerequisites — for example, you need a User Dashboard before you can build Analytics. Each feature has a build cost and gameplay effects like reduced churn or increased revenue."
+  },
+  "synergy": {
+    "term": "Feature Synergy",
+    "short": "Bonus effects when you ship the right combination of features",
+    "tip": "Certain features work better together. Ship all the required features in a synergy combo and you unlock permanent bonuses like reduced churn, revenue multipliers, or user growth boosts. Check the Product screen to see which synergies you've discovered and which ones you're close to unlocking."
+  },
+  "soc2": {
+    "term": "SOC 2",
+    "short": "A security compliance certification",
+    "tip": "SOC 2 (Service Organization Control) is a security framework that enterprise customers require. Getting certified means an auditor verified your security controls meet industry standards. Without it, most large companies won't even start a sales conversation."
+  },
+  "nps": {
+    "term": "NPS",
+    "short": "Net Promoter Score",
+    "tip": "A survey metric: 'How likely are you to recommend us?' Responses of 9-10 are Promoters, 0-6 are Detractors. NPS = % Promoters minus % Detractors. Above 50 is excellent. Above 70 is world-class. Below 0 means more people hate you than love you."
+  },
+  "cap_table": {
+    "term": "Cap Table",
+    "short": "Who owns what percentage of your company",
+    "tip": "The capitalization table tracks every share of your company — founders, investors, employee options. Each fundraise adds new shareholders and dilutes existing ones. Keeping your cap table clean means knowing exactly who owns what and at what terms."
+  },
+  "bridge_round": {
+    "term": "Bridge Round",
+    "short": "Emergency funding to keep the lights on",
+    "tip": "A small fundraise between major rounds, usually from existing investors. It means you need more runway before you can raise a proper round. VCs see it as a yellow flag — it means the company is burning faster than expected."
+  },
+  "vc_chips": {
+    "term": "VC Chips",
+    "short": "Soft currency earned through gameplay",
+    "tip": "Chips are earned by shipping features, hitting milestones, completing quarters profitably, and returning after being away. Spend them to reveal extra hiring candidates, skip tough events, or boost feature progress. Chips make things faster but nothing requires them — every chip perk has a free alternative."
   }
 }

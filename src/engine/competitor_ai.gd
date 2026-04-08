@@ -5,14 +5,14 @@ extends RefCounted
 const BASE_USER_GROWTH_PER_QUARTER := 50
 const COMPETITORS_PATH := "res://src/data/competitors.json"
 
-const TYPE_TO_FOCUS := {
+const TYPE_TO_FOCUS: Dictionary = {
 	CompanyData.CompanyType.SAAS: "saas",
 	CompanyData.CompanyType.CONSUMER: "consumer",
 	CompanyData.CompanyType.MARKETPLACE: "marketplace",
 	CompanyData.CompanyType.DEV_TOOLS: "dev_tools",
 }
 
-const SIZE_PRESETS := {
+const SIZE_PRESETS: Dictionary = {
 	"startup": {"users_min": 50, "users_max": 2_000, "funding_min": 10_000, "funding_max": 200_000, "quality_min": 20, "quality_max": 45, "growth_min": 0.04, "growth_max": 0.10},
 	"growth": {"users_min": 2_000, "users_max": 50_000, "funding_min": 500_000, "funding_max": 10_000_000, "quality_min": 40, "quality_max": 65, "growth_min": 0.03, "growth_max": 0.08},
 	"enterprise": {"users_min": 100_000, "users_max": 5_000_000, "funding_min": 50_000_000, "funding_max": 500_000_000, "quality_min": 55, "quality_max": 80, "growth_min": 0.01, "growth_max": 0.04},
@@ -62,8 +62,6 @@ static func _load_pool() -> void:
 	if _pool.is_empty():
 		_pool = _fallback_pool()
 
-	if OS.is_debug_build():
-		print("CompetitorAI: loaded %d competitors from JSON" % _pool.size())
 
 
 static func generate_starting_competitors(

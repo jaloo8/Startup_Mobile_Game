@@ -76,6 +76,7 @@ func _build_ui() -> void:
 	_build_fundraising()
 	_build_economy()
 	_build_events()
+	_build_chips()
 	_build_save_load()
 	_build_footer()
 
@@ -495,6 +496,41 @@ func _build_events() -> void:
 
 
 # ---------------------------------------------------------------------------
+# VC Chips
+# ---------------------------------------------------------------------------
+
+func _build_chips() -> void:
+	_vbox.add_child(_section("VC Chips"))
+	_vbox.add_child(_dim_label("Current: %d chips (earned: %d, spent: %d)" % [
+		CurrencyManager.chips, CurrencyManager.total_earned, CurrencyManager.total_spent]))
+
+	var row := _hbox()
+	_vbox.add_child(row)
+
+	_add_action_btn(row, "+10", ThemeManager.C_GREEN, func():
+		CurrencyManager.earn(10, "dev_panel")
+		_flash("Earned 10 chips — total %d" % CurrencyManager.chips)
+	)
+	_add_action_btn(row, "+50", ThemeManager.C_GREEN, func():
+		CurrencyManager.earn(50, "dev_panel")
+		_flash("Earned 50 chips — total %d" % CurrencyManager.chips)
+	)
+	_add_action_btn(row, "+100", ThemeManager.C_GREEN, func():
+		CurrencyManager.earn(100, "dev_panel")
+		_flash("Earned 100 chips — total %d" % CurrencyManager.chips)
+	)
+	_add_action_btn(row, "Reset to 0", ThemeManager.C_RED, func():
+		CurrencyManager.chips = 0
+		CurrencyManager.total_earned = 0
+		CurrencyManager.total_spent = 0
+		CurrencyManager.chips_changed.emit(0, 0)
+		_flash("Chips reset to 0")
+	)
+
+	_vbox.add_child(_sep())
+
+
+# ---------------------------------------------------------------------------
 # Save / Load
 # ---------------------------------------------------------------------------
 
@@ -798,7 +834,7 @@ func _next_round_name() -> String:
 	if GameState.financials == null:
 		return "?"
 	var round_val = FundraisingEngine.next_round(GameState)
-	var names := ["Pre-Seed", "Seed", "Series A", "Series B", "Growth"]
+	var names: Array = ["Pre-Seed", "Seed", "Series A", "Series B", "Growth"]
 	if round_val >= 0 and round_val < names.size():
 		return names[round_val]
 	return "?"

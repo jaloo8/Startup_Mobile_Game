@@ -55,12 +55,12 @@ func _refresh_profile() -> void:
 	title_label.text = _employee.employee_name
 	subtitle_label.text = _employee.display_title()
 
-	var profile_parts := [_employee.employment_label(), _employee.personality_label()]
+	var profile_parts: Array = [_employee.employment_label(), _employee.personality_label()]
 	if _employee.age > 0:
 		profile_parts.append("Age %d" % _employee.age)
 	profile_label.text = " · ".join(profile_parts)
 
-	var tenure_parts := ["Tenure: %d quarter%s" % [_employee.tenure_quarters, "s" if _employee.tenure_quarters != 1 else ""]]
+	var tenure_parts: Array = ["Tenure: %d quarter%s" % [_employee.tenure_quarters, "s" if _employee.tenure_quarters != 1 else ""]]
 	if not _employee.bio.is_empty():
 		tenure_parts.append(_employee.bio)
 	tenure_label.text = "\n".join(tenure_parts)

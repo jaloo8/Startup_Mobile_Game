@@ -7,6 +7,7 @@ extends Control
 @onready var analytics_header: Label = %AnalyticsHeader
 @onready var analytics_row: HBoxContainer = %AnalyticsRow
 @onready var privacy_btn: Button = %PrivacyButton
+@onready var terms_btn: Button = %TermsButton
 @onready var privacy_panel: PanelContainer = %PrivacyPanel
 @onready var privacy_text: RichTextLabel = %PrivacyText
 @onready var close_privacy_btn: Button = %ClosePrivacyButton
@@ -20,12 +21,15 @@ extends Control
 # Dynamically created premium + tutorial controls.
 var _premium_row: Control
 var _tutorial_btn: Button
+var _sfx_toggle: CheckButton
+var _haptic_toggle: CheckButton
 
 
 func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	analytics_toggle.toggled.connect(_on_analytics_toggled)
 	privacy_btn.pressed.connect(_on_privacy)
+	terms_btn.pressed.connect(_on_terms)
 	close_privacy_btn.pressed.connect(_on_close_privacy)
 	dismiss_banner_btn.pressed.connect(_on_dismiss_banner)
 	age_confirm_btn.pressed.connect(_on_age_confirmed)
@@ -55,6 +59,7 @@ func _ready() -> void:
 			age_gate_panel.visible = false
 			consent_banner.visible = false
 
+	_build_audio_section()
 	_build_premium_section()
 	AdManager.premium_unlocked.connect(_on_premium_unlocked)
 	UITouchHelper.harden_tree(self)
@@ -64,8 +69,14 @@ func _ready() -> void:
 
 func _on_age_confirmed() -> void:
 	Analytics.confirm_age()
-	age_gate_panel.visible = false
-	consent_banner.visible = true
+	AnimHelper.fade_out(age_gate_panel, 0.14)
+	var tw := create_tween()
+	tw.tween_interval(0.16)
+	tw.tween_callback(func() -> void:
+		age_gate_panel.visible = false
+		consent_banner.visible = true
+		AnimHelper.fade_in(consent_banner, 0.0, 0.18)
+	)
 
 
 func _on_age_denied() -> void:
@@ -94,6 +105,7 @@ func _update_analytics_desc() -> void:
 
 func _on_privacy() -> void:
 	privacy_panel.visible = true
+	AnimHelper.pop_in(privacy_panel, 0.0, 0.2)
 	var path := "res://PRIVACY_POLICY.txt"
 	if FileAccess.file_exists(path):
 		var file := FileAccess.open(path, FileAccess.READ)
@@ -104,16 +116,99 @@ func _on_privacy() -> void:
 		privacy_text.text = "Privacy policy file not found."
 
 
+func _on_terms() -> void:
+	privacy_panel.visible = true
+	AnimHelper.pop_in(privacy_panel, 0.0, 0.2)
+	var path := "res://TERMS_OF_SERVICE.txt"
+	if FileAccess.file_exists(path):
+		var file := FileAccess.open(path, FileAccess.READ)
+		if file:
+			privacy_text.text = file.get_as_text()
+			file = null
+	else:
+		privacy_text.text = "Terms of Service file not found."
+
+
 func _on_close_privacy() -> void:
-	privacy_panel.visible = false
+	AnimHelper.pop_out(privacy_panel, 0.14, func() -> void: privacy_panel.visible = false)
 
 
 func _on_dismiss_banner() -> void:
-	consent_banner.visible = false
+	AnimHelper.fade_out(consent_banner, 0.14, func() -> void: consent_banner.visible = false)
 
 
 func _on_back() -> void:
 	SceneLoader.goto_scene("res://src/ui/main_menu/main_menu.tscn")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Audio & Haptic section
+# ─────────────────────────────────────────────────────────────────────────────
+
+func _build_audio_section() -> void:
+	var parent := version_label.get_parent()
+	if parent == null:
+		return
+
+	var insert_idx := version_label.get_index() + 1
+
+	var sep := HSeparator.new()
+	sep.add_theme_color_override("color", Color(0.18, 0.20, 0.30, 0.7))
+	parent.add_child(sep)
+	parent.move_child(sep, insert_idx)
+	insert_idx += 1
+
+	# SFX toggle row
+	var sfx_row := HBoxContainer.new()
+	sfx_row.add_theme_constant_override("separation", 12)
+	parent.add_child(sfx_row)
+	parent.move_child(sfx_row, insert_idx)
+	insert_idx += 1
+
+	var sfx_label := Label.new()
+	sfx_label.text = "Sound Effects"
+	sfx_label.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
+	sfx_label.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+	sfx_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sfx_row.add_child(sfx_label)
+
+	_sfx_toggle = CheckButton.new()
+	_sfx_toggle.button_pressed = SfxPlayer.sfx_enabled
+	_sfx_toggle.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
+	_sfx_toggle.toggled.connect(_on_sfx_toggled)
+	sfx_row.add_child(_sfx_toggle)
+
+	# Haptic toggle row
+	var haptic_row := HBoxContainer.new()
+	haptic_row.add_theme_constant_override("separation", 12)
+	parent.add_child(haptic_row)
+	parent.move_child(haptic_row, insert_idx)
+	insert_idx += 1
+
+	var haptic_label := Label.new()
+	haptic_label.text = "Vibration"
+	haptic_label.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
+	haptic_label.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+	haptic_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	haptic_row.add_child(haptic_label)
+
+	_haptic_toggle = CheckButton.new()
+	_haptic_toggle.button_pressed = SfxPlayer.haptic_enabled
+	_haptic_toggle.custom_minimum_size.y = ThemeManager.TOUCH_MIN_H
+	_haptic_toggle.toggled.connect(_on_haptic_toggled)
+	haptic_row.add_child(_haptic_toggle)
+
+
+func _on_sfx_toggled(enabled: bool) -> void:
+	SfxPlayer.set_sfx_enabled(enabled)
+	if enabled:
+		SfxPlayer.play("toggle")
+
+
+func _on_haptic_toggled(enabled: bool) -> void:
+	SfxPlayer.set_haptic_enabled(enabled)
+	if enabled:
+		AnimHelper.haptic(&"medium")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

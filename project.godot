@@ -33,6 +33,11 @@ Analytics="*res://src/autoload/analytics.gd"
 AdManager="*res://src/autoload/ad_manager.gd"
 TutorialManager="*res://src/autoload/tutorial_manager.gd"
 SfxPlayer="*res://src/autoload/sfx_player.gd"
+ToastManager="*res://src/autoload/toast_manager.gd"
+AchievementManager="*res://src/autoload/achievement_manager.gd"
+RunHistory="*res://src/autoload/run_history.gd"
+PrestigeManager="*res://src/autoload/prestige_manager.gd"
+DailyBonus="*res://src/autoload/daily_bonus.gd"
 
 [display]
 

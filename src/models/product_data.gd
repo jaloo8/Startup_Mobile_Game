@@ -156,7 +156,7 @@ func avg_feature_quality() -> float:
 
 
 func add_feature(feature_name: String, quality: int, quarter: int, feature_id: String = "") -> void:
-	var entry := {
+	var entry: Dictionary = {
 		"name": feature_name,
 		"quality": clampi(quality, 1, 100),
 		"quarter_shipped": quarter,

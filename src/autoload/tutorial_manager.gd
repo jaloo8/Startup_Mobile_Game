@@ -15,34 +15,40 @@ const FREE_STEP_TO_SKIP := 99   # sentinel value written by skip()
 # ── Step definitions ──────────────────────────────────────────────────────────
 # auto_on: "" = manual only | "people" = fires when People screen opens
 #          "quarter" = fires after the first quarter advance
-const STEPS := [
+const STEPS: Array = [
 	{
 		"title": "Welcome to Venture!",
-		"message": "You're the CEO. Build a product, grow your users, and reach profitability before your cash runs out.",
+		"message": "You're the CEO of a brand-new startup. Your mission: ship features, acquire users, and reach profitability before your runway runs dry.",
 		"action": "Let's Build →",
 		"auto_on": "",
 	},
 	{
-		"title": "Watch Your Cash",
-		"message": "These stats are your lifeline. When Cash hits zero — game over. Runway shows how many quarters you have left to survive.",
+		"title": "Watch Your Runway",
+		"message": "Cash is your lifeline — when it hits zero, it's game over. Runway tells you how many quarters you can survive at current spending. Green means healthy. Red means act fast.",
 		"action": "Got it",
 		"auto_on": "",
 	},
 	{
-		"title": "Build a Team",
-		"message": "Tap People to hire your first employee, then assign them to Features so your product starts getting built.",
+		"title": "Hire Your First Engineer",
+		"message": "Every product starts with a team. Tap People to hire your first employee, then assign them to Features so development begins.",
 		"action": "Open People →",
 		"auto_on": "people",
 	},
 	{
 		"title": "Advance the Quarter",
-		"message": "Ready? Tap Advance Quarter. Your team works, revenue comes in, and surprises unfold — good and bad.",
+		"message": "Each quarter, your team codes, revenue flows in, and events unfold — fundraising opportunities, market shifts, and unexpected decisions. Tap Advance Quarter to move time forward.",
 		"action": "Got it",
 		"auto_on": "quarter",
 	},
 	{
-		"title": "You're in Business!",
-		"message": "Read the quarterly report each time you advance. Use People, Product, Finances, and Market to manage every aspect of your company.",
+		"title": "VC Chips",
+		"message": "You earn VC Chips by shipping features, hitting milestones, and staying profitable. Spend them on the hiring screen to reveal extra candidates, in events to skip tough choices, or on the product screen to boost feature progress.",
+		"action": "Nice →",
+		"auto_on": "",
+	},
+	{
+		"title": "You're Live!",
+		"message": "Check the quarterly report after each advance. Use People for hiring, Product for features, Finances for fundraising, and Market for competitive intel. Ship fast, stay funded, and build something remarkable.",
 		"action": "Start Building 🚀",
 		"auto_on": "",
 	},

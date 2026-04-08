@@ -46,9 +46,18 @@ static func _harden_button(btn: BaseButton, min_touch_size: float) -> void:
 	btn.custom_minimum_size = min_size
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
-	# Placeholder hook for a future visual polish pass (press scale/ripple/haptics).
+	# Wire press feedback: squash/stretch animation + light haptic on every button.
 	if not btn.has_meta(VISUAL_HOOK_META_KEY):
 		btn.set_meta(VISUAL_HOOK_META_KEY, "press_feedback_v1")
+		btn.button_down.connect(func() -> void:
+			if is_instance_valid(btn):
+				AnimHelper.button_press(btn)
+		)
+		btn.button_up.connect(func() -> void:
+			if is_instance_valid(btn):
+				AnimHelper.button_release(btn)
+				AnimHelper.haptic(&"light")
+		)
 
 
 static func _harden_box_spacing(box: BoxContainer, min_button_gap: int) -> void:
