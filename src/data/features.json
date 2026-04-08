@@ -240,7 +240,7 @@
       "id": "referral_program",
       "name": "Referral Program",
       "description": "Reward users for inviting friends. Marketplace growth flywheel.",
-      "cost": 120,
+      "cost": 150,
       "effects": {"user_growth_bonus": 20, "churn_reduction": 0.005},
       "prerequisites": []
     }

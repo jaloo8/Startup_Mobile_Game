@@ -17,6 +17,8 @@ func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	_refresh()
 	UITouchHelper.harden_tree(self)
+	Analytics.track_screen("save_slots")
+	AnimHelper.fade_in(self, 0.0, 0.16)
 	AnimHelper.stagger_list(slot_container, 0.06, 0.0, 24.0)
 
 
@@ -83,7 +85,7 @@ func _create_occupied_slot(info: Dictionary) -> PanelContainer:
 
 	var diff_label := Label.new()
 	diff_label.text = str(info.get("difficulty", "normal")).capitalize()
-	diff_label.add_theme_font_size_override("font_size", 11)
+	diff_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	diff_label.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5))
 	info_vbox.add_child(diff_label)
 
@@ -119,7 +121,7 @@ func _create_empty_slot(_info: Dictionary) -> PanelContainer:
 	var label := Label.new()
 	label.text = "Empty Slot"
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 	label.add_theme_color_override("font_color", Color(0.4, 0.4, 0.45))
 	hbox.add_child(label)
 
@@ -145,7 +147,7 @@ func _create_locked_slot(info: Dictionary) -> PanelContainer:
 	var slot_idx := _slot_index(slot_name)
 	var title := Label.new()
 	title.text = "Premium Slot %d" % slot_idx
-	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 	title.add_theme_color_override("font_color", Color(0.86, 0.76, 0.42))
 	vbox.add_child(title)
 

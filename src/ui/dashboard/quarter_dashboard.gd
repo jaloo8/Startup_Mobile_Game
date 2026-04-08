@@ -1,5 +1,10 @@
 extends Control
 ## Main gameplay screen.
+##
+## AI INTEGRATION OPPORTUNITY: The office scene (workers, furniture, decorations)
+## could use AI-generated background art via ComfyUI + SDXL pixel-art LoRA.
+## Generate unique office backgrounds per office_level at build time, replacing
+## the static PNGs. See docs/AI_TECH_OPPORTUNITIES.md for the workflow.
 
 @onready var quarter_label: Label = %QuarterLabel
 @onready var company_label: Label = %CompanyLabel
@@ -95,6 +100,14 @@ var _chip_hud_label: Label
 var _passive_ticker_label: Label
 var _boost_idle_btn: Button
 var _offline_summary_backdrop: ColorRect
+# Economy mood lighting — subtle edge tint for bull/bear atmosphere.
+var _economy_vignette: ColorRect
+
+# --- Performance caches (avoid per-refresh allocations on mobile) ---
+# Avatar textures loaded once, keyed by index (1-8). Avoids ResourceLoader.load() per employee per refresh.
+static var _avatar_cache: Dictionary = {}  # int -> Texture2D
+# Debounce guard for office banner resize to prevent rebuild spam.
+var _office_resize_pending: bool = false
 
 # Previous stat values for animated counter rolls.
 var _first_refresh: bool = true
@@ -222,7 +235,7 @@ func _exit_tree() -> void:
 
 func _build_finance_plain_label() -> void:
 	_finance_plain_label = Label.new()
-	_finance_plain_label.add_theme_font_size_override("font_size", 11)
+	_finance_plain_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	_finance_plain_label.add_theme_color_override("font_color", Color(0.66, 0.74, 0.9))
 	_finance_plain_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var vbox := quarter_label.get_parent().get_parent()
@@ -246,7 +259,7 @@ func _build_delta_labels() -> void:
 
 func _make_delta_label() -> Label:
 	var lbl := Label.new()
-	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	lbl.visible = false
 	return lbl
 
@@ -273,7 +286,7 @@ func _move_nav_to_top() -> void:
 	# Also style the nav buttons to look more like tabs
 	for btn: Button in [people_btn, product_btn, finance_btn, market_btn]:
 		btn.custom_minimum_size = Vector2(0, 46)
-		btn.add_theme_font_size_override("font_size", 13)
+		btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 
 
 func _build_quarter_transition_fx() -> void:
@@ -419,22 +432,36 @@ func _play_quarter_transition() -> float:
 
 	_play_transition_sfx("start")
 
+	# Subtle screen shake on quarter change — conveys "time moved forward."
+	AnimHelper.screen_shake(get_tree(), 0.15, 0.18)
+
 	var tw := create_tween()
 	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tw.tween_property(quarter_transition_tint, "modulate:a", 0.78, 0.12)
+	# Phase 1: tint + label + sweep all animate in together.
+	tw.tween_property(quarter_transition_tint, "modulate:a", 0.82, 0.10)
 	if _transition_label != null:
-		tw.parallel().tween_property(_transition_label, "modulate:a", 1.0, 0.10)
-		tw.parallel().tween_property(_transition_label, "scale", Vector2.ONE, 0.16)
+		tw.parallel().tween_property(_transition_label, "modulate:a", 1.0, 0.08)
+		# Disney overshoot: label pops in slightly larger then settles.
+		tw.parallel().tween_property(_transition_label, "scale", Vector2(1.06, 1.06), 0.12) \
+			.set_trans(Tween.TRANS_BACK)
 	if _transition_sweep != null:
-		tw.parallel().tween_property(_transition_sweep, "modulate:a", 0.34, 0.09)
-		tw.parallel().tween_property(_transition_sweep, "position:x", width + sweep_w, 0.27).set_trans(Tween.TRANS_CUBIC)
+		tw.parallel().tween_property(_transition_sweep, "modulate:a", 0.38, 0.07)
+		tw.parallel().tween_property(_transition_sweep, "position:x", width + sweep_w, 0.24) \
+			.set_trans(Tween.TRANS_CUBIC)
 
-	tw.tween_interval(0.03)
-	tw.tween_property(quarter_transition_tint, "modulate:a", 0.0, 0.24)
+	# Brief hold — let the player register the quarter label.
+	tw.tween_interval(0.05)
+
+	# Label settles to final scale during hold.
 	if _transition_label != null:
-		tw.parallel().tween_property(_transition_label, "modulate:a", 0.0, 0.16)
+		tw.parallel().tween_property(_transition_label, "scale", Vector2.ONE, 0.10)
+
+	# Phase 2: everything fades out.
+	tw.tween_property(quarter_transition_tint, "modulate:a", 0.0, 0.22)
+	if _transition_label != null:
+		tw.parallel().tween_property(_transition_label, "modulate:a", 0.0, 0.14)
 	if _transition_sweep != null:
-		tw.parallel().tween_property(_transition_sweep, "modulate:a", 0.0, 0.14)
+		tw.parallel().tween_property(_transition_sweep, "modulate:a", 0.0, 0.12)
 	tw.tween_callback(func() -> void:
 		if quarter_transition_tint:
 			quarter_transition_tint.visible = false
@@ -451,7 +478,7 @@ func _build_feature_banner() -> void:
 	# A slim banner near the top of the event log area that shows when a
 	# feature ships (for players who are on the dashboard when it happens).
 	_feature_banner = Label.new()
-	_feature_banner.add_theme_font_size_override("font_size", 13)
+	_feature_banner.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	_feature_banner.add_theme_color_override("font_color", Color(0.4, 0.95, 0.55))
 	_feature_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_feature_banner.visible = false
@@ -501,7 +528,7 @@ func _build_next_action_label() -> void:
 
 func _build_advance_hint_label() -> void:
 	_advance_hint_label = Label.new()
-	_advance_hint_label.add_theme_font_size_override("font_size", 11)
+	_advance_hint_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	_advance_hint_label.add_theme_color_override("font_color", Color(0.9, 0.7, 0.35))
 	_advance_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_advance_hint_label.visible = false
@@ -542,7 +569,7 @@ func _build_advance_toast() -> void:
 
 func _build_hosting_status_label() -> void:
 	_hosting_status_label = Label.new()
-	_hosting_status_label.add_theme_font_size_override("font_size", 13)
+	_hosting_status_label.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	var status_row := economy_label.get_parent()
 	if status_row:
 		status_row.add_child(_hosting_status_label)
@@ -555,8 +582,8 @@ func _build_office_worker_layer() -> void:
 	_office_worker_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_office_worker_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	office_banner.add_child(_office_worker_layer)
-	if not office_banner.resized.is_connected(_refresh_office_worker_ambient):
-		office_banner.resized.connect(_refresh_office_worker_ambient)
+	if not office_banner.resized.is_connected(_debounced_office_refresh):
+		office_banner.resized.connect(_debounced_office_refresh)
 
 
 func _refresh(_q: int) -> void:
@@ -1152,17 +1179,27 @@ func _refresh_economy() -> void:
 	if world_text.is_empty():
 		economy_label.text = market_text
 		economy_label.add_theme_color_override("font_color", Color(0.72, 0.78, 0.9))
-		return
-
-	economy_label.text = "%s  ·  World: %s" % [market_text, world_text]
-	var growth_mult := GameState.world_event_mult("growth_mult", 1.0)
-	var cost_mult := GameState.world_event_mult("cost_mult", 1.0)
-	if growth_mult < 0.97 or cost_mult > 1.03:
-		economy_label.add_theme_color_override("font_color", Color(0.96, 0.72, 0.45))
-	elif growth_mult > 1.03 and cost_mult <= 1.03:
-		economy_label.add_theme_color_override("font_color", Color(0.58, 0.88, 0.56))
 	else:
-		economy_label.add_theme_color_override("font_color", Color(0.62, 0.82, 0.95))
+		economy_label.text = "%s  ·  World: %s" % [market_text, world_text]
+		var growth_mult := GameState.world_event_mult("growth_mult", 1.0)
+		var cost_mult := GameState.world_event_mult("cost_mult", 1.0)
+		if growth_mult < 0.97 or cost_mult > 1.03:
+			economy_label.add_theme_color_override("font_color", Color(0.96, 0.72, 0.45))
+		elif growth_mult > 1.03 and cost_mult <= 1.03:
+			economy_label.add_theme_color_override("font_color", Color(0.58, 0.88, 0.56))
+		else:
+			economy_label.add_theme_color_override("font_color", Color(0.62, 0.82, 0.95))
+
+	# Economy mood lighting — subtle colored vignette for market atmosphere.
+	# Bull = warm green tint, Bear = cool red tint, Neutral = remove.
+	if _economy_vignette and is_instance_valid(_economy_vignette):
+		AnimHelper.remove_mood_vignette(_economy_vignette)
+		_economy_vignette = null
+	match GameState.market.economy_state:
+		MarketData.EconomyState.BULL:
+			_economy_vignette = AnimHelper.mood_vignette(self, Color(0.15, 0.55, 0.25), 0.06)
+		MarketData.EconomyState.BEAR:
+			_economy_vignette = AnimHelper.mood_vignette(self, Color(0.55, 0.12, 0.12), 0.08)
 
 
 func _refresh_energy() -> void:
@@ -1188,9 +1225,29 @@ func _on_feature_shipped_dashboard(feature_name: String, quality: int) -> void:
 	_feature_banner.text = "Feature shipped: %s  (%s quality, %d/100) — check Product for details" % [feature_name, q_word, quality]
 	_feature_banner.modulate.a = 0.0
 	_feature_banner.visible = true
+
+	# Celebration proportional to quality — Pixar's "staging" principle.
+	if quality >= 70:
+		# High quality: screen flash + confetti burst + strong haptic.
+		AnimHelper.screen_flash(self, Color(0.3, 1.0, 0.5, 0.25), 0.35)
+		AnimHelper.confetti_burst(self, Vector2(360, 300), [
+			ThemeManager.C_GREEN, ThemeManager.C_GOLD, ThemeManager.C_BLUE,
+		], 30, 200.0, 1.8)
+		AnimHelper.haptic(&"heavy")
+		SfxPlayer.play("feature_ship")
+	elif quality >= 45:
+		# Decent: small flash + medium haptic.
+		AnimHelper.screen_flash(self, Color(0.3, 0.8, 0.5, 0.15), 0.25)
+		AnimHelper.haptic(&"medium")
+		SfxPlayer.play("feature_ship")
+	else:
+		# Rough: just the banner, light haptic.
+		AnimHelper.haptic(&"light")
+
+	# Banner entrance: slide in with spring overshoot.
+	AnimHelper.slide_in(_feature_banner, Vector2(0, -16), 0.0, 0.22)
 	var tw := create_tween()
-	tw.tween_property(_feature_banner, "modulate:a", 1.0, 0.25).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(4.8)
+	tw.tween_interval(5.0)
 	tw.tween_property(_feature_banner, "modulate:a", 0.0, 0.8)
 	tw.tween_callback(func() -> void: _feature_banner.visible = false)
 
@@ -1350,6 +1407,17 @@ func _refresh_office_banner() -> void:
 	_refresh_office_worker_ambient()
 
 
+func _debounced_office_refresh() -> void:
+	# Coalesce rapid resize events into a single rebuild (saves battery on layout shifts).
+	if _office_resize_pending:
+		return
+	_office_resize_pending = true
+	get_tree().create_timer(0.05).timeout.connect(func() -> void:
+		_office_resize_pending = false
+		_refresh_office_worker_ambient()
+	)
+
+
 func _refresh_office_worker_ambient() -> void:
 	if _office_worker_layer == null or GameState.company == null:
 		return
@@ -1369,6 +1437,9 @@ func _refresh_office_worker_ambient() -> void:
 	tint.color = Color(accent.r, accent.g, accent.b, clampf(0.10 + float(office_level) * 0.02, 0.08, 0.18))
 	_office_worker_layer.add_child(tint)
 
+	# --- Office decorations (furniture makes the scene feel alive) ---
+	_add_office_decorations(width, height, office_level, accent)
+
 	var slots: Array[Vector2] = _build_desk_slots(style, width, height)
 	var total_visible: int = mini(GameState.employees.size(), slots.size())
 	var desk_w: float = float(style.get("desk_w", 16.0))
@@ -1377,6 +1448,15 @@ func _refresh_office_worker_ambient() -> void:
 		var emp: EmployeeData = GameState.employees[i]
 		var slot: Vector2 = slots[i]
 
+		# Chair behind the desk (small dark rect, gives depth).
+		var chair := ColorRect.new()
+		chair.custom_minimum_size = Vector2(8, 6)
+		chair.size = Vector2(8, 6)
+		chair.color = Color(0.20, 0.18, 0.24, 0.75)
+		chair.position = Vector2(slot.x - 4.0, slot.y - 4.0)
+		_office_worker_layer.add_child(chair)
+
+		# Desk surface.
 		var desk := ColorRect.new()
 		desk.custom_minimum_size = Vector2(desk_w, desk_h)
 		desk.size = Vector2(desk_w, desk_h)
@@ -1384,32 +1464,130 @@ func _refresh_office_worker_ambient() -> void:
 		desk.position = Vector2(slot.x - (desk_w * 0.5), slot.y)
 		_office_worker_layer.add_child(desk)
 
+		# Monitor body (dark frame).
 		var monitor := ColorRect.new()
-		monitor.custom_minimum_size = Vector2(5, 2)
-		monitor.size = Vector2(5, 2)
-		monitor.color = Color(0.15, 0.2, 0.27, 0.95)
-		monitor.position = Vector2(slot.x + (desk_w * 0.25), slot.y - 2.0)
+		monitor.custom_minimum_size = Vector2(6, 4)
+		monitor.size = Vector2(6, 4)
+		monitor.color = Color(0.12, 0.14, 0.20, 0.95)
+		monitor.position = Vector2(slot.x + (desk_w * 0.22), slot.y - 4.0)
 		_office_worker_layer.add_child(monitor)
 
+		# Monitor screen glow — color matches assignment, pulses gently.
+		var screen := ColorRect.new()
+		screen.custom_minimum_size = Vector2(4, 2)
+		screen.size = Vector2(4, 2)
+		var screen_color: Color = PixelCharacter.SHIRT_COLORS.get(emp.assignment, Color(0.4, 0.5, 0.6))
+		screen.color = Color(screen_color.r, screen_color.g, screen_color.b, 0.65)
+		screen.position = Vector2(slot.x + (desk_w * 0.22) + 1.0, slot.y - 3.0)
+		_office_worker_layer.add_child(screen)
+		# Gentle screen glow pulse — the room feels alive.
+		var scr_tw := screen.create_tween().set_loops()
+		scr_tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		scr_tw.tween_interval(float(hash(emp.employee_uid) % 7) * 0.1)
+		scr_tw.tween_property(screen, "color:a", 0.85, 1.2)
+		scr_tw.tween_property(screen, "color:a", 0.50, 1.2)
+
+		# Coffee mug for ~30% of workers (adds whimsy).
+		if hash(emp.employee_uid) % 3 == 0:
+			var mug := ColorRect.new()
+			mug.custom_minimum_size = Vector2(2, 3)
+			mug.size = Vector2(2, 3)
+			mug.color = Color(0.8, 0.6, 0.4, 0.8)
+			mug.position = Vector2(slot.x - (desk_w * 0.35), slot.y - 2.0)
+			_office_worker_layer.add_child(mug)
+
+		# Worker sprite (now with morale expressions + 4-frame animation).
 		var worker: Control = _make_worker_sprite(emp)
 		worker.position = Vector2(slot.x - 7.0, slot.y - 20.0)
 		_office_worker_layer.add_child(worker)
 
-		# PixelCharacter handles its own frame-swap animation internally.
-		# We add a subtle positional bob here so each worker has unique rhythm.
+		# Disney-style positional bob: anticipation (slight down) then lift.
+		# Each worker gets unique rhythm from their UID — no two bob in sync.
 		var base_pos: Vector2 = worker.position
 		var tw := worker.create_tween().set_loops()
 		tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		# Stagger start by UID so workers don't bob in unison.
 		tw.tween_interval(float(hash(emp.employee_uid) % 11) * 0.04)
 		var bob: float = 0.8 + (float(emp.assignment % 3) * 0.2)
+		# Anticipation: slight dip before the main bob (squash principle).
+		tw.tween_property(worker, "position:y", base_pos.y + bob * 0.3, 0.12)
+		tw.tween_property(worker, "position:y", base_pos.y - bob * 0.2, 0.38)
 		tw.tween_property(worker, "position:y", base_pos.y + bob, 0.58)
-		tw.tween_property(worker, "position:y", base_pos.y, 0.58)
-		# Bug-fixers get extra lateral fidget.
+		tw.tween_property(worker, "position:y", base_pos.y, 0.42)
+		# Bug-fixers get extra lateral fidget (frustration animation).
 		if emp.assignment == EmployeeData.Assignment.BUGS:
-			tw.tween_property(worker, "position:x", base_pos.x + 0.5, 0.20)
-			tw.tween_property(worker, "position:x", base_pos.x - 0.5, 0.20)
-			tw.tween_property(worker, "position:x", base_pos.x, 0.20)
+			tw.tween_property(worker, "position:x", base_pos.x + 0.6, 0.15)
+			tw.tween_property(worker, "position:x", base_pos.x - 0.6, 0.15)
+			tw.tween_property(worker, "position:x", base_pos.x, 0.12)
+		# R&D gets a thoughtful lean.
+		elif emp.assignment == EmployeeData.Assignment.RND:
+			tw.tween_property(worker, "position:x", base_pos.x + 0.4, 0.80)
+			tw.tween_property(worker, "position:x", base_pos.x, 0.60)
+
+
+## Adds decorative furniture to the office scene — plants, whiteboard, water cooler.
+## These scale with office level (bigger offices get more stuff).
+func _add_office_decorations(width: float, height: float, level: int, accent: Color) -> void:
+	# Potted plant in the corner (all levels).
+	var plant := ColorRect.new()
+	plant.custom_minimum_size = Vector2(4, 8)
+	plant.size = Vector2(4, 8)
+	plant.color = Color(0.25, 0.65, 0.35, 0.7)
+	plant.position = Vector2(8, height * 0.55)
+	_office_worker_layer.add_child(plant)
+	# Plant pot.
+	var pot := ColorRect.new()
+	pot.custom_minimum_size = Vector2(5, 3)
+	pot.size = Vector2(5, 3)
+	pot.color = Color(0.55, 0.35, 0.25, 0.75)
+	pot.position = Vector2(7, height * 0.55 + 8)
+	_office_worker_layer.add_child(pot)
+
+	# Whiteboard on the "wall" area (level 1+).
+	if level >= 1:
+		var board := ColorRect.new()
+		board.custom_minimum_size = Vector2(20, 10)
+		board.size = Vector2(20, 10)
+		board.color = Color(0.88, 0.88, 0.90, 0.25)
+		board.position = Vector2(width * 0.70, height * 0.15)
+		_office_worker_layer.add_child(board)
+		# Board frame.
+		var frame := ColorRect.new()
+		frame.custom_minimum_size = Vector2(22, 1)
+		frame.size = Vector2(22, 1)
+		frame.color = Color(0.50, 0.48, 0.44, 0.35)
+		frame.position = Vector2(width * 0.70 - 1, height * 0.15 + 10)
+		_office_worker_layer.add_child(frame)
+
+	# Water cooler (level 2+).
+	if level >= 2:
+		var cooler := ColorRect.new()
+		cooler.custom_minimum_size = Vector2(4, 10)
+		cooler.size = Vector2(4, 10)
+		cooler.color = Color(0.70, 0.75, 0.82, 0.5)
+		cooler.position = Vector2(width - 14, height * 0.50)
+		_office_worker_layer.add_child(cooler)
+		# Water jug on top.
+		var jug := ColorRect.new()
+		jug.custom_minimum_size = Vector2(3, 4)
+		jug.size = Vector2(3, 4)
+		jug.color = Color(0.55, 0.75, 0.95, 0.45)
+		jug.position = Vector2(width - 13.5, height * 0.50 - 4)
+		_office_worker_layer.add_child(jug)
+
+	# Second plant on the other side (level 3).
+	if level >= 3:
+		var plant2 := ColorRect.new()
+		plant2.custom_minimum_size = Vector2(5, 10)
+		plant2.size = Vector2(5, 10)
+		plant2.color = Color(0.20, 0.58, 0.30, 0.65)
+		plant2.position = Vector2(width - 16, height * 0.55 - 2)
+		_office_worker_layer.add_child(plant2)
+		var pot2 := ColorRect.new()
+		pot2.custom_minimum_size = Vector2(6, 3)
+		pot2.size = Vector2(6, 3)
+		pot2.color = Color(0.50, 0.32, 0.22, 0.7)
+		pot2.position = Vector2(width - 17, height * 0.55 + 8)
+		_office_worker_layer.add_child(pot2)
 
 
 func _build_desk_slots(style: Dictionary, width: float, height: float) -> Array[Vector2]:
@@ -1462,7 +1640,7 @@ func _refresh_team() -> void:
 	if GameState.employees.is_empty():
 		var lbl := Label.new()
 		lbl.text = "No team yet — visit People to hire"
-		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		lbl.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5))
 		team_container.add_child(lbl)
 		return
@@ -1478,7 +1656,9 @@ func _refresh_team() -> void:
 		avatar.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		avatar.clip_contents = true
 		var avatar_idx: int = (hash(emp.employee_name) % 8) + 1
-		var avatar_tex: Texture2D = ResourceLoader.load("res://assets/avatars/avatar_%d.png" % avatar_idx)
+		if not _avatar_cache.has(avatar_idx):
+			_avatar_cache[avatar_idx] = ResourceLoader.load("res://assets/avatars/avatar_%d.png" % avatar_idx)
+		var avatar_tex: Texture2D = _avatar_cache.get(avatar_idx) as Texture2D
 		if avatar_tex:
 			avatar.texture = avatar_tex
 		row.add_child(avatar)
@@ -1486,7 +1666,7 @@ func _refresh_team() -> void:
 		var lbl := Label.new()
 		var assign_name: String = EmployeeData.ASSIGNMENT_NAMES.get(emp.assignment, "Unassigned")
 		lbl.text = "%s — %s · %s" % [emp.employee_name, emp.display_title(), assign_name]
-		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var morale_color: Color
 		if emp.morale >= 70:

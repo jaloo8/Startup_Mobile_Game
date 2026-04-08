@@ -185,7 +185,7 @@ func _build_founder_score() -> void:
 
 	var grade_label := Label.new()
 	grade_label.text = "%s  (%d/100)" % [grade, score]
-	grade_label.add_theme_font_size_override("font_size", 36)
+	grade_label.add_theme_font_size_override("font_size", ThemeManager.FONT_HERO)
 	grade_label.add_theme_color_override("font_color", grade_color)
 	grade_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	score_section.add_child(grade_label)
@@ -209,7 +209,7 @@ func _build_founder_score() -> void:
 
 		var axis_label := Label.new()
 		axis_label.text = axis.get("label", key)
-		axis_label.add_theme_font_size_override("font_size", 11)
+		axis_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		axis_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		axis_label.custom_minimum_size.x = 120
 		row.add_child(axis_label)
@@ -226,7 +226,7 @@ func _build_founder_score() -> void:
 
 		var val_label := Label.new()
 		val_label.text = "%d" % int(axis.get("score", 0))
-		val_label.add_theme_font_size_override("font_size", 11)
+		val_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		val_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		val_label.custom_minimum_size.x = 28
 		val_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -280,7 +280,7 @@ func _build_prestige_summary() -> void:
 
 		var xp_lbl := Label.new()
 		xp_lbl.text = "%d / %d XP" % [xp, xp_next]
-		xp_lbl.add_theme_font_size_override("font_size", 11)
+		xp_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		xp_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		xp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		section.add_child(xp_lbl)
@@ -292,16 +292,36 @@ func _build_prestige_summary() -> void:
 
 
 func _animate_entrance() -> void:
-	# Somber, slower reveals — this is a loss screen.
-	AnimHelper.fade_in(reason_label, 0.0, 0.40)
-	AnimHelper.fade_in(stats_label, 0.25, 0.35)
+	# Somber screen shake on arrival — the impact of failure.
+	AnimHelper.screen_shake(get_tree(), 0.4, 0.40)
+	AnimHelper.haptic(&"heavy")
+
+	# Red vignette — the mood is heavy.
+	AnimHelper.mood_vignette(self, Color(0.6, 0.08, 0.08), 0.12)
+
+	# Falling embers/ash — somber atmosphere.
+	AnimHelper.falling_embers(self, 8.0)
+
+	# Title: typewriter reveal for dramatic weight.
+	reason_label.modulate.a = 1.0
+	AnimHelper.typewriter(reason_label, reason_label.text, 20.0, 0.3)
+
+	# Stats: fade in after the title lands.
+	AnimHelper.fade_in(stats_label, 0.80, 0.40)
+
 	# Angel panel slides up as a dramatic reveal — hope after failure.
 	if angel_panel.visible:
-		AnimHelper.slide_in(angel_panel, Vector2(0, 40), 0.50, 0.30)
+		AnimHelper.slide_in(angel_panel, Vector2(0, 50), 1.2, 0.35)
+		# Glow pulse on the angel panel to draw attention.
+		get_tree().create_timer(1.6).timeout.connect(func() -> void:
+			if is_instance_valid(angel_panel):
+				AnimHelper.glow_pulse(angel_panel, 1.02, 0.85, 2.0)
+		)
+
 	# Buttons fade in last.
 	for btn in [restart_btn, menu_btn]:
 		if btn != null:
-			AnimHelper.fade_in(btn, 0.70, 0.25)
+			AnimHelper.fade_in(btn, 1.4, 0.30)
 
 
 func _peak_users() -> int:

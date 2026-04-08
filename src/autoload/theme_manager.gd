@@ -41,6 +41,7 @@ const C_TEXT_HINT   := Color(0.580, 0.740, 0.920, 1.0)  # #94BDEB — info hint 
 
 ## Specials
 const C_CHIP        := Color(0.957, 0.784, 0.259, 1.0)  # #F4C842 — VC Chip gold
+const C_ORANGE      := Color(0.950, 0.550, 0.400, 1.0)  # #F28C66 — stress / warm accent
 const C_TRANSPARENT := Color(0.0, 0.0, 0.0, 0.0)
 const C_OVERLAY     := Color(0.020, 0.050, 0.120, 0.92) # modal backdrop
 
@@ -61,13 +62,15 @@ const TOUCH_MIN_H := 46
 # ---------------------------------------------------------------------------
 # Font sizes — readable at 720×1280 on an iPhone SE (2x display)
 # ---------------------------------------------------------------------------
-const FONT_XS  := 11
-const FONT_SM  := 13
-const FONT_MD  := 15   # default body
-const FONT_LG  := 18
-const FONT_XL  := 22
-const FONT_XXL := 28
-const FONT_HERO:= 36
+const FONT_XS   := 11
+const FONT_SM   := 13
+const FONT_MD   := 15   # default body
+const FONT_LG   := 18
+const FONT_XL   := 22
+const FONT_ICON := 24   # icon text / large badges
+const FONT_XXL  := 28
+const FONT_HERO := 36
+const FONT_JUMBO:= 48   # splash / game over numbers
 
 
 # ---------------------------------------------------------------------------
@@ -88,6 +91,50 @@ func _apply_global_theme() -> void:
 # ---------------------------------------------------------------------------
 # Public helpers — callable from any .gd file via ThemeManager.*
 # ---------------------------------------------------------------------------
+
+## Returns the top safe area inset in viewport pixels (for notched devices).
+## On desktop or non-notched devices, returns 0. Use this to pad screen tops
+## so content doesn't clip under the status bar or camera notch.
+static func safe_inset_top() -> float:
+	if not _is_mobile_platform():
+		return 0.0
+	var screen_w := float(DisplayServer.screen_get_size().x)
+	if screen_w <= 0.0:
+		return 0.0
+	var safe := DisplayServer.screen_get_usable_rect()
+	# With canvas_items + expand, viewport width is locked at 720;
+	# physical→viewport scale factor is 720 / physical_screen_width.
+	return maxf(0.0, float(safe.position.y) * (720.0 / screen_w))
+
+
+## Returns the bottom safe area inset in viewport pixels (for home indicator).
+static func safe_inset_bottom() -> float:
+	if not _is_mobile_platform():
+		return 0.0
+	var screen := DisplayServer.screen_get_size()
+	var screen_w := float(screen.x)
+	var screen_h := float(screen.y)
+	if screen_w <= 0.0 or screen_h <= 0.0:
+		return 0.0
+	var safe := DisplayServer.screen_get_usable_rect()
+	var bottom_physical := screen_h - float(safe.position.y + safe.size.y)
+	return maxf(0.0, bottom_physical * (720.0 / screen_w))
+
+
+## Convenience: returns the top margin a screen should use, ensuring it's
+## at least the safe inset. Pass the screen's designed minimum margin.
+static func safe_top_margin(designed_margin: float = 40.0) -> float:
+	return maxf(designed_margin, safe_inset_top())
+
+
+## Convenience: returns the bottom margin a screen should use.
+static func safe_bottom_margin(designed_margin: float = 24.0) -> float:
+	return maxf(designed_margin, safe_inset_bottom())
+
+
+static func _is_mobile_platform() -> bool:
+	return OS.has_feature("mobile") or OS.has_feature("ios") or OS.has_feature("android")
+
 
 ## Returns green / gold / red based on a 0.0-1.0 health ratio.
 ## inverted=true means 0.0 is good (used for tech_debt, bugs).

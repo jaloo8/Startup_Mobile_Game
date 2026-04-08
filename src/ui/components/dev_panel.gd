@@ -77,6 +77,7 @@ func _build_ui() -> void:
 	_build_economy()
 	_build_events()
 	_build_chips()
+	_build_state_export()
 	_build_save_load()
 	_build_footer()
 
@@ -358,6 +359,63 @@ func _build_product() -> void:
 		_flash("Founder energy=5 — burnout imminent")
 	)
 
+	# Quick product actions
+	_vbox.add_child(_dim_label("Quick Actions:"))
+	var quick_row := _hbox()
+	_vbox.add_child(quick_row)
+
+	_add_action_btn(quick_row, "Ship Feature", ThemeManager.C_BLUE, func():
+		if GameState.product == null: return
+		if GameState.product.current_feature_name.is_empty():
+			_flash("No feature in progress"); return
+		var fname := GameState.product.current_feature_name
+		GameState.product.add_feature(fname, 80, GameState.current_quarter)
+		GameState.product.feature_progress = 0.0
+		GameState.product.current_feature_name = ""
+		GameState.product.target_feature_id = ""
+		_flash("Shipped feature: %s (quality 80)" % fname)
+	)
+
+	_add_action_btn(quick_row, "Quality Max", ThemeManager.C_GREEN, func():
+		if GameState.product == null: return
+		GameState.product.stability = 100
+		GameState.product.ux_score = 100
+		_flash("Stability=100, UX=100")
+	)
+
+	_add_action_btn(quick_row, "Bugs=0", ThemeManager.C_GREEN, func():
+		if GameState.product == null: return
+		GameState.product.bugs = 0
+		_flash("All bugs cleared")
+	)
+
+	# Hosting controls
+	if GameState.company != null:
+		_vbox.add_child(_dim_label("Hosting:"))
+		var host_row := _hbox()
+		_vbox.add_child(host_row)
+
+		_add_action_btn(host_row, "Max Hosting", ThemeManager.C_TEAL, func():
+			if GameState.company == null: return
+			var co := GameState.company
+			co.hosting_upgrade_web_level = CompanyData.HOSTING_LANE_UPGRADE_MAX
+			co.hosting_upgrade_cache_level = CompanyData.HOSTING_LANE_UPGRADE_MAX
+			co.hosting_upgrade_data_level = CompanyData.HOSTING_LANE_UPGRADE_MAX
+			co.hosting_optimization_level = CompanyData.HOSTING_OPTIMIZATION_MAX
+			co.hosting_reliability = 99.99
+			co.hosting_incidents_last_quarter = 0
+			co.hosting_overage_cost = 0.0
+			_flash("Hosting maxed: all lanes L%d, opt L%d, 99.99%% reliability" % [
+				CompanyData.HOSTING_LANE_UPGRADE_MAX, CompanyData.HOSTING_OPTIMIZATION_MAX])
+		)
+
+		_add_action_btn(host_row, "Reliability=99.99", ThemeManager.C_GREEN, func():
+			if GameState.company == null: return
+			GameState.company.hosting_reliability = 99.99
+			GameState.company.hosting_incidents_last_quarter = 0
+			_flash("Hosting reliability=99.99%, incidents cleared")
+		)
+
 	_vbox.add_child(_sep())
 
 
@@ -528,6 +586,56 @@ func _build_chips() -> void:
 	)
 
 	_vbox.add_child(_sep())
+
+
+# ---------------------------------------------------------------------------
+# State Export
+# ---------------------------------------------------------------------------
+
+func _build_state_export() -> void:
+	_vbox.add_child(_section("State Export"))
+
+	var row := _hbox()
+	_vbox.add_child(row)
+
+	_add_action_btn(row, "Print State JSON", DEV_ORANGE, _on_export_state)
+
+	_vbox.add_child(_sep())
+
+
+func _on_export_state() -> void:
+	var state := {}
+	if GameState.company:
+		state["company"] = {
+			"name": GameState.company.company_name,
+			"type": GameState.company.type,
+			"cash": GameState.company.cash,
+			"valuation": GameState.company.valuation,
+			"reputation": GameState.company.reputation,
+			"employee_count": GameState.employees.size(),
+		}
+	if GameState.product:
+		state["product"] = {
+			"users": GameState.product.users,
+			"dau": GameState.product.dau,
+			"stability": GameState.product.stability,
+			"ux_score": GameState.product.ux_score,
+			"bugs": GameState.product.bugs,
+			"tech_debt": GameState.product.tech_debt,
+			"features_shipped": GameState.product.features.size(),
+		}
+	if GameState.financials:
+		state["financials"] = {
+			"revenue": GameState.financials.revenue,
+			"burn": GameState.financials.burn_rate,
+			"runway_quarters": GameState.financials.runway_quarters(
+				GameState.company.cash if GameState.company else 0.0),
+		}
+	state["quarter"] = GameState.current_quarter
+	state["year"] = GameState.current_year
+	state["total_quarters"] = GameState.total_quarters_elapsed()
+	print(JSON.stringify(state, "\t"))
+	ToastManager.show("State exported to console")
 
 
 # ---------------------------------------------------------------------------

@@ -401,3 +401,377 @@ static func hide_backdrop(backdrop: ColorRect, then: Callable = Callable()) -> v
 	tw.tween_callback(backdrop.queue_free)
 	if then.is_valid():
 		tw.tween_callback(then)
+
+
+# ---------------------------------------------------------------------------
+# Typewriter text — letter-by-letter reveal
+# ---------------------------------------------------------------------------
+
+## Reveals text one character at a time with an optional cursor blink.
+## Returns the tween so caller can await tw.finished.
+static func typewriter(label: Label, text: String, chars_per_sec: float = 40.0,
+		delay: float = 0.0) -> Tween:
+	label.text = text
+	label.visible_characters = 0
+	var total := text.length()
+	var duration := float(total) / maxf(1.0, chars_per_sec)
+	var tw := label.create_tween()
+	tw.tween_property(label, "visible_characters", total, duration) \
+		.set_delay(delay) \
+		.set_ease(Tween.EASE_OUT) \
+		.set_trans(Tween.TRANS_LINEAR)
+	return tw
+
+
+# ---------------------------------------------------------------------------
+# Glow pulse — rhythmic alpha/scale breathe for emphasis
+# ---------------------------------------------------------------------------
+
+## Gentle glow pulse that loops: scale breathes between 1.0 and scale_to,
+## alpha breathes between base_alpha and 1.0. Great for "tap here" hints.
+static func glow_pulse(node: Control, scale_to: float = 1.06,
+		base_alpha: float = 0.7, cycle_time: float = 1.4) -> Tween:
+	node.pivot_offset = node.size * 0.5
+	var tw := node.create_tween().set_loops()
+	tw.tween_property(node, "scale", Vector2.ONE * scale_to, cycle_time * 0.5) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate:a", 1.0, cycle_time * 0.5) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(node, "scale", Vector2.ONE, cycle_time * 0.5) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate:a", base_alpha, cycle_time * 0.5) \
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	return tw
+
+
+# ---------------------------------------------------------------------------
+# Score reveal — dramatic counter with overshoot
+# ---------------------------------------------------------------------------
+
+## Counts up from 0 to target with an overshoot bounce at the end.
+## Perfect for score screens. The label scales up during the count.
+static func score_reveal(label: Label, target: int, duration: float = 1.2,
+		delay: float = 0.0, format_fn: Callable = Callable()) -> Tween:
+	label.text = "0"
+	label.pivot_offset = label.size * 0.5
+	label.scale = Vector2(0.8, 0.8)
+	label.modulate.a = 0.0
+	var tw := label.create_tween()
+	# Fade in + scale up.
+	tw.set_parallel(true)
+	tw.tween_property(label, "modulate:a", 1.0, 0.2).set_delay(delay)
+	tw.tween_property(label, "scale", Vector2(1.1, 1.1), duration * 0.85) \
+		.set_delay(delay).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
+	# Count up.
+	var overshoot_val := int(target * 1.08) + 2
+	tw.tween_method(func(v: float) -> void:
+		if is_instance_valid(label):
+			if format_fn.is_valid():
+				label.text = format_fn.call(int(v))
+			else:
+				label.text = "%d" % int(v),
+		0.0, float(overshoot_val), duration * 0.8
+	).set_delay(delay).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
+	# Settle: overshoot back to real value + scale settle.
+	tw.set_parallel(false)
+	tw.tween_method(func(v: float) -> void:
+		if is_instance_valid(label):
+			if format_fn.is_valid():
+				label.text = format_fn.call(int(v))
+			else:
+				label.text = "%d" % int(v),
+		float(overshoot_val), float(target), duration * 0.2
+	).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_BACK)
+	tw.parallel().tween_property(label, "scale", Vector2.ONE, duration * 0.2) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	return tw
+
+
+# ---------------------------------------------------------------------------
+# Screen flash — brief bright flash for impact moments
+# ---------------------------------------------------------------------------
+
+## Flashes the screen white (or custom color) then fades — fundraise, feature ship.
+static func screen_flash(parent: Control, color: Color = Color(1, 1, 1, 0.35),
+		duration: float = 0.30) -> void:
+	if not is_instance_valid(parent):
+		return
+	var flash := ColorRect.new()
+	flash.color = color
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.z_index = 90
+	parent.add_child(flash)
+	var tw := flash.create_tween()
+	tw.tween_property(flash, "color:a", 0.0, duration) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
+	tw.tween_callback(flash.queue_free)
+
+
+# ---------------------------------------------------------------------------
+# Confetti burst — CPU particles for celebrations
+# ---------------------------------------------------------------------------
+
+## Spawns a burst of colorful confetti particles. One-shot, auto-cleanup.
+## Colors default to a festive palette; pass custom colors for themed bursts.
+static func confetti_burst(parent: Control, origin: Vector2 = Vector2.ZERO,
+		colors: Array[Color] = [], amount: int = 45,
+		spread: float = 280.0, lifetime: float = 2.0) -> CPUParticles2D:
+	if not is_instance_valid(parent):
+		return null
+	var palette: Array[Color] = colors if not colors.is_empty() else [
+		Color(1.0, 0.84, 0.0),      # gold
+		Color(0.30, 0.85, 0.45),     # green
+		Color(0.29, 0.62, 1.0),      # blue
+		Color(0.88, 0.32, 0.32),     # red
+		Color(0.80, 0.45, 0.95),     # purple
+		Color(1.0, 0.55, 0.25),      # orange
+		Color(0.20, 0.85, 0.85),     # teal
+	]
+	var particles := CPUParticles2D.new()
+	particles.emitting = false
+	particles.one_shot = true
+	particles.amount = amount
+	particles.lifetime = lifetime
+	particles.explosiveness = 0.95
+	particles.z_index = 80
+	particles.position = origin if origin != Vector2.ZERO else Vector2(360, 200)
+
+	# Direction: upward fountain with spread.
+	particles.direction = Vector2(0, -1)
+	particles.spread = spread
+	particles.initial_velocity_min = 180.0
+	particles.initial_velocity_max = 420.0
+	particles.gravity = Vector2(0, 380)
+
+	# Size: small confetti rectangles.
+	particles.scale_amount_min = 2.5
+	particles.scale_amount_max = 5.5
+
+	# Rotation for tumbling.
+	particles.angular_velocity_min = -360.0
+	particles.angular_velocity_max = 360.0
+
+	# Color: random from palette via gradient.
+	var gradient := Gradient.new()
+	var step := 1.0 / maxf(1.0, float(palette.size() - 1))
+	gradient.offsets = PackedFloat32Array()
+	gradient.colors = PackedColorArray()
+	for i in palette.size():
+		gradient.add_point(float(i) * step, palette[i])
+	particles.color_ramp = gradient
+	# Fade out over lifetime.
+	var alpha_curve := Gradient.new()
+	alpha_curve.offsets = PackedFloat32Array([0.0, 0.7, 1.0])
+	alpha_curve.colors = PackedColorArray([Color.WHITE, Color.WHITE, Color(1, 1, 1, 0)])
+	particles.color_initial_ramp = alpha_curve
+
+	parent.add_child(particles)
+	particles.emitting = true
+
+	# Auto-cleanup after particles expire.
+	var tree := parent.get_tree()
+	if tree:
+		tree.create_timer(lifetime + 0.5).timeout.connect(func() -> void:
+			if is_instance_valid(particles):
+				particles.queue_free()
+		)
+	return particles
+
+
+## Confetti rain from the top of the screen — victory screens, major milestones.
+## Particles fall continuously for `duration` seconds then stop.
+static func confetti_rain(parent: Control, duration: float = 4.0,
+		colors: Array[Color] = []) -> CPUParticles2D:
+	if not is_instance_valid(parent):
+		return null
+	var palette: Array[Color] = colors if not colors.is_empty() else [
+		Color(1.0, 0.84, 0.0),
+		Color(0.30, 0.85, 0.45),
+		Color(0.29, 0.62, 1.0),
+		Color(0.88, 0.32, 0.32),
+		Color(0.80, 0.45, 0.95),
+		Color(1.0, 0.55, 0.25),
+	]
+	var particles := CPUParticles2D.new()
+	particles.emitting = true
+	particles.one_shot = false
+	particles.amount = 60
+	particles.lifetime = 3.0
+	particles.z_index = 80
+	particles.position = Vector2(360, -20)
+
+	# Emit from a wide horizontal band at the top.
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particles.emission_rect_extents = Vector2(380, 5)
+
+	particles.direction = Vector2(0, 1)
+	particles.spread = 25.0
+	particles.initial_velocity_min = 60.0
+	particles.initial_velocity_max = 160.0
+	particles.gravity = Vector2(0, 120)
+
+	particles.scale_amount_min = 2.0
+	particles.scale_amount_max = 4.5
+
+	particles.angular_velocity_min = -200.0
+	particles.angular_velocity_max = 200.0
+
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array()
+	gradient.colors = PackedColorArray()
+	var step := 1.0 / maxf(1.0, float(palette.size() - 1))
+	for i in palette.size():
+		gradient.add_point(float(i) * step, palette[i])
+	particles.color_ramp = gradient
+	var alpha_curve := Gradient.new()
+	alpha_curve.offsets = PackedFloat32Array([0.0, 0.8, 1.0])
+	alpha_curve.colors = PackedColorArray([Color.WHITE, Color.WHITE, Color(1, 1, 1, 0)])
+	particles.color_initial_ramp = alpha_curve
+
+	parent.add_child(particles)
+
+	# Stop emitting after duration, cleanup after last particles fade.
+	var tree := parent.get_tree()
+	if tree:
+		tree.create_timer(duration).timeout.connect(func() -> void:
+			if is_instance_valid(particles):
+				particles.emitting = false
+		)
+		tree.create_timer(duration + 3.5).timeout.connect(func() -> void:
+			if is_instance_valid(particles):
+				particles.queue_free()
+		)
+	return particles
+
+
+# ---------------------------------------------------------------------------
+# Ambient floating particles — gentle background sparkles
+# ---------------------------------------------------------------------------
+
+## Slow-drifting ambient particles for backgrounds (main menu, idle screens).
+## Returns the node so caller can manage lifetime.
+static func ambient_particles(parent: Control, color: Color = Color(0.5, 0.6, 0.9, 0.3),
+		amount: int = 20) -> CPUParticles2D:
+	if not is_instance_valid(parent):
+		return null
+	var particles := CPUParticles2D.new()
+	particles.emitting = true
+	particles.one_shot = false
+	particles.amount = amount
+	particles.lifetime = 6.0
+	particles.z_index = -1
+	particles.position = Vector2(360, 640)
+
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particles.emission_rect_extents = Vector2(360, 640)
+
+	particles.direction = Vector2(0, -1)
+	particles.spread = 180.0
+	particles.initial_velocity_min = 8.0
+	particles.initial_velocity_max = 28.0
+	particles.gravity = Vector2.ZERO
+
+	particles.scale_amount_min = 1.5
+	particles.scale_amount_max = 3.5
+	particles.color = color
+
+	# Fade in and out over lifetime.
+	var alpha_curve := Gradient.new()
+	alpha_curve.offsets = PackedFloat32Array([0.0, 0.3, 0.7, 1.0])
+	alpha_curve.colors = PackedColorArray([
+		Color(1, 1, 1, 0), Color(1, 1, 1, 0.6),
+		Color(1, 1, 1, 0.6), Color(1, 1, 1, 0),
+	])
+	particles.color_initial_ramp = alpha_curve
+
+	parent.add_child(particles)
+	return particles
+
+
+# ---------------------------------------------------------------------------
+# Vignette overlay — mood lighting for economy/atmosphere
+# ---------------------------------------------------------------------------
+
+## Adds a subtle colored vignette (edges-only tint) to convey mood.
+## Returns the overlay so caller can remove it. Fades in over 0.4s.
+static func mood_vignette(parent: Control, color: Color,
+		intensity: float = 0.25) -> ColorRect:
+	if not is_instance_valid(parent):
+		return null
+	var vignette := ColorRect.new()
+	vignette.color = Color(color.r, color.g, color.b, 0.0)
+	vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vignette.z_index = 1
+	parent.add_child(vignette)
+	var tw := vignette.create_tween()
+	tw.tween_property(vignette, "color:a", intensity, 0.4) \
+		.set_ease(Tween.EASE_OUT)
+	return vignette
+
+
+## Removes a mood vignette with a fade.
+static func remove_mood_vignette(vignette: ColorRect) -> void:
+	if not is_instance_valid(vignette):
+		return
+	var tw := vignette.create_tween()
+	tw.tween_property(vignette, "color:a", 0.0, 0.3) \
+		.set_ease(Tween.EASE_IN)
+	tw.tween_callback(vignette.queue_free)
+
+
+# ---------------------------------------------------------------------------
+# Falling embers — somber particles for game over / failure
+# ---------------------------------------------------------------------------
+
+## Slow falling ember/ash particles for somber moments (game over).
+static func falling_embers(parent: Control, duration: float = 5.0) -> CPUParticles2D:
+	if not is_instance_valid(parent):
+		return null
+	var particles := CPUParticles2D.new()
+	particles.emitting = true
+	particles.one_shot = false
+	particles.amount = 25
+	particles.lifetime = 4.0
+	particles.z_index = 2
+	particles.position = Vector2(360, -10)
+
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particles.emission_rect_extents = Vector2(380, 5)
+
+	particles.direction = Vector2(0, 1)
+	particles.spread = 30.0
+	particles.initial_velocity_min = 20.0
+	particles.initial_velocity_max = 55.0
+	particles.gravity = Vector2(0, 30)
+
+	# Gentle lateral drift.
+	particles.tangential_accel_min = -8.0
+	particles.tangential_accel_max = 8.0
+
+	particles.scale_amount_min = 1.5
+	particles.scale_amount_max = 3.0
+	particles.color = Color(0.9, 0.4, 0.2, 0.5)
+
+	var alpha_curve := Gradient.new()
+	alpha_curve.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
+	alpha_curve.colors = PackedColorArray([
+		Color(1, 1, 1, 0), Color(1, 1, 1, 0.7),
+		Color(1, 1, 1, 0.4), Color(1, 1, 1, 0),
+	])
+	particles.color_initial_ramp = alpha_curve
+
+	parent.add_child(particles)
+
+	var tree := parent.get_tree()
+	if tree:
+		tree.create_timer(duration).timeout.connect(func() -> void:
+			if is_instance_valid(particles):
+				particles.emitting = false
+		)
+		tree.create_timer(duration + 4.5).timeout.connect(func() -> void:
+			if is_instance_valid(particles):
+				particles.queue_free()
+		)
+	return particles

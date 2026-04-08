@@ -1,6 +1,7 @@
 class_name RevenueEngine
 extends RefCounted
 ## Calculates quarterly revenue based on company type and product metrics.
+## Internal helpers compute monthly rates and multiply by 3 for quarterly totals.
 
 static func calculate(company: CompanyData, product: ProductData) -> float:
 	if company == null or product == null:

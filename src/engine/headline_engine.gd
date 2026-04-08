@@ -1,6 +1,11 @@
 class_name HeadlineEngine
 extends RefCounted
 ## Picks and fills contextual news headlines each quarter.
+##
+## AI INTEGRATION OPPORTUNITY: Use an LLM to generate contextual headlines
+## that reference the player's actual company name, product, and current events.
+## Pre-generate a batch of 200+ headlines per company type at game start (one API
+## call), then draw from the pool each quarter. Far more immersive than templates.
 
 static var _templates: Array[Dictionary] = []
 

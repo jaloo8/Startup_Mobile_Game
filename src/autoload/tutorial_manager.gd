@@ -263,7 +263,7 @@ func _build_canvas() -> CanvasLayer:
 	h_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	step_row.add_child(h_spacer)
 	var step_lbl := Label.new()
-	step_lbl.add_theme_font_size_override("font_size", 11)
+	step_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	step_lbl.add_theme_color_override("font_color", Color(0.40, 0.44, 0.60))
 	step_row.add_child(step_lbl)
 	_step_lbl = step_lbl
@@ -277,7 +277,7 @@ func _build_canvas() -> CanvasLayer:
 
 	# Message
 	var msg_lbl := Label.new()
-	msg_lbl.add_theme_font_size_override("font_size", 13)
+	msg_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	msg_lbl.add_theme_color_override("font_color", Color(0.70, 0.72, 0.82))
 	msg_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(msg_lbl)

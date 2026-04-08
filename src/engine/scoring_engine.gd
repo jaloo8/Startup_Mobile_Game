@@ -4,6 +4,11 @@ class_name ScoringEngine
 ## Evaluates performance across multiple axes to produce a composite score (0-100)
 ## and a letter grade (S/A/B/C/D/F). Used on victory and game-over screens.
 ##
+## AI INTEGRATION OPPORTUNITY: Use an LLM to generate personalized post-game
+## narrative summaries ("Your company's story") based on the event_log, key
+## decisions, and scoring breakdown. Would make each run feel unique and
+## shareable — great for social media virality.
+##
 ## Usage:
 ##   var result: Dictionary = ScoringEngine.calculate(GameState)
 ##   # result = {score: 78, grade: "A", breakdown: {...}, summary: "..."}

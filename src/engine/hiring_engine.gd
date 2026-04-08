@@ -1,8 +1,14 @@
 class_name HiringEngine
 extends RefCounted
 ## Generates candidates and handles the hiring pipeline.
+##
+## AI INTEGRATION OPPORTUNITY: Use an LLM to generate unique employee bios,
+## personality quirks, and interview dialogue. Could also generate unique
+## portrait sprites via Retro Diffusion API at hire time (cache results so
+## the same employee always looks the same across sessions).
 
 static var _bio_pool: Dictionary = {}
+static var _seniority_prefixes: Dictionary = {}
 
 static func _ensure_bio_pool() -> void:
 	if not _bio_pool.is_empty():
@@ -14,6 +20,7 @@ static func _ensure_bio_pool() -> void:
 	f.close()
 	if parsed is Dictionary:
 		_bio_pool = parsed.get("by_personality", {})
+		_seniority_prefixes = parsed.get("by_seniority_prefix", {})
 
 
 static func _pick_bio(personality: EmployeeData.Personality, seniority: EmployeeData.Seniority) -> String:
@@ -26,14 +33,9 @@ static func _pick_bio(personality: EmployeeData.Personality, seniority: Employee
 	# Occasionally prepend a seniority-flavoured prefix for variety.
 	if randf() < 0.40:
 		var sen_key: String = EmployeeData.SENIORITY_NAMES.get(seniority, "Mid")
-		var f2 := FileAccess.open("res://src/data/bios.json", FileAccess.READ)
-		if f2 != null:
-			var parsed2 := JSON.parse_string(f2.get_as_text())
-			f2.close()
-			if parsed2 is Dictionary:
-				var prefixes: Array = parsed2.get("by_seniority_prefix", {}).get(sen_key, [])
-				if not prefixes.is_empty():
-					base = prefixes.pick_random() + " " + base
+		var prefixes: Array = _seniority_prefixes.get(sen_key, [])
+		if not prefixes.is_empty():
+			base = prefixes.pick_random() + " " + base
 	return base
 
 

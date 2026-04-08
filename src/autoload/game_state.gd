@@ -85,8 +85,12 @@ const SAVE_BACKUP_SUFFIX := ".bak"
 const SAVE_TMP_SUFFIX := ".tmp"
 # Sustainable win is intentionally later-game to preserve early momentum while
 # extending run length. Feature build speed stays unchanged.
+# Balance note (Apr 2026): Streak reduced from 6→4 because the growth-then-
+# profitability arc the economy naturally produces made 6 consecutive profitable
+# quarters unachievable on Normal. SaaS/DevTools revenue thresholds lowered to
+# align with their ~$5/user/Q revenue rate (were requiring ~28K users to hit).
 const SUSTAINABLE_MIN_QUARTERS := 20
-const SUSTAINABLE_PROFIT_STREAK := 6
+const SUSTAINABLE_PROFIT_STREAK := 4
 const SUSTAINABLE_DEFAULT_REQUIREMENTS: Dictionary = {
 	"users": 12_000,
 	"features": 8,
@@ -96,7 +100,7 @@ const SUSTAINABLE_REQUIREMENTS_BY_TYPE: Dictionary = {
 	CompanyData.CompanyType.SAAS: {
 		"users": 10_000,
 		"features": 8,
-		"revenue_per_q": 140_000.0,
+		"revenue_per_q": 70_000.0,
 	},
 	CompanyData.CompanyType.CONSUMER: {
 		"users": 8_000,
@@ -111,7 +115,7 @@ const SUSTAINABLE_REQUIREMENTS_BY_TYPE: Dictionary = {
 	CompanyData.CompanyType.DEV_TOOLS: {
 		"users": 12_000,
 		"features": 8,
-		"revenue_per_q": 120_000.0,
+		"revenue_per_q": 60_000.0,
 	},
 }
 # Centralized difficulty knobs consumed by simulation, fundraising, and events.
@@ -134,7 +138,7 @@ const DIFFICULTY_MULTS: Dictionary = {
 		"event_pressure_mult": 1.0,
 	},
 	"hardcore": {
-		"cash_mult": 0.6,
+		"cash_mult": 0.75,
 		"churn_mult": 1.5,
 		"competitor_mult": 1.5,
 		"fundraise_amount_mult": 0.90,

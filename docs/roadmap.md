@@ -371,10 +371,10 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Employee detail view** — Added dedicated employee profile screen with history timeline + trajectory chart + role/trait metadata
 - [~] **Difficulty tuning** — Backend knobs now tune churn/competitor pressure, fundraising thresholds/offer sizes, and event pressure by difficulty; added `docs/difficulty-playtest-matrix.md` for structured 12-run validation, but full empirical pass is still pending
 - [x] **Tutorial** — Guided first-quarter overlay implemented (`TutorialManager`) with step persistence, auto-advance triggers, skip, and replay from Settings
-- [x] **Sound effects** — `SfxPlayer` autoload (`src/autoload/sfx_player.gd`) with PCM synthesis via `AudioStreamGenerator`; 6 named sounds: `hire`, `feature_ship`, `button_tap`, `event_popup`, `fire`, `retire`; registered in `project.godot`; wired into hire badge, fire button, event popup, and feature ship celebration
+- [x] **Sound effects** — `SfxPlayer` autoload (`src/autoload/sfx_player.gd`) with PCM synthesis via `AudioStreamGenerator`; 6 named sounds: `hire`, `feature_ship`, `button_tap`, `event_popup`, `fire`, `retire`; additional SFX added: `achievement`, `game_over`, `victory`, `fundraise`, `toast`, `quarter_whoosh`, `quarter_ding` (some synthesized, some asset-based); registered in `project.godot`; wired into hire badge, fire button, event popup, feature ship celebration, and new ceremony/transition flows
 - [ ] **Dynamic org structures (large companies)** — Introduce team pods / function leads once company reaches scale thresholds, with clearer inter-team mesh bonuses and delegation tradeoffs
-- [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated character sprites in the workspace scene are still outstanding
-- [~] **Office worker ambient animation** — Dashboard office banner now uses desk-aware pseudo-sprite workers (head/body badges), monitor+desk placement, and office customization states (per office tier + company accent); fully custom animated sprite art pipeline is still outstanding.
+- [~] **Visual office/garage scene** — Static office banner images integrated for all 4 upgrade levels; animated pixel character workers, furniture decorations, and economy mood lighting (bull/bear vignettes) now in place; Kenney/custom sprite art replacement still outstanding
+- [~] **Office worker ambient animation** — Dashboard office banner now uses procedural pixel characters with 4-frame animation, morale expressions, office furniture (desks, chairs, monitors, plants, whiteboards, water coolers, coffee mugs), monitor glow pulses, and Disney-style positional bob; Kenney/custom sprite art replacement still outstanding.
 - [~] **Product visual prototype lab** — Product screen now includes a data-driven `Prototype Concept` switcher backed by `src/data/product_preview_prototypes.json` so new concept ideas can be added without code changes; concept-specific art variants and per-concept layout overrides are still pending
 - [ ] **Time progression options** — Real-time or monthly-tick mode with speed controls (1x, 2x, 4x, pause) as alternative to quarterly turns
 - [ ] **Hybrid real-time ops monetization experiment (player-first)** — Evaluate an optional real-time operations layer (timers that scale with company maturity) while keeping core quarter strategy decisions intact. Acceleration should come from earned tokens + optional rewarded ads, with premium focused on ad removal/QoL boosts rather than pay-to-win stat advantages. Validate only through soft-launch retention + sentiment data before broad rollout.
@@ -391,7 +391,7 @@ Do these in order. Each one should be playable before starting the next.
 - [x] **Quarterly advance transition animation + SFX** — Dashboard now runs a richer full-screen transition (label + sweep + eased fade) when advancing a quarter, with audio hooks for asset-based whoosh/chime and synthesized fallback tones when SFX files are not present yet.
 
 **Soon (next sprint):**
-- [ ] **Kenney character sprite integration** — Download the free [Kenney Character Pack](https://kenney.nl/assets/toon-characters-1) (CC0, no attribution required). Wire up `AnimatedSprite2D` nodes for idle/walk/sit cycles. Display employees as animated sprites at their desks in the office scene, matching their current assignment (Features = typing, Bugs = looking worried, R&D = reading). Office scene upgrades (garage → co-working → HQ) swap the background banner and add more desk slots.
+- [~] **Kenney character sprite integration** — Procedural `PixelCharacter` sprites with 4-frame animation and morale expressions are now serving as office worker visuals; Kenney/custom art replacement remains a possible polish step. Wire up `AnimatedSprite2D` nodes for idle/walk/sit cycles. Display employees as animated sprites at their desks in the office scene, matching their current assignment (Features = typing, Bugs = looking worried, R&D = reading). Office scene upgrades (garage → co-working → HQ) swap the background banner and add more desk slots.
 - [x] **Feature-ship confetti burst** — `GPUParticles2D` + `ParticleProcessMaterial` created programmatically in `product_overview.gd`; fires quality-tinted confetti (green/gold/red) on feature ship with `SfxPlayer.play("feature_ship")`; gradient built via `Gradient` API — no scene editor required.
 
 **Later (post-alpha):**
@@ -416,7 +416,7 @@ Do these in order. Each one should be playable before starting the next.
 - [ ] **Competitor product depth** — Each major competitor can have multiple products (e.g., Googlr has search, cloud, ads, hardware) that affect different market segments
 - [ ] **Community mod packs** — Ship a companion "real names" JSON; build a simple import flow (paste URL or pick file) for user-created competitor packs
 - [ ] **Scenario packs** — "Dot-Com Boom", "AI Gold Rush", "Pandemic Pivot", etc. (JSON configs)
-- [ ] **Achievements** — Track across runs
+- [x] **Achievements** — `AchievementManager` autoload fully implemented with JSON definitions, persistent unlocks, cross-run tracking, signal-based ceremony (confetti/screen flash/toast), and dedicated achievement browser screen
 - [ ] **Postmortem screen** — Timeline of key decisions, shareable
 - [ ] **Seed system** — Share seeds for specific market conditions
 

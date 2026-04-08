@@ -9,6 +9,13 @@ extends TextureRect
 ## 14×20 gives enough room for: hair detail, visible neck, collar, belt line,
 ## separated legs, and distinct arm poses — while staying firmly in the
 ## chunky pixel-art register (Kairosoft / Tiny Tower).
+##
+## AI INTEGRATION OPPORTUNITY: Replace procedural generation with AI-generated
+## sprites using PixelLab (pixellab.ai) or Retro Diffusion (retrodiffusion.ai).
+## Either tool can batch-generate 50+ unique employee sprites with style-reference
+## mode pointed at our existing 14×20 art. Use rd-animation model for sprite
+## sheets with walk/idle/action frames. Pre-generate at build time (not runtime)
+## to avoid mobile battery drain. See docs/AI_TECH_OPPORTUNITIES.md for details.
 
 
 # ---------------------------------------------------------------------------
@@ -61,6 +68,17 @@ const GLASSES_COLOR := Color(0.80, 0.82, 0.90, 0.92)
 const EYE_WHITE     := Color(0.92, 0.92, 0.94)
 const EYE_PUPIL     := Color(0.12, 0.12, 0.16)
 
+## Morale-driven mouth expressions (the tiny details that sell personality).
+## 0=happy, 1=content, 2=neutral, 3=stressed, 4=upset
+const MOUTH_HAPPY   := 0
+const MOUTH_CONTENT := 1
+const MOUTH_NEUTRAL := 2
+const MOUTH_STRESSED:= 3
+const MOUTH_UPSET   := 4
+
+## Cheek blush for high-morale characters (adds warmth/cuteness).
+const BLUSH_COLOR := Color(0.92, 0.55, 0.50, 0.35)
+
 
 # ---------------------------------------------------------------------------
 # Instance state
@@ -70,6 +88,12 @@ var _anim_tween: Tween
 var _frames: Array[ImageTexture] = []
 var _frame_index: int = 0
 var _assignment: int = 5
+
+# Sprite frame cache — avoids regenerating identical textures when office refreshes.
+# Key: "uid:assignment:mouth" → frames. Cleared on scene change (static lifetime).
+# ~40 texture creations per refresh → 0 on cache hit (big mobile battery win).
+static var _frame_cache: Dictionary = {}  # String -> Array[ImageTexture]
+const _FRAME_CACHE_MAX := 60  # Evict oldest if cache grows past this
 
 
 # ---------------------------------------------------------------------------
@@ -95,11 +119,36 @@ static func create(emp: EmployeeData, display_height: float = 20.0) -> PixelChar
 	var shirt: Color = SHIRT_COLORS.get(emp.assignment, SHIRT_COLORS[5])
 	var style := (h / 7) % HAIR_STYLE_COUNT
 	var glasses: bool = (h / 31) % 5 == 0  # ~20% chance
+	var mouth := _morale_to_mouth(emp.morale, emp.stress)
 
-	pc._frames = _make_frames(skin, hair, shirt, style, glasses, emp.assignment)
+	# Cache key: deterministic inputs that affect the visual output.
+	var cache_key := "%s:%d:%d" % [emp.employee_uid, emp.assignment, mouth]
+	if _frame_cache.has(cache_key):
+		pc._frames = _frame_cache[cache_key]
+	else:
+		pc._frames = _make_frames_v2(skin, hair, shirt, style, glasses, emp.assignment, mouth)
+		_frame_cache[cache_key] = pc._frames
+		# Simple eviction: drop first entry if cache is too large.
+		if _frame_cache.size() > _FRAME_CACHE_MAX:
+			var first_key: String = _frame_cache.keys()[0]
+			_frame_cache.erase(first_key)
+
 	if not pc._frames.is_empty():
 		pc.texture = pc._frames[0]
 	return pc
+
+
+## Maps morale/stress to a mouth expression for personality.
+static func _morale_to_mouth(morale: int, stress: int) -> int:
+	if morale >= 80 and stress < 30:
+		return MOUTH_HAPPY
+	if morale >= 60:
+		return MOUTH_CONTENT
+	if stress >= 70:
+		return MOUTH_STRESSED
+	if morale <= 30:
+		return MOUTH_UPSET
+	return MOUTH_NEUTRAL
 
 
 # ---------------------------------------------------------------------------
@@ -124,23 +173,56 @@ func _start_anim() -> void:
 	if _anim_tween and _anim_tween.is_valid():
 		_anim_tween.kill()
 
-	var dur: float
+	# Disney principle: asymmetric timing makes motion feel alive.
+	# Each assignment has a unique rhythm & personality.
+	var action_dur: float
+	var rest_dur: float
 	match _assignment:
-		0: dur = 0.38   # FEATURES — brisk typing
-		1: dur = 0.28   # BUGS — jittery
-		2: dur = 0.52   # TECH_DEBT — methodical
-		3: dur = 0.48   # INFRA — steady
-		4: dur = 0.72   # RND — contemplative
-		_: dur = 0.90   # UNASSIGNED — lazy bob
+		0:  # FEATURES — brisk typing rhythm, short rest
+			action_dur = 0.28
+			rest_dur = 0.14
+		1:  # BUGS — jittery, fast fidgeting
+			action_dur = 0.22
+			rest_dur = 0.10
+		2:  # TECH_DEBT — methodical, longer pauses
+			action_dur = 0.45
+			rest_dur = 0.30
+		3:  # INFRA — steady, rhythmic
+			action_dur = 0.40
+			rest_dur = 0.22
+		4:  # RND — contemplative, long think pauses
+			action_dur = 0.60
+			rest_dur = 0.55
+		_:  # UNASSIGNED — lazy, slow breathing bob
+			action_dur = 0.80
+			rest_dur = 0.70
 
 	_frame_index = 0
 	_anim_tween = create_tween().set_loops()
-	_anim_tween.tween_callback(_swap_frame).set_delay(dur)
+	# 4-frame cycle: idle(0) → action-A(1) → idle-blink(2) → action-B(3)
+	# This gives asymmetric motion — Disney's "moving hold" principle.
+	if _frames.size() >= 4:
+		_anim_tween.tween_callback(_set_frame.bind(0))
+		_anim_tween.tween_interval(rest_dur)
+		_anim_tween.tween_callback(_set_frame.bind(1))
+		_anim_tween.tween_interval(action_dur)
+		_anim_tween.tween_callback(_set_frame.bind(2))
+		_anim_tween.tween_interval(rest_dur * 0.6)  # blink is quick
+		_anim_tween.tween_callback(_set_frame.bind(3))
+		_anim_tween.tween_interval(action_dur)
+	else:
+		_anim_tween.tween_callback(_swap_frame).set_delay(action_dur)
 
 
 func _swap_frame() -> void:
 	_frame_index = (_frame_index + 1) % _frames.size()
 	texture = _frames[_frame_index]
+
+
+func _set_frame(idx: int) -> void:
+	if idx < _frames.size():
+		_frame_index = idx
+		texture = _frames[idx]
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +242,105 @@ static func _make_frames(skin: Color, hair: Color, shirt: Color,
 		var img := _draw(skin, hair, shirt, hair_style, glasses, assignment, pose)
 		out.append(ImageTexture.create_from_image(img))
 	return out
+
+
+## 4-frame version: idle, action-A, idle-blink, action-B.
+## Frame 2 (blink) closes the eyes briefly for a Disney "living hold" feel.
+static func _make_frames_v2(skin: Color, hair: Color, shirt: Color,
+		hair_style: int, glasses: bool, assignment: int,
+		mouth: int = MOUTH_NEUTRAL) -> Array[ImageTexture]:
+	var out: Array[ImageTexture] = []
+	# Frame 0: idle, eyes open.
+	out.append(ImageTexture.create_from_image(
+		_draw_v2(skin, hair, shirt, hair_style, glasses, assignment, 0, false, mouth)))
+	# Frame 1: action pose A.
+	out.append(ImageTexture.create_from_image(
+		_draw_v2(skin, hair, shirt, hair_style, glasses, assignment, 1, false, mouth)))
+	# Frame 2: idle with blink (eyes closed = character feels alive).
+	out.append(ImageTexture.create_from_image(
+		_draw_v2(skin, hair, shirt, hair_style, glasses, assignment, 0, true, mouth)))
+	# Frame 3: action pose B (mirror of A with slight variation).
+	out.append(ImageTexture.create_from_image(
+		_draw_v2(skin, hair, shirt, hair_style, glasses, assignment, 2, false, mouth)))
+	return out
+
+
+## Enhanced draw with blink support and morale expressions.
+static func _draw_v2(skin: Color, hair: Color, shirt: Color,
+		hair_style: int, glasses: bool, assignment: int,
+		pose: int, blink: bool, mouth: int) -> Image:
+	# Use the base draw for body/hair/torso, then override eyes + mouth.
+	var base_pose := 0 if pose == 0 or pose == 2 else 1
+	var img := _draw(skin, hair, shirt, hair_style, glasses, assignment, base_pose)
+
+	var cx := CHAR_W / 2
+	var head_w := 6
+	var head_x := cx - head_w / 2
+	var skin_shadow := skin.darkened(0.12)
+
+	# --- BLINK: close eyes (draw skin over eye pixels) ---
+	if blink:
+		var ey := 4
+		# Draw eyelids (skin-colored line where eyes were).
+		_px(img, head_x + 1, ey, skin_shadow)
+		_px(img, head_x + 2, ey, skin_shadow)
+		_px(img, head_x + 3, ey, skin_shadow)
+		_px(img, head_x + 4, ey, skin_shadow)
+
+	# --- MOUTH EXPRESSIONS (row 5-6, adds personality) ---
+	# Clear the default mouth first.
+	_px(img, head_x + 1, 5, skin)
+	_px(img, head_x + 2, 5, skin)
+	_px(img, head_x + 3, 5, skin)
+	_px(img, head_x + 4, 5, skin)
+	_px(img, head_x + 1, 6, skin)
+	_px(img, head_x + 4, 6, skin)
+
+	var mouth_color := skin.darkened(0.20)
+	match mouth:
+		MOUTH_HAPPY:
+			# Wide smile: curved up at corners (⌣).
+			_px(img, head_x + 1, 5, mouth_color)
+			_px(img, head_x + 2, 6, mouth_color)
+			_px(img, head_x + 3, 6, mouth_color)
+			_px(img, head_x + 4, 5, mouth_color)
+			# Rosy cheeks — the Pixar touch.
+			_px(img, head_x, 5, BLUSH_COLOR.blend(skin))
+			_px(img, head_x + 5, 5, BLUSH_COLOR.blend(skin))
+		MOUTH_CONTENT:
+			# Small smile: slight upturn.
+			_px(img, head_x + 2, 5, mouth_color)
+			_px(img, head_x + 3, 5, mouth_color)
+			_px(img, head_x + 4, 5, mouth_color.lightened(0.1))
+		MOUTH_NEUTRAL:
+			# Flat line.
+			_px(img, head_x + 2, 5, skin_shadow)
+			_px(img, head_x + 3, 5, skin_shadow)
+		MOUTH_STRESSED:
+			# Wavy line (tension).
+			_px(img, head_x + 1, 5, mouth_color)
+			_px(img, head_x + 2, 6, mouth_color)
+			_px(img, head_x + 3, 5, mouth_color)
+			_px(img, head_x + 4, 6, mouth_color)
+		MOUTH_UPSET:
+			# Frown: curved down at corners (⌢).
+			_px(img, head_x + 1, 6, mouth_color)
+			_px(img, head_x + 2, 5, mouth_color)
+			_px(img, head_x + 3, 5, mouth_color)
+			_px(img, head_x + 4, 6, mouth_color)
+
+	# --- POSE 2: mirror variation for action-B ---
+	# Pose 2 uses the idle body but with a slight head tilt (1px shift on eyes).
+	if pose == 2 and not blink:
+		var ey := 4
+		# Shift eyes 1px right for "looking at something" effect.
+		_px(img, head_x + 1, ey, skin)  # clear left eye-white
+		_px(img, head_x + 2, ey, EYE_WHITE)
+		_px(img, head_x + 3, ey, EYE_PUPIL)
+		_px(img, head_x + 4, ey, EYE_PUPIL)
+		_px(img, head_x + 5, ey, EYE_WHITE)
+
+	return img
 
 
 # ---------------------------------------------------------------------------

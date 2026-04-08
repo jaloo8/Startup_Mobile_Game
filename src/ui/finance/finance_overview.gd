@@ -101,7 +101,7 @@ func _build_context_hints() -> void:
 	vbox.move_child(_next_move_label, cash_value.get_parent().get_index() + 2)
 
 	_drilldown_label = Label.new()
-	_drilldown_label.add_theme_font_size_override("font_size", 11)
+	_drilldown_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	_drilldown_label.add_theme_color_override("font_color", Color(0.7, 0.75, 0.9))
 	_drilldown_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_drilldown_label)
@@ -139,7 +139,7 @@ func _build_hosting_controls() -> void:
 	vbox.move_child(row, cash_value.get_parent().get_index() + 4)
 
 	_hosting_meta_label = Label.new()
-	_hosting_meta_label.add_theme_font_size_override("font_size", 11)
+	_hosting_meta_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	_hosting_meta_label.add_theme_color_override("font_color", Color(0.62, 0.67, 0.82))
 	_hosting_meta_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_hosting_meta_label)
@@ -212,16 +212,16 @@ func _refresh() -> void:
 	var rw: float = GameState.financials.runway_quarters(GameState.company.cash)
 	if rw == INF:
 		runway_value.text = "Profitable — no runway needed"
-		runway_value.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
+		runway_value.add_theme_color_override("font_color", ThemeManager.C_GREEN)
 	elif rw < 1.0:
 		runway_value.text = "Critical — less than 1 quarter"
-		runway_value.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+		runway_value.add_theme_color_override("font_color", ThemeManager.C_RED)
 	elif rw < 3.0:
 		runway_value.text = "~%d quarters — start fundraising" % roundi(rw)
 		runway_value.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
 	else:
 		runway_value.text = "~%d quarters" % roundi(rw)
-		runway_value.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
+		runway_value.add_theme_color_override("font_color", ThemeManager.C_GREEN)
 
 	var costs: Dictionary = GameState.financials.costs_breakdown
 	salary_cost.text = "$%s" % SceneLoader.format_money(costs.get("salaries", 0.0))
@@ -247,7 +247,7 @@ func _refresh() -> void:
 		var bp: int = GameState.board_patience
 		if bp >= 5:
 			board_label.text = "Board: Satisfied"
-			board_label.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
+			board_label.add_theme_color_override("font_color", ThemeManager.C_GREEN)
 		elif bp >= 3:
 			board_label.text = "Board: Watching closely"
 			board_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
@@ -256,7 +256,7 @@ func _refresh() -> void:
 			board_label.add_theme_color_override("font_color", Color(0.95, 0.5, 0.2))
 		else:
 			board_label.text = "Board: Furious — your position is at risk"
-			board_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+			board_label.add_theme_color_override("font_color", ThemeManager.C_RED)
 
 
 func _refresh_context_hints(runway_quarters: float) -> void:
@@ -303,7 +303,7 @@ func _refresh_hosting_controls() -> void:
 			GameState.company.hosting_optimization_level,
 		]
 	if GameState.company.hosting_reliability < 93.0 or peak_util > 1.15:
-		_hosting_meta_label.add_theme_color_override("font_color", Color(0.95, 0.56, 0.45))
+		_hosting_meta_label.add_theme_color_override("font_color", ThemeManager.C_ORANGE)
 	elif pressure >= 2.2:
 		_hosting_meta_label.add_theme_color_override("font_color", Color(0.95, 0.72, 0.42))
 	elif GameState.company.hosting_reliability < 97.0 or peak_util > 0.95 or pressure >= 1.25:
@@ -555,7 +555,7 @@ func _refresh_trend_chart() -> void:
 			cash_series,    Color(0.33, 0.80, 0.52), "Cash",
 			revenue_series, Color(0.37, 0.63, 0.95), "Revenue",
 			burn_series,    Color(0.92, 0.38, 0.38), "Burn",
-			users_series,   Color(0.96, 0.74, 0.31), "Users"
+			users_series,   ThemeManager.C_GOLD, "Users"
 		)
 
 	if trend_meta:
@@ -650,12 +650,42 @@ func _on_accept_offer() -> void:
 		return
 	var firm_name: String = _current_offer.get("firm_name", "unknown")
 	var amount: float = _current_offer.get("amount", 0.0)
+	var round_name: String = _current_offer.get("round", "")
 	Analytics.track_fundraise_result(true, firm_name, amount)
 	FundraisingEngine.accept_offer(GameState, _current_offer)
 	SfxPlayer.play("fundraise")
 	AnimHelper.haptic(&"heavy")
 	ToastManager.show("Raised $%s! 🎉" % SceneLoader.format_money(amount), "💰", ThemeManager.C_GOLD)
+
+	# --- Fundraise celebration (scaled to round size) ---
+	# Screen flash — green for money!
+	AnimHelper.screen_flash(self, Color(0.2, 0.85, 0.3, 0.25), 0.40)
 	AnimHelper.screen_shake(get_tree(), 0.3, 0.3)
+
+	# Confetti burst from the offer panel — money colors.
+	var burst_origin := Vector2(size.x * 0.5, offer_panel.global_position.y + offer_panel.size.y * 0.5 - global_position.y)
+	var money_colors: Array[Color] = [
+		Color(0.18, 0.80, 0.35),   # green
+		Color(1.0, 0.84, 0.0),     # gold
+		Color(0.30, 0.90, 0.55),   # light green
+		Color(0.95, 0.75, 0.15),   # amber
+	]
+	# Bigger rounds get bigger celebrations.
+	var burst_amount := 25
+	if amount >= 2_000_000:
+		burst_amount = 50
+	elif amount >= 500_000:
+		burst_amount = 35
+	AnimHelper.confetti_burst(self, burst_origin, money_colors, burst_amount, 240.0, 2.0)
+
+	# Series A+ gets a second delayed burst for extra drama.
+	if amount >= 2_000_000:
+		get_tree().create_timer(0.5).timeout.connect(func() -> void:
+			if is_instance_valid(self):
+				AnimHelper.confetti_burst(self, Vector2(burst_origin.x - 100, burst_origin.y), money_colors, 20, 180.0, 1.5)
+				AnimHelper.confetti_burst(self, Vector2(burst_origin.x + 100, burst_origin.y), money_colors, 20, 180.0, 1.5)
+		)
+
 	AnimHelper.pop_out(offer_panel, 0.16, func() -> void:
 		offer_panel.visible = false
 		fundraise_btn.visible = true

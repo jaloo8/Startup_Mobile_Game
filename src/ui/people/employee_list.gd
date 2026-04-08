@@ -96,6 +96,7 @@ func _ready() -> void:
 	_refresh_list()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("people")
+	AnimHelper.fade_in(self, 0.0, 0.18)
 
 
 func _exit_tree() -> void:
@@ -134,7 +135,7 @@ func _build_sort_buttons() -> void:
 		var btn := Button.new()
 		btn.text = SORT_LABELS[key]
 		btn.custom_minimum_size = Vector2(82, 46)
-		btn.add_theme_font_size_override("font_size", 11)
+		btn.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		btn.pressed.connect(_on_sort_pressed.bind(key))
 		sort_row.add_child(btn)
 		_sort_buttons[key] = btn
@@ -151,7 +152,7 @@ func _build_sort_hint_label() -> void:
 	if parent == null:
 		return
 	_sort_hint_label = Label.new()
-	_sort_hint_label.add_theme_font_size_override("font_size", 11)
+	_sort_hint_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	_sort_hint_label.add_theme_color_override("font_color", Color(0.56, 0.6, 0.72))
 	_sort_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(_sort_hint_label)
@@ -165,8 +166,8 @@ func _build_allocation_hint_label() -> void:
 	if parent == null:
 		return
 	_allocation_hint_label = Label.new()
-	_allocation_hint_label.add_theme_font_size_override("font_size", 11)
-	_allocation_hint_label.add_theme_color_override("font_color", Color(0.58, 0.74, 0.92))
+	_allocation_hint_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+	_allocation_hint_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_HINT)
 	_allocation_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(_allocation_hint_label)
 	parent.move_child(_allocation_hint_label, capacity_label.get_index() + 1)
@@ -190,7 +191,7 @@ func _refresh_allocation_hint() -> void:
 	var stage: String = _responsibility_stage()
 	if stage == RESPONSIBILITY_STAGE_EARLY:
 		_allocation_hint_label.text = "Team model: Early startup (shared hats). Keep most people on Features; other lanes still provide partial feature support."
-		_allocation_hint_label.add_theme_color_override("font_color", Color(0.58, 0.74, 0.92))
+		_allocation_hint_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_HINT)
 		return
 
 	var missing: Array[String] = []
@@ -396,11 +397,11 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	styled.content_margin_bottom = 10
 	styled.border_width_left = 3
 	if emp.morale >= 70:
-		styled.border_color = Color(0.28, 0.82, 0.45)   # green
+		styled.border_color = ThemeManager.C_GREEN   # green
 	elif emp.morale >= 40:
 		styled.border_color = Color(0.92, 0.76, 0.22)   # gold
 	else:
-		styled.border_color = Color(0.88, 0.30, 0.30)   # red
+		styled.border_color = ThemeManager.C_RED   # red
 	panel.add_theme_stylebox_override("panel", styled)
 
 	var vbox := VBoxContainer.new()
@@ -424,7 +425,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	if emp.stress >= 70:
 		var stress_badge := Label.new()
 		stress_badge.text = "⚠ Burnout risk" if emp.stress >= 85 else "⚠ High stress"
-		stress_badge.add_theme_font_size_override("font_size", 11)
+		stress_badge.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		stress_badge.add_theme_color_override("font_color",
 			Color(0.92, 0.28, 0.28) if emp.stress >= 85 else Color(0.95, 0.62, 0.22))
 		title_row.add_child(stress_badge)
@@ -433,7 +434,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 	if busy_q > 0:
 		var busy_badge := Label.new()
 		busy_badge.text = "Interviewing (%dQ left)" % busy_q
-		busy_badge.add_theme_font_size_override("font_size", 11)
+		busy_badge.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		busy_badge.add_theme_color_override("font_color", Color(0.95, 0.72, 0.35))
 		title_row.add_child(busy_badge)
 
@@ -468,7 +469,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 		salary_label.text = "Contract: $%sK/quarter" % str(snapped(emp.salary_per_quarter / 1000.0, 0.1))
 	elif emp.employment_type == EmployeeData.EmploymentType.INTERN:
 		salary_label.text = "Intern stipend: $%sK/quarter" % str(snapped(emp.salary_per_quarter / 1000.0, 0.1))
-	salary_label.add_theme_font_size_override("font_size", 13)
+	salary_label.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	salary_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 	vbox.add_child(salary_label)
 
@@ -484,7 +485,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 
 	var assign_label := Label.new()
 	assign_label.text = "Focus:"
-	assign_label.add_theme_font_size_override("font_size", 13)
+	assign_label.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	assign_row.add_child(assign_label)
 
 	for a_key in EmployeeData.ASSIGNMENT_NAMES:
@@ -495,7 +496,7 @@ func _create_employee_card(emp: EmployeeData) -> PanelContainer:
 		btn.custom_minimum_size = Vector2(0, 46)
 		btn.toggle_mode = true
 		btn.button_pressed = (emp.assignment == a_key)
-		btn.add_theme_font_size_override("font_size", 11)
+		btn.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		var icon_tex := _assign_icon_texture(a_key)
 		if icon_tex:
 			btn.icon = icon_tex
@@ -549,13 +550,13 @@ func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
 	var lbl := Label.new()
 	var color: Color
 	if value >= 70:
-		color = Color(0.3, 0.85, 0.4)
+		color = ThemeManager.C_GREEN
 	elif value >= 40:
 		color = Color(0.9, 0.8, 0.2)
 	else:
-		color = Color(0.9, 0.3, 0.3)
+		color = ThemeManager.C_RED
 	lbl.text = "%s: %d" % [label_text, value]
-	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	lbl.add_theme_color_override("font_color", color)
 	parent.add_child(lbl)
 
@@ -615,7 +616,7 @@ func _refresh_candidates() -> void:
 
 		var name_lbl := Label.new()
 		name_lbl.text = "%s — %s" % [candidate.employee_name, candidate.display_title()]
-		name_lbl.add_theme_font_size_override("font_size", 15)
+		name_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cand_title_row.add_child(name_lbl)
 
@@ -631,7 +632,7 @@ func _refresh_candidates() -> void:
 				elif fit_str == "Good fit":
 					fit_badge.text = "✓ Good for Features"
 					fit_badge.add_theme_color_override("font_color", Color(0.4, 0.85, 0.5))
-				fit_badge.add_theme_font_size_override("font_size", 11)
+				fit_badge.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 				cand_title_row.add_child(fit_badge)
 
 		var cost_per_q: float = candidate.salary_per_quarter
@@ -643,7 +644,7 @@ func _refresh_candidates() -> void:
 			salary_text = "Intern stipend $%sK/quarter (high growth upside)" % str(snapped(cost_per_q / 1000.0, 0.1))
 		var salary_lbl := Label.new()
 		salary_lbl.text = salary_text
-		salary_lbl.add_theme_font_size_override("font_size", 13)
+		salary_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		salary_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 		vbox.add_child(salary_lbl)
 
@@ -694,13 +695,13 @@ func _refresh_candidates() -> void:
 				report.get("interviewer_role", "Interviewer"),
 				report.get("confidence", "Unknown confidence"),
 			]
-			meta_lbl.add_theme_font_size_override("font_size", 11)
-			meta_lbl.add_theme_color_override("font_color", Color(0.62, 0.64, 0.72))
+			meta_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+			meta_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 			vbox.add_child(meta_lbl)
 
 			var feedback_lbl := Label.new()
 			feedback_lbl.text = str(report.get("feedback", ""))
-			feedback_lbl.add_theme_font_size_override("font_size", 11)
+			feedback_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 			feedback_lbl.add_theme_color_override("font_color", Color(0.78, 0.80, 0.88))
 			feedback_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			vbox.add_child(feedback_lbl)
@@ -727,13 +728,13 @@ func _refresh_candidates() -> void:
 
 			var neg_hint := Label.new()
 			neg_hint.text = "One chance — they may walk"
-			neg_hint.add_theme_font_size_override("font_size", 11)
+			neg_hint.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 			neg_hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 			neg_row.add_child(neg_hint)
 		else:
 			var neg_done_lbl := Label.new()
 			neg_done_lbl.text = "Salary negotiated"
-			neg_done_lbl.add_theme_font_size_override("font_size", 11)
+			neg_done_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 			neg_done_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.5))
 			vbox.add_child(neg_done_lbl)
 
@@ -752,7 +753,7 @@ func _refresh_candidates() -> void:
 				var ad_btn := Button.new()
 				ad_btn.text = "Quick Peek (Ad)"
 				ad_btn.custom_minimum_size = Vector2(120, 46)
-				ad_btn.add_theme_font_size_override("font_size", 11)
+				ad_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 				ad_btn.pressed.connect(_on_ad_reveal.bind(candidate))
 				btn_row.add_child(ad_btn)
 
@@ -840,7 +841,7 @@ func _show_office_upgrade_hint() -> void:
 		GameState.employees.size(),
 		GameState.company.office_capacity(),
 	]
-	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	lbl.add_theme_color_override("font_color", Color(0.9, 0.75, 0.35))
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_child(lbl)
@@ -873,7 +874,7 @@ func _on_negotiate_salary(candidate: EmployeeData) -> void:
 func _show_temp_message(msg: String) -> void:
 	var lbl := Label.new()
 	lbl.text = msg
-	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	lbl.add_theme_color_override("font_color", Color(0.9, 0.55, 0.3))
 	candidate_container.add_child(lbl)
 	var tw := create_tween()
@@ -1140,21 +1141,21 @@ func _show_interviewer_picker(candidate: EmployeeData) -> void:
 
 	var title := Label.new()
 	title.text = "Choose an interviewer for %s" % candidate.employee_name
-	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_font_size_override("font_size", ThemeManager.FONT_LG)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(title)
 
 	var subtitle := Label.new()
 	subtitle.text = "Better interviewers give cleaner reads, but can tie up team capacity."
 	subtitle.add_theme_font_size_override("font_size", 12)
-	subtitle.add_theme_color_override("font_color", Color(0.62, 0.64, 0.72))
+	subtitle.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(subtitle)
 
 	var stage_lbl := Label.new()
 	stage_lbl.text = _interview_stage_hint()
-	stage_lbl.add_theme_font_size_override("font_size", 11)
+	stage_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	stage_lbl.add_theme_color_override("font_color", Color(0.56, 0.74, 0.90))
 	stage_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stage_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1245,13 +1246,13 @@ func _add_interviewer_option(
 	var name_lbl := Label.new()
 	name_lbl.text = "%s — %s" % [interviewer_name, role]
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_lbl.add_theme_font_size_override("font_size", 13)
+	name_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	name_lbl.add_theme_color_override("font_color", Color(0.93, 0.95, 1.0))
 	title_row.add_child(name_lbl)
 
 	var read_lbl := Label.new()
 	read_lbl.text = "People read %d" % people_skill
-	read_lbl.add_theme_font_size_override("font_size", 11)
+	read_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	read_lbl.add_theme_color_override("font_color", Color(0.62, 0.74, 0.92))
 	title_row.add_child(read_lbl)
 
@@ -1268,7 +1269,7 @@ func _add_interviewer_option(
 
 	var hint_lbl := Label.new()
 	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint_lbl.add_theme_font_size_override("font_size", 11)
+	hint_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	body.add_child(hint_lbl)
 
 	var run_btn := Button.new()
@@ -1444,7 +1445,7 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 
 	var company_lbl := Label.new()
 	company_lbl.text = GameState.company.company_name if GameState.company else "Venture"
-	company_lbl.add_theme_font_size_override("font_size", 13)
+	company_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	company_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.9))
 	strip_hbox.add_child(company_lbl)
 
@@ -1496,7 +1497,7 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 	# "NEW HIRE" glow label
 	var new_hire_lbl := Label.new()
 	new_hire_lbl.text = "✦  WELCOME TO THE TEAM  ✦"
-	new_hire_lbl.add_theme_font_size_override("font_size", 11)
+	new_hire_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	new_hire_lbl.add_theme_color_override("font_color", Color(0.45, 0.78, 1.0))
 	new_hire_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_child(new_hire_lbl)
@@ -1512,15 +1513,15 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 	# Title
 	var title_lbl := Label.new()
 	title_lbl.text = "%s · %s" % [emp.display_title(), emp.employment_label()]
-	title_lbl.add_theme_font_size_override("font_size", 13)
+	title_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	title_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.85))
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_child(title_lbl)
 
 	var trait_lbl := Label.new()
 	trait_lbl.text = "%s — %s" % [emp.personality_label(), emp.personality_effect_hint()]
-	trait_lbl.add_theme_font_size_override("font_size", 11)
-	trait_lbl.add_theme_color_override("font_color", Color(0.58, 0.74, 0.92))
+	trait_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+	trait_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT_HINT)
 	trait_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	trait_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.add_child(trait_lbl)
@@ -1562,13 +1563,44 @@ func _show_hire_badge(emp: EmployeeData) -> void:
 	)
 	body.add_child(assign_btn)
 
-	# Pop-in animation
-	card.scale = Vector2(0.7, 0.7)
+	# --- Celebration animation (Disney-style: anticipation → pop → follow-through) ---
+	# Screen flash on hire — impact moment.
+	AnimHelper.screen_flash(self, Color(0.35, 0.65, 1.0, 0.25), 0.35)
+	AnimHelper.haptic(&"medium")
+	SfxPlayer.play("hire")
+
+	# Card pop-in with spring overshoot (starts tiny, overshoots 1.08, settles 1.0).
+	card.scale = Vector2(0.0, 0.0)
 	card.pivot_offset = Vector2(160, 240)
-	var tw := create_tween()
-	tw.set_ease(Tween.EASE_OUT)
-	tw.set_trans(Tween.TRANS_BACK)
-	tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.3)
+	card.modulate.a = 0.0
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.36) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(card, "modulate:a", 1.0, 0.18) \
+		.set_ease(Tween.EASE_OUT)
+
+	# Confetti burst behind the badge card — celebration!
+	tw.set_parallel(false)
+	tw.tween_callback(func() -> void:
+		if is_instance_valid(overlay):
+			AnimHelper.confetti_burst(overlay, Vector2(size.x * 0.5, size.y * 0.4),
+				[Color(0.35, 0.65, 1.0), Color(0.30, 0.85, 0.45), Color(1.0, 0.84, 0.0),
+				 Color(0.80, 0.45, 0.95), Color(1.0, 0.55, 0.25)], 30, 200.0, 1.8)
+	)
+
+	# Avatar pop-in with slight delay for staggered feel.
+	av_panel.scale = Vector2(0.0, 0.0)
+	av_panel.pivot_offset = av_panel.size * 0.5
+	get_tree().create_timer(0.20).timeout.connect(func() -> void:
+		if is_instance_valid(av_panel):
+			AnimHelper.pop_in(av_panel, 0.0, 0.28)
+	)
+
+	# Name typewriter reveal for dramatic flair.
+	get_tree().create_timer(0.30).timeout.connect(func() -> void:
+		if is_instance_valid(name_lbl):
+			AnimHelper.typewriter(name_lbl, name_lbl.text, 30.0)
+	)
 
 
 static func _badge_stat(parent: HBoxContainer, label: String, value: int) -> void:
@@ -1578,10 +1610,10 @@ static func _badge_stat(parent: HBoxContainer, label: String, value: int) -> voi
 
 	var val_lbl := Label.new()
 	val_lbl.text = str(value)
-	val_lbl.add_theme_font_size_override("font_size", 18)
+	val_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_LG)
 	val_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if value >= 70:
-		val_lbl.add_theme_color_override("font_color", Color(0.3, 0.85, 0.4))
+		val_lbl.add_theme_color_override("font_color", ThemeManager.C_GREEN)
 	elif value >= 40:
 		val_lbl.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
 	else:
@@ -1634,7 +1666,7 @@ func _show_assign_prompt(emp: EmployeeData) -> void:
 
 	var title := Label.new()
 	title.text = "Where should\n%s focus?" % emp.employee_name
-	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_font_size_override("font_size", ThemeManager.FONT_LG)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	header_row.add_child(title)
 
@@ -1655,7 +1687,7 @@ func _show_assign_prompt(emp: EmployeeData) -> void:
 		var btn := Button.new()
 		btn.text = "%s\n%s" % [EmployeeData.ASSIGNMENT_NAMES[a_key], _assignment_description_for_stage(a_key, stage)]
 		btn.custom_minimum_size = Vector2(0, 50)
-		btn.add_theme_font_size_override("font_size", 13)
+		btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		var prompt_icon := _assign_icon_texture(a_key)
 		if prompt_icon:
 			btn.icon = prompt_icon

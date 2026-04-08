@@ -12,7 +12,15 @@
       "Zero drama, high delivery. Rarely the loudest voice, but often the most useful.",
       "Has strong opinions, loosely held. Anchoring when needed, adaptable when not.",
       "Shows up every day and does what needs doing. Underrated quality at every stage.",
-      "Rarely the first to speak in a meeting, but always the first to deliver."
+      "Rarely the first to speak in a meeting, but always the first to deliver.",
+      "The engineer you forget to worry about. That's the highest compliment.",
+      "Handles production issues without making them everyone's crisis.",
+      "Ships at a predictable clip. Roadmap estimates actually hold when they're assigned.",
+      "Takes ownership of the unsexy but critical infrastructure work nobody volunteers for.",
+      "Never inflates estimates, never misses them either. A planning team's dream.",
+      "The codebase is cleaner after every PR they submit. No fanfare, just discipline.",
+      "Keeps their head down during chaos. The calm one in the incident channel.",
+      "Builds things that last. Their code is still running two startups later."
     ],
     "Ambitious": [
       "Wants to own a roadmap by Q3. Brings serious energy when morale is solid.",
@@ -26,7 +34,15 @@
       "Moves fast, learns from failures, then moves faster. Has strong opinions on what good looks like.",
       "Will join to grow. Will leave if growth stalls. Keep them challenged.",
       "Treats every quarter as a new opportunity to outperform the last one.",
-      "Has already mapped out what their next title should be. Could be a good thing."
+      "Has already mapped out what their next title should be. Could be a good thing.",
+      "Asks 'what's next?' before the current sprint is even closed. Restless in the best way.",
+      "Wants to present at the all-hands. Wants to own the demo. Wants to ship the thing.",
+      "Competed in hackathons before joining. Still treats every feature like one.",
+      "The kind of person who reads the investor deck and asks how they can help hit the numbers.",
+      "Ships fast, iterates faster. Sometimes too fast — but that's a good problem to have.",
+      "Already thinking about the Series B while you're closing the Seed. Infectious energy.",
+      "Wants equity because they plan to make it worth something. That's the right attitude.",
+      "Will outwork everyone for a quarter, then expect recognition. Fair trade."
     ],
     "Perfectionist": [
       "Finds the bug everyone else missed. Slightly slower than you'd like on green-field features.",
@@ -40,10 +56,18 @@
       "Will rewrite a function three times before they're satisfied. The third version is usually excellent.",
       "The kind of engineer who writes the test first and means it.",
       "Keeps tech debt honest. Will not pretend the workaround is a real fix.",
-      "Documentation is not an afterthought for them. The rest of the team thanks them later."
+      "Documentation is not an afterthought for them. The rest of the team thanks them later.",
+      "Their PRs come with tests, docs, and a migration plan. Every single time.",
+      "Allergic to 'we'll fix it later.' Because they know later never comes.",
+      "The reason your API contract hasn't broken in six months.",
+      "Spends an hour on variable naming. You laugh until the codebase is readable a year later.",
+      "Reviews code like an editor reviews prose. Tighter, cleaner, more intentional.",
+      "Will block a deploy over a logging inconsistency. You'll be grateful during the next incident.",
+      "Treats monitoring dashboards like an art form. Surprisingly, it matters.",
+      "Once spent a weekend rewriting a test suite. The team's deploy confidence doubled."
     ],
     "Team Player": [
-      "Makes every sprint slightly better just by being in it. Easy collaborator, natural unblocked.",
+      "Makes every sprint slightly better just by being in it. Easy collaborator, natural unblocker.",
       "Dependable across assignments and a genuine team-first attitude. Retention asset.",
       "Not the highest individual output on paper, but the team performs better when they're around.",
       "First to help unblock a stuck teammate. Reduces friction across the org.",
@@ -54,7 +78,15 @@
       "Great at translating between technical and non-technical stakeholders. Quietly valuable.",
       "Puts the team's velocity before their own headline metrics. A genuine asset.",
       "Keeps the team healthy when pressure builds. That's harder than it looks.",
-      "Invests in shared tooling and documentation others actually use. Rare."
+      "Invests in shared tooling and documentation others actually use. Rare.",
+      "The person who updates the wiki after every decision. Everyone benefits, nobody asks.",
+      "Organizes the team lunch. Remembers dietary restrictions. Somehow that matters for morale.",
+      "Runs the best retrospectives. People actually look forward to them.",
+      "De-escalates Slack threads before they become incidents. Social engineering at its finest.",
+      "Pairs with struggling teammates without being asked. Never makes it weird.",
+      "Their onboarding buddy feedback is always glowing. New hires ramp faster near them.",
+      "Volunteers for the integration work nobody wants. Makes it look easy.",
+      "The team's morale stays higher when they're in the room. Hard to quantify, impossible to ignore."
     ],
     "Mentor": [
       "Makes junior teammates better. Their influence compounds over time.",
@@ -68,7 +100,15 @@
       "Team multiplier. Individual output is good; team output is great when they're involved.",
       "Institutional knowledge made human. Preserves context that would otherwise walk out the door.",
       "Develops teammates the way a good coach develops players. Consistently.",
-      "The reason some of your best engineers didn't quit in their first year."
+      "The reason some of your best engineers didn't quit in their first year.",
+      "Has a knack for asking the question that makes a junior realize the answer themselves.",
+      "Wrote the internal engineering wiki. It's actually useful. That alone justifies the hire.",
+      "Former bootcamp TA. Brings that patience and clarity to every interaction.",
+      "Gives feedback that people act on instead of getting defensive about.",
+      "Turns code reviews into learning moments. PRs take longer but engineers grow faster.",
+      "The senior who remembers what it felt like to be junior. That empathy shows.",
+      "Hosts weekly office hours. Attendance keeps growing. That says everything.",
+      "Three of their former mentees are now senior engineers at other companies. That's a track record."
     ],
     "Adaptable": [
       "Comfortable wearing different hats. Effective across more role types than their title suggests.",
@@ -82,14 +122,67 @@
       "Thrives in companies that are still figuring out who does what. Great for your stage.",
       "Good at figuring out what needs to be done without being told. Especially useful pre-PMF.",
       "Doesn't mind when the plan changes. Usually the one who helps make the new plan.",
-      "Works well in ambiguity, executes well under clarity. Can handle both."
+      "Works well in ambiguity, executes well under clarity. Can handle both.",
+      "Switched from mobile to backend mid-sprint when the team needed it. Didn't miss a beat.",
+      "Learns by shipping. Picks up a new framework by building something real in it.",
+      "Comfortable being the only person who knows how something works. Figures it out.",
+      "Has done startup, big tech, and agency work. Each one made them more versatile.",
+      "The person you throw at the undefined project. They'll scope it and ship it.",
+      "Joined as a frontend engineer, now runs the deploy pipeline too. Just happened naturally.",
+      "Treats every reorg as an opportunity. Genuine optimism about change.",
+      "Can context-switch between three codebases in a day without dropping quality."
     ]
   },
   "by_seniority_prefix": {
-    "Junior": ["Early in their career, but eager.", "Still finding their footing, but promising.", "Fresh to the industry."],
-    "Mid": ["A couple of years in, growing fast.", "Starting to own work end-to-end.", "Has shipped real product before."],
-    "Senior": ["Experienced across multiple product cycles.", "Independently drives complex work.", "Been around long enough to know what matters."],
-    "Lead": ["Multiplies the team around them.", "Has led projects from scoping to ship.", "Balances technical depth with team ownership."],
-    "Principal": ["Sets technical direction across the org.", "Has seen most problems before.", "Operates at the intersection of strategy and code."]
+    "Junior": [
+      "Early in their career, but eager.",
+      "Still finding their footing, but promising.",
+      "Fresh to the industry.",
+      "Recent grad with a sharp mind and a lot to learn.",
+      "Green but hungry. Absorbs feedback like a sponge.",
+      "First real engineering job. Already asking the right questions.",
+      "Bootcamp graduate with surprising project depth.",
+      "Young and a little nervous, but the code speaks for itself."
+    ],
+    "Mid": [
+      "A couple of years in, growing fast.",
+      "Starting to own work end-to-end.",
+      "Has shipped real product before.",
+      "Past the junior learning curve, hitting their stride.",
+      "Comfortable owning features from design to deploy.",
+      "Has been through at least one production outage. Came out stronger.",
+      "Knows enough to be dangerous, experienced enough to be careful.",
+      "Starting to mentor juniors without being asked to."
+    ],
+    "Senior": [
+      "Experienced across multiple product cycles.",
+      "Independently drives complex work.",
+      "Been around long enough to know what matters.",
+      "Has seen three different architectures fail and knows why.",
+      "Can scope a quarter of work in a single afternoon.",
+      "Trusted to make technical decisions without a meeting.",
+      "The person you call when something is on fire at 2am.",
+      "Has opinions about build systems. They're usually right."
+    ],
+    "Lead": [
+      "Multiplies the team around them.",
+      "Has led projects from scoping to ship.",
+      "Balances technical depth with team ownership.",
+      "Writes the design doc, builds consensus, ships the feature.",
+      "Comfortable saying no to stakeholders when the trade-off isn't worth it.",
+      "Runs standups that people actually find useful.",
+      "Translates business requirements into technical plans the team trusts.",
+      "The bridge between what product wants and what engineering can deliver."
+    ],
+    "Principal": [
+      "Sets technical direction across the org.",
+      "Has seen most problems before.",
+      "Operates at the intersection of strategy and code.",
+      "Their architecture decisions echo through the codebase for years.",
+      "Trusted by the CEO and the interns equally.",
+      "Could be a CTO somewhere else. Chooses to build here.",
+      "Writes the most consequential 200 lines of code in the company.",
+      "The person whose Slack messages make everyone stop and read."
+    ]
   }
 }

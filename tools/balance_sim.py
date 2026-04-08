@@ -33,7 +33,7 @@ DIFFICULTY_MULTS = {
     "normal":  {"cash_mult": 1.0, "churn_mult": 1.0, "competitor_mult": 1.0,
                 "fundraise_amount_mult": 1.0, "fundraise_threshold_shift": 0.0,
                 "event_pressure_mult": 1.0},
-    "hardcore": {"cash_mult": 0.6, "churn_mult": 1.5, "competitor_mult": 1.5,
+    "hardcore": {"cash_mult": 0.75, "churn_mult": 1.5, "competitor_mult": 1.5,
                  "fundraise_amount_mult": 0.90, "fundraise_threshold_shift": 0.06,
                  "event_pressure_mult": 1.20},
 }
@@ -73,10 +73,10 @@ GROWTH_BALANCE = {
 }
 
 SUSTAINABLE_WIN = {
-    "saas":        {"users": 10_000, "features": 8, "revenue": 140_000},
+    "saas":        {"users": 10_000, "features": 8, "revenue": 70_000},
     "consumer":    {"users": 8_000,  "features": 7, "revenue": 40_000},
     "marketplace": {"users": 14_000, "features": 8, "revenue": 260_000},
-    "dev_tools":   {"users": 12_000, "features": 8, "revenue": 120_000},
+    "dev_tools":   {"users": 12_000, "features": 8, "revenue": 60_000},
 }
 
 BASE_ORGANIC_USERS_PER_QUARTER = 35

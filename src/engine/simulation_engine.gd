@@ -1,6 +1,12 @@
 class_name SimulationEngine
 extends RefCounted
 ## Runs one quarter of simulation.
+##
+## AI INTEGRATION OPPORTUNITY: Use ML-based difficulty balancing (like Unity's
+## ML-Agents but custom) — train a small model on playtest data to dynamically
+## adjust growth constants, event probabilities, and market conditions based on
+## player skill level. Could also use reinforcement learning to test balance
+## automatically (replace manual playtest matrix with AI playthroughs).
 
 const BASE_ORGANIC_USERS_PER_QUARTER := 35
 const MARKETING_USER_MULT := 0.5
@@ -231,6 +237,10 @@ static func _safe_dict(value) -> Dictionary:
 	return value if value is Dictionary else {}
 
 
+## Advance the simulation by one quarter. Processing order:
+## 1. World events  2. Work output & product metrics  3. Users & revenue
+## 4. Valuation, costs, cash  5. Competitors & economy  6. Random events
+## 7. Employee lifecycle (morale, aging, turnover, skills)  8. Founder & board
 static func process_quarter(state: Node) -> void:
 	WorldEventEngine.resolve_quarter(state)
 	_apply_work_output(state)

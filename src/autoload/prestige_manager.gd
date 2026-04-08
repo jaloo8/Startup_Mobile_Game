@@ -24,6 +24,11 @@ const SAVE_PATH := "user://prestige.dat"
 ## Maximum founder level.
 const MAX_LEVEL := 50
 
+## XP formula components (used in award_run_xp).
+const BASE_XP := 50
+const QUARTER_XP_BONUS := 5
+const SCORE_XP_BONUS := 2
+
 ## XP required for each level.  Index 0 is unused (no level 0).
 ## Level 1 = 0 XP (starting), Level 2 = 100, Level 3 = 250, ...
 ## Formula: xp_for(n) = round(100 * (n - 1)^1.55)  for n >= 2
@@ -363,7 +368,7 @@ func award_run_xp(is_win: bool) -> int:
 	var founder_score: int = _get_founder_score()
 
 	# XP formula: base + quarter bonus + score bonus, wins get 2x
-	var base_xp: int = 50 + (quarters_survived * 5) + (founder_score * 2)
+	var base_xp: int = BASE_XP + (quarters_survived * QUARTER_XP_BONUS) + (founder_score * SCORE_XP_BONUS)
 	if is_win:
 		base_xp *= 2
 

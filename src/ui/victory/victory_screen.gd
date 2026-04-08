@@ -102,17 +102,21 @@ func _build_founder_score() -> void:
 
 	var grade_label := Label.new()
 	grade_label.text = grade
-	grade_label.add_theme_font_size_override("font_size", 48)
+	grade_label.add_theme_font_size_override("font_size", ThemeManager.FONT_JUMBO)
 	grade_label.add_theme_color_override("font_color", grade_color)
 	grade_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	score_section.add_child(grade_label)
+	# Dramatic grade pop-in with delay.
+	AnimHelper.pop_in(grade_label, 0.8, 0.40)
 
 	var score_num := Label.new()
-	score_num.text = "%d / 100" % score
 	score_num.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 	score_num.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 	score_num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	score_section.add_child(score_num)
+	# Score counter rolls up with overshoot.
+	AnimHelper.score_reveal(score_num, score, 1.0, 1.0,
+		func(v: int) -> String: return "%d / 100" % v)
 
 	var summary_lbl := Label.new()
 	summary_lbl.text = summary
@@ -133,7 +137,7 @@ func _build_founder_score() -> void:
 
 		var axis_label := Label.new()
 		axis_label.text = axis.get("label", key)
-		axis_label.add_theme_font_size_override("font_size", 11)
+		axis_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		axis_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		axis_label.custom_minimum_size.x = 120
 		row.add_child(axis_label)
@@ -150,7 +154,7 @@ func _build_founder_score() -> void:
 
 		var val_label := Label.new()
 		val_label.text = "%d" % int(axis.get("score", 0))
-		val_label.add_theme_font_size_override("font_size", 11)
+		val_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		val_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		val_label.custom_minimum_size.x = 28
 		val_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -184,7 +188,7 @@ func _build_prestige_summary() -> void:
 
 	var level_lbl := Label.new()
 	level_lbl.text = "Level %d" % level
-	level_lbl.add_theme_font_size_override("font_size", 22)
+	level_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XL)
 	level_lbl.add_theme_color_override("font_color", ThemeManager.C_PURPLE)
 	level_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	section.add_child(level_lbl)
@@ -201,7 +205,7 @@ func _build_prestige_summary() -> void:
 
 		var xp_lbl := Label.new()
 		xp_lbl.text = "%d / %d XP" % [xp, xp_next]
-		xp_lbl.add_theme_font_size_override("font_size", 11)
+		xp_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		xp_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		xp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		section.add_child(xp_lbl)
@@ -217,7 +221,7 @@ func _build_prestige_summary() -> void:
 			perks_text.append("... +%d more" % (perks.size() - 4))
 		var perks_lbl := Label.new()
 		perks_lbl.text = "\n".join(perks_text)
-		perks_lbl.add_theme_font_size_override("font_size", 11)
+		perks_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 		perks_lbl.add_theme_color_override("font_color", ThemeManager.C_TEXT_DIM)
 		perks_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		section.add_child(perks_lbl)
@@ -283,7 +287,7 @@ func _build_timeline() -> void:
 	if key_moments.is_empty():
 		var lbl := Label.new()
 		lbl.text = "A quiet journey — but you made it."
-		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 		timeline_container.add_child(lbl)
 		return
@@ -293,32 +297,57 @@ func _build_timeline() -> void:
 		var yr: int = moment.get("year", 1)
 		var qt: int = moment.get("quarter", 1)
 		lbl.text = "Y%d Q%d — %s" % [yr, qt, moment.get("title", "")]
-		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		lbl.add_theme_color_override("font_color", Color(0.6, 0.75, 0.6))
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		timeline_container.add_child(lbl)
 
 
 func _animate_entrance() -> void:
+	# Screen flash — immediate "wow" on arrival.
+	AnimHelper.screen_flash(self, Color(1, 1, 1, 0.4), 0.50)
+
+	# Confetti rain — lasts the whole time the player reads the screen.
+	AnimHelper.confetti_rain(self, 5.0)
+
 	# Title: big celebratory pop.
 	AnimHelper.pop_in(win_title, 0.0, 0.36)
-	# Subtitle: slide up.
-	AnimHelper.slide_in(win_subtitle, Vector2(0, 24), 0.10, 0.26)
-	# Stats: fade in after title lands.
-	AnimHelper.fade_in(stats_label, 0.28, 0.30)
+
+	# Subtitle: typewriter reveal for dramatic effect.
+	win_subtitle.modulate.a = 0.0
+	get_tree().create_timer(0.30).timeout.connect(func() -> void:
+		if is_instance_valid(win_subtitle):
+			win_subtitle.modulate.a = 1.0
+			AnimHelper.typewriter(win_subtitle, win_subtitle.text, 35.0)
+	)
+
+	# Stats: fade in after subtitle.
+	AnimHelper.fade_in(stats_label, 0.60, 0.35)
+
 	# Timeline: stagger the milestone entries.
-	AnimHelper.stagger_list(timeline_container, 0.06, 0.40, 20.0)
+	AnimHelper.stagger_list(timeline_container, 0.06, 0.75, 20.0)
+
 	# Buttons: slide up from bottom, staggered.
 	var buttons: Array[Control] = []
 	for btn in [continue_btn, menu_btn, new_game_btn]:
 		if btn != null:
 			buttons.append(btn)
 	for i in buttons.size():
-		AnimHelper.slide_in(buttons[i], Vector2(0, 28), 0.55 + i * 0.06)
-	# Celebratory pulse on the title after it lands.
+		AnimHelper.slide_in(buttons[i], Vector2(0, 28), 0.90 + i * 0.06)
+
+	# Celebratory confetti burst from center after title lands.
 	get_tree().create_timer(0.40).timeout.connect(func() -> void:
 		if is_instance_valid(win_title):
-			AnimHelper.pulse(win_title, 1.12, 0.20))
+			AnimHelper.pulse(win_title, 1.12, 0.20)
+			AnimHelper.confetti_burst(self, Vector2(360, 120))
+	)
+
+	# Second burst when score section would be visible.
+	get_tree().create_timer(1.5).timeout.connect(func() -> void:
+		if is_instance_valid(self):
+			AnimHelper.confetti_burst(self, Vector2(180, 350), [], 25, 220.0)
+			AnimHelper.confetti_burst(self, Vector2(540, 350), [], 25, 220.0)
+	)
 
 
 func _on_menu() -> void:

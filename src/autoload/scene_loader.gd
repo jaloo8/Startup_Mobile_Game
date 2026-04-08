@@ -121,6 +121,8 @@ func _apply_touch_hardening(root: Node) -> void:
 	# Mobile accessibility baseline. This also tags nodes with lightweight
 	# visual-polish metadata hooks for future animation passes.
 	UITouchHelper.harden_tree(root)
+	# Adjust screen margins for device safe area (notch / home indicator).
+	UITouchHelper.apply_safe_area(root)
 
 
 static func free_children(node: Node) -> void:

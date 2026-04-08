@@ -31,6 +31,7 @@ func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("achievements")
+	AnimHelper.fade_in(self, 0.0, 0.16)
 	_build_ui()
 
 
@@ -163,7 +164,7 @@ func _build_card(def: Dictionary, unlocked: bool, hidden: bool) -> PanelContaine
 		icon_lbl.text = def.get("icon", "?")
 	else:
 		icon_lbl.text = "?"
-	icon_lbl.add_theme_font_size_override("font_size", 24)
+	icon_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_ICON)
 	icon_lbl.custom_minimum_size = Vector2(36, 0)
 	icon_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	icon_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

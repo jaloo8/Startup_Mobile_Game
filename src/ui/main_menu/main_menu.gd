@@ -11,6 +11,9 @@ var _history_btn: Button
 var _achievements_btn: Button
 
 
+var _ambient: CPUParticles2D
+
+
 func _ready() -> void:
 	play_btn.pressed.connect(_on_play)
 	continue_btn.pressed.connect(_on_continue)
@@ -21,6 +24,8 @@ func _ready() -> void:
 	_build_extra_buttons()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("main_menu")
+	# Ambient floating particles behind the menu — subtle life.
+	_ambient = AnimHelper.ambient_particles(self, Color(0.4, 0.5, 0.85, 0.2), 18)
 	_animate_entrance()
 	# Check for daily login bonus on main menu load.
 	_check_daily_bonus()

@@ -250,10 +250,22 @@ func _unlock(def: Dictionary) -> void:
 	var icon: String = def.get("icon", "🏆")
 	var chips: int = int(def.get("reward_chips", 0))
 
-	# Play celebration.
+	# --- Achievement unlock celebration ---
 	SfxPlayer.play("achievement")
 	AnimHelper.haptic(&"heavy")
 	ToastManager.show_achievement(title, icon)
+
+	# Screen flash + confetti on the active scene for visual punch.
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree and is_instance_valid(tree.current_scene):
+		var scene: Node = tree.current_scene
+		if scene is Control:
+			AnimHelper.screen_flash(scene as Control, Color(1.0, 0.84, 0.0, 0.20), 0.35)
+			var viewport_size := scene.get_viewport_rect().size
+			AnimHelper.confetti_burst(scene as Control,
+				Vector2(viewport_size.x * 0.5, 80.0),
+				[Color(1.0, 0.84, 0.0), Color(0.80, 0.45, 0.95), Color(0.30, 0.85, 0.45)],
+				20, 200.0, 1.5)
 
 	# Award chips.
 	if chips > 0 and CurrencyManager.has_method("earn"):

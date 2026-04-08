@@ -119,3 +119,33 @@ static func _harden_grid_spacing(grid: GridContainer, min_button_gap: int) -> vo
 		grid.add_theme_constant_override("h_separation", min_button_gap)
 	if grid.get_theme_constant("v_separation") < min_button_gap:
 		grid.add_theme_constant_override("v_separation", min_button_gap)
+
+
+## Adjusts the root-level MarginContainer's top and bottom margins to
+## respect the device safe area (notch, home indicator). Call once per screen
+## in _ready() or via SceneLoader on scene transitions. Idempotent.
+static func apply_safe_area(root: Node) -> void:
+	var margin := _find_root_margin(root)
+	if margin == null:
+		return
+	if margin.has_meta("_safe_area_applied"):
+		return
+	margin.set_meta("_safe_area_applied", true)
+	var designed_top := float(margin.get_theme_constant("margin_top"))
+	var designed_bottom := float(margin.get_theme_constant("margin_bottom"))
+	var safe_top := ThemeManager.safe_top_margin(designed_top)
+	var safe_bottom := ThemeManager.safe_bottom_margin(designed_bottom)
+	if safe_top > designed_top:
+		margin.add_theme_constant_override("margin_top", int(safe_top))
+	if safe_bottom > designed_bottom:
+		margin.add_theme_constant_override("margin_bottom", int(safe_bottom))
+
+
+static func _find_root_margin(node: Node) -> MarginContainer:
+	if node is MarginContainer:
+		return node as MarginContainer
+	# Check immediate children — the root MarginContainer is always at depth 0 or 1.
+	for child in node.get_children():
+		if child is MarginContainer:
+			return child as MarginContainer
+	return null

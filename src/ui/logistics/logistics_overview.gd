@@ -61,7 +61,7 @@ func _refresh() -> void:
 	)
 	reliability_label.text = "Reliability: %.1f%%  ·  Peak lane load: %.0f%%" % [reliability, peak_load * 100.0]
 	if reliability < 93.0:
-		reliability_label.add_theme_color_override("font_color", Color(0.95, 0.56, 0.45))
+		reliability_label.add_theme_color_override("font_color", ThemeManager.C_ORANGE)
 	elif reliability < 97.0:
 		reliability_label.add_theme_color_override("font_color", Color(0.95, 0.8, 0.4))
 	else:
@@ -130,7 +130,7 @@ func _set_lane(
 	bar.max_value = 1.6
 	bar.value = clampf(util, 0.0, 1.6)
 	if util > 1.0:
-		bar.add_theme_color_override("font_color", Color(0.95, 0.56, 0.45))
+		bar.add_theme_color_override("font_color", ThemeManager.C_ORANGE)
 	elif util > 0.85:
 		bar.add_theme_color_override("font_color", Color(0.95, 0.8, 0.4))
 	else:

@@ -74,7 +74,7 @@ func _create_row(rank: int, entry: Dictionary) -> PanelContainer:
 	var rank_label := Label.new()
 	rank_label.text = "#%d" % rank
 	rank_label.custom_minimum_size = Vector2(40, 0)
-	rank_label.add_theme_font_size_override("font_size", 18)
+	rank_label.add_theme_font_size_override("font_size", ThemeManager.FONT_LG)
 	if rank <= 3:
 		rank_label.add_theme_color_override("font_color", Color(0.95, 0.8, 0.2))
 	hbox.add_child(rank_label)
@@ -89,7 +89,7 @@ func _create_row(rank: int, entry: Dictionary) -> PanelContainer:
 	if is_player:
 		name_text += "  ← You"
 	name_label.text = name_text
-	name_label.add_theme_font_size_override("font_size", 15)
+	name_label.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 	if is_player:
 		name_label.add_theme_color_override("font_color", Color(0.4, 0.7, 1.0))
 	info_vbox.add_child(name_label)
@@ -108,13 +108,13 @@ func _create_row(rank: int, entry: Dictionary) -> PanelContainer:
 
 	var users_label := Label.new()
 	users_label.text = "%s users" % SceneLoader.format_number(entry.get("users", 0))
-	users_label.add_theme_font_size_override("font_size", 13)
+	users_label.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	users_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	stats_vbox.add_child(users_label)
 
 	var funding_label := Label.new()
 	funding_label.text = "$%s raised" % SceneLoader.format_money(float(entry.get("funding", 0)))
-	funding_label.add_theme_font_size_override("font_size", 11)
+	funding_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	funding_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 	funding_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	stats_vbox.add_child(funding_label)
@@ -123,7 +123,7 @@ func _create_row(rank: int, entry: Dictionary) -> PanelContainer:
 	var quality_val: int = entry.get("quality", 0)
 	var quality_lbl := Label.new()
 	quality_lbl.text = "Q:%d" % quality_val
-	quality_lbl.add_theme_font_size_override("font_size", 11)
+	quality_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	quality_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	if quality_val >= 70:
 		quality_lbl.add_theme_color_override("font_color", ThemeManager.C_GREEN)

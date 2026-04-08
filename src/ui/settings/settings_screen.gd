@@ -104,29 +104,25 @@ func _update_analytics_desc() -> void:
 
 
 func _on_privacy() -> void:
-	privacy_panel.visible = true
-	AnimHelper.pop_in(privacy_panel, 0.0, 0.2)
-	var path := "res://PRIVACY_POLICY.txt"
-	if FileAccess.file_exists(path):
-		var file := FileAccess.open(path, FileAccess.READ)
-		if file:
-			privacy_text.text = file.get_as_text()
-			file = null
-	else:
-		privacy_text.text = "Privacy policy file not found."
+	_show_legal_doc("res://PRIVACY_POLICY.txt", "Privacy policy")
 
 
 func _on_terms() -> void:
+	_show_legal_doc("res://TERMS_OF_SERVICE.txt", "Terms of Service")
+
+
+func _show_legal_doc(path: String, display_name: String) -> void:
 	privacy_panel.visible = true
 	AnimHelper.pop_in(privacy_panel, 0.0, 0.2)
-	var path := "res://TERMS_OF_SERVICE.txt"
 	if FileAccess.file_exists(path):
 		var file := FileAccess.open(path, FileAccess.READ)
 		if file:
 			privacy_text.text = file.get_as_text()
 			file = null
+		else:
+			privacy_text.text = "%s file could not be opened." % display_name
 	else:
-		privacy_text.text = "Terms of Service file not found."
+		privacy_text.text = "%s file not found." % display_name
 
 
 func _on_close_privacy() -> void:
@@ -278,7 +274,7 @@ func _build_premium_section() -> void:
 
 		var restore_btn := Button.new()
 		restore_btn.text = "Restore"
-		restore_btn.add_theme_font_size_override("font_size", 13)
+		restore_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		var rs := StyleBoxFlat.new()
 		rs.bg_color = Color(0.14, 0.18, 0.30)
 		rs.set_corner_radius_all(9)
@@ -304,7 +300,7 @@ func _build_premium_section() -> void:
 
 	var tut_btn := Button.new()
 	tut_btn.text = "Replay Tutorial"
-	tut_btn.add_theme_font_size_override("font_size", 13)
+	tut_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	tut_btn.add_theme_color_override("font_color", Color(0.55, 0.58, 0.72))
 	var tb_style := StyleBoxFlat.new()
 	tb_style.bg_color = Color(0.12, 0.14, 0.24)

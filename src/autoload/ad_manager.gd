@@ -437,7 +437,7 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 	# Sub-message
 	var sub := Label.new()
 	sub.text = "You've played 2 years free!\nUnlock the full game to keep building."
-	sub.add_theme_font_size_override("font_size", 13)
+	sub.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	sub.add_theme_color_override("font_color", Color(0.68, 0.70, 0.82))
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -446,7 +446,7 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 	# What you get
 	var perks_lbl := Label.new()
 	perks_lbl.text = "✓  Play until IPO or acquisition\n✓  Full save slots unlocked\n✓  No ads — ever"
-	perks_lbl.add_theme_font_size_override("font_size", 13)
+	perks_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	perks_lbl.add_theme_color_override("font_color", Color(0.45, 0.85, 0.55))
 	perks_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(perks_lbl)
@@ -458,7 +458,7 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 	# Buy button
 	var buy_btn := Button.new()
 	buy_btn.text = "Unlock Full Game — $2.99"
-	buy_btn.add_theme_font_size_override("font_size", 15)
+	buy_btn.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 	buy_btn.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 	var buy_n := StyleBoxFlat.new()
 	buy_n.bg_color = Color(0.18, 0.44, 0.88)
@@ -503,7 +503,7 @@ func _build_paywall(on_unlock: Callable, on_cancel: Callable) -> CanvasLayer:
 
 	var note_lbl := Label.new()
 	note_lbl.text = "Purchases are processed by Apple App Store / Google Play."
-	note_lbl.add_theme_font_size_override("font_size", 11)
+	note_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	note_lbl.add_theme_color_override("font_color", Color(0.55, 0.58, 0.7))
 	note_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	note_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -160,7 +160,8 @@
       {
         "label": "Mediate the conflict yourself",
         "effects": {
-          "morale_all": 5
+          "morale_all": 5,
+          "stress_all": 4
         },
         "outcome_template": "Took a full day but they found common ground. The team respects that you stepped in instead of ignoring it.",
         "outcome_variations": [
@@ -512,7 +513,9 @@
         "label": "Ask for double",
         "effects": {
           "cash": 120000,
-          "reputation": -14
+          "reputation": -14,
+          "morale_all": -5,
+          "stress_all": 8
         },
         "outcome_template": "He laughs so hard he spills his green juice on your whiteboard. 'I like you. Bold.' He doubles the check. Your investors are furious but the runway is looking real comfortable.",
         "outcome_variations": [
@@ -617,7 +620,9 @@
       },
       {
         "label": "Not ready for interns yet",
-        "effects": {},
+        "effects": {
+          "stress_all": -2
+        },
         "outcome_template": "You send a kind rejection. They reply: 'No worries! I'll follow {company_name} — rooting for you.' Somehow that feels worse than the rejection.",
         "outcome_variations": [
           "Passed. Probably the right call — you don't have bandwidth to mentor anyone right now. But that kid was sharp.",
@@ -646,7 +651,8 @@
       {
         "label": "Allow full remote",
         "effects": {
-          "morale_all": 3
+          "morale_all": 3,
+          "stability": -5
         },
         "outcome_template": "{employee_name} is grateful and productive. But now three other people are asking why they can't go remote too.",
         "outcome_variations": [
@@ -668,7 +674,8 @@
       {
         "label": "Trial period — 3 months remote",
         "effects": {
-          "morale_all": 2
+          "morale_all": 2,
+          "stress_all": 3
         },
         "outcome_template": "Fair compromise. {employee_name} is motivated to prove remote works. You'll revisit in 3 months with data.",
         "outcome_variations": [
@@ -698,7 +705,8 @@
       {
         "label": "Give them the title",
         "effects": {
-          "morale_all": -3
+          "morale_all": 3,
+          "salary_increase_pct": 5
         },
         "outcome_template": "They're thrilled. But three other people schedule 1:1s within the week asking about their career paths. You've opened a can of worms.",
         "outcome_variations": [
@@ -709,7 +717,8 @@
       {
         "label": "Decline — too early for VP titles",
         "effects": {
-          "morale_all": -2
+          "morale_all": -5,
+          "stress_all": 3
         },
         "outcome_template": "You explain that titles will come as the company grows. They accept it but their enthusiasm dims. Their recruiter DMs stay open.",
         "outcome_variations": [
@@ -1027,7 +1036,8 @@
         "label": "Send a legal threat",
         "effects": {
           "cash": -8000,
-          "reputation": -3
+          "reputation": 0,
+          "users": 200
         },
         "outcome_template": "Your lawyer sends a cease and desist. {competitor_name} ignores it. You spent $8K on legal fees for a strongly worded letter. Welcome to tech.",
         "outcome_variations": [
@@ -1039,7 +1049,8 @@
         "label": "Publicly call them out",
         "effects": {
           "reputation": 5,
-          "users": 300
+          "users": 300,
+          "stress_all": 5
         },
         "outcome_template": "You write a thread showing the side-by-side comparison. It goes viral. Sympathy users sign up. {competitor_name} has to respond.",
         "outcome_variations": [
@@ -1326,7 +1337,8 @@
         "label": "Accept the discount",
         "effects": {
           "cash": 30000,
-          "reputation": 5
+          "reputation": 5,
+          "tech_debt": 3
         },
         "outcome_template": "Big logo on your customer page. Revenue boost. But the margin is thin and they'll expect this pricing forever. Enterprise sales 101.",
         "outcome_variations": [
@@ -1541,7 +1553,9 @@
       },
       {
         "label": "Skip it — too much overhead",
-        "effects": {},
+        "effects": {
+          "stress_all": -2
+        },
         "outcome_template": "You pass. The paperwork would have taken your CEO time for weeks. That time is better spent on the product. Probably.",
         "outcome_variations": [
           "You pass on the grant. Later you hear a competitor got it. Free money going to your competition. Ouch.",
@@ -1813,7 +1827,8 @@
         "label": "Send a team member instead",
         "effects": {
           "reputation": 5,
-          "morale_all": 3
+          "morale_all": 3,
+          "cash": -3000
         },
         "outcome_template": "Your best communicator takes the stage. They nail it. The team feels empowered. And you got to keep building.",
         "outcome_variations": [
@@ -1866,7 +1881,8 @@
       {
         "label": "Skip it — Slack updates are enough",
         "effects": {
-          "morale_all": -3
+          "morale_all": -3,
+          "stress_all": -3
         },
         "outcome_template": "No meeting. People feel disconnected. Two engineers are working on overlapping features. Nobody noticed until code review.",
         "outcome_variations": [
@@ -2006,7 +2022,8 @@
         "label": "Full team workshop day",
         "effects": {
           "morale_all": 8,
-          "stress_all": -5
+          "stress_all": -5,
+          "cash": -3000
         },
         "outcome_template": "A day off from coding to define who you are. Sticky notes everywhere. Arguments about whether 'hustle' is a value or a red flag. You emerge with 5 values the team actually believes in.",
         "outcome_variations": [
@@ -2467,7 +2484,8 @@
         "effects": {
           "reputation": 5,
           "users": 800,
-          "morale_all": 4
+          "morale_all": 4,
+          "stress_all": 5
         },
         "outcome_template": "The piece runs glowing. Inbound hiring interest spikes, a few competitor execs DM you, and user sign-ups tick up.",
         "outcome_variations": [
@@ -2535,8 +2553,8 @@
       {
         "label": "Lawyer up and send a correction demand",
         "effects": {
-          "reputation": -5,
-          "morale_all": -6,
+          "reputation": -2,
+          "morale_all": -3,
           "cash": -8000
         },
         "outcome_template": "The legal threat backfires — the journalist publishes the demand letter too. Now the story is about suppression.",
@@ -2683,7 +2701,8 @@
         "effects": {
           "tech_debt": -20,
           "stability": 10,
-          "stress_all": -5
+          "stress_all": -5,
+          "users": -300
         },
         "outcome_template": "Two weeks of zero feature work. The board is nervous. But deploys go from 4 hours to 12 minutes. Test suite passes consistently. The team exhales for the first time in months.",
         "outcome_variations": [
@@ -2832,7 +2851,7 @@
     "title": "Compliance Crunch",
     "category": "product",
     "stage": "growth",
-    "niches": ["compliance_ops", "vertical_crm", "fintech_infra"],
+    "niches": ["compliance_ops", "vertical_crm"],
     "description_template": "A potential enterprise customer requires SOC 2 Type II compliance before they'll sign. Your current security posture is... aspirational.",
     "variations": [
       "The audit checklist arrives. 147 items. You scan it. 'Do you have a documented incident response plan?' No. 'Is access logged and reviewed quarterly?' Also no. 'Is production access restricted to authorized personnel?' Everyone has production access.",
@@ -2900,7 +2919,8 @@
         "label": "Take a real week off",
         "effects": {
           "morale_all": 5,
-          "stress_all": -10
+          "stress_all": -10,
+          "bugs": 2
         },
         "outcome_template": "You disappear for a week. No Slack, no email, no laptop. The team handles everything. You come back and realize: the company doesn't need you for every decision. That's actually great news.",
         "outcome_variations": [
@@ -2982,7 +3002,8 @@
         "effects": {
           "reputation": 5,
           "users": 600,
-          "cash": 8000
+          "cash": 8000,
+          "stress_all": 4
         },
         "outcome_template": "Source-available with a commercial license for enterprise. Developers can read and contribute. Companies pay for production use. Best of both worlds.",
         "outcome_variations": [
@@ -3073,7 +3094,8 @@
         "label": "Async standups — written updates in Slack",
         "effects": {
           "morale_all": 5,
-          "stress_all": -3
+          "stress_all": -3,
+          "bugs": 1
         },
         "outcome_template": "You move standups to a Slack bot. Everyone posts their update by 10am. Engineers get their mornings back. Managers lose the face-time. Net positive.",
         "outcome_variations": [

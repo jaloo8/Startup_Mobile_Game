@@ -151,7 +151,7 @@ func _build_eta_label() -> void:
 	# Since we can't directly reorder scene nodes here, we add it as a
 	# sibling after build_progress inside its parent VBox.
 	_eta_label = Label.new()
-	_eta_label.add_theme_font_size_override("font_size", 13)
+	_eta_label.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	_eta_label.add_theme_color_override("font_color", Color(0.55, 0.8, 0.95))
 	_eta_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_eta_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -286,7 +286,7 @@ func _build_visual_preset_controls() -> void:
 
 	var proto_title := Label.new()
 	proto_title.text = "Prototype Concept"
-	proto_title.add_theme_font_size_override("font_size", 11)
+	proto_title.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	proto_title.add_theme_color_override("font_color", Color(0.65, 0.74, 0.92))
 	proto_row.add_child(proto_title)
 
@@ -615,11 +615,11 @@ func _refresh() -> void:
 		var quality: int = f.get("quality", 0)
 		var color: Color
 		if quality >= 70:
-			color = Color(0.3, 0.85, 0.4)
+			color = ThemeManager.C_GREEN
 		elif quality >= 50:
 			color = Color(0.9, 0.8, 0.2)
 		else:
-			color = Color(0.9, 0.3, 0.3)
+			color = ThemeManager.C_RED
 		lbl.text = "%s · %d/100 · shipped Q%d" % [f.get("name", "?"), quality, f.get("quarter_shipped", 0)]
 		lbl.add_theme_font_size_override("font_size", 14)
 		lbl.add_theme_color_override("font_color", color)
@@ -662,13 +662,13 @@ func _build_synergy_section() -> void:
 
 		if is_fired:
 			row.text = "%s %s — %s" % [icon, sname, desc]
-			row.add_theme_font_size_override("font_size", 13)
+			row.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 			row.add_theme_color_override("font_color", ThemeManager.C_GOLD)
 		else:
 			# Show locked synergies with hints about required features.
 			var req: Array = syn.get("required_features", []) if syn.get("required_features") is Array else []
 			row.text = "🔒 %s — %d features required" % [sname, req.size()]
-			row.add_theme_font_size_override("font_size", 13)
+			row.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 			row.add_theme_color_override("font_color", Color(0.38, 0.40, 0.48))
 
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -932,7 +932,7 @@ func _on_product_demo(feature_id: String) -> void:
 	if product_visual:
 		var float_lbl := Label.new()
 		float_lbl.text = "+%d Rep" % rep_bonus
-		float_lbl.add_theme_font_size_override("font_size", 13)
+		float_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 		float_lbl.add_theme_color_override("font_color", Color(0.45, 0.95, 0.55))
 		float_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		float_lbl.z_index = 60
@@ -994,7 +994,7 @@ func _create_feature_card(fdef: Dictionary) -> PanelContainer:
 
 	var name_lbl := Label.new()
 	name_lbl.text = fdef.get("name", "???")
-	name_lbl.add_theme_font_size_override("font_size", 15)
+	name_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_MD)
 	vbox.add_child(name_lbl)
 
 	var desc_lbl := Label.new()
@@ -1030,7 +1030,7 @@ func _create_feature_card(fdef: Dictionary) -> PanelContainer:
 
 	var cost_lbl := Label.new()
 	cost_lbl.text = "Effort: %d points" % int(float(fdef.get("cost", 100)) * GameState.product.feature_cost_multiplier())
-	cost_lbl.add_theme_font_size_override("font_size", 11)
+	cost_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	cost_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 	vbox.add_child(cost_lbl)
 
@@ -1072,7 +1072,7 @@ func _refresh_milestone_roadmap() -> void:
 
 	var heading := Label.new()
 	heading.text = "ROADMAP"
-	heading.add_theme_font_size_override("font_size", 11)
+	heading.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	heading.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55))
 	strip.add_child(heading)
 
@@ -1193,11 +1193,11 @@ func _tint_bar(bar: ProgressBar, val: float, inverted: bool) -> void:
 	var health := ratio if not inverted else (1.0 - ratio)
 	var fill_color: Color
 	if health >= 0.65:
-		fill_color = Color(0.28, 0.82, 0.45)     # green — healthy
+		fill_color = ThemeManager.C_GREEN     # green — healthy
 	elif health >= 0.35:
 		fill_color = Color(0.92, 0.76, 0.22)     # gold — warning
 	else:
-		fill_color = Color(0.88, 0.30, 0.30)     # red — critical
+		fill_color = ThemeManager.C_RED     # red — critical
 
 	var fill_style := StyleBoxFlat.new()
 	fill_style.bg_color = fill_color

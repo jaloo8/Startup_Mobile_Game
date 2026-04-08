@@ -1,6 +1,12 @@
 class_name EventEngine
 extends RefCounted
 ## Loads events from JSON, checks triggers, and picks quarter events.
+##
+## AI INTEGRATION OPPORTUNITY: Use an LLM (Claude API) to dynamically generate
+## event text, choices, and outcomes based on current game state. Could produce
+## unique narrative events each playthrough instead of pulling from a fixed pool.
+## Implementation: call API at build time to pre-generate a large event bank,
+## or at runtime with aggressive caching. See docs/AI_TECH_OPPORTUNITIES.md.
 
 static var _all_events: Array[EventData] = []
 static var _cooldowns: Dictionary = {}  # event_id -> quarters_remaining

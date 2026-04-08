@@ -65,23 +65,27 @@ func _draw_grid(chart_rect: Rect2) -> void:
 		)
 
 
-func _draw_series(chart_rect: Rect2, values: Array[float], color: Color) -> void:
-	if values.size() < 2:
-		return
-
+func _series_range(values: Array[float]) -> Vector3:
+	## Returns Vector3(min, max, span) for a value array.
 	var min_v := values[0]
 	var max_v := values[0]
 	for v in values:
 		min_v = minf(min_v, v)
 		max_v = maxf(max_v, v)
-	var span := maxf(1.0, max_v - min_v)
+	return Vector3(min_v, max_v, maxf(1.0, max_v - min_v))
 
+
+func _draw_series(chart_rect: Rect2, values: Array[float], color: Color) -> void:
+	if values.size() < 2:
+		return
+
+	var r := _series_range(values)
 	var points := PackedVector2Array()
 	var n := values.size()
 	for i in range(n):
 		var t := float(i) / float(n - 1) if n > 1 else 0.0
 		var x := chart_rect.position.x + chart_rect.size.x * t
-		var norm := clampf((values[i] - min_v) / span, 0.0, 1.0)
+		var norm := clampf((values[i] - r.x) / r.z, 0.0, 1.0)
 		var y := chart_rect.position.y + chart_rect.size.y * (1.0 - norm)
 		points.append(Vector2(x, y))
 
@@ -92,17 +96,10 @@ func _draw_last_value_dot(chart_rect: Rect2, values: Array[float], color: Color)
 	if values.is_empty():
 		return
 
-	var min_v := values[0]
-	var max_v := values[0]
-	for v in values:
-		min_v = minf(min_v, v)
-		max_v = maxf(max_v, v)
-	var span := maxf(1.0, max_v - min_v)
+	var r := _series_range(values)
 	var n := values.size()
-	var last_val := values[n - 1]
-
 	var x := chart_rect.position.x + chart_rect.size.x
-	var norm := clampf((last_val - min_v) / span, 0.0, 1.0)
+	var norm := clampf((values[n - 1] - r.x) / r.z, 0.0, 1.0)
 	var y := chart_rect.position.y + chart_rect.size.y * (1.0 - norm)
 	draw_circle(Vector2(x, y), 3.2, color)
 
