@@ -16,9 +16,8 @@ The Game is a premium mobile startup simulation game available for a one-time pu
 
 ## 2. Data Controller
 
-**Developer:** [YOUR_LEGAL_NAME]
-**Contact email:** [YOUR_EMAIL]
-**Mailing address:** [YOUR_ADDRESS]
+**Developer:** Water Hazard Studios
+**Contact email:** Water.Hazard.Studios@gmail.com
 
 For privacy inquiries, use the subject line: "Venture Privacy Inquiry"
 
@@ -199,7 +198,7 @@ You have the right to:
 
 Because our diagnostic data is anonymous and cannot be linked to an identifiable individual, we may be unable to fulfill access, rectification, or portability requests (GDPR Art. 11). In such cases, we will explain why and offer to delete all data associated with your installation identifier upon request.
 
-**Contact:** [YOUR_EMAIL]
+**Contact:** Water.Hazard.Studios@gmail.com
 **Response time:** within 30 days
 
 ### 7.6 Rights Under CCPA/CPRA (California Users)
@@ -215,7 +214,7 @@ You have the right to:
 
 Categories of personal information collected in the preceding 12 months: Internet or electronic network activity information (anonymous gameplay diagnostics as described in Section 3.2). No personal information is sold or shared for cross-context behavioral advertising. No personal information is shared with data brokers.
 
-**Contact:** [YOUR_EMAIL]
+**Contact:** Water.Hazard.Studios@gmail.com
 **Response time:** within 45 days (extendable by 45 days with notice)
 
 ### 7.7 Rights Under Other US State Privacy Laws
@@ -231,7 +230,7 @@ If you are a resident of any US state with a comprehensive privacy law — inclu
 
 Because we collect only anonymous diagnostic data that cannot identify any individual, many of these rights may not be exercisable in practice. We will, however, respond to any request in good faith and explain our data practices.
 
-To exercise any right, contact [YOUR_EMAIL].
+To exercise any right, contact Water.Hazard.Studios@gmail.com.
 
 ### 7.8 Rights Under International Privacy Laws
 
@@ -293,7 +292,7 @@ The Game requires age confirmation before any data is collected. If a user indic
 
 If we learn that we have inadvertently collected data from a child under 13, we will delete it immediately and terminate the associated analytics identifier.
 
-**Parents and guardians:** if you believe your child under 13 has provided data through the Game, contact [YOUR_EMAIL] and we will delete it within **48 hours**.
+**Parents and guardians:** if you believe your child under 13 has provided data through the Game, contact Water.Hazard.Studios@gmail.com and we will delete it within **48 hours**.
 
 ### 12.2 EU Age Requirements (GDPR Article 8)
 
@@ -359,7 +358,7 @@ When we update this policy:
 
 If you have a concern about our data practices:
 
-1. Contact us at [YOUR_EMAIL]
+1. Contact us at Water.Hazard.Studios@gmail.com
 2. File a complaint with your local Data Protection Authority:
    - EU: https://edpb.europa.eu/about-edpb/about-edpb/members_en
    - UK: https://ico.org.uk/make-a-complaint/
@@ -373,9 +372,8 @@ We commit to acknowledging complaints within 72 hours and providing a substantiv
 
 For questions, concerns, data access requests, or deletion requests:
 
-**Developer:** [YOUR_LEGAL_NAME]
-**Email:** [YOUR_EMAIL]
-**Mailing address:** [YOUR_ADDRESS]
+**Developer:** Water Hazard Studios
+**Email:** Water.Hazard.Studios@gmail.com
 **Subject line:** "Venture Privacy Inquiry"
 
 Acknowledgment: within 72 hours
@@ -383,4 +381,4 @@ Substantive response: within 30 days
 
 ---
 
-*This Privacy Policy is provided for informational purposes. We recommend consulting with a qualified legal professional to ensure full compliance with all applicable laws in your jurisdiction before publishing.*
+*Thank you for reading our Privacy Policy. We are committed to protecting your privacy and being transparent about our data practices.*

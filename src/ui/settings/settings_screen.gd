@@ -64,7 +64,9 @@ func _ready() -> void:
 	AdManager.premium_unlocked.connect(_on_premium_unlocked)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("settings")
-	AnimHelper.fade_in(self, 0.0, 0.18)
+	var _settings_parent := version_label.get_parent()
+	if _settings_parent:
+		AnimHelper.stagger_list(_settings_parent, 0.04, 0.0, 18.0)
 
 
 func _on_age_confirmed() -> void:

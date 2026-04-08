@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Pixel grid pattern for texture -->
+    <pattern id="pixelGrid" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="none"/>
+      <rect x="0" y="0" width="1" height="1" fill="rgba(255,255,255,0.03)"/>
+    </pattern>
+
+    <!-- Water gradient -->
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1E3A5F;stop-opacity:1"/>
+    </linearGradient>
+
+    <!-- Sky/background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1E293B;stop-opacity:1"/>
+    </linearGradient>
+
+    <!-- Flag gradient -->
+    <linearGradient id="flagGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EF4444;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#DC2626;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background: rounded square -->
+  <rect x="0" y="0" width="512" height="512" rx="80" ry="80" fill="url(#bgGrad)"/>
+
+  <!-- Subtle pixel grid overlay -->
+  <rect x="0" y="0" width="512" height="512" rx="80" ry="80" fill="url(#pixelGrid)"/>
+
+  <!-- ============================================ -->
+  <!-- WATER — pixel-art style stepped waves        -->
+  <!-- ============================================ -->
+
+  <!-- Back wave (darker, behind) -->
+  <g opacity="0.5">
+    <!-- Pixel-stepped wave shape -->
+    <rect x="40"  y="320" width="432" height="152" rx="4" fill="#1E3A8A"/>
+    <!-- Wave crest pixels -->
+    <rect x="40"  y="312" width="48"  height="8" fill="#1E3A8A"/>
+    <rect x="96"  y="304" width="40"  height="16" fill="#1E3A8A"/>
+    <rect x="144" y="308" width="32"  height="12" fill="#1E3A8A"/>
+    <rect x="200" y="312" width="48"  height="8" fill="#1E3A8A"/>
+    <rect x="264" y="304" width="40"  height="16" fill="#1E3A8A"/>
+    <rect x="320" y="310" width="48"  height="10" fill="#1E3A8A"/>
+    <rect x="384" y="304" width="40"  height="16" fill="#1E3A8A"/>
+    <rect x="432" y="312" width="40"  height="8" fill="#1E3A8A"/>
+  </g>
+
+  <!-- Main water body -->
+  <rect x="40" y="328" width="432" height="144" rx="4" fill="url(#waterGrad)"/>
+
+  <!-- Front wave crests (lighter, pixel stepped) -->
+  <rect x="48"  y="320" width="40"  height="8" fill="#3B82F6"/>
+  <rect x="96"  y="316" width="48"  height="12" fill="#3B82F6"/>
+  <rect x="152" y="320" width="32"  height="8" fill="#3B82F6"/>
+  <rect x="200" y="314" width="40"  height="14" fill="#3B82F6"/>
+  <rect x="248" y="318" width="48"  height="10" fill="#3B82F6"/>
+  <rect x="304" y="314" width="40"  height="14" fill="#3B82F6"/>
+  <rect x="352" y="320" width="48"  height="8" fill="#3B82F6"/>
+  <rect x="408" y="316" width="56"  height="12" fill="#3B82F6"/>
+
+  <!-- Wave highlights (pixel sparkle on crests) -->
+  <rect x="104" y="316" width="8" height="4" fill="#60A5FA" opacity="0.8"/>
+  <rect x="208" y="314" width="8" height="4" fill="#60A5FA" opacity="0.8"/>
+  <rect x="312" y="314" width="8" height="4" fill="#60A5FA" opacity="0.8"/>
+  <rect x="416" y="316" width="8" height="4" fill="#60A5FA" opacity="0.8"/>
+
+  <!-- Deep water shadow at bottom -->
+  <rect x="40" y="432" width="432" height="40" rx="0" fill="#0F2557" opacity="0.5"/>
+
+  <!-- ============================================ -->
+  <!-- GOLF FLAG — pixel art style                  -->
+  <!-- ============================================ -->
+
+  <!-- Flag pole (pixel-wide, goes into water) -->
+  <rect x="252" y="96" width="8" height="260" fill="#D4D4D8"/>
+  <!-- Pole highlight -->
+  <rect x="252" y="96" width="3" height="260" fill="#E4E4E7"/>
+  <!-- Pole shadow -->
+  <rect x="257" y="96" width="3" height="260" fill="#A1A1AA"/>
+
+  <!-- Flag (triangular, pixel-stepped for retro feel) -->
+  <!-- Row 1 (top) -->
+  <rect x="260" y="96"  width="16" height="8" fill="url(#flagGrad)"/>
+  <!-- Row 2 -->
+  <rect x="260" y="104" width="32" height="8" fill="url(#flagGrad)"/>
+  <!-- Row 3 -->
+  <rect x="260" y="112" width="48" height="8" fill="url(#flagGrad)"/>
+  <!-- Row 4 -->
+  <rect x="260" y="120" width="64" height="8" fill="url(#flagGrad)"/>
+  <!-- Row 5 -->
+  <rect x="260" y="128" width="80" height="8" fill="url(#flagGrad)"/>
+  <!-- Row 6 -->
+  <rect x="260" y="136" width="72" height="8" fill="#DC2626"/>
+  <!-- Row 7 -->
+  <rect x="260" y="144" width="56" height="8" fill="#DC2626"/>
+  <!-- Row 8 -->
+  <rect x="260" y="152" width="40" height="8" fill="#B91C1C"/>
+  <!-- Row 9 (bottom) -->
+  <rect x="260" y="160" width="24" height="8" fill="#B91C1C"/>
+
+  <!-- Flag highlight stripe -->
+  <rect x="260" y="112" width="48" height="4" fill="#F87171" opacity="0.5"/>
+
+  <!-- Flag "WH" text (pixel letters on flag) -->
+  <!-- W -->
+  <rect x="268" y="120" width="3" height="12" fill="rgba(255,255,255,0.9)"/>
+  <rect x="274" y="128" width="3" height="4"  fill="rgba(255,255,255,0.9)"/>
+  <rect x="280" y="120" width="3" height="12" fill="rgba(255,255,255,0.9)"/>
+  <rect x="271" y="128" width="3" height="4"  fill="rgba(255,255,255,0.9)"/>
+  <rect x="277" y="128" width="3" height="4"  fill="rgba(255,255,255,0.9)"/>
+  <!-- H -->
+  <rect x="288" y="120" width="3" height="12" fill="rgba(255,255,255,0.9)"/>
+  <rect x="296" y="120" width="3" height="12" fill="rgba(255,255,255,0.9)"/>
+  <rect x="291" y="124" width="5" height="3"  fill="rgba(255,255,255,0.9)"/>
+
+  <!-- ============================================ -->
+  <!-- GOLF BALL sinking into water                 -->
+  <!-- ============================================ -->
+
+  <!-- Ball (partially submerged, to the left of the pole) -->
+  <circle cx="192" cy="328" r="18" fill="#F5F5F4"/>
+  <circle cx="192" cy="328" r="18" fill="#E7E5E4" opacity="0.5"/>
+  <!-- Ball dimples (pixel style) -->
+  <rect x="184" y="320" width="4" height="4" rx="1" fill="#D6D3D1"/>
+  <rect x="192" y="318" width="4" height="4" rx="1" fill="#D6D3D1"/>
+  <rect x="188" y="326" width="4" height="4" rx="1" fill="#D6D3D1"/>
+  <rect x="196" y="324" width="4" height="4" rx="1" fill="#D6D3D1"/>
+  <!-- Ball highlight -->
+  <rect x="186" y="316" width="6" height="4" rx="1" fill="rgba(255,255,255,0.6)"/>
+
+  <!-- Water covering bottom of ball (ball is sinking) -->
+  <rect x="170" y="336" width="44" height="20" fill="url(#waterGrad)"/>
+  <!-- Small splash ripples around ball -->
+  <rect x="168" y="332" width="8"  height="4" fill="#60A5FA" opacity="0.6"/>
+  <rect x="208" y="334" width="8"  height="4" fill="#60A5FA" opacity="0.6"/>
+  <rect x="178" y="336" width="4"  height="3" fill="#93C5FD" opacity="0.4"/>
+  <rect x="202" y="336" width="4"  height="3" fill="#93C5FD" opacity="0.4"/>
+
+  <!-- ============================================ -->
+  <!-- STUDIO NAME TEXT                             -->
+  <!-- ============================================ -->
+
+  <!-- "WATER HAZARD" — main text -->
+  <text x="256" y="248" text-anchor="middle"
+        font-family="'Courier New', 'SF Mono', monospace"
+        font-size="42" font-weight="bold" letter-spacing="4"
+        fill="#F8FAFC">WATER HAZARD</text>
+
+  <!-- "STUDIOS" — subtitle -->
+  <text x="256" y="284" text-anchor="middle"
+        font-family="'Courier New', 'SF Mono', monospace"
+        font-size="28" font-weight="normal" letter-spacing="12"
+        fill="#94A3B8">STUDIOS</text>
+
+  <!-- Subtle underline accent -->
+  <rect x="136" y="294" width="240" height="2" rx="1" fill="#3B82F6" opacity="0.5"/>
+</svg>

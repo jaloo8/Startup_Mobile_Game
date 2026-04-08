@@ -36,7 +36,9 @@ func _ready() -> void:
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("logistics")
-	AnimHelper.fade_in(self, 0.0, 0.18)
+	var _logistics_vbox := plan_hint.get_parent()
+	if _logistics_vbox:
+		AnimHelper.stagger_list(_logistics_vbox, 0.04, 0.0, 20.0)
 
 
 func _populate_plan_picker() -> void:

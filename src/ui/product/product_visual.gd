@@ -65,12 +65,108 @@ func setup(company_type: int) -> void:
 	_unlocked_features.clear()
 	_preview_feature_id = ""
 	_company_type = company_type
-	add_theme_stylebox_override("panel", _sfb(Color(0.055, 0.060, 0.110), 8))
+	# Phone bezel: dark border with heavy rounded corners to look like a device.
+	var bezel := StyleBoxFlat.new()
+	bezel.bg_color = Color(0.02, 0.02, 0.04)
+	bezel.set_corner_radius_all(18)
+	bezel.border_color = Color(0.22, 0.24, 0.32)
+	bezel.set_border_width_all(2)
+	bezel.set_content_margin_all(0)
+	add_theme_stylebox_override("panel", bezel)
+	# Phone chrome: status bar + screen + home indicator.
+	_build_phone_chrome(company_type)
+
+
+func _build_phone_chrome(company_type: int) -> void:
+	var phone_vbox := VBoxContainer.new()
+	phone_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	phone_vbox.add_theme_constant_override("separation", 0)
+	add_child(phone_vbox)
+
+	# ── Status bar (fake phone OS chrome) ──
+	var status_bar := HBoxContainer.new()
+	status_bar.custom_minimum_size = Vector2(0, 18)
+	status_bar.add_theme_constant_override("separation", 4)
+	status_bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	var sb_style := StyleBoxFlat.new()
+	sb_style.bg_color = Color(0.03, 0.03, 0.06)
+	sb_style.set_content_margin_all(2)
+	sb_style.content_margin_left = 12.0
+	sb_style.content_margin_right = 12.0
+	sb_style.corner_radius_top_left = 16
+	sb_style.corner_radius_top_right = 16
+	status_bar.add_theme_stylebox_override("panel", sb_style)
+	# Use a PanelContainer wrapper for the status bar background
+	var sb_panel := PanelContainer.new()
+	sb_panel.add_theme_stylebox_override("panel", sb_style)
+	sb_panel.add_child(status_bar)
+	phone_vbox.add_child(sb_panel)
+
+	# Time
+	var time_lbl := Label.new()
+	time_lbl.text = "9:41"
+	time_lbl.add_theme_font_size_override("font_size", 9)
+	time_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
+	time_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_bar.add_child(time_lbl)
+	# Notch spacer
+	var notch := ColorRect.new()
+	notch.custom_minimum_size = Vector2(50, 8)
+	notch.color = Color(0.0, 0.0, 0.0)
+	notch.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var notch_style := StyleBoxFlat.new()
+	notch_style.bg_color = Color(0.0, 0.0, 0.0)
+	notch_style.corner_radius_bottom_left = 6
+	notch_style.corner_radius_bottom_right = 6
+	status_bar.add_child(notch)
+	# Signal + Battery
+	var right_lbl := Label.new()
+	right_lbl.text = "LTE  100%"
+	right_lbl.add_theme_font_size_override("font_size", 9)
+	right_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
+	right_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	right_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_bar.add_child(right_lbl)
+
+	# ── App screen area (where features render) ──
+	var screen_area := PanelContainer.new()
+	screen_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var screen_style := StyleBoxFlat.new()
+	screen_style.bg_color = Color(0.055, 0.060, 0.110)
+	screen_style.set_content_margin_all(4)
+	screen_area.add_theme_stylebox_override("panel", screen_style)
+	phone_vbox.add_child(screen_area)
+	# This container is where company-specific UI gets built
+	var app_content := Control.new()
+	app_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	app_content.name = "AppContent"
+	screen_area.add_child(app_content)
+
+	# ── Home indicator (bottom bar) ──
+	var bottom_bar := CenterContainer.new()
+	bottom_bar.custom_minimum_size = Vector2(0, 12)
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0.03, 0.03, 0.06)
+	bar_bg.corner_radius_bottom_left = 16
+	bar_bg.corner_radius_bottom_right = 16
+	bar_bg.set_content_margin_all(2)
+	var bar_panel := PanelContainer.new()
+	bar_panel.add_theme_stylebox_override("panel", bar_bg)
+	bar_panel.add_child(bottom_bar)
+	phone_vbox.add_child(bar_panel)
+	# Home indicator pill
+	var pill := ColorRect.new()
+	pill.custom_minimum_size = Vector2(48, 4)
+	pill.color = Color(0.35, 0.38, 0.48)
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom_bar.add_child(pill)
+
+	# ── Build company-specific UI into the app screen area ──
 	match company_type:
-		CompanyData.CompanyType.CONSUMER:    _build_consumer()
-		CompanyData.CompanyType.SAAS:        _build_saas()
-		CompanyData.CompanyType.MARKETPLACE: _build_marketplace()
-		CompanyData.CompanyType.DEV_TOOLS:   _build_dev_tools()
+		CompanyData.CompanyType.CONSUMER:    _build_consumer(app_content)
+		CompanyData.CompanyType.SAAS:        _build_saas(app_content)
+		CompanyData.CompanyType.MARKETPLACE: _build_marketplace(app_content)
+		CompanyData.CompanyType.DEV_TOOLS:   _build_dev_tools(app_content)
 
 
 func _exit_tree() -> void:
@@ -777,11 +873,14 @@ func _img_icon(filename: String, size: float, corner: int,
 # Consumer App  (Streaming / Social)
 # ─────────────────────────────────────────────────────────────────────────────
 
-func _build_consumer() -> void:
+func _build_consumer(parent: Control = null) -> void:
 	var root := _vbox(0)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(root)
+	if parent:
+		parent.add_child(root)
+	else:
+		add_child(root)
 	_consumer_nodes["root"] = root
 
 	# Full-surface tint used by Dark Mode unlock animation.
@@ -947,11 +1046,14 @@ func _build_consumer() -> void:
 # SaaS B2B Dashboard
 # ─────────────────────────────────────────────────────────────────────────────
 
-func _build_saas() -> void:
+func _build_saas(parent: Control = null) -> void:
 	var root := _vbox(0)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(root)
+	if parent:
+		parent.add_child(root)
+	else:
+		add_child(root)
 
 	# ── Header ──────────────────────────────────────────────────────────────
 	var hdr_p := _pill(Color(0.08, 0.10, 0.17))
@@ -1080,11 +1182,14 @@ func _build_saas() -> void:
 # Marketplace / Storefront
 # ─────────────────────────────────────────────────────────────────────────────
 
-func _build_marketplace() -> void:
+func _build_marketplace(parent: Control = null) -> void:
 	var root := _vbox(0)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(root)
+	if parent:
+		parent.add_child(root)
+	else:
+		add_child(root)
 
 	# ── Header with search ───────────────────────────────────────────────────
 	var hdr_p := _pill(Color(0.08, 0.10, 0.17))
@@ -1218,11 +1323,14 @@ func _build_marketplace() -> void:
 # Dev Tools / API Console
 # ─────────────────────────────────────────────────────────────────────────────
 
-func _build_dev_tools() -> void:
+func _build_dev_tools(parent: Control = null) -> void:
 	var root := _vbox(0)
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(root)
+	if parent:
+		parent.add_child(root)
+	else:
+		add_child(root)
 
 	# ── Window chrome (terminal title bar) ───────────────────────────────────
 	var chrome_p := _pill(Color(0.13, 0.14, 0.20))

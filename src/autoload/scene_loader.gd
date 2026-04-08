@@ -68,8 +68,21 @@ func goto_scene(path: String) -> void:
 
 
 func _animate_scene_swap(path: String) -> void:
+	# Safety: guarantee _transitioning resets even if a tween is killed mid-flight
+	# (e.g., scene freed during deferred call, tween never finishes).
+	var safety := get_tree().create_timer(WIPE_FADE_OUT + WIPE_FADE_IN + 1.0)
+	safety.timeout.connect(func() -> void:
+		if _transitioning:
+			push_warning("SceneLoader: transition safety timeout — forcing reset")
+			_transitioning = false
+			_transition_rect.modulate.a = 0.0
+	)
+
 	# Phase 1: fade to black.
 	var tw := create_tween()
+	if tw == null:
+		_transitioning = false
+		return
 	tw.tween_property(_transition_rect, "modulate:a", 1.0, WIPE_FADE_OUT) \
 		.set_ease(Tween.EASE_OUT)
 	await tw.finished
@@ -79,6 +92,10 @@ func _animate_scene_swap(path: String) -> void:
 
 	# Phase 3: fade from black (even on failure — don't leave the screen black).
 	var tw2 := create_tween()
+	if tw2 == null:
+		_transitioning = false
+		_transition_rect.modulate.a = 0.0
+		return
 	tw2.tween_property(_transition_rect, "modulate:a", 0.0, WIPE_FADE_IN) \
 		.set_ease(Tween.EASE_IN)
 	await tw2.finished

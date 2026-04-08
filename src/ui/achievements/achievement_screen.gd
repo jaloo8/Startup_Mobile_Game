@@ -31,7 +31,6 @@ func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("achievements")
-	AnimHelper.fade_in(self, 0.0, 0.16)
 	_build_ui()
 
 

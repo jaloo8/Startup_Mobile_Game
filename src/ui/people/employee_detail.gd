@@ -19,7 +19,8 @@ func _ready() -> void:
 	_load_employee()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("employee_detail")
-	AnimHelper.fade_in(self, 0.0, 0.20)
+	AnimHelper.pop_in(title_label, 0.0, 0.22)
+	AnimHelper.stagger_list(history_list, 0.04, 0.08, 16.0)
 
 
 func _load_employee() -> void:

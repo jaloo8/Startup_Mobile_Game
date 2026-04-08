@@ -26,7 +26,12 @@ func _ready() -> void:
 	Analytics.track_screen("main_menu")
 	# Ambient floating particles behind the menu — subtle life.
 	_ambient = AnimHelper.ambient_particles(self, Color(0.4, 0.5, 0.85, 0.2), 18)
-	_animate_entrance()
+	# Defer entrance animation until after the first layout pass so the
+	# VBoxContainer has assigned final positions.  Running slide_in during
+	# _ready() captures stale positions and the container overrides the
+	# position tween, which can stall the entire parallel tween (including
+	# the modulate:a fade) — leaving buttons invisible.
+	_deferred_entrance.call_deferred()
 	# Check for daily login bonus on main menu load.
 	_check_daily_bonus()
 
@@ -89,6 +94,12 @@ func _refresh_continue_state() -> void:
 	continue_btn.text = label
 
 
+func _deferred_entrance() -> void:
+	# Wait one full process frame so the VBox has finalized child positions.
+	await get_tree().process_frame
+	_animate_entrance()
+
+
 func _animate_entrance() -> void:
 	# Title: pop in with spring overshoot.
 	var title: Label = get_node_or_null("CenterContainer/VBox/Title")
@@ -105,6 +116,10 @@ func _animate_entrance() -> void:
 		AnimHelper.fade_in(_badges_container, 0.16, 0.22)
 
 	# Buttons: stagger slide up from below.
+	# Use fade_in instead of slide_in because these buttons live inside a
+	# VBoxContainer — the container manages their position property every
+	# frame, which fights the slide_in position tween and can stall the
+	# entire tween (including the alpha channel), leaving buttons invisible.
 	var buttons: Array[Control] = []
 	for btn in [play_btn, continue_btn, settings_btn, quit_btn]:
 		if btn != null:
@@ -114,7 +129,18 @@ func _animate_entrance() -> void:
 	if _history_btn and is_instance_valid(_history_btn):
 		buttons.append(_history_btn)
 	for i in buttons.size():
-		AnimHelper.slide_in(buttons[i], Vector2(0, 32), 0.18 + i * 0.06)
+		AnimHelper.fade_in(buttons[i], 0.18 + i * 0.06, 0.22)
+
+	# Safety net: guarantee all buttons are fully visible after the
+	# animation window, even if a tween is killed by a layout pass.
+	get_tree().create_timer(0.80).timeout.connect(_ensure_buttons_visible)
+
+
+func _ensure_buttons_visible() -> void:
+	for btn in [play_btn, continue_btn, settings_btn, quit_btn,
+				_achievements_btn, _history_btn]:
+		if btn != null and is_instance_valid(btn):
+			btn.modulate.a = 1.0
 
 
 func _on_settings() -> void:

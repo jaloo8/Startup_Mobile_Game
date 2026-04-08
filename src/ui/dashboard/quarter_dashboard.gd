@@ -167,9 +167,12 @@ func _ready() -> void:
 	_refresh(GameState.current_quarter)
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("dashboard")
-	AnimHelper.fade_in(self, 0.0, 0.16)
 
 	_build_dev_button()
+
+	# Entrance animations on child elements (safe — never on self).
+	AnimHelper.stagger_list(stats_grid, 0.04, 0.0, 18.0)
+	AnimHelper.fade_in(event_log_container, 0.12, 0.20)
 
 	# Start tutorial on first run (deferred so all nodes are fully laid out).
 	TutorialManager.start_if_needed.call_deferred()

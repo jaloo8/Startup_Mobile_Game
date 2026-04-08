@@ -90,7 +90,9 @@ func _ready() -> void:
 	_on_difficulty_changed(1)   # Normal is the default
 	_on_scenario_changed(0)
 	UITouchHelper.harden_tree(self)
-	AnimHelper.fade_in(self, 0.0, 0.18)
+	var _form_container := type_selector.get_parent()
+	if _form_container:
+		AnimHelper.stagger_list(_form_container, 0.04, 0.0, 18.0)
 
 
 func _load_type_illustration(type_id: int) -> void:

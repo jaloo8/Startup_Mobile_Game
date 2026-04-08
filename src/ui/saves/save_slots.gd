@@ -18,7 +18,6 @@ func _ready() -> void:
 	_refresh()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("save_slots")
-	AnimHelper.fade_in(self, 0.0, 0.16)
 	AnimHelper.stagger_list(slot_container, 0.06, 0.0, 24.0)
 
 

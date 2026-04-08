@@ -9,7 +9,7 @@ Version: 3.0
 
 These Terms of Service and End User License Agreement
 ("Terms") govern your use of the mobile game Venture
-("the Game") developed by [YOUR_LEGAL_NAME] ("Developer",
+("the Game") developed by Water Hazard Studios ("Developer",
 "we", "us", "our"). By downloading, installing, or using
 the Game, you agree to be bound by these Terms and our
 Privacy Policy.
@@ -187,12 +187,12 @@ unauthorized use of your app store account.
 graphics, illustrations, animations, pixel art, text, audio,
 sound effects, game mechanics, data files, character designs,
 UI design, and documentation, is the intellectual property of
-[YOUR_LEGAL_NAME] or its licensors, and is protected by
+Water Hazard Studios or its licensors, and is protected by
 copyright, trademark, trade secret, and other intellectual
 property laws of the United States and international treaties.
 
 6.2 "Venture" and related logos, names, and visual elements
-are trademarks of [YOUR_LEGAL_NAME]. All rights reserved.
+are trademarks of Water Hazard Studios. All rights reserved.
 
 6.3 Nothing in these Terms grants you any right, title, or
 interest in any intellectual property of the Game beyond the
@@ -353,7 +353,7 @@ LIMITATIONS.
 ============================================================
 
 To the maximum extent permitted by applicable law, you agree
-to indemnify, defend, and hold harmless [YOUR_LEGAL_NAME]
+to indemnify, defend, and hold harmless Water Hazard Studios
 and its officers, directors, employees, agents, licensors,
 and affiliates from and against any and all claims, damages,
 losses, liabilities, costs, and expenses (including
@@ -379,7 +379,7 @@ RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT.
 13.1 INFORMAL RESOLUTION (MANDATORY)
 
 Before initiating any formal dispute resolution proceeding,
-you agree to first contact us at [YOUR_EMAIL] and attempt
+you agree to first contact us at Water.Hazard.Studios@gmail.com and attempt
 to resolve the dispute informally for at least sixty (60)
 days. You must include a description of the dispute, the
 relief sought, and your contact information. We will
@@ -453,7 +453,7 @@ from filing a claim in small claims court.
 13.6 OPT-OUT OF ARBITRATION
 
 You may opt out of this arbitration provision by sending
-written notice to [YOUR_EMAIL] within 30 days of first
+written notice to Water.Hazard.Studios@gmail.com within 30 days of first
 downloading or using the Game. The notice must include
 your name, the date you first used the Game, and a clear
 statement that you wish to opt out of the arbitration
@@ -596,10 +596,10 @@ Office of Foreign Assets Control (OFAC).
 If you downloaded the Game from the Apple App Store, you
 acknowledge and agree that:
 
-(a) These Terms are between you and [YOUR_LEGAL_NAME], not
+(a) These Terms are between you and Water Hazard Studios, not
 Apple Inc. ("Apple"). Apple is not a party to these Terms.
 
-(b) [YOUR_LEGAL_NAME], not Apple, is solely responsible for
+(b) Water Hazard Studios, not Apple, is solely responsible for
 the Game and its content.
 
 (c) Apple has no obligation whatsoever to furnish any
@@ -613,9 +613,9 @@ extent permitted by applicable law, Apple has no other
 warranty obligation with respect to the Game. Any other
 claims, losses, liabilities, damages, costs, or expenses
 attributable to any failure to conform to any warranty
-are the sole responsibility of [YOUR_LEGAL_NAME].
+are the sole responsibility of Water Hazard Studios.
 
-(e) [YOUR_LEGAL_NAME], not Apple, is responsible for
+(e) Water Hazard Studios, not Apple, is responsible for
 addressing any claims you or any third party may have
 relating to the Game or your possession and/or use of the
 Game, including but not limited to: (i) product liability
@@ -626,7 +626,7 @@ or similar legislation.
 
 (f) In the event of any third-party claim that the Game or
 your possession and use of the Game infringes a third
-party's intellectual property rights, [YOUR_LEGAL_NAME],
+party's intellectual property rights, Water Hazard Studios,
 not Apple, will be solely responsible for the investigation,
 defense, settlement, and discharge of any such claim.
 
@@ -643,8 +643,8 @@ U.S. Government restricted party list.
 (i) You will comply with all applicable third-party terms
 of agreement when using the Game.
 
-(j) [YOUR_LEGAL_NAME]'s contact information for questions,
-complaints, and claims: [YOUR_EMAIL]
+(j) Water Hazard Studios's contact information for questions,
+complaints, and claims: Water.Hazard.Studios@gmail.com
 
 15.9 GOOGLE PLAY-SPECIFIC TERMS (Android Users)
 
@@ -692,14 +692,10 @@ We may update these Terms at any time. When we do:
 
 For questions about these Terms:
 
-Developer: [YOUR_LEGAL_NAME]
-Email: [YOUR_EMAIL]
-Mailing address: [YOUR_ADDRESS]
+Developer: Water Hazard Studios
+Email: Water.Hazard.Studios@gmail.com
 Subject line: "Venture Terms of Service Inquiry"
 
 ============================================================
 
-These Terms of Service are provided for informational
-purposes. We recommend consulting with a qualified legal
-professional to ensure compliance with all applicable laws
-in your jurisdiction before publishing.
+Thank you for reading our Terms of Service.

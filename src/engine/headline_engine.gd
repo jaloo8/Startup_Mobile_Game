@@ -137,6 +137,8 @@ static func _matches_filters(t: Dictionary, ctx: Dictionary) -> bool:
 			var niche_id: String = str(ctx.get("niche_id", ""))
 			if niche_id.is_empty() or niche_id not in niches_raw:
 				return false
+	if t.get("requires_world_event", false) and not ctx.get("has_active_world_event", false):
+		return false
 	return true
 
 
@@ -202,6 +204,8 @@ static func _build_context(state: Node) -> Dictionary:
 	var competitor_name: String = _pick_relevant_competitor_name(state, type_key, niche_id)
 	var type_label: String = CompanyData.TYPE_NAMES.get(state.company.type, "tech")
 
+	var has_active_world_event: bool = int(state.active_world_event_quarters_left) > 0
+
 	return {
 		"competitor": competitor_name,
 		"economy_label": economy_label,
@@ -214,7 +218,8 @@ static func _build_context(state: Node) -> Dictionary:
 		"valuation": state.company.valuation,
 		"year": state.current_year,
 		"quarter": state.current_quarter,
-		"world_event_title": state.active_world_event_title if int(state.active_world_event_quarters_left) > 0 else "steady conditions",
+		"world_event_title": state.active_world_event_title if has_active_world_event else "steady conditions",
+		"has_active_world_event": has_active_world_event,
 	}
 
 

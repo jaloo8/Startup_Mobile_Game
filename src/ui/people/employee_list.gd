@@ -96,7 +96,8 @@ func _ready() -> void:
 	_refresh_list()
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("people")
-	AnimHelper.fade_in(self, 0.0, 0.18)
+	AnimHelper.pop_in(capacity_label, 0.0, 0.22)
+	AnimHelper.stagger_list(list_container, 0.05, 0.06, 20.0)
 
 
 func _exit_tree() -> void:

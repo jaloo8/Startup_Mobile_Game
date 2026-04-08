@@ -5,8 +5,8 @@ Last updated: April 7, 2026
 CONTACT US
 ============================================================
 
-Developer: [YOUR_LEGAL_NAME]
-Email: [YOUR_EMAIL]
+Developer: Water Hazard Studios
+Email: Water.Hazard.Studios@gmail.com
 Subject line: "Venture Support"
 
 We aim to respond to all inquiries within 72 hours.
@@ -82,7 +82,7 @@ purchase. If the issue persists, try the following:
   3. Restart the Game
   4. Restart your device
 
-If none of these steps work, contact us at [YOUR_EMAIL] with
+If none of these steps work, contact us at Water.Hazard.Studios@gmail.com with
 your purchase receipt (available in your app store purchase
 history).
 
@@ -164,7 +164,7 @@ strategic considerations.
 Q: How do I win?
 
 A: You can achieve victory by reaching a sustainable scale
-with 6 consecutive profitable quarters after Year 5, meeting
+with 4 consecutive profitable quarters after Year 5, meeting
 type-specific growth thresholds. You can also continue
 playing after victory in sandbox mode.
 
@@ -223,7 +223,7 @@ A: Try the following steps:
   2. Restart your device
   3. Ensure your device's operating system is up to date
   4. Ensure you have the latest version of Venture installed
-  5. If the issue persists, contact us at [YOUR_EMAIL]
+  5. If the issue persists, contact us at Water.Hazard.Studios@gmail.com
      with your device model, OS version, and a description
      of when the crash occurs
 
@@ -251,7 +251,7 @@ FEEDBACK AND BUG REPORTS
 
 Q: How do I report a bug?
 
-A: Send an email to [YOUR_EMAIL] with the subject line
+A: Send an email to Water.Hazard.Studios@gmail.com with the subject line
 "Venture Bug Report" and include:
   - Your device model (e.g., iPhone 14, Galaxy S24)
   - Your operating system version (e.g., iOS 18.2,
@@ -265,7 +265,7 @@ A: Send an email to [YOUR_EMAIL] with the subject line
 Q: Can I suggest a feature?
 
 A: Absolutely! We welcome feedback and feature suggestions.
-Send an email to [YOUR_EMAIL] with the subject line
+Send an email to Water.Hazard.Studios@gmail.com with the subject line
 "Venture Feature Suggestion" and describe your idea.
 
 ============================================================
@@ -278,7 +278,7 @@ Terms of Service: Available as TERMS_OF_SERVICE.txt in the
   app bundle
 
 For privacy-related inquiries, data access, or deletion
-requests, email [YOUR_EMAIL] with the subject line
+requests, email Water.Hazard.Studios@gmail.com with the subject line
 "Venture Privacy Inquiry."
 
 ============================================================

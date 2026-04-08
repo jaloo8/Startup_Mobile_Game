@@ -922,28 +922,40 @@ func _on_product_demo(feature_id: String) -> void:
 	if GameState.company == null:
 		return
 	SfxPlayer.play("button_tap")
+	AnimHelper.haptic(&"medium")
 	_demo_count += 1
 	# Diminishing returns: first 3 taps give full bonus, then it tapers
 	var rep_bonus: int = maxi(1, 3 - (_demo_count / 3))
 	GameState.company.reputation = clampi(GameState.company.reputation + rep_bonus, 0, 100)
 	_refresh()
 
-	# Floating "+N Rep" label over the product mockup
+	# Brief cyan flash on the phone mockup — "the product reacted to your demo."
+	if product_visual and is_instance_valid(product_visual):
+		AnimHelper.screen_flash(product_visual, Color(0.30, 0.75, 1.0, 0.12), 0.20)
+
+	# Floating "+N Rep" label over the product mockup with spring animation
 	if product_visual:
 		var float_lbl := Label.new()
 		float_lbl.text = "+%d Rep" % rep_bonus
-		float_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+		float_lbl.add_theme_font_size_override("font_size", ThemeManager.FONT_LG)
 		float_lbl.add_theme_color_override("font_color", Color(0.45, 0.95, 0.55))
 		float_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		float_lbl.z_index = 60
 		float_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		product_visual.add_child(float_lbl)
-		float_lbl.position = Vector2(product_visual.size.x * 0.3, product_visual.size.y * 0.5)
-		var tw := create_tween()
-		tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		tw.parallel().tween_property(float_lbl, "position:y", float_lbl.position.y - 30.0, 1.0)
-		tw.parallel().tween_property(float_lbl, "modulate:a", 0.0, 1.0).set_delay(0.4)
-		tw.finished.connect(func() -> void:
+		float_lbl.position = Vector2(product_visual.size.x * 0.3, product_visual.size.y * 0.4)
+		# Scale pop-in for extra juice
+		float_lbl.scale = Vector2(0.5, 0.5)
+		float_lbl.pivot_offset = Vector2(40, 10)
+		var tw := create_tween().set_parallel(true)
+		tw.tween_property(float_lbl, "scale", Vector2.ONE, 0.18) \
+			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		tw.tween_property(float_lbl, "position:y", float_lbl.position.y - 36.0, 1.2) \
+			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(float_lbl, "modulate:a", 0.0, 0.8).set_delay(0.5) \
+			.set_ease(Tween.EASE_IN)
+		tw.set_parallel(false)
+		tw.tween_callback(func() -> void:
 			if is_instance_valid(float_lbl):
 				float_lbl.queue_free()
 		)
