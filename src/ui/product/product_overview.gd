@@ -1056,8 +1056,11 @@ func _create_feature_card(fdef: Dictionary) -> PanelContainer:
 
 
 func _on_select_feature(fdef: Dictionary) -> void:
-	GameState.product.target_feature_id = fdef.get("id", "")
-	GameState.product.feature_progress = 0.0
+	var fid: String = fdef.get("id", "")
+	if not GameState.product.start_build(fid):
+		# Fallback: legacy path if queue is full or ID empty.
+		GameState.product.target_feature_id = fid
+		GameState.product.feature_progress = 0.0
 	AnimHelper.pop_out(picker_panel, 0.14, func() -> void:
 		picker_panel.visible = false
 		_refresh()
@@ -1218,4 +1221,6 @@ func _tint_bar(bar: ProgressBar, val: float, inverted: bool) -> void:
 
 
 func _on_back() -> void:
+	if OS.is_debug_build():
+		print("[Product] _on_back() called — transitioning=%s" % SceneLoader._transitioning)
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")

@@ -563,11 +563,17 @@ func _add_stat(parent: HBoxContainer, label_text: String, value: int) -> void:
 
 
 func _on_hire_pressed() -> void:
+	if OS.is_debug_build():
+		print("[People] _on_hire_pressed() — cash=$%.0f, employees=%d, capacity=%d, disabled=%s" % [
+			GameState.company.cash, GameState.employees.size(),
+			GameState.company.office_capacity(), hire_btn.disabled])
 	if GameState.employees.size() >= GameState.company.office_capacity():
 		_update_hire_button()
 		return
 
 	if GameState.company.cash < POSTING_FEE:
+		if OS.is_debug_build():
+			print("[People] BLOCKED — can't afford posting fee ($%.0f < $%.0f)" % [GameState.company.cash, POSTING_FEE])
 		_update_hire_button()
 		return
 
@@ -1719,6 +1725,8 @@ func _on_pass_candidate(candidate: EmployeeData) -> void:
 
 
 func _on_back() -> void:
+	if OS.is_debug_build():
+		print("[People] _on_back() called — transitioning=%s" % SceneLoader._transitioning)
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 

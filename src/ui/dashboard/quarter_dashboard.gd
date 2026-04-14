@@ -1911,43 +1911,42 @@ func _safe_disconnect(sig: Signal, callable: Callable) -> void:
 func _build_dev_button() -> void:
 	if not AdManager.is_dev_mode():
 		return
+	# Insert a real DEV button directly into the TopRow HBox (next to Menu).
+	# This avoids CanvasLayer z-fighting and guarantees click handling.
 	var btn := Button.new()
-	btn.text = "DEV"
-	btn.custom_minimum_size = Vector2(54, 32)
-	var style := ThemeManager._flat_box_static(
-		Color(1.0, 0.6, 0.2, 0.25), Color(1.0, 0.6, 0.2, 0.7),
-		ThemeManager.CORNER_SM)
-	style.content_margin_left = 6.0
-	style.content_margin_right = 6.0
-	style.content_margin_top = 4.0
-	style.content_margin_bottom = 4.0
+	btn.text = "⚙ DEV"
+	btn.custom_minimum_size = Vector2(72, 40)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(1.0, 0.45, 0.0, 0.92)
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(6.0)
+	style.border_color = Color(1.0, 0.7, 0.3, 1.0)
+	style.set_border_width_all(2)
 	btn.add_theme_stylebox_override("normal", style)
-	btn.add_theme_stylebox_override("hover", ThemeManager._flat_box_static(
-		Color(1.0, 0.6, 0.2, 0.4), Color(1.0, 0.6, 0.2, 0.9),
-		ThemeManager.CORNER_SM))
-	btn.add_theme_color_override("font_color", Color(1.0, 0.6, 0.2))
-	btn.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
+	var hover_style := style.duplicate() as StyleBoxFlat
+	hover_style.bg_color = Color(1.0, 0.55, 0.1, 1.0)
+	btn.add_theme_stylebox_override("hover", hover_style)
+	var pressed_style := style.duplicate() as StyleBoxFlat
+	pressed_style.bg_color = Color(0.85, 0.35, 0.0, 1.0)
+	btn.add_theme_stylebox_override("pressed", pressed_style)
+	btn.add_theme_stylebox_override("focus", style)
+	btn.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+	btn.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
 	btn.pressed.connect(_open_dev_panel)
-	# Place in top-right corner via a CanvasLayer so it floats above scroll
-	var layer := CanvasLayer.new()
-	layer.layer = 90
-	add_child(layer)
-	var anchor := Control.new()
-	anchor.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	anchor.offset_left = -66
-	anchor.offset_top = 6
-	anchor.offset_right = -8
-	anchor.offset_bottom = 38
-	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layer.add_child(anchor)
-	anchor.add_child(btn)
-	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Add directly to TopRow, before the Menu button.
+	var top_row: Node = menu_btn.get_parent()
+	if top_row:
+		top_row.add_child(btn)
+		top_row.move_child(btn, menu_btn.get_index())
 
 
 func _open_dev_panel() -> void:
+	if OS.is_debug_build():
+		print("[Dashboard] _open_dev_panel() called — is_dev_mode=%s" % AdManager.is_dev_mode())
 	var panel := DevPanel.create()
 	if panel == null:
+		if OS.is_debug_build():
+			print("[Dashboard] DevPanel.create() returned null!")
 		return
 	get_tree().root.add_child(panel)
 	panel.closed.connect(func():

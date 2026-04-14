@@ -217,6 +217,10 @@ func new_game(config: Dictionary) -> void:
 	# Apply any unlocked prestige perks for this run.
 	PrestigeManager.apply_perks(self)
 
+	# Premium players start with 2 build slots instead of 1.
+	if AdManager.is_premium():
+		product.build_slots = 2
+
 	is_game_active = true
 
 
@@ -373,9 +377,15 @@ func _seed_next_feature_progress(progress_ratio: float) -> void:
 		product.feature_progress = 0.0
 		return
 	var target: Dictionary = available[0]
-	product.target_feature_id = str(target.get("id", "")).strip_edges()
+	var fid: String = str(target.get("id", "")).strip_edges()
 	var cost: float = maxf(1.0, float(target.get("cost", ProductData.FEATURE_COST)) * product.feature_cost_multiplier())
-	product.feature_progress = clampf(cost * progress_ratio, 0.0, cost * 0.95)
+	var progress: float = clampf(cost * progress_ratio, 0.0, cost * 0.95)
+	# Use build queue system instead of legacy fields directly.
+	product.reset_build_state()
+	product.start_build(fid)
+	if not product.build_queue.is_empty():
+		product.build_queue[0]["progress"] = progress
+	product._sync_legacy_fields()
 
 
 func _seed_financial_snapshot_for_scenario() -> void:
@@ -1203,6 +1213,7 @@ func _serialize() -> Dictionary:
 			"feature_progress": product.feature_progress,
 			"target_feature_id": product.target_feature_id,
 			"revenue_mult": product.revenue_mult,
+			"build_state": product.serialize_build_state(),
 			"user_growth_flat_bonus": product.user_growth_flat_bonus,
 			"dau_bonus": product.dau_bonus,
 		},
@@ -1331,6 +1342,9 @@ func _deserialize(data: Dictionary) -> bool:
 	product.revenue_mult = pd.get("revenue_mult", 1.0)
 	product.user_growth_flat_bonus = pd.get("user_growth_flat_bonus", 0)
 	product.dau_bonus = pd.get("dau_bonus", 0.0)
+	# Restore build-queue state (gracefully handles old saves without it).
+	var build_data: Dictionary = _safe_dict(pd.get("build_state", {}))
+	product.deserialize_build_state(build_data)
 
 	financials = FinancialsData.new()
 	var fd: Dictionary = _safe_dict(data.get("financials", {}))
@@ -1457,6 +1471,7 @@ func _clamp_deserialized_values() -> void:
 	product.churn_rate = clampf(product.churn_rate, ProductData.CHURN_RATE_MIN, ProductData.CHURN_RATE_MAX)
 	product.feature_progress = clampf(product.feature_progress, 0.0, 1e9)
 	product.revenue_mult = clampf(product.revenue_mult, 0.01, 100.0)
+	product.build_slots = clampi(product.build_slots, 1, ProductData.MAX_BUILD_SLOTS)
 	product.dau_bonus = clampf(product.dau_bonus, 0.0, 1.0)
 	product.user_growth_flat_bonus = maxi(0, product.user_growth_flat_bonus)
 

@@ -368,11 +368,11 @@ func _build_product() -> void:
 		if GameState.product == null: return
 		if GameState.product.current_feature_name.is_empty():
 			_flash("No feature in progress"); return
+		var fid: String = GameState.product.slot_feature_id(0)
 		var fname := GameState.product.current_feature_name
-		GameState.product.add_feature(fname, 80, GameState.current_quarter)
-		GameState.product.feature_progress = 0.0
+		GameState.product.add_feature(fname, 80, GameState.current_quarter, fid)
+		GameState.product.remove_build(fid)
 		GameState.product.current_feature_name = ""
-		GameState.product.target_feature_id = ""
 		_flash("Shipped feature: %s (quality 80)" % fname)
 	)
 

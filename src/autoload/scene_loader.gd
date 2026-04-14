@@ -33,8 +33,29 @@ const PRELOAD_SCENES: Array = [
 
 func _ready() -> void:
 	_build_transition_overlay()
+	_build_dev_mode_banner()
 	_apply_touch_hardening.call_deferred(get_tree().current_scene)
 	_preload_all.call_deferred()
+
+
+## Persistent "DEV MODE" banner in the top-left corner on every screen.
+## Small, unobtrusive, always visible so you know at a glance.
+func _build_dev_mode_banner() -> void:
+	if not AdManager.is_dev_mode():
+		return
+	var banner_layer := CanvasLayer.new()
+	banner_layer.layer = 100
+	banner_layer.name = "DevBanner"
+	add_child(banner_layer)
+	var lbl := Label.new()
+	lbl.text = "DEV MODE"
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.6, 0.0, 0.8))
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	lbl.offset_left = 8
+	lbl.offset_top = 4
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	banner_layer.add_child(lbl)
 
 
 func _build_transition_overlay() -> void:
@@ -61,7 +82,11 @@ func _preload_all() -> void:
 
 
 func goto_scene(path: String) -> void:
+	if OS.is_debug_build():
+		print("[SceneLoader] goto_scene('%s')  _transitioning=%s" % [path, _transitioning])
 	if _transitioning:
+		if OS.is_debug_build():
+			print("[SceneLoader] BLOCKED — _transitioning is true, ignoring request")
 		return  # prevent double-tap scene swaps
 	_transitioning = true
 	_animate_scene_swap.call_deferred(path)

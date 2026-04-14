@@ -452,15 +452,32 @@ static func _apply_work_output(state: Node) -> void:
 
 		match emp.assignment:
 			EmployeeData.Assignment.FEATURES:
-				var target_def: Dictionary = state.product.get_target_feature(state.company.type)
-				if target_def.is_empty() and state.product.target_feature_id.is_empty():
+				# Distribute output across all active build slots evenly.
+				if state.product.build_queue.is_empty():
+					# Legacy path: auto-pick a feature if queue is empty.
 					var available: Array[Dictionary] = state.product.available_features(state.company.type)
 					if available.is_empty():
 						continue
-				var cost: float = float(target_def.get("cost", ProductData.FEATURE_COST)) * state.product.feature_cost_multiplier()
-				state.product.feature_progress += output * 0.5 * feature_focus_mult * feature_mesh_mult
-				if state.product.feature_progress >= cost:
-					state.product.feature_progress -= cost
+				var slot_count: int = maxi(1, state.product.active_build_count())
+				var per_slot_output: float = output * 0.5 * feature_focus_mult * feature_mesh_mult / float(slot_count)
+				var slots_to_ship: Array[int] = []
+				for si in range(state.product.build_queue.size()):
+					var slot: Dictionary = state.product.build_queue[si]
+					var sfid: String = slot.get("feature_id", "")
+					var sdef: Dictionary = _get_feature_def(state, sfid)
+					if sdef.is_empty():
+						continue
+					var crunch_mult: float = ProductData.CRUNCH_PROGRESS_MULT if slot.get("crunched", false) else 1.0
+					var cost: float = float(sdef.get("cost", ProductData.FEATURE_COST)) * state.product.feature_cost_multiplier()
+					state.product.add_slot_progress(si, per_slot_output * crunch_mult)
+					if state.product.slot_progress(si) >= cost:
+						slots_to_ship.append(si)
+				# Ship completed features (reverse order to preserve indices).
+				slots_to_ship.reverse()
+				for si in slots_to_ship:
+					var slot: Dictionary = state.product.build_queue[si]
+					var sfid: String = slot.get("feature_id", "")
+					var sdef: Dictionary = _get_feature_def(state, sfid)
 					var debt_penalty: int = roundi(float(state.product.tech_debt) * 0.18)
 					var bug_penalty: int = roundi(minf(15.0, float(state.product.bugs) * 0.35))
 					var quality: int = clampi(
@@ -468,15 +485,17 @@ static func _apply_work_output(state: Node) -> void:
 						15,
 						100
 					)
-					var fname: String = target_def.get("name", _feature_names.pick_random())
-					var fid: String = target_def.get("id", "")
-					state.product.add_feature(fname, quality, state.current_quarter, fid)
-					if not target_def.is_empty():
-						state.product.apply_feature_effects(target_def)
+					var fname: String = sdef.get("name", _feature_names.pick_random())
+					state.product.add_feature(fname, quality, state.current_quarter, sfid)
+					if not sdef.is_empty():
+						state.product.apply_feature_effects(sdef)
 						var rep_bonus := state.product.drain_pending_reputation_bonus()
 						if rep_bonus != 0:
 							state.company.reputation = clampi(state.company.reputation + rep_bonus, 0, 100)
-					state.product.target_feature_id = ""
+					state.product.remove_build(sfid)
+					# Apply crunch penalties to feature-assigned employees.
+					if slot.get("crunched", false):
+						_apply_crunch_penalties(state)
 			EmployeeData.Assignment.BUGS:
 				var bug_mult: float = (1.0 + tech_bonus) * lane_effect_mult * bugs_mesh_mult
 				state.product.bugs = maxi(0, state.product.bugs - maxi(1, ceili(output * 0.16 * bug_mult)))
@@ -494,11 +513,32 @@ static func _apply_work_output(state: Node) -> void:
 				state.product.ux_score = mini(100, state.product.ux_score + maxi(1, ceili(rnd_work)))
 				state.product.churn_rate = maxf(ProductData.CHURN_RATE_MIN, state.product.churn_rate - (rnd_work * 0.000025))
 
+		# Cross-support: non-feature employees contribute a small share to builds.
 		if active_features_assigned > 0 \
 		and emp.assignment != EmployeeData.Assignment.FEATURES \
-		and not state.product.target_feature_id.is_empty():
-			state.product.feature_progress += output * 0.5 * cross_support_share * feature_mesh_mult
+		and state.product.active_build_count() > 0:
+			var cross_per_slot: float = output * 0.5 * cross_support_share * feature_mesh_mult / float(state.product.active_build_count())
+			for csi in range(state.product.active_build_count()):
+				state.product.add_slot_progress(csi, cross_per_slot)
 		emp.tenure_quarters += 1
+
+
+static func _get_feature_def(state: Node, fid: String) -> Dictionary:
+	if fid.is_empty():
+		return {}
+	var key := ProductData._type_key(state.company.type)
+	var catalog: Array = ProductData._feature_catalog.get(key, [])
+	for entry in catalog:
+		if entry is Dictionary and entry.get("id", "") == fid:
+			return entry
+	return {}
+
+
+static func _apply_crunch_penalties(state: Node) -> void:
+	for emp: EmployeeData in state.employees:
+		if emp.assignment == EmployeeData.Assignment.FEATURES:
+			emp.stress = clampi(emp.stress + ProductData.CRUNCH_STRESS_COST, 0, 100)
+			emp.morale = clampi(emp.morale - ProductData.CRUNCH_MORALE_COST, 0, 100)
 
 
 static func _update_product_metrics(state: Node) -> void:

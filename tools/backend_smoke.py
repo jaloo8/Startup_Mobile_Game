@@ -170,7 +170,7 @@ UI_BUTTON_SCRIPT_CHECKS = (
             "pick_btn.pressed.connect(_on_pick_feature)",
             'btn.text = "Build This"',
             "btn.pressed.connect(_on_select_feature.bind(fdef))",
-            'GameState.product.target_feature_id = fdef.get("id", "")',
+            'GameState.product.start_build(fid)',
         ],
         "required_funcs": ["_on_back", "_on_pick_feature", "_on_select_feature"],
     },

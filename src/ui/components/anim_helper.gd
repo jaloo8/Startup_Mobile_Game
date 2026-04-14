@@ -37,20 +37,24 @@ static func pop_in(node: Control, delay: float = 0.0, duration: float = 0.26) ->
 	return tw
 
 
-## Slide-in from an offset — list rows, panels sliding up from bottom.
-static func slide_in(node: Control, offset: Vector2,
+## Slide-in entrance animation — fade + subtle scale.
+## NOTE: Previous version moved `position` directly, which fights with
+## VBox/HBox/Grid container layout (children pile at y=0 because position
+## is captured before the container's first layout pass).  Now uses only
+## opacity + scale which are safe inside managed containers.
+static func slide_in(node: Control, _offset: Vector2 = Vector2.ZERO,
 		delay: float = 0.0, duration: float = 0.22) -> Tween:
-	var original_pos := node.position
-	node.position = original_pos + offset
 	node.modulate.a = 0.0
+	node.scale = Vector2(0.97, 0.97)
+	node.pivot_offset = node.size * 0.5
 	var tw := node.create_tween().set_parallel(true)
-	tw.tween_property(node, "position", original_pos, duration) \
-		.set_delay(delay) \
-		.set_ease(Tween.EASE_OUT) \
-		.set_trans(Tween.TRANS_QUINT)
-	tw.tween_property(node, "modulate:a", 1.0, duration * 0.7) \
+	tw.tween_property(node, "modulate:a", 1.0, duration) \
 		.set_delay(delay) \
 		.set_ease(Tween.EASE_OUT)
+	tw.tween_property(node, "scale", Vector2.ONE, duration) \
+		.set_delay(delay) \
+		.set_ease(Tween.EASE_OUT) \
+		.set_trans(Tween.TRANS_BACK)
 	return tw
 
 
@@ -94,13 +98,13 @@ static func pop_out(node: Control, duration: float = 0.18,
 	return tw
 
 
-## Slide out to an offset.
-static func slide_out(node: Control, offset: Vector2, duration: float = 0.20,
-		then: Callable = Callable()) -> Tween:
+## Slide out — fade + scale down. Safe inside managed containers.
+static func slide_out(node: Control, _offset: Vector2 = Vector2.ZERO,
+		duration: float = 0.20, then: Callable = Callable()) -> Tween:
+	node.pivot_offset = node.size * 0.5
 	var tw := node.create_tween().set_parallel(true)
-	tw.tween_property(node, "position", node.position + offset, duration) \
-		.set_ease(Tween.EASE_IN) \
-		.set_trans(Tween.TRANS_QUINT)
+	tw.tween_property(node, "scale", Vector2(0.97, 0.97), duration) \
+		.set_ease(Tween.EASE_IN)
 	tw.tween_property(node, "modulate:a", 0.0, duration * 0.6) \
 		.set_ease(Tween.EASE_IN)
 	if then.is_valid():
@@ -150,18 +154,20 @@ static func flash_color(node: CanvasItem, flash_color: Color,
 
 
 ## Shake node horizontally — error feedback, low cash warning.
+## Uses rotation instead of position to stay compatible with containers.
 static func shake(node: Control, intensity: float = 6.0,
 		duration: float = 0.30) -> Tween:
-	var origin := node.position
+	node.pivot_offset = node.size * 0.5
 	var tw := node.create_tween()
 	var steps := 6
+	var max_degrees := clampf(intensity * 0.5, 1.0, 4.0)
 	for i in steps:
 		var dir := 1.0 if i % 2 == 0 else -1.0
 		var dampen := 1.0 - (float(i) / float(steps))
-		tw.tween_property(node, "position",
-			origin + Vector2(intensity * dir * dampen, 0),
+		tw.tween_property(node, "rotation_degrees",
+			max_degrees * dir * dampen,
 			duration / float(steps)).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(node, "position", origin, duration / float(steps * 2))
+	tw.tween_property(node, "rotation_degrees", 0.0, duration / float(steps * 2))
 	return tw
 
 

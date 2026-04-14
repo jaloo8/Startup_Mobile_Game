@@ -35,9 +35,13 @@ const AD_COOLDOWN_HOURS   := 8  # minimum hours between ad sessions
 ## Chip costs (edit these to tune balance)
 const COST_EXTRA_CANDIDATE  := 3
 const COST_REROLL_EVENT     := 4
-const COST_FEATURE_BOOST    := 5
+const COST_FEATURE_BOOST    := 5    # Legacy — kept for old UI paths
+const COST_RUSH_QUARTER     := 5    # Skip 1 quarter of build time
+const COST_RUSH_INSTANT_BASE := 10  # Base cost for instant complete (+ 5 per remaining quarter)
 const COST_DOUBLE_IDLE      := 6
 const COST_OFFICE_THEME     := 10
+## Slot unlock costs: index 0 = unlock slot 2, 1 = slot 3, 2 = slot 4.
+const COST_SLOT_UNLOCK: Array[int] = [8, 15, 25]
 
 ## Earn amounts
 const EARN_QUARTER_POSITIVE := 1
@@ -166,14 +170,105 @@ func spend_reroll_event() -> bool:
 
 
 ## Boost current feature progress by 10% (5 chips).
+## Legacy — kept for backward compatibility.  Prefer spend_rush_quarter().
 func spend_feature_boost() -> bool:
 	if not spend(COST_FEATURE_BOOST, "feature_boost"):
 		return false
-	# Apply the boost immediately to the active feature
 	if GameState.product != null and not GameState.product.target_feature_id.is_empty():
 		GameState.product.feature_progress = minf(
 			GameState.product.feature_progress + 0.10, 1.0)
 	return true
+
+
+## Rush: skip 1 quarter of build time on a specific build slot (5 chips).
+func spend_rush_quarter(slot_index: int) -> bool:
+	if GameState.product == null:
+		return false
+	if slot_index < 0 or slot_index >= GameState.product.active_build_count():
+		return false
+	if not spend(COST_RUSH_QUARTER, "rush_quarter"):
+		return false
+	var fid: String = GameState.product.slot_feature_id(slot_index)
+	var fdef: Dictionary = GameState.product.get_target_feature(GameState.company.type) if slot_index == 0 else {}
+	if fdef.is_empty():
+		# Look up from catalog for non-slot-0.
+		var key := ProductData._type_key(GameState.company.type)
+		var catalog: Array = ProductData._feature_catalog.get(key, [])
+		for entry in catalog:
+			if entry is Dictionary and entry.get("id", "") == fid:
+				fdef = entry
+				break
+	var cost: float = float(fdef.get("cost", ProductData.FEATURE_COST)) * GameState.product.feature_cost_multiplier()
+	# Add 1 quarter-worth of progress (cost / expected_quarters).
+	var quarter_worth: float = cost * 0.25  # rough estimate of 1 quarter contribution
+	GameState.product.add_slot_progress(slot_index, quarter_worth)
+	return true
+
+
+## Rush: instant complete a feature in a build slot.
+## Cost scales with remaining build time: base + 5 per remaining quarter-worth.
+func rush_instant_cost(slot_index: int) -> int:
+	if GameState.product == null:
+		return 0
+	if slot_index < 0 or slot_index >= GameState.product.active_build_count():
+		return 0
+	var fid: String = GameState.product.slot_feature_id(slot_index)
+	var fdef: Dictionary = _lookup_feature_def(fid)
+	var cost: float = float(fdef.get("cost", ProductData.FEATURE_COST)) * GameState.product.feature_cost_multiplier()
+	var progress: float = GameState.product.slot_progress(slot_index)
+	var remaining: float = maxf(0.0, cost - progress)
+	var remaining_quarters: int = ceili(remaining / maxf(1.0, cost * 0.25))
+	return COST_RUSH_INSTANT_BASE + remaining_quarters * 5
+
+
+func spend_rush_instant(slot_index: int) -> bool:
+	var instant_cost: int = rush_instant_cost(slot_index)
+	if instant_cost <= 0:
+		return false
+	if not spend(instant_cost, "rush_instant"):
+		return false
+	# Set progress to above cost threshold so it ships on next sim tick.
+	var fid: String = GameState.product.slot_feature_id(slot_index)
+	var fdef: Dictionary = _lookup_feature_def(fid)
+	var cost: float = float(fdef.get("cost", ProductData.FEATURE_COST)) * GameState.product.feature_cost_multiplier()
+	GameState.product.add_slot_progress(slot_index, cost * 2.0)  # guarantee completion
+	return true
+
+
+## Unlock an additional build slot (permanent for the run).
+func slot_unlock_cost() -> int:
+	var current: int = GameState.product.build_slots if GameState.product else 1
+	var unlock_index: int = current - 1  # slot 2 = index 0, slot 3 = index 1, etc.
+	if unlock_index < 0 or unlock_index >= COST_SLOT_UNLOCK.size():
+		return 0
+	return COST_SLOT_UNLOCK[unlock_index]
+
+
+func spend_slot_unlock() -> bool:
+	if GameState.product == null:
+		return false
+	var cost_chips: int = slot_unlock_cost()
+	if cost_chips <= 0:
+		return false  # already at max
+	if not spend(cost_chips, "slot_unlock"):
+		return false
+	GameState.product.build_slots = mini(
+		GameState.product.build_slots + 1,
+		ProductData.MAX_BUILD_SLOTS
+	)
+	return true
+
+
+## Helper: look up a feature definition from the catalog.
+func _lookup_feature_def(fid: String) -> Dictionary:
+	if fid.is_empty() or GameState.company == null:
+		return {}
+	var key := ProductData._type_key(GameState.company.type)
+	var catalog: Array = ProductData._feature_catalog.get(key, [])
+	for entry in catalog:
+		if entry is Dictionary and entry.get("id", "") == fid:
+			return entry
+	return {}
 
 
 ## Double passive income for 1 hour (6 chips).

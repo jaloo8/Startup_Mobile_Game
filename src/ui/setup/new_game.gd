@@ -12,12 +12,20 @@ extends Control
 @onready var start_btn: Button = %StartButton
 @onready var back_btn: Button = %BackButton
 @onready var type_illustration: TextureRect = %TypeIllustration
+@onready var founder_portrait: TextureRect = get_node_or_null("%FounderPortrait")
 
 const TYPE_ILLUSTRATION_PATHS: Dictionary = {
 	CompanyData.CompanyType.SAAS:        "res://assets/illustrations/company_type_saas.png",
 	CompanyData.CompanyType.CONSUMER:    "res://assets/illustrations/company_type_consumer.png",
 	CompanyData.CompanyType.MARKETPLACE: "res://assets/illustrations/company_type_marketplace.png",
 	CompanyData.CompanyType.DEV_TOOLS:   "res://assets/illustrations/company_type_devtools.png",
+}
+
+const FOUNDER_PORTRAIT_PATHS: Dictionary = {
+	CompanyData.FounderBackground.ENGINEER:  "res://assets/illustrations/founders/founder_engineer.png",
+	CompanyData.FounderBackground.FINANCE:   "res://assets/illustrations/founders/founder_finance.png",
+	CompanyData.FounderBackground.RECRUITER: "res://assets/illustrations/founders/founder_recruiter.png",
+	CompanyData.FounderBackground.HUSTLER:   "res://assets/illustrations/founders/founder_hustler.png",
 }
 
 # Difficulty plain-English descriptions shown below the selector
@@ -289,6 +297,18 @@ func _on_background_changed(_idx: int) -> void:
 		stats.get("people", 5),
 		stats.get("business", 5),
 	]
+	_update_founder_portrait(bg_id)
+
+
+func _update_founder_portrait(bg_id: int) -> void:
+	if founder_portrait == null:
+		return
+	var path: String = FOUNDER_PORTRAIT_PATHS.get(bg_id, "")
+	if path.is_empty() or not ResourceLoader.exists(path):
+		founder_portrait.visible = false
+		return
+	founder_portrait.texture = load(path) as Texture2D
+	founder_portrait.visible = true
 
 
 func _on_start() -> void:

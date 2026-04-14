@@ -804,6 +804,7 @@ func _company_name() -> String:
 # ─────────────────────────────────────────────────────────────────────────────
 
 const _ASSET_BASE := "res://assets/illustrations/"
+const _ICON_BASE := "res://assets/icons/"
 
 
 func _load_tex(filename: String) -> Texture2D:
@@ -811,6 +812,30 @@ func _load_tex(filename: String) -> Texture2D:
 	if ResourceLoader.exists(path):
 		return ResourceLoader.load(path) as Texture2D
 	return null
+
+
+## Load a pixel-art icon from assets/icons/.  Returns null if missing.
+func _load_icon(filename: String) -> Texture2D:
+	var path := _ICON_BASE + filename
+	if ResourceLoader.exists(path):
+		return ResourceLoader.load(path) as Texture2D
+	return null
+
+
+## Create a TextureRect for an icon, falling back to a label if the file is
+## missing.  `fallback_text` is the emoji/text that was there before.
+func _icon_or_lbl(icon_file: String, size: float, fallback_text: String,
+		fallback_color: Color = Color(1, 1, 1)) -> Control:
+	var tex := _load_icon(icon_file)
+	if tex:
+		var tr := TextureRect.new()
+		tr.texture = tex
+		tr.custom_minimum_size = Vector2(size, size)
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		return tr
+	return _lbl(fallback_text, int(size / 2.0), fallback_color)
 
 
 ## Card filled with an image texture (falls back to solid color if asset missing).
@@ -919,7 +944,7 @@ func _build_consumer(parent: Control = null) -> void:
 
 	# Bell + dot — push_notifications
 	var bell_wrap := _hbox(2)
-	var bell := _lbl("🔔", 11)
+	var bell := _icon_or_lbl("icon_bell.png", 18, "🔔")
 	var dot := _pill(Color(0.95, 0.28, 0.25), 6, 6, 3)
 	bell_wrap.add_child(bell)
 	bell_wrap.add_child(dot)
@@ -1021,13 +1046,17 @@ func _build_consumer(parent: Control = null) -> void:
 	var act_row := _hbox(10)
 	feed_v.add_child(act_row)
 
-	var share_l := _lbl("↗  Share", 8, Color(0.45, 0.70, 0.95))
-	_gate("sharing", share_l)
-	act_row.add_child(share_l)
+	var share_row := _hbox(3)
+	share_row.add_child(_icon_or_lbl("icon_share.png", 14, "↗"))
+	share_row.add_child(_lbl("Share", 8, Color(0.45, 0.70, 0.95)))
+	_gate("sharing", share_row)
+	act_row.add_child(share_row)
 
-	var dl_l := _lbl("↓  Download", 8, Color(0.40, 0.80, 0.55))
-	_gate("offline_mode", dl_l)
-	act_row.add_child(dl_l)
+	var dl_row := _hbox(3)
+	dl_row.add_child(_icon_or_lbl("icon_download.png", 14, "↓"))
+	dl_row.add_child(_lbl("Download", 8, Color(0.40, 0.80, 0.55)))
+	_gate("offline_mode", dl_row)
+	act_row.add_child(dl_row)
 
 	# Chat FAB — live_chat
 	var chat_row := _hbox(0)
@@ -1036,8 +1065,10 @@ func _build_consumer(parent: Control = null) -> void:
 
 	var chat_fab := _pill(Color(0.15, 0.50, 0.92), 0, 20, 10)
 	chat_fab.size_flags_horizontal = Control.SIZE_SHRINK_END
-	var chat_l := _lbl("  Chat  ", 8, Color(1, 1, 1))
-	chat_fab.add_child(chat_l)
+	var chat_icon_row := _hbox(4)
+	chat_icon_row.add_child(_icon_or_lbl("icon_chat.png", 14, "💬"))
+	chat_icon_row.add_child(_lbl("Chat", 8, Color(1, 1, 1)))
+	chat_fab.add_child(chat_icon_row)
 	_gate("live_chat", chat_fab)
 	chat_row.add_child(chat_fab)
 
@@ -1064,9 +1095,8 @@ func _build_saas(parent: Control = null) -> void:
 	hdr_p.add_child(_mg(hdr_row, 10, 10, 7, 7))
 
 	var grid_p := _pill(Color(0.22, 0.50, 0.82), 18, 18, 4)
-	var grid_l := _lbl("▦", 9, Color(1, 1, 1))
-	grid_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	grid_p.add_child(grid_l)
+	var grid_icon := _icon_or_lbl("icon_briefcase.png", 14, "▦")
+	grid_p.add_child(grid_icon)
 	hdr_row.add_child(grid_p)
 
 	hdr_row.add_child(_lbl(_company_name(), 9, Color(0.92, 0.92, 1.0)))
@@ -1210,9 +1240,9 @@ func _build_marketplace(parent: Control = null) -> void:
 	search_p.add_child(_lbl("  Search products...", 8, Color(0.32, 0.34, 0.42)))
 	hdr_row.add_child(search_p)
 
-	var cart_l := _lbl("🛒", 12)
-	_gate("payment_escrow", cart_l)
-	hdr_row.add_child(cart_l)
+	var cart_icon := _icon_or_lbl("icon_cart.png", 18, "🛒")
+	_gate("payment_escrow", cart_icon)
+	hdr_row.add_child(cart_icon)
 
 	# ── Category tabs — categories ───────────────────────────────────────────
 	var cats_row := _hbox(4)
@@ -1266,7 +1296,13 @@ func _build_marketplace(parent: Control = null) -> void:
 	var ratings_row := _hbox(5)
 	_gate("ratings", ratings_row)
 	content_v.add_child(ratings_row)
-	ratings_row.add_child(_lbl("★★★★☆", 10, Color(0.92, 0.75, 0.18)))
+	var stars_row := _hbox(1)
+	for i in range(5):
+		var star := _icon_or_lbl("icon_star.png", 12, "★", Color(0.92, 0.75, 0.18))
+		if i == 4:
+			star.modulate = Color(0.40, 0.42, 0.50)  # empty star (5th)
+		stars_row.add_child(star)
+	ratings_row.add_child(stars_row)
 	ratings_row.add_child(_lbl("4.8  ·  Reviews & Trust", 8, Color(0.60, 0.62, 0.70)))
 
 	# Delivery tracking — delivery_tracking

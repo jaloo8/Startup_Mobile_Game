@@ -595,6 +595,10 @@ Before committing any content changes:
 | Edge case tests | `docs/dev-edge-case-test-matrix.md` |
 | Execution path | `docs/current-execution-path.md` |
 | AI tech opportunities | `docs/AI_TECH_OPPORTUNITIES.md` |
+| **Tier 1 launch punch list** | `docs/tier1-launch-punchlist.md` |
+| **Builder slots + rush design** | `docs/design-builder-slots-rush.md` |
+| **Cursor art prompt guide** | `docs/cursor-prompt-guide.md` |
+| **Visual asset brief** | `docs/visual-asset-brief-v1.md` |
 
 ### Session History & Source Material
 | What | Where |
@@ -610,30 +614,40 @@ Before committing any content changes:
 
 ## 12. CURRENT STATUS (Update this section as work progresses)
 
-**As of April 7, 2026:**
+**As of April 13, 2026:**
 
-### What's Done (~200 items)
+### What's Done (~220 items)
 - Full core gameplay loop (quarterly simulation, 12-step engine)
 - All 4 company types with unique growth curves and features
 - Employee system (hire, fire, interview, assign, bios, avatars, detail view)
 - Product system (features, ETA, synergies, interactive phone mockup)
+- **Builder Slots system** — multi-slot parallel feature builds (1-4 slots)
+- **Rush mechanics** — VC Chip rush (quarter skip + instant), ad rush (stacking diminishing returns), crunch mode (free rush with morale cost)
+- **Feature upgrade tiers** — Scaled/Optimized/Enterprise-Grade per feature
 - Finance system (fundraising, burn/revenue/runway, marketing spend, deltas)
 - Event system (50+ events, 26 world events, 67+ headlines)
 - Competitor system (86 competitors, market leaderboard)
-- Save/load (atomic writes, checksums, backup recovery, auto-save)
+- Save/load (atomic writes, checksums, backup recovery, auto-save, build-queue migration)
 - Tutorial (5-step overlay), Achievements (40), Founder Score (6-axis)
-- VC Chips currency with 4 spend actions
+- VC Chips currency with **8 spend actions** (original 4 + rush quarter + rush instant + slot unlock + legacy boost)
 - 22 SFX, haptics, screen shake, floating numbers, confetti
 - All legal docs, privacy policy, ToS, support file
 - Dev panel, smoke test, balance sim, QA checklist
+- **16 pixel art UI icons** wired into product mockup (replacing emoji)
+- **6 founder archetype portraits** wired into new game setup screen
+- **13 consumer app component images** (thumbnails, stories, recommendations, brand badge, avatar)
+- **Store listing copy** drafted (App Store + Google Play descriptions, keywords, categories)
+- **Tier 1 launch punch list** with phased timeline (see `docs/tier1-launch-punchlist.md`)
 
 ### What's Blocking Launch
 1. Apple Developer enrollment ($99) — user hasn't done this yet
 2. Google Play Console enrollment ($25) — user hasn't done this yet
 3. First device build — never run on a real phone
 4. `MONETIZATION_TEMP_DISABLED = false` + IAP plugin wiring
-5. Store listing assets (screenshots, descriptions)
+5. Store listing assets (screenshots — copy is done)
 6. Beta testing (TestFlight / Play Store internal track)
+7. Build Queue UI — backend done, product overview screen needs multi-slot display
+8. **founder_hustler.png** has real social media logos (LinkedIn, Instagram, Twitter) — needs regeneration with generic icons
 
 ### What Needs Content Work
 - Employee bios: 72 → 200 (need 128 more)
@@ -643,11 +657,40 @@ Before committing any content changes:
 - Game over postmortem templates: 0 → 10+
 - Event description variations: 1 each → 3-5 each
 
+### What Needs Art Work (see `docs/cursor-prompt-guide.md`)
+- SaaS component images: 3 needed (chart, integrations, audit log)
+- Marketplace component images: 4 needed (3 products, tracking bar)
+- Dev Tools component images: 3 needed (CLI snippet, docs panel, usage chart)
+- Employee specialty portraits: 18 needed (9 specialties × 2 variants)
+- Store marketing assets: 8+ needed (screenshots, feature graphic, etc.)
+
 ### Balance Status
 - Sandbox: All 4 types, 0 losses across 36 runs
 - Normal: Marketplace viable (1/9 loss), other types challenging
 - Hardcore: Intentionally brutal (all losses by Q3-4)
 - Remaining concern: 6-quarter profit streak is the binding constraint for Sustainable win
+
+### New Systems Added (April 13, 2026)
+
+#### Builder Slots (`product_data.gd`)
+Multi-slot parallel feature build system. Players start with 1 slot (2 if premium). Unlock up to 4 via team size or VC Chips. Build queue stored as `Array[Dictionary]` with feature_id, progress, crunched flag. Backward-compatible with old saves via `deserialize_build_state()` migration.
+
+Key constants:
+- `MAX_BUILD_SLOTS = 4`
+- `SLOT_UNLOCK_ENGINEER_THRESHOLDS = [5, 12, 20]`
+- `CRUNCH_PROGRESS_MULT = 1.5`, `CRUNCH_STRESS_COST = 15`, `CRUNCH_MORALE_COST = 10`
+
+#### Ad Rush (Stacking Diminishing Returns)
+Up to 3 ads per feature per day. Each reduces REMAINING build time: 25% → 15% → 10%. Net max acceleration ~42%. Resets daily. Themed as "Watch a Pitch" / "Attend a Meetup" / "Sponsor Coffee".
+
+#### Feature Upgrade Tiers
+After shipping a feature, upgrade it: Base → Scaled (+50% effects) → Optimized (+100%) → Enterprise-Grade (+150%). Each tier costs more progress. Tracked in `feature_upgrades` dict.
+
+#### Icon System (`product_visual.gd`)
+New `_icon_or_lbl()` helper loads pixel art PNGs from `assets/icons/` with automatic fallback to emoji/text labels if the file is missing. `_load_icon()` reads from `_ICON_BASE = "res://assets/icons/"`. 16 icons wired into product mockup replacing emoji.
+
+#### Founder Portraits (`new_game.gd`)
+`FOUNDER_PORTRAIT_PATHS` dict maps `FounderBackground` enum to PNGs in `assets/illustrations/founders/`. Portrait `TextureRect` created dynamically and inserted into the setup VBox after the background selector.
 
 ---
 
@@ -660,7 +703,79 @@ Before committing any content changes:
 
 ---
 
-## 14. COMMON PITFALLS TO AVOID
+## 14. DEV MODE (Testing Guide)
+
+### What Is Dev Mode?
+
+Dev mode is controlled by `AdManager.current_build_mode()`. It's automatically active when running from the Godot Editor or a debug build (`OS.is_debug_build()`). In release/export builds, it's off unless `BUILD_MODE_OVERRIDE` is set.
+
+**When dev mode is active:**
+- `AdManager.is_premium()` returns `true` — all premium features unlocked
+- `AdManager.is_game_locked()` returns `false` — paywall never triggers
+- Purchase flows skip the real store and call `_complete_premium_unlock()` directly
+- The **DEV button** appears in the top-right corner of the Quarter Dashboard
+- Premium players start with 2 build slots (dev mode counts as premium)
+
+### How to Access the Dev Panel
+
+1. Run the game in Godot Editor (dev mode is automatic)
+2. Start or load any game
+3. On the Quarter Dashboard, tap the orange **"DEV"** button (top-right)
+4. The Dev Panel overlay opens — press **Escape** to close
+
+### What the Dev Panel Can Do
+
+| Section | Actions |
+|---------|---------|
+| **Restore** | Set Energy=100, Board patience=4, All morale=80 |
+| **People** | Hire Random, Hire 5 Random, Fire Last, Skill All +10 |
+| **Product** | Debt/Bugs=0, Stability=100, UX=80, Ship Feature instantly |
+| **Sabotage** | Debt=80, Bugs=50, Cash=$0, Energy=5 (for testing failure states) |
+| **Quick Build** | Ship current feature at quality 80, Quality Max, Bugs=0 |
+| **Hosting** | Max all hosting upgrades, Set reliability to 99.99% |
+| **Fundraising** | Generate VC offer, Accept offer, Force next round |
+| **Economy** | Toggle Bull/Neutral/Bear markets |
+| **World Events** | Trigger random world event, Clear active world event |
+| **Events** | Trigger random narrative event, Clear cooldowns, Clear fired events |
+| **VC Chips** | +10, +50, +100, Reset to 0 |
+| **God Mode** | Toggle invincibility (no bankruptcy, no burnout) |
+| **Export** | Print full game state as JSON to console |
+| **Save/Load** | Quick save to any slot, Load from any slot |
+
+### Testing the New Builder Slots System
+
+To test builder slots + rush in dev mode:
+1. Start a new game (you'll have 2 slots since dev mode = premium)
+2. Select a feature to build (slot 1 fills)
+3. Use Dev Panel → VC Chips → +50 to give yourself chips
+4. In CurrencyManager (via code or debug), call `spend_slot_unlock()` to get slot 3
+5. Select another feature (slot 2 fills)
+6. Advance quarters and observe both features building in parallel
+7. Test `spend_rush_quarter(0)` to skip a quarter on slot 0
+8. Test crunch by setting `GameState.product.set_slot_crunched(0, true)` before advancing
+
+### Forcing Release Mode in Editor
+
+To test the paywall, ads, and IAP flow as a non-paying user:
+```gdscript
+# In src/autoload/ad_manager.gd line 39:
+const BUILD_MODE_OVERRIDE := "release"   # Forces release behavior in editor
+```
+**Remember to revert this before committing.** The smoke test checks that `MONETIZATION_TEMP_DISABLED = true` for safety.
+
+### MONETIZATION_TEMP_DISABLED Flag
+
+This master kill switch (`ad_manager.gd` line 32) is currently `true`. When true:
+- All ad calls return false/empty
+- `is_premium()` returns true (everything unlocked)
+- `is_game_locked()` returns false (paywall disabled)
+- Purchase flows call `on_unlock` immediately (no store)
+
+**Flip to `false` only after IAP plugin is wired and tested.**
+
+---
+
+## 15. COMMON PITFALLS TO AVOID
 
 1. **Don't skim the Dev Bible.** It's 85,672 characters across 12 sections. Items like "onboarding takes 1-2 weeks" and "Speed (1-100)" are buried in paragraphs, not headers. Read line by line.
 2. **Don't assume the tracker is complete.** Always check against source material when making claims about what's tracked.
