@@ -310,9 +310,11 @@ func _is_premium_safe() -> bool:
 func _max_save_slots() -> int:
 	var mgr := _ad_manager()
 	if mgr == null:
-		return 5
+		# Safe fallback: free-tier limit, not premium. Prevents accidental
+		# premium bypass if AdManager fails to load.
+		return 2
 	if not mgr.has_method("max_save_slots"):
-		return 5
+		return 2
 	return clampi(int(mgr.call("max_save_slots")), 1, 5)
 
 

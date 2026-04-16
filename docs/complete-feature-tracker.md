@@ -2,7 +2,7 @@
 
 **Purpose:** This is the single source of truth for every feature, system, and polish item mentioned across all conversations, memory files, and documentation. Written at the user's explicit request so nothing gets forgotten.
 
-**Last updated:** April 7, 2026 (v3 — line-by-line pass of full Dev Bible + all 239 Cursor messages + Claude Code transcript)
+**Last updated:** April 15, 2026 (v4 — added free-first launch strategy, difficulty gating behind premium, soft launch plan)
 
 **Legend:**
 - ✅ DONE — Implemented and working
@@ -389,9 +389,12 @@ Each company type was designed with a unique core mechanic. These are individual
 | 208a | Free-to-play version with creative ads (separate from premium) | ❌ NOT STARTED | User: "have a free to play version which has these ads like we discussed where it is creative, or a paid option with no ads" — ad-supported free tier in addition to $2.99 premium |
 | 208b | VC Chips as both cosmetic AND gameplay accelerator | ✅ DONE | User: "both please" when asked about cosmetic vs. gameplay currency |
 | 208c | Rewarded ads to earn VC Chips (free version) | ❌ NOT STARTED | User wants ads that aren't invasive; rewarded video for chips is natural fit |
-| 208d | Release strategy: free version first or paid first? | ❌ NOT STARTED | User: "Should we actually release the free version first before the ad free version?" — decision still open |
+| 208d | Release strategy: FREE FIRST, then paid | ✅ DECIDED | **Decision (April 15, 2026):** Launch free version first with 8-quarter trial + $2.99 IAP unlock. Rationale: zero existing audience, free gets 10-50x more downloads on mobile, store algorithm favors volume, soft launch data will validate conversion before committing to pricing. Evaluate paid-only version after 30 days of conversion data. |
 | 208e | Bundle: "Venture: Complete Collection" — $12.99 | ❌ NOT STARTED | Dev Bible 9: "Bundle — 'Venture: Complete Collection' — $12.99 (base + all 4 DLCs, ~25% savings)" — IAP bundle product when DLCs exist |
 | 208f | Base game price: $4.99 (Dev Bible) vs $2.99 (current) — price decision | ❌ NOT STARTED | Dev Bible originally specced $4.99 base game; current implementation uses $2.99. Final pricing decision needed before launch. |
+| 208g | **Free tier = Sandbox difficulty ONLY** | ✅ DONE | **Implemented April 16, 2026.** Free players see all 3 difficulties but Normal/Hardcore show 🔒 lock icons. Tapping a locked difficulty snaps back to Sandbox and shows an emotion-driven upgrade prompt ("Ready for a real challenge?" / "Think you can survive the startup gauntlet?") with an inline "Unlock Full Game — $2.99" button. Safety guard in `_on_start()` forces Sandbox even if selector is bypassed. Smoke test validates the gating code exists. |
+| 208h | Soft launch free in 1 market before wide release | ❌ NOT STARTED | **Decision (April 15, 2026):** Soft launch as free in Canada or Australia for 2-4 weeks. Collect real conversion data (free→paid rate at Q8 paywall). If conversion >3%, keep free tier and optimize funnel. If <1.5%, extend trial or adjust pricing. Data-driven decision before worldwide launch. |
+| 208i | Free-tier onboarding: skip difficulty selector, auto-Sandbox | ✅ DONE | **Implemented April 16, 2026.** Free users auto-default to Sandbox (index 0). Difficulty selector still visible (shows locked options as aspiration) but defaults to Sandbox with no extra taps needed. Premium users default to Normal. Research-backed: showing locked content increases conversion vs hiding it. |
 
 ## 21. Legal & Business
 
@@ -602,20 +605,23 @@ These are recurring quality standards and philosophies the user has expressed ac
 
 | Status | Count |
 |--------|-------|
-| ✅ DONE | ~200 |
+| ✅ DONE / DECIDED | ~202 |
 | 🔶 PARTIAL | ~35 |
-| ❌ NOT STARTED (v1.0 scope) | ~85 |
+| ❌ NOT STARTED (v1.0 scope) | ~88 |
 | 🔮 FUTURE/DLC | ~20 |
-| **Total tracked** | **~350** |
+| **Total tracked** | **~355** |
 
 ### Critical Path to Launch (must-do items):
 1. ❌ Apple Developer + Google Play enrollment (user)
 2. ❌ Export templates + first device build (user)
 3. ❌ QA Section 23 mobile testing (user + dev)
 4. ❌ `MONETIZATION_TEMP_DISABLED = false` + IAP wiring
-5. ❌ Store listing assets (screenshots, description)
-6. ❌ TestFlight / Play Store internal beta
-7. ❌ Public launch
+5. ✅ Free-tier difficulty gating (Sandbox only for free, Normal/Hardcore behind paywall) — 208g
+6. ✅ Free-tier onboarding flow (auto-Sandbox, locked options visible as aspiration) — 208i
+7. ❌ Store listing assets (screenshots, description)
+8. ❌ Soft launch free in 1 market (Canada/Australia) — collect conversion data — 208h
+9. ❌ TestFlight / Play Store internal beta
+10. ❌ Public worldwide launch (free with $2.99 IAP unlock)
 
 ### High-priority before launch:
 - ❌ Info icons/tooltips on all game metrics (accessibility)

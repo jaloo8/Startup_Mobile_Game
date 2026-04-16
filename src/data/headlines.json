@@ -369,5 +369,236 @@
   {
     "template": "Markets, memos, and morale: startup teams call this quarter 'narrative ops'",
     "weight": 0.9
+  },
+
+  {
+    "template": "Mega-round mania: three startups close $100M+ rounds in a single week",
+    "economy": "bull"
+  },
+  {
+    "template": "Secondaries market heats up as employees cash out pre-IPO shares",
+    "economy": "bull"
+  },
+  {
+    "template": "Euphoria or fundamentals? Tech valuations haven't been this high since 2021",
+    "economy": "bull"
+  },
+  {
+    "template": "Hiring freezes spread as startups conserve cash for longer winter",
+    "economy": "bear"
+  },
+  {
+    "template": "Bridge rounds outnumber Series As for the first time in a decade",
+    "economy": "bear"
+  },
+  {
+    "template": "\"Default alive or default dead?\" — the question every board is asking",
+    "economy": "bear"
+  },
+  {
+    "template": "Markets in wait-and-see mode as earnings season approaches",
+    "economy": "neutral"
+  },
+  {
+    "template": "Tech hiring stabilizes after months of volatility",
+    "economy": "neutral"
+  },
+  {
+    "template": "Some VCs cautiously re-opening checkbooks; others still sitting on hands",
+    "economy": "neutral"
+  },
+  {
+    "template": "Neutral ground: founders report mixed signals from customers and investors alike",
+    "economy": "neutral"
+  },
+
+  {
+    "template": "{competitor} hires former Big Tech VP to lead product",
+    "weight": 1.0
+  },
+  {
+    "template": "{competitor} launches free tier in apparent bid for market share",
+    "weight": 1.0
+  },
+  {
+    "template": "Former {competitor} engineers start their own company in the same space",
+    "weight": 0.95
+  },
+  {
+    "template": "{competitor} spotted testing a redesigned onboarding flow",
+    "weight": 0.9
+  },
+  {
+    "template": "{competitor} posts cryptic \"something big is coming\" teaser on social media",
+    "weight": 0.85
+  },
+
+  {
+    "template": "SaaS retention benchmarks tick upward as buyers commit to fewer, deeper tools",
+    "company_types": ["saas"],
+    "weight": 1.1
+  },
+  {
+    "template": "Enterprise deal cycles stretching to 90+ days as procurement tightens",
+    "company_types": ["saas"],
+    "weight": 1.05
+  },
+  {
+    "template": "Social apps battle notification fatigue as users trim their home screens",
+    "company_types": ["consumer"],
+    "weight": 1.1
+  },
+  {
+    "template": "Consumer startups rediscover organic growth after paid acquisition costs spike",
+    "company_types": ["consumer"],
+    "weight": 1.05
+  },
+  {
+    "template": "Marketplace take rates under pressure as sellers demand better unit economics",
+    "company_types": ["marketplace"],
+    "weight": 1.1
+  },
+  {
+    "template": "Two-sided marketplaces learn the hard way: supply-side churn kills growth",
+    "company_types": ["marketplace"],
+    "weight": 1.0
+  },
+  {
+    "template": "Dev tools consolidation: three infrastructure startups merge into one platform",
+    "company_types": ["dev_tools"],
+    "weight": 1.1
+  },
+  {
+    "template": "Usage-based pricing gains converts as dev tool buyers demand pay-for-what-you-use",
+    "company_types": ["dev_tools"],
+    "weight": 1.0
+  },
+
+  {
+    "template": "{company_name} featured in roundup of fastest-growing {type_label} startups",
+    "min_users": 3000
+  },
+  {
+    "template": "Employees at {company_name} say the culture is unlike anywhere they've worked",
+    "min_users": 2000,
+    "min_quarter": 6
+  },
+  {
+    "template": "{company_name} catches attention after consecutive quarters of user growth",
+    "min_users": 8000
+  },
+  {
+    "template": "Industry insiders speculate {company_name} could be a unicorn within two years",
+    "min_users": 30000,
+    "min_quarter": 12
+  },
+  {
+    "template": "{company_name} reportedly turns down early acquisition interest to stay independent",
+    "min_users": 15000,
+    "min_quarter": 10
+  },
+  {
+    "template": "Profile: how {company_name} went from garage to growth-stage in record time",
+    "min_users": 25000,
+    "min_quarter": 8
+  },
+
+  {
+    "template": "Compensation wars: senior engineers now command $400K+ total comp packages"
+  },
+  {
+    "template": "The great rebundling: startups glue point solutions back into platforms"
+  },
+  {
+    "template": "Why seed-stage founders are skipping pitch decks and shipping demos instead"
+  },
+  {
+    "template": "Quiet quitting hits startups: managers struggle to detect disengagement in small teams"
+  },
+  {
+    "template": "Technical cofounders are the new kingmakers — and they know it"
+  },
+  {
+    "template": "Product-led growth is table stakes now. What's the next edge?"
+  },
+  {
+    "template": "The $5K MRR milestone: still the hardest dollar in SaaS"
+  },
+  {
+    "template": "Founders debate: is it better to raise too much or too little?"
+  },
+  {
+    "template": "Offshore engineering hubs mature as time-zone arbitrage becomes standard"
+  },
+  {
+    "template": "Startup graveyard: lessons from this quarter's highest-profile shutdowns"
+  },
+  {
+    "template": "First-time founders now average 34 years old, up from 27 a decade ago"
+  },
+  {
+    "template": "The metrics that actually predict startup survival (spoiler: it's not revenue)"
+  },
+  {
+    "template": "Every startup says they're \"AI-native\" — investors are learning to tell who means it"
+  },
+  {
+    "template": "Why your best engineers keep leaving for smaller companies"
+  },
+  {
+    "template": "The anti-perks movement: startups cutting free lunch to extend runway"
+  },
+  {
+    "template": "Stack overflow: the average startup now uses 47 SaaS tools internally"
+  },
+
+  {
+    "template": "Late-stage investors say they want profitability — then fund another growth story",
+    "min_quarter": 8
+  },
+  {
+    "template": "Board dynamics shift as founders navigate their first down quarter",
+    "min_quarter": 6
+  },
+  {
+    "template": "Big Tech antitrust hearings create unexpected openings for nimble startups",
+    "min_quarter": 4
+  },
+  {
+    "template": "Post-seed mortality rate spikes: the Series A gap is wider than ever",
+    "min_quarter": 4
+  },
+  {
+    "template": "VCs share their most common pass reasons — and none of them are about the product",
+    "min_quarter": 3
+  },
+
+  {
+    "template": "Operators rewrite hiring plans after {world_event_title} shifts budget assumptions",
+    "min_quarter": 2,
+    "weight": 1.15,
+    "requires_world_event": true
+  },
+  {
+    "template": "CFOs cite {world_event_title} as the reason Q{quarter} forecast models broke",
+    "min_quarter": 3,
+    "weight": 1.2,
+    "requires_world_event": true
+  },
+  {
+    "template": "Startup Slack channels can't stop debating {world_event_title} and what comes next",
+    "min_quarter": 2,
+    "weight": 1.1,
+    "requires_world_event": true
+  },
+
+  {
+    "template": "TechCon keynote: AI will \"change everything\" (audience checks Slack during demo)"
+  },
+  {
+    "template": "Startup Week panels sell out; afterparty conversations are where deals actually close"
+  },
+  {
+    "template": "End of quarter crunch: every sales team alive is pushing deals before midnight"
   }
 ]

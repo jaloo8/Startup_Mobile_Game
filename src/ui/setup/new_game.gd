@@ -71,6 +71,7 @@ const START_SCENARIOS: Array = [
 var _type_hint_label: Label
 var _difficulty_desc_label: Label
 var _scenario_desc_label: Label
+var _premium_hint_label: Label  # "Unlock Premium" prompt below difficulty
 
 
 func _ready() -> void:
@@ -233,7 +234,22 @@ func _on_niche_changed(_idx: int) -> void:
 func _on_difficulty_changed(idx: int) -> void:
 	if _difficulty_desc_label == null:
 		return
-	_difficulty_desc_label.text = DIFFICULTY_DESCS.get(idx, "")
+
+	var selected_id: int = difficulty_selector.get_item_id(idx)
+
+	# Free users tapped a locked difficulty — bounce them back to Sandbox
+	# and show a friendly, emotion-driven upgrade prompt.
+	if not _is_premium_safe() and selected_id > 0:
+		difficulty_selector.select(0)  # Snap back to Sandbox
+		_difficulty_desc_label.text = DIFFICULTY_DESCS.get(0, "")
+		_show_premium_difficulty_prompt(selected_id)
+		return
+
+	# Hide premium hint when a valid selection is made
+	if _premium_hint_label != null:
+		_premium_hint_label.visible = false
+
+	_difficulty_desc_label.text = DIFFICULTY_DESCS.get(selected_id, "")
 	if not _difficulty_desc_label.text.is_empty():
 		AnimHelper.fade_in(_difficulty_desc_label, 0.0, 0.15)
 
@@ -262,10 +278,18 @@ func _populate_type_selector() -> void:
 
 func _populate_difficulty_selector() -> void:
 	difficulty_selector.clear()
-	difficulty_selector.add_item("Sandbox")
-	difficulty_selector.add_item("Normal")
-	difficulty_selector.add_item("Hardcore")
-	difficulty_selector.select(1)
+	var is_premium: bool = _is_premium_safe()
+	difficulty_selector.add_item("Sandbox", 0)
+	if is_premium:
+		difficulty_selector.add_item("Normal", 1)
+		difficulty_selector.add_item("Hardcore", 2)
+		difficulty_selector.select(1)  # Default to Normal for premium
+	else:
+		# Free users: show locked difficulties with lock icon so they can
+		# see what they're missing (aspiration) without being able to select.
+		difficulty_selector.add_item("Normal  🔒", 1)
+		difficulty_selector.add_item("Hardcore  🔒", 2)
+		difficulty_selector.select(0)  # Auto-select Sandbox — fewer decisions
 
 
 func _populate_scenario_selector() -> void:
@@ -322,6 +346,10 @@ func _on_start() -> void:
 	var difficulties: Array = ["sandbox", "normal", "hardcore"]
 
 	var diff_idx := clampi(difficulty_selector.selected, 0, difficulties.size() - 1)
+
+	# Safety: free users can only play Sandbox regardless of selector state.
+	if not _is_premium_safe() and diff_idx > 0:
+		diff_idx = 0
 	var scen_idx := clampi(scenario_selector.selected, 0, START_SCENARIOS.size() - 1)
 	var scenario_id: String = "garage"
 	var scenario_meta = scenario_selector.get_item_metadata(scen_idx)
@@ -379,3 +407,73 @@ func _on_start() -> void:
 
 func _on_back() -> void:
 	SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")
+
+
+## Returns true if the player has premium access. Safe fallback to false.
+func _is_premium_safe() -> bool:
+	var mgr := get_node_or_null("/root/AdManager")
+	if mgr == null:
+		return false
+	if not mgr.has_method("is_premium"):
+		return false
+	return bool(mgr.call("is_premium"))
+
+
+## Contextual upgrade prompt when a free user taps a locked difficulty.
+## Uses emotion-driven copy (research: benefits > feature lists).
+func _show_premium_difficulty_prompt(difficulty_id: int) -> void:
+	if _premium_hint_label == null:
+		_premium_hint_label = Label.new()
+		_premium_hint_label.add_theme_font_size_override("font_size", 13)
+		_premium_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var parent := difficulty_selector.get_parent()
+		if parent and _difficulty_desc_label:
+			parent.add_child(_premium_hint_label)
+			parent.move_child(_premium_hint_label, _difficulty_desc_label.get_index() + 1)
+
+	# Emotion-driven copy that sells the experience, not the feature.
+	var copy: String
+	if difficulty_id == 2:
+		copy = "Think you can survive the real startup gauntlet? Hardcore mode is brutal — minimal runway, ruthless competitors, and realistic failure rates. Unlock the full game to prove you've got what it takes."
+	else:
+		copy = "Ready for a real challenge? Normal mode is how startups actually feel — tight budgets, real competition, and every decision matters. Unlock the full game to experience the real thing."
+
+	_premium_hint_label.text = copy
+	_premium_hint_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.2))
+	_premium_hint_label.visible = true
+	AnimHelper.fade_in(_premium_hint_label, 0.0, 0.2)
+
+	# Build a small unlock button below the prompt
+	var existing_btn := _premium_hint_label.get_node_or_null("UnlockBtn")
+	if existing_btn == null:
+		var btn := Button.new()
+		btn.name = "UnlockBtn"
+		btn.text = "Unlock Full Game — $2.99"
+		btn.custom_minimum_size = Vector2(0, 46)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.pressed.connect(_on_premium_unlock_pressed)
+		var parent := _premium_hint_label.get_parent()
+		if parent:
+			parent.add_child(btn)
+			parent.move_child(btn, _premium_hint_label.get_index() + 1)
+
+
+func _on_premium_unlock_pressed() -> void:
+	var mgr := get_node_or_null("/root/AdManager")
+	if mgr == null or not mgr.has_method("show_paywall"):
+		return
+	mgr.call("show_paywall",
+		# on_unlock: refresh the difficulty selector to show unlocked options
+		func():
+			_populate_difficulty_selector()
+			_on_difficulty_changed(difficulty_selector.selected)
+			if _premium_hint_label:
+				_premium_hint_label.visible = false
+			# Remove the unlock button
+			var btn := _premium_hint_label.get_parent().get_node_or_null("UnlockBtn") if _premium_hint_label else null
+			if btn:
+				btn.queue_free()
+			ToastManager.show("Full game unlocked! All difficulties available."),
+		# on_cancel: do nothing, player stays on Sandbox
+		Callable()
+	)

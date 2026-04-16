@@ -132,8 +132,11 @@ UI_BUTTON_SCRIPT_CHECKS = (
             "back_btn.pressed.connect(_on_back)",
             "GameState.new_game(config)",
             'SceneLoader.goto_scene("res://src/ui/saves/save_slots.tscn")',
+            # Difficulty gating: free users must be locked to Sandbox
+            "_is_premium_safe()",
+            "not _is_premium_safe() and diff_idx > 0",
         ],
-        "required_funcs": ["_on_start", "_on_back"],
+        "required_funcs": ["_on_start", "_on_back", "_is_premium_safe", "_show_premium_difficulty_prompt"],
         "required_any": [
             [
                 'change_scene_to_file("res://src/ui/dashboard/quarter_dashboard.tscn")',
@@ -724,6 +727,50 @@ def validate_vcs(data: object) -> List[str]:
     return errors
 
 
+def validate_vc_dialogue(data: object) -> List[str]:
+    """Validate vc_dialogue.json has required categories and non-empty content."""
+    errors: List[str] = []
+    if not isinstance(data, dict):
+        return ["vc_dialogue.json root must be an object"]
+
+    required_categories = [
+        "openings", "questions", "reactions_positive", "reactions_neutral",
+        "reactions_negative", "offer_lines", "acceptance_celebrations",
+    ]
+    for cat in required_categories:
+        val = data.get(cat)
+        if not isinstance(val, list):
+            errors.append(f"vc_dialogue.{cat} must be an array")
+            continue
+        if not val:
+            errors.append(f"vc_dialogue.{cat} must be non-empty")
+            continue
+        for idx, entry in enumerate(val):
+            if cat in ("openings", "questions"):
+                if not isinstance(entry, dict):
+                    errors.append(f"vc_dialogue.{cat}[{idx}] must be an object")
+                elif not entry.get("text", "").strip():
+                    errors.append(f"vc_dialogue.{cat}[{idx}].text must be non-empty")
+            else:
+                if not isinstance(entry, str) or not entry.strip():
+                    errors.append(f"vc_dialogue.{cat}[{idx}] must be a non-empty string")
+
+    rejections = data.get("rejections")
+    if not isinstance(rejections, dict):
+        errors.append("vc_dialogue.rejections must be an object")
+    else:
+        for tier in ("elite", "top", "mid", "emerging"):
+            tier_lines = rejections.get(tier, [])
+            if not isinstance(tier_lines, list) or not tier_lines:
+                errors.append(f"vc_dialogue.rejections.{tier} must be a non-empty array")
+            else:
+                for idx, line in enumerate(tier_lines):
+                    if not isinstance(line, str) or not line.strip():
+                        errors.append(f"vc_dialogue.rejections.{tier}[{idx}] must be non-empty")
+
+    return errors
+
+
 def validate_competitors(data: object) -> List[str]:
     errors: List[str] = []
     if not isinstance(data, dict):
@@ -1111,6 +1158,56 @@ def validate_button_scene_contracts() -> List[str]:
     return errors
 
 
+def validate_back_button_navigation() -> List[str]:
+    """Verify every _on_back() handler calls SceneLoader.goto_scene() and that
+    SceneLoader releases _transitioning before fade-in (not after)."""
+    errors: List[str] = []
+    # Check: every screen with a BackButton node and _on_back() func must
+    # actually call SceneLoader.goto_scene() inside that function body.
+    back_screens = [
+        ROOT / "src" / "ui" / "people" / "employee_list.gd",
+        ROOT / "src" / "ui" / "product" / "product_overview.gd",
+        ROOT / "src" / "ui" / "finance" / "finance_overview.gd",
+        ROOT / "src" / "ui" / "market" / "market_leaderboard.gd",
+        ROOT / "src" / "ui" / "settings" / "settings_screen.gd",
+        ROOT / "src" / "ui" / "saves" / "save_slots.gd",
+        ROOT / "src" / "ui" / "setup" / "new_game.gd",
+        ROOT / "src" / "ui" / "logistics" / "logistics_overview.gd",
+    ]
+    for path in back_screens:
+        if not path.exists():
+            continue
+        src = path.read_text(encoding="utf-8")
+        rel = path.relative_to(ROOT)
+        # Find the _on_back function body (from "func _on_back" to next "func " or end)
+        match = re.search(r"func _on_back\(\)[^\n]*\n((?:\t[^\n]*\n)*)", src)
+        if match is None:
+            # No _on_back — that's caught by button script contracts
+            continue
+        body = match.group(1)
+        if "SceneLoader.goto_scene(" not in body:
+            errors.append(
+                f"{rel}: _on_back() does not call SceneLoader.goto_scene() — "
+                f"back button will not navigate"
+            )
+    # Check: SceneLoader must reset _transitioning BEFORE fade-in, not after.
+    sl_path = ROOT / "src" / "autoload" / "scene_loader.gd"
+    if sl_path.exists():
+        sl_src = sl_path.read_text(encoding="utf-8")
+        # The pattern: _do_scene_swap should be followed by _transitioning = false
+        # BEFORE the Phase 3 fade-in tween.
+        swap_idx = sl_src.find("_do_scene_swap(path)")
+        fade_in_idx = sl_src.find("# Phase 3")
+        trans_reset_idx = sl_src.find("_transitioning = false", swap_idx if swap_idx >= 0 else 0)
+        if swap_idx >= 0 and fade_in_idx >= 0 and trans_reset_idx >= 0:
+            if trans_reset_idx > fade_in_idx:
+                errors.append(
+                    "scene_loader.gd: _transitioning reset happens AFTER fade-in — "
+                    "this blocks back-button presses during the 0.20s fade window"
+                )
+    return errors
+
+
 def validate_glossary_no_near_duplicates(data: object) -> List[str]:
     """Flag glossary keys that differ only by case (e.g. 'MRR' vs 'mrr')."""
     errors: List[str] = []
@@ -1424,6 +1521,7 @@ def main() -> int:
         "product_preview_prototypes": DATA_DIR / "product_preview_prototypes.json",
         "achievements": DATA_DIR / "achievements.json",
         "feature_synergies": DATA_DIR / "feature_synergies.json",
+        "vc_dialogue": DATA_DIR / "vc_dialogue.json",
     }
     for p in paths.values():
         _require_file(p, errors)
@@ -1443,6 +1541,7 @@ def main() -> int:
         niches_data = _load_json(paths["niches"])
         product_preview_prototypes_data = _load_json(paths["product_preview_prototypes"])
         achievements_data = _load_json(paths["achievements"])
+        vc_dialogue_data = _load_json(paths["vc_dialogue"])
     except Exception as exc:
         print(f"[FAIL] JSON load error: {exc}")
         return 1
@@ -1456,6 +1555,7 @@ def main() -> int:
     errors.extend(validate_glossary(glossary_data))
     errors.extend(validate_glossary_no_near_duplicates(glossary_data))
     errors.extend(validate_vcs(vcs_data))
+    errors.extend(validate_vc_dialogue(vc_dialogue_data))
     errors.extend(validate_competitors(competitors_data))
     errors.extend(validate_niches(niches_data))
     errors.extend(validate_niche_competitor_coverage(niches_data, competitors_data))
@@ -1471,6 +1571,7 @@ def main() -> int:
     errors.extend(validate_scene_loader_usage())
     errors.extend(validate_button_script_contracts())
     errors.extend(validate_button_scene_contracts())
+    errors.extend(validate_back_button_navigation())
     errors.extend(validate_scroll_contracts())
     errors.extend(validate_serialization_coverage())
 
@@ -1483,11 +1584,11 @@ def main() -> int:
 
     print("Backend smoke check PASSED")
     print(
-        "Validated: features/events/world-events/headlines/glossary/vcs/competitors/niches/product-preview-prototypes "
+        "Validated: features/events/world-events/headlines/glossary/vcs/vc-dialogue/competitors/niches/product-preview-prototypes "
         "+ visual presets + difficulty wiring + monetization stability gate + version constant "
         "+ event cooldown reset + history snapshots + SceneLoader usage "
         "+ glossary near-dupes + niche-competitor coverage + headline quality "
-        "+ UI button wiring + scroll contracts + serialization coverage + achievements"
+        "+ UI button wiring + back-button navigation + scroll contracts + serialization coverage + achievements"
     )
     return 0
 

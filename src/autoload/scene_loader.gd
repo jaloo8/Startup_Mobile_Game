@@ -115,16 +115,20 @@ func _animate_scene_swap(path: String) -> void:
 	# Phase 2: swap the scene while the screen is black.
 	var swap_ok := _do_scene_swap(path)
 
+	# Unlock navigation immediately after the swap — the new scene is ready
+	# and the fade-in is purely cosmetic.  Keeping _transitioning locked during
+	# fade-in caused silent back-button failures when users tapped within the
+	# 0.20s fade window (Product / Finance / Market screens).
+	_transitioning = false
+
 	# Phase 3: fade from black (even on failure — don't leave the screen black).
 	var tw2 := create_tween()
 	if tw2 == null:
-		_transitioning = false
 		_transition_rect.modulate.a = 0.0
 		return
 	tw2.tween_property(_transition_rect, "modulate:a", 0.0, WIPE_FADE_IN) \
 		.set_ease(Tween.EASE_IN)
 	await tw2.finished
-	_transitioning = false
 
 
 func _do_scene_swap(path: String) -> bool:

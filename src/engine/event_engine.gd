@@ -261,6 +261,8 @@ static func _effective_event_weight(ev: EventData, context: Dictionary) -> float
 
 
 static func _build_context(state: Node) -> Dictionary:
+	if state.company == null or state.product == null or state.financials == null:
+		return {}
 	return {
 		"quarter": state.current_quarter,
 		"year": state.current_year,

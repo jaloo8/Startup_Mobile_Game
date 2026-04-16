@@ -268,5 +268,25 @@
     "term": "VC Chips",
     "short": "Soft currency earned through gameplay",
     "tip": "Chips are earned by shipping features, hitting milestones, completing quarters profitably, and returning after being away. Spend them to reveal extra hiring candidates, skip tough events, or boost feature progress. Chips make things faster but nothing requires them — every chip perk has a free alternative."
+  },
+  "users": {
+    "term": "Users",
+    "short": "How many people have signed up for your product",
+    "tip": "Total registered users. More users means more potential revenue — but only if they stick around. Watch your churn rate to make sure growth isn't just a leaky bucket."
+  },
+  "team_capacity": {
+    "term": "Team / Capacity",
+    "short": "How many employees you have versus your office limit",
+    "tip": "Your team size is limited by your current office. Upgrade your office to fit more people. A bigger team means more output across all work lanes — but also higher burn rate from salaries."
+  },
+  "bugs": {
+    "term": "Bugs",
+    "short": "Known issues in your product",
+    "tip": "Bugs pile up as you ship features, especially when tech debt is high. More bugs means higher churn — users get frustrated and leave. Assign engineers to Bug Fixes to squash them."
+  },
+  "reputation": {
+    "term": "Reputation",
+    "short": "How the industry perceives your company",
+    "tip": "Reputation affects hiring quality, fundraising success, and user trust. Ship great features, hit milestones, and avoid outages to build it up. A good reputation makes everything easier — a bad one makes everything harder."
   }
 }

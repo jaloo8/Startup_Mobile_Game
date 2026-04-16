@@ -30,6 +30,7 @@ extends Control
 @onready var decline_btn: Button = %DeclineButton
 
 var _current_offer: Dictionary = {}
+var _board_row: HBoxContainer  # HBox wrapper around board_label + info button
 var _quarter_delta_label: Label
 var _next_move_label: Label
 var _hosting_plan_picker: OptionButton
@@ -58,6 +59,7 @@ func _ready() -> void:
 	_wire_glossary(runway_title_btn, "runway")
 	_wire_glossary(%EquityTitle, "equity")
 	_wire_glossary(%ValuationTitle, "valuation")
+	_add_info_button_near(board_label, "board_patience")
 	_build_context_hints()
 	_build_hosting_controls()
 	_build_marketing_controls()
@@ -237,13 +239,14 @@ func _refresh() -> void:
 	_refresh_trend_chart()
 	_refresh_health_trend_chart()
 
+	var _board_container: Control = _board_row if _board_row else board_label
 	if GameState.financials.funding_rounds.is_empty():
-		board_label.visible = false
-	elif not board_label.visible:
-		board_label.visible = true
-		AnimHelper.fade_in(board_label, 0.0, 0.2)
+		_board_container.visible = false
+	elif not _board_container.visible:
+		_board_container.visible = true
+		AnimHelper.fade_in(_board_container, 0.0, 0.2)
 	else:
-		board_label.visible = true
+		_board_container.visible = true
 		var bp: int = GameState.board_patience
 		if bp >= 5:
 			board_label.text = "Board: Satisfied"
@@ -499,6 +502,31 @@ func _set_glossary_tooltip(btn: Control, glossary_key: String) -> void:
 	btn.tooltip_text = "\n".join(parts)
 
 
+func _add_info_button_near(target: Label, glossary_key: String) -> void:
+	if target == null:
+		return
+	var parent := target.get_parent()
+	if parent == null:
+		return
+	# Wrap the label + info button in an HBox so they sit side-by-side.
+	var idx := target.get_index()
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	parent.remove_child(target)
+	hbox.add_child(target)
+	var info_btn := Button.new()
+	info_btn.text = "ⓘ"
+	info_btn.flat = true
+	info_btn.custom_minimum_size = Vector2(32, 32)
+	info_btn.add_theme_font_size_override("font_size", 13)
+	info_btn.pressed.connect(Glossary.show_term.bind(glossary_key))
+	_set_glossary_tooltip(info_btn, glossary_key)
+	hbox.add_child(info_btn)
+	parent.add_child(hbox)
+	parent.move_child(hbox, idx)
+	_board_row = hbox
+
+
 func _trend_points(limit: int = 12) -> Array[Dictionary]:
 	var points: Array[Dictionary] = []
 	for item in GameState.history:
@@ -602,8 +630,24 @@ func _on_fundraise() -> void:
 		var firm_name: String = o.get("firm_name", "The firm")
 		var style: String = o.get("firm_style", "")
 		var reason: String = o.get("reason", "They passed.")
+		var opening: String = o.get("opening", "")
+		var reaction: String = o.get("reaction", "")
 		var header := "%s\n%s" % [firm_name, style] if not style.is_empty() else firm_name
-		offer_label.text = "%s\n\nYou pitched your %s round.\n\n\"%s\"\n\nTry again next quarter — or build more traction first." % [header, o["round"], reason]
+
+		var parts: Array[String] = [header, ""]
+		if not opening.is_empty():
+			parts.append("\"%s\"" % opening)
+			parts.append("")
+		parts.append("You pitched your %s round." % o["round"])
+		if not reaction.is_empty():
+			parts.append("")
+			parts.append("\"%s\"" % reaction)
+		parts.append("")
+		parts.append("\"%s\"" % reason)
+		parts.append("")
+		parts.append("Try again next quarter — or build more traction first.")
+		offer_label.text = "\n".join(parts)
+
 		accept_btn.visible = false
 		decline_btn.text = "Back to It"
 		offer_panel.visible = true
@@ -614,6 +658,8 @@ func _on_fundraise() -> void:
 	var firm_name: String = o.get("firm_name", "Investors")
 	var style: String = o.get("firm_style", "")
 	var tier: String = o.get("tier", "mid")
+	var opening: String = o.get("opening", "")
+	var offer_dialogue: String = o.get("offer_line", "")
 
 	var header := firm_name
 	if not style.is_empty():
@@ -630,14 +676,23 @@ func _on_fundraise() -> void:
 	else:
 		board_note = "\n\nNo board seat. They're hands-off for now."
 
-	offer_label.text = "%s%s\n\n%s Round\n\nOffering $%s at a $%s pre-money valuation.\n\nYou'd give up %.1f%% of the company.%s" % [
-		header, tier_label,
-		o["round"],
+	var parts: Array[String] = ["%s%s" % [header, tier_label], ""]
+	if not opening.is_empty():
+		parts.append("\"%s\"" % opening)
+		parts.append("")
+	if not offer_dialogue.is_empty():
+		parts.append("\"%s\"" % offer_dialogue)
+		parts.append("")
+	parts.append("%s Round" % o["round"])
+	parts.append("")
+	parts.append("Offering $%s at a $%s pre-money valuation." % [
 		SceneLoader.format_money(o["amount"]),
 		SceneLoader.format_money(o["valuation"]),
-		o["dilution"],
-		board_note,
-	]
+	])
+	parts.append("")
+	parts.append("You'd give up %.1f%% of the company.%s" % [o["dilution"], board_note])
+	offer_label.text = "\n".join(parts)
+
 	accept_btn.visible = true
 	decline_btn.text = "Walk Away"
 	offer_panel.visible = true
@@ -655,7 +710,11 @@ func _on_accept_offer() -> void:
 	FundraisingEngine.accept_offer(GameState, _current_offer)
 	SfxPlayer.play("fundraise")
 	AnimHelper.haptic(&"heavy")
-	ToastManager.show("Raised $%s! 🎉" % SceneLoader.format_money(amount), "💰", ThemeManager.C_GOLD)
+	var accept_msg: String = FundraisingEngine.acceptance_line()
+	if not accept_msg.is_empty():
+		ToastManager.show("\"%s\" — Raised $%s! 🎉" % [accept_msg, SceneLoader.format_money(amount)], "💰", ThemeManager.C_GOLD)
+	else:
+		ToastManager.show("Raised $%s! 🎉" % SceneLoader.format_money(amount), "💰", ThemeManager.C_GOLD)
 
 	# --- Fundraise celebration (scaled to round size) ---
 	# Screen flash — green for money!
@@ -705,6 +764,8 @@ func _on_decline_offer() -> void:
 
 
 func _on_back() -> void:
+	if OS.is_debug_build():
+		print("[Finance] _on_back() called — transitioning=%s" % SceneLoader._transitioning)
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
 

@@ -42,6 +42,7 @@ const TIER_ROUND_MATCH: Dictionary = {
 }
 
 const VCS_PATH := "res://src/data/vcs.json"
+const DIALOGUE_PATH := "res://src/data/vc_dialogue.json"
 const TYPE_TO_FOCUS: Dictionary = {
 	CompanyData.CompanyType.SAAS: "saas",
 	CompanyData.CompanyType.CONSUMER: "consumer",
@@ -50,6 +51,7 @@ const TYPE_TO_FOCUS: Dictionary = {
 }
 
 static var _firms: Array[Dictionary] = []
+static var _dialogue: Dictionary = {}  # Loaded from vc_dialogue.json
 
 
 static func _load_firms() -> void:
@@ -141,6 +143,8 @@ static func generate_offer(state: Node) -> Dictionary:
 			"tier": tier,
 			"round": round_name,
 			"reason": _rejection_reason(tier, quality_signal),
+			"opening": pitch_opening(tier),
+			"reaction": reaction_line(quality_signal),
 		}
 
 	var effective_min: float = float(round_info["min"])
@@ -176,6 +180,8 @@ static func generate_offer(state: Node) -> Dictionary:
 		"valuation": valuation,
 		"dilution": dilution,
 		"board_seat": wants_board_seat,
+		"opening": pitch_opening(tier),
+		"offer_line": offer_line(),
 	}
 
 
@@ -235,13 +241,95 @@ static func _pick_firm(state: Node, round_type: Round, quality: float) -> Dictio
 
 
 static func _rejection_reason(tier: String, _quality: float) -> String:
-	match tier:
-		"elite":
-			return ["Not enough traction for our thesis right now.", "We loved the pitch, but we need to see stronger unit economics.", "Impressive team, but the market fit isn't there yet for us."].pick_random()
-		"top":
-			return ["We're going to pass for now — come back when you hit $1M ARR.", "The space is interesting but we need more proof points.", "Good foundation, but we'd want to see faster growth before committing."].pick_random()
-		_:
-			return ["We'll keep in touch. Not the right time for us.", "Interesting business, but not quite the fit we're looking for this fund.", "We appreciate the meeting. Let's reconnect next quarter."].pick_random()
+	_ensure_dialogue()
+	var rejections: Dictionary = _dialogue.get("rejections", {}) if _dialogue.get("rejections") is Dictionary else {}
+	var tier_lines: Array = rejections.get(tier, []) if rejections.get(tier) is Array else []
+	if not tier_lines.is_empty():
+		return str(tier_lines.pick_random())
+	# Fallback: try mid tier, then generic.
+	var mid_lines: Array = rejections.get("mid", []) if rejections.get("mid") is Array else []
+	if not mid_lines.is_empty():
+		return str(mid_lines.pick_random())
+	return "We'll keep in touch. Not the right time for us."
+
+
+## Pick a contextual opening line for the VC meeting.
+static func pitch_opening(tier: String) -> String:
+	_ensure_dialogue()
+	var openings: Array = _dialogue.get("openings", []) if _dialogue.get("openings") is Array else []
+	if openings.is_empty():
+		return ""
+	# Prefer tier-matched openings, but fall back to generic ones.
+	var matched: Array[String] = []
+	var generic: Array[String] = []
+	for entry: Variant in openings:
+		if not entry is Dictionary:
+			continue
+		var d: Dictionary = entry as Dictionary
+		var text: String = str(d.get("text", ""))
+		if text.is_empty():
+			continue
+		var entry_tier: String = str(d.get("tier", ""))
+		if entry_tier.is_empty():
+			generic.append(text)
+		elif entry_tier == tier:
+			matched.append(text)
+	if not matched.is_empty() and randf() > 0.4:
+		return matched.pick_random()
+	if not generic.is_empty():
+		return generic.pick_random()
+	return ""
+
+
+## Pick an offer line — the VC's words when presenting the term sheet.
+static func offer_line() -> String:
+	_ensure_dialogue()
+	var lines: Array = _dialogue.get("offer_lines", []) if _dialogue.get("offer_lines") is Array else []
+	if lines.is_empty():
+		return "We'd like to move forward. Here's what we're thinking."
+	return str(lines.pick_random())
+
+
+## Pick a celebration line after the founder accepts the deal.
+static func acceptance_line() -> String:
+	_ensure_dialogue()
+	var lines: Array = _dialogue.get("acceptance_celebrations", []) if _dialogue.get("acceptance_celebrations") is Array else []
+	if lines.is_empty():
+		return "Welcome to the portfolio."
+	return str(lines.pick_random())
+
+
+## Pick a reaction line based on company strength signal.
+static func reaction_line(quality: float) -> String:
+	_ensure_dialogue()
+	var key: String
+	if quality >= 0.5:
+		key = "reactions_positive"
+	elif quality >= 0.25:
+		key = "reactions_neutral"
+	else:
+		key = "reactions_negative"
+	var lines: Array = _dialogue.get(key, []) if _dialogue.get(key) is Array else []
+	if lines.is_empty():
+		return ""
+	return str(lines.pick_random())
+
+
+static func _ensure_dialogue() -> void:
+	if not _dialogue.is_empty():
+		return
+	if not FileAccess.file_exists(DIALOGUE_PATH):
+		return
+	var file := FileAccess.open(DIALOGUE_PATH, FileAccess.READ)
+	if file == null:
+		return
+	var text := file.get_as_text()
+	file = null
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return
+	if json.data is Dictionary:
+		_dialogue = json.data
 
 
 static func _company_strength(state: Node) -> float:

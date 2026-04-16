@@ -1,0 +1,143 @@
+{
+  "_mod_info": "Dialogue lines spoken by VCs during fundraising meetings. Each category is used at a specific point in the pitch flow. Lines are picked randomly, filtered by tier/economy/round when those fields are present.",
+
+  "openings": [
+    {"text": "We've been watching your space. Walk us through the numbers."},
+    {"text": "Our partners were split on taking this meeting. Convince us."},
+    {"text": "We read the deck. Now tell us what the deck doesn't say."},
+    {"text": "I've got 30 minutes. Make me believe."},
+    {"text": "Interesting space. The question is whether you can own it."},
+    {"text": "So. You're burning how much per quarter?", "tone": "skeptical"},
+    {"text": "A friend of a friend vouched for you. That bought you this meeting."},
+    {"text": "We took a similar meeting last week. They didn't get a second one."},
+    {"text": "I'll be honest — I almost passed on this. Glad I didn't cancel.", "tone": "warm"},
+    {"text": "Let's skip the vision slide. What's actually working?", "tone": "direct"},
+    {"text": "We like the sector. The real question is why you and why now."},
+    {"text": "My partner says your metrics remind her of a company we backed in '19."},
+    {"text": "We've funded six companies in this space. Tell us what you'd do differently."},
+    {"text": "First — before we get into anything — who's your customer and what's the pain?"},
+    {"text": "I read the blog post your CTO published last month. Thoughtful stuff. Let's talk."},
+    {"text": "Alright, the floor is yours. No slides, just talk to us.", "tier": "elite"},
+    {"text": "We don't usually take meetings this early. Your growth curve got our attention.", "tier": "elite"},
+    {"text": "Our thesis is about markets, not products. Tell us about the market.", "tier": "top"},
+    {"text": "Quick ground rules: we're going to challenge every number. Don't take it personally.", "tier": "top"},
+    {"text": "We keep things informal. Grab a coffee and tell us the story.", "tier": "emerging"},
+    {"text": "We're an early believer fund. Proof points matter less than founder conviction.", "tier": "emerging"}
+  ],
+
+  "questions": [
+    {"text": "What does your retention look like after 90 days?", "focus": "growth"},
+    {"text": "Walk me through unit economics. What's your CAC to LTV?", "focus": "revenue"},
+    {"text": "What happens when a bigger player copies your main feature?", "focus": "moat"},
+    {"text": "Tell me about a decision you almost got wrong.", "focus": "founder"},
+    {"text": "If we gave you double the money, what would you do differently?", "focus": "strategy"},
+    {"text": "What's the one metric that keeps you up at night?", "focus": "growth"},
+    {"text": "How do you think about pricing power as you scale?", "focus": "revenue"},
+    {"text": "Where does the next 10x in users come from?", "focus": "growth"},
+    {"text": "Tell me about your team. Who's employee number one?", "focus": "team"},
+    {"text": "What's your honest assessment of your biggest competitor right now?", "focus": "moat"},
+    {"text": "Walk me through your worst quarter. What did you learn?", "focus": "founder"},
+    {"text": "How are you thinking about international expansion?", "focus": "strategy"},
+    {"text": "If the market turns tomorrow, how many quarters can you survive?", "focus": "runway"},
+    {"text": "What would make you walk away from this company?", "focus": "founder"},
+    {"text": "What part of the product are you most proud of shipping?", "focus": "product"}
+  ],
+
+  "reactions_positive": [
+    "Those numbers are better than I expected. Let's keep talking.",
+    "OK — now you have my attention.",
+    "That's a growth rate we don't see often at this stage.",
+    "Solid. That's the kind of trajectory that compounds.",
+    "Our portfolio company in this space would kill for those metrics.",
+    "I just texted my partner. She's going to want to hear this too.",
+    "This is cleaner than most Series A decks I see. And you're earlier.",
+    "Good margins. Good retention. You're doing something right."
+  ],
+
+  "reactions_neutral": [
+    "Interesting. Not where I expected it to be, but interesting.",
+    "The numbers tell a mixed story. Walk me through the trend lines.",
+    "There's signal here, but I'm not sure it's strong enough yet.",
+    "We've seen similar traction. The question is whether it holds.",
+    "Decent foundation. I'd want to see another quarter before committing.",
+    "Some of these numbers land, some don't. Let's unpack that.",
+    "It's early. Hard to call at this stage.",
+    "You're in the zone where this could break either way."
+  ],
+
+  "reactions_negative": [
+    "I'll be candid — these numbers are below our threshold.",
+    "The burn concerns me. You're spending faster than you're learning.",
+    "I see the vision, but the metrics don't support it yet.",
+    "You're going to have a hard time raising at this valuation with these numbers.",
+    "We've passed on stronger traction in this space. I'll be honest with you.",
+    "This feels too early for us. Come back with stronger proof points.",
+    "I want to be excited, but the churn is telling me something.",
+    "Your team is promising. The numbers aren't there yet."
+  ],
+
+  "offer_lines": [
+    "We'd like to move forward. Here's what we're thinking.",
+    "We want in. Let me lay out the terms.",
+    "Good meeting. We're prepared to make an offer today.",
+    "My partners and I talked it over. We'd like to be part of this.",
+    "Let's cut to it — we want to invest. Here are the terms.",
+    "We believe in what you're building. This is what we can do.",
+    "I called my partners on the way back. We have a term sheet ready.",
+    "Don't sign anything else yet. We want to lead this round."
+  ],
+
+  "rejections": {
+    "elite": [
+      "Not enough traction for our thesis right now.",
+      "We loved the pitch, but we need to see stronger unit economics.",
+      "Impressive team, but the market fit isn't there yet for us.",
+      "We have a portfolio conflict in this space. Can't move forward.",
+      "The opportunity size doesn't match our fund model. Come back when you're bigger.",
+      "We're going to pass. But I'd take your next meeting with our growth fund.",
+      "Candidly, we think the market timing is off. Check back in two quarters.",
+      "Strong founder. But we need to see revenue, not projections.",
+      "Our investment committee couldn't get to consensus. That's a no for now."
+    ],
+    "top": [
+      "We're going to pass for now — come back when you hit $1M ARR.",
+      "The space is interesting but we need more proof points.",
+      "Good foundation, but we'd want to see faster growth before committing.",
+      "We like you as a founder. The business needs more seasoning.",
+      "Too early for our stage. Have you talked to seed funds?",
+      "We just closed a deal in adjacent territory. Conflict of interest.",
+      "The competitive landscape gives us pause. Too many well-funded players.",
+      "There's something here, but we can't get comfortable on the valuation."
+    ],
+    "mid": [
+      "We'll keep in touch. Not the right time for us.",
+      "Interesting business, but not quite the fit we're looking for this fund.",
+      "We appreciate the meeting. Let's reconnect next quarter.",
+      "We're overallocated in this sector right now. Bad timing.",
+      "Not a no forever — just a no right now. Keep building.",
+      "We need to see more traction before we can pull the trigger.",
+      "Good pitch. We're going to marinate on it. Follow up in 90 days.",
+      "We like what you're doing but our partners want to see a trend, not a moment."
+    ],
+    "emerging": [
+      "This is a bit beyond our check size at this stage. We wish you well.",
+      "We're a smaller fund. Can't stretch to this round size.",
+      "We love the mission, but our portfolio is full this quarter.",
+      "Honestly, you should be talking to bigger firms. You've outgrown us.",
+      "We'd have said yes six months ago. Our fund is mostly deployed now.",
+      "Not the right fit for our thesis, but I'm going to make an intro for you.",
+      "We admire the hustle. The economics just aren't there for our model yet."
+    ]
+  },
+
+  "acceptance_celebrations": [
+    "Welcome to the portfolio. Now the real work begins.",
+    "Deal closed. Let's go build something.",
+    "You just leveled up. Don't let the money make you lazy.",
+    "Congrats. I'll introduce you to three companies in our network this week.",
+    "Money's wiring now. Spend it wisely — we'll be watching.",
+    "Great outcome. Now hit those milestones or our next meeting will be different.",
+    "We backed you because we believe. Prove us right.",
+    "The hard part wasn't raising. The hard part starts now."
+  ]
+}

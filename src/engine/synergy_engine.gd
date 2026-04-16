@@ -111,7 +111,7 @@ static func _apply_synergy(synergy: Dictionary, state: Node) -> void:
 		if fx.has("dau_bonus"):
 			product.dau_bonus += float(fx["dau_bonus"])
 		if fx.has("revenue_mult"):
-			product.revenue_mult *= float(fx["revenue_mult"])
+			product.revenue_mult = clampf(product.revenue_mult * float(fx["revenue_mult"]), 0.1, 5.0)
 		if fx.has("stability_bonus"):
 			product.stability = mini(product.stability + int(fx["stability_bonus"]), 100)
 

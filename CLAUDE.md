@@ -34,8 +34,9 @@ These exist because previous sessions skimmed instead of reading, missed items, 
 | **Platforms** | iOS, Android (Steam future possibility) |
 | **Studio** | Water Hazard Studios |
 | **Contact** | Water.Hazard.Studios@gmail.com |
-| **Monetization** | $2.99 premium unlock (free trial: 8 quarters / Year 2). DLC $2.99 each. |
-| **Launch target** | Mid-May 2026 |
+| **Monetization** | Free download + $2.99 IAP unlock (free trial: Sandbox only, 8 quarters / Year 2). DLC $2.99 each. |
+| **Launch strategy** | Free-first: soft launch free in 1 market → collect conversion data → worldwide. Difficulty gated behind premium (free=Sandbox, paid=Normal/Hardcore). |
+| **Launch target** | Late May 2026 |
 | **Test devices** | iPhone 14, Samsung Galaxy S20 Ultra, iPad Pro 11" |
 
 **One-line pitch:** "Pocket GM 3, but for tech startups — a premium mobile management sim where you build a company from garage to IPO."
@@ -140,7 +141,7 @@ These are registered in `project.godot` under `[autoload]` and available globall
 | MarketData | `src/models/market_data.gd` | competitors, economy_state, market_trend |
 | EventData | `src/models/event_data.gd` | id, title, category, choices, effects, trigger_conditions |
 
-### JSON Data Files (13)
+### JSON Data Files (14)
 | File | Contents | Count |
 |------|----------|-------|
 | `events.json` | Narrative events with choices | ~50 |
@@ -148,13 +149,14 @@ These are registered in `project.godot` under `[autoload]` and available globall
 | `competitors.json` | AI competitor companies | 86 |
 | `features.json` | Buildable product features | 40 (10 per type) |
 | `feature_synergies.json` | Feature combo bonuses | varies |
-| `headlines.json` | News ticker templates | 67+ |
+| `headlines.json` | News ticker templates | 152 |
 | `bios.json` | Employee backstories | 72 |
 | `names.json` | Name generation data | varies |
 | `niches.json` | Market niches per company type | varies |
 | `vcs.json` | VC firm data with preferences | varies |
+| `vc_dialogue.json` | VC pitch dialogue variations | 108 |
 | `achievements.json` | Achievement definitions | 40 |
-| `glossary.json` | In-game term definitions | varies |
+| `glossary.json` | In-game term definitions | 37 |
 | `product_preview_prototypes.json` | Product mockup concepts | varies |
 
 ---
@@ -182,11 +184,13 @@ Player visits screens in any order, then hits "Advance Quarter." PGM3-style: do 
 | **Dev Tools** | Developer Ecosystem (DX, docs, community) | API calls, SDK installs | Usage-based pricing |
 
 ### 3 Difficulty Modes
-| Mode | Description |
-|------|-------------|
-| Sandbox | Extra starting cash, slower competitors, forgiving market. Learning mode. |
-| Normal | Realistic startup economics. Tight budget, real competition. |
-| Hardcore | Minimal runway, aggressive competitors, realistic failure rates. |
+| Mode | Description | Access |
+|------|-------------|--------|
+| Sandbox | Extra starting cash, slower competitors, forgiving market. Learning mode. | **Free + Premium** |
+| Normal | Realistic startup economics. Tight budget, real competition. | **Premium only** |
+| Hardcore | Minimal runway, aggressive competitors, realistic failure rates. | **Premium only** |
+
+**Free-tier flow:** Difficulty selector is hidden. Free players auto-start in Sandbox. This reduces onboarding friction (fewer choices) and gives free players the best chance of enjoying the game before hitting the Q8 paywall. Normal/Hardcore show "Unlock with Premium" badges for premium users.
 
 ### 6 Starting Scenarios
 Garage ($20K), Accelerator ($125K), Corporate Spinoff ($500K), VC-Backed ($2M), Growth Operator ($8M), Scale Chief ($30M)
@@ -246,11 +250,11 @@ Engineer, Finance, Recruiter, Hustler — plus Custom (distribute 20 points) and
 | Events | ~50 | 50+ (with 3-5 variations each) | Variations needed |
 | World Events | 26 | 26+ | Met |
 | Employee Bios | 72 | 200 | Need ~128 more |
-| Headlines | 67+ | 150 | Need ~83 more |
+| Headlines | 152 | 150 | ✅ Met |
 | Competitors | 86 | 100+ | Need ~14 more |
 | Achievements | 40 | 40 | Met |
 | Features (per type) | 10 | 10 | Met |
-| VC Pitch Dialogue Variations | 0 | 30+ | Not started |
+| VC Pitch Dialogue Variations | 108 | 30+ | ✅ Met |
 | Quarterly Report Templates | ~1 | 20+ | Not started |
 | Game Over Postmortem Templates | 0 | 10+ | Not started |
 | Competitor Description Templates | 86 | 50+ | Met |
@@ -644,15 +648,18 @@ Before committing any content changes:
 2. Google Play Console enrollment ($25) — user hasn't done this yet
 3. First device build — never run on a real phone
 4. `MONETIZATION_TEMP_DISABLED = false` + IAP plugin wiring
-5. Store listing assets (screenshots — copy is done)
-6. Beta testing (TestFlight / Play Store internal track)
-7. Build Queue UI — backend done, product overview screen needs multi-slot display
-8. **founder_hustler.png** has real social media logos (LinkedIn, Instagram, Twitter) — needs regeneration with generic icons
+5. **Free-tier difficulty gating** — hide difficulty selector for free users, auto-Sandbox, "Unlock with Premium" on Normal/Hardcore
+6. **Free-tier onboarding flow** — skip difficulty selection entirely for free users (fewer taps)
+7. Store listing assets (screenshots — copy is done)
+8. **Soft launch free in 1 market** — collect conversion data before worldwide
+9. Beta testing (TestFlight / Play Store internal track)
+10. Build Queue UI — backend done, product overview screen needs multi-slot display
+11. **founder_hustler.png** has real social media logos (LinkedIn, Instagram, Twitter) — needs regeneration with generic icons
 
 ### What Needs Content Work
 - Employee bios: 72 → 200 (need 128 more)
-- Headlines: 67 → 150 (need 83 more)
-- VC dialogue variations: 0 → 30+
+- Headlines: ✅ 152 (target: 150)
+- VC Pitch Dialogue: ✅ 108 lines across 8 categories (target: 30+)
 - Quarterly report templates: ~1 → 20+
 - Game over postmortem templates: 0 → 10+
 - Event description variations: 1 each → 3-5 each

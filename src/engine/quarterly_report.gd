@@ -8,6 +8,8 @@ extends RefCounted
 
 
 static func generate(state: Node) -> Array[String]:
+	if state.company == null or state.product == null or state.financials == null or state.market == null:
+		return [] as Array[String]
 	var bullets: Array[String] = []
 	var history: Array[Dictionary] = state.history
 

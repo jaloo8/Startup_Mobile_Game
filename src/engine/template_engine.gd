@@ -22,6 +22,8 @@ static func _strip_unresolved(text: String) -> String:
 
 
 static func build_context(state: Node, extra: Dictionary = {}) -> Dictionary:
+	if state.company == null or state.product == null or state.financials == null or state.market == null:
+		return extra.duplicate()
 	var ctx: Dictionary = {
 		"company_name": state.company.company_name,
 		"company_type": state.company.type_name(),

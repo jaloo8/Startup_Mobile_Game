@@ -91,6 +91,9 @@ func _ready() -> void:
 	%StabilityTitle.pressed.connect(Glossary.show_term.bind("stability"))
 	%UxTitle.pressed.connect(Glossary.show_term.bind("ux_score"))
 	%ChurnTitle.pressed.connect(Glossary.show_term.bind("churn_rate"))
+	%BugsTitle.pressed.connect(Glossary.show_term.bind("bugs"))
+	%UsersTitle.pressed.connect(Glossary.show_term.bind("users"))
+	_add_features_info_button()
 	picker_panel.visible = false
 	build_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
@@ -144,6 +147,30 @@ func _refresh_product_visual() -> void:
 			var cost: float = maxf(1.0, float(target.get("cost", 100)) * GameState.product.feature_cost_multiplier())
 			var progress_01: float = clampf(GameState.product.feature_progress / cost, 0.0, 1.0)
 			product_visual.set_build_preview(target.get("id", ""), progress_01)
+
+
+func _add_features_info_button() -> void:
+	if features_label == null:
+		return
+	var parent := features_label.get_parent()
+	if parent == null:
+		return
+	var idx := features_label.get_index()
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	parent.remove_child(features_label)
+	hbox.add_child(features_label)
+	var info_btn := Button.new()
+	info_btn.text = "ⓘ"
+	info_btn.flat = true
+	info_btn.custom_minimum_size = Vector2(32, 32)
+	info_btn.add_theme_font_size_override("font_size", 13)
+	info_btn.pressed.connect(Glossary.show_term.bind("feature_tree"))
+	if Glossary.has_term("feature_tree"):
+		info_btn.tooltip_text = Glossary.get_tip("feature_tree")
+	hbox.add_child(info_btn)
+	parent.add_child(hbox)
+	parent.move_child(hbox, idx)
 
 
 func _build_eta_label() -> void:

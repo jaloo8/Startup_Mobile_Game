@@ -17,6 +17,7 @@ var _scroll: ScrollContainer
 var _vbox: VBoxContainer
 var _inspector_label: Label
 var _status_label: Label
+var _flash_tween: Tween
 var _god_mode_btn: Button
 var _load_btns: Array[Button] = []
 
@@ -365,14 +366,20 @@ func _build_product() -> void:
 	_vbox.add_child(quick_row)
 
 	_add_action_btn(quick_row, "Ship Feature", ThemeManager.C_BLUE, func():
-		if GameState.product == null: return
-		if GameState.product.current_feature_name.is_empty():
+		if GameState.product == null or GameState.company == null: return
+		if GameState.product.build_queue.is_empty():
 			_flash("No feature in progress"); return
-		var fid: String = GameState.product.slot_feature_id(0)
-		var fname := GameState.product.current_feature_name
+		var slot: Dictionary = GameState.product.build_queue[0]
+		var fid: String = slot.get("feature_id", "")
+		# Resolve human-readable name: temporarily set target_feature_id so
+		# get_target_feature() can look it up in the catalog.
+		var old_target := GameState.product.target_feature_id
+		GameState.product.target_feature_id = fid
+		var fdef := GameState.product.get_target_feature(GameState.company.type)
+		GameState.product.target_feature_id = old_target
+		var fname: String = fdef.get("name", fid) if not fdef.is_empty() else fid
 		GameState.product.add_feature(fname, 80, GameState.current_quarter, fid)
 		GameState.product.remove_build(fid)
-		GameState.product.current_feature_name = ""
 		_flash("Shipped feature: %s (quality 80)" % fname)
 	)
 
@@ -430,7 +437,7 @@ func _build_fundraising() -> void:
 	_vbox.add_child(row)
 
 	_add_action_btn(row, "Generate Offer", ThemeManager.C_GOLD, func():
-		if GameState.company == null:
+		if GameState.company == null or GameState.financials == null:
 			_flash("No active game"); return
 		var offer := FundraisingEngine.generate_offer(GameState)
 		if offer.get("rejected", false):
@@ -445,7 +452,7 @@ func _build_fundraising() -> void:
 	)
 
 	_add_action_btn(row, "Accept Offer", ThemeManager.C_GREEN, func():
-		if GameState.company == null:
+		if GameState.company == null or GameState.financials == null:
 			_flash("No active game"); return
 		var offer := FundraisingEngine.generate_offer(GameState)
 		if offer.get("rejected", false):
@@ -634,7 +641,8 @@ func _on_export_state() -> void:
 	state["quarter"] = GameState.current_quarter
 	state["year"] = GameState.current_year
 	state["total_quarters"] = GameState.total_quarters_elapsed()
-	print(JSON.stringify(state, "\t"))
+	if OS.is_debug_build():
+		print(JSON.stringify(state, "\t"))
 	ToastManager.show("State exported to console")
 
 
@@ -841,9 +849,11 @@ func _flash(msg: String) -> void:
 		return
 	_status_label.text = msg
 	_status_label.modulate.a = 1.0
-	var tw := create_tween()
-	tw.tween_interval(1.5)
-	tw.tween_property(_status_label, "modulate:a", 0.0, 0.5)
+	if _flash_tween and _flash_tween.is_running():
+		_flash_tween.kill()
+	_flash_tween = create_tween()
+	_flash_tween.tween_interval(1.5)
+	_flash_tween.tween_property(_status_label, "modulate:a", 0.0, 0.5)
 
 
 # ===========================================================================

@@ -90,7 +90,9 @@ func _ready() -> void:
 	hire_btn.pressed.connect(_on_hire_pressed)
 	back_btn.pressed.connect(_on_back)
 	candidate_panel.visible = false
+	_add_capacity_info()
 	_build_sort_buttons()
+	_set_sort_tooltips()
 	_build_allocation_hint_label()
 	_update_hire_button()
 	_refresh_list()
@@ -108,6 +110,8 @@ func _exit_tree() -> void:
 
 
 func _update_hire_button() -> void:
+	if GameState.company == null:
+		return
 	if GameState.employees.size() >= GameState.company.office_capacity():
 		hire_btn.disabled = true
 		hire_btn.text = "Office Full — Upgrade in Finances to hire more"
@@ -124,6 +128,46 @@ func _update_hire_button() -> void:
 	hire_btn.disabled = false
 	hire_btn.text = "Post Job Listing ($%sK)" % str(snapped(POSTING_FEE / 1000.0, 0.1))
 	hire_btn.modulate = Color(1, 1, 1, 1)
+
+
+func _add_capacity_info() -> void:
+	if capacity_label == null:
+		return
+	var parent := capacity_label.get_parent()
+	if parent == null:
+		return
+	# Wrap capacity_label + info button in an HBox so they sit side-by-side.
+	var idx := capacity_label.get_index()
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	parent.remove_child(capacity_label)
+	hbox.add_child(capacity_label)
+	var info_btn := Button.new()
+	info_btn.text = "ⓘ"
+	info_btn.flat = true
+	info_btn.custom_minimum_size = Vector2(32, 32)
+	info_btn.add_theme_font_size_override("font_size", 13)
+	info_btn.pressed.connect(Glossary.show_term.bind("team_capacity"))
+	if Glossary.has_term("team_capacity"):
+		info_btn.tooltip_text = Glossary.get_tip("team_capacity")
+	hbox.add_child(info_btn)
+	parent.add_child(hbox)
+	parent.move_child(hbox, idx)
+
+
+func _set_sort_tooltips() -> void:
+	# Map sort keys to glossary keys where an entry exists.
+	var sort_glossary_map: Dictionary = {
+		SortKey.SKILL: "skill",
+		SortKey.MORALE: "morale",
+	}
+	for key in sort_glossary_map:
+		if not _sort_buttons.has(key):
+			continue
+		var btn: Button = _sort_buttons[key]
+		var glossary_key: String = sort_glossary_map[key]
+		if Glossary.has_term(glossary_key):
+			btn.tooltip_text = "%s — %s" % [Glossary.get_term(glossary_key), Glossary.get_short(glossary_key)]
 
 
 func _build_sort_buttons() -> void:
@@ -163,15 +207,20 @@ func _build_sort_hint_label() -> void:
 func _build_allocation_hint_label() -> void:
 	if _allocation_hint_label != null:
 		return
-	var parent := capacity_label.get_parent()
-	if parent == null:
+	# capacity_label may be wrapped in an HBox by _add_capacity_info(),
+	# so walk up to the VBox that owns the layout.
+	var cap_wrapper := capacity_label.get_parent()
+	if cap_wrapper == null:
+		return
+	var vbox := cap_wrapper.get_parent() if cap_wrapper is HBoxContainer else cap_wrapper
+	if vbox == null:
 		return
 	_allocation_hint_label = Label.new()
 	_allocation_hint_label.add_theme_font_size_override("font_size", ThemeManager.FONT_XS)
 	_allocation_hint_label.add_theme_color_override("font_color", ThemeManager.C_TEXT_HINT)
 	_allocation_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	parent.add_child(_allocation_hint_label)
-	parent.move_child(_allocation_hint_label, capacity_label.get_index() + 1)
+	vbox.add_child(_allocation_hint_label)
+	vbox.move_child(_allocation_hint_label, cap_wrapper.get_index() + 1)
 
 
 func _responsibility_stage() -> String:
@@ -340,6 +389,9 @@ func _sorted_employees() -> Array[EmployeeData]:
 
 func _refresh_list() -> void:
 	SceneLoader.free_children(list_container)
+
+	if GameState.company == null:
+		return
 
 	capacity_label.text = "Team: %d / %d (%s)" % [
 		GameState.employees.size(),

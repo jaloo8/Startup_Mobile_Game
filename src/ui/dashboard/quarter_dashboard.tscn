@@ -193,9 +193,12 @@ layout_mode = 2
 text = "∞"
 horizontal_alignment = 2
 
-[node name="UsersTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="UsersTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Users"
+flat = true
+alignment = 0
+text = "Users  ⓘ"
 
 [node name="UsersLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
@@ -203,9 +206,12 @@ layout_mode = 2
 text = "0"
 horizontal_alignment = 2
 
-[node name="TeamTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="TeamTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Team"
+flat = true
+alignment = 0
+text = "Team  ⓘ"
 
 [node name="EmployeesLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true

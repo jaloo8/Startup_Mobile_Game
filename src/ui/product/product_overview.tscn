@@ -122,18 +122,24 @@ max_value = 100.0
 value = 50.0
 show_percentage = true
 
-[node name="BugsTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="BugsTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Bugs"
+flat = true
+alignment = 0
+text = "Bugs  ⓘ"
 
 [node name="BugsLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "0"
 
-[node name="UsersTitle" type="Label" parent="MarginContainer/VBox/StatsGrid"]
+[node name="UsersTitle" type="Button" parent="MarginContainer/VBox/StatsGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Users"
+flat = true
+alignment = 0
+text = "Users  ⓘ"
 
 [node name="UsersLabel" type="Label" parent="MarginContainer/VBox/StatsGrid"]
 unique_name_in_owner = true

@@ -20,6 +20,8 @@ extends Control
 @onready var revenue_title_btn: Button = %RevenueTitle
 @onready var burn_title_btn: Button = %BurnTitle
 @onready var runway_title_btn: Button = %RunwayTitle
+@onready var users_title_btn: Button = %UsersTitle
+@onready var team_title_btn: Button = %TeamTitle
 @onready var advance_btn: Button = %AdvanceButton
 @onready var people_btn: Button = %PeopleButton
 @onready var product_btn: Button = %ProductButton
@@ -131,8 +133,11 @@ func _ready() -> void:
 	_wire_glossary_button(revenue_title_btn, "quarterly_revenue")
 	_wire_glossary_button(burn_title_btn, "quarterly_burn")
 	_wire_glossary_button(runway_title_btn, "runway")
+	_wire_glossary_button(users_title_btn, "users")
+	_wire_glossary_button(team_title_btn, "team_capacity")
 	if key_metric_title:
 		key_metric_title.pressed.connect(_on_key_metric_info_pressed)
+	_wire_status_info_buttons()
 
 	GameState.quarter_advanced.connect(_refresh)
 	GameState.game_over.connect(_on_game_over)
@@ -218,6 +223,38 @@ func _apply_plain_finance_titles() -> void:
 		burn_title_btn.text = "Burn Rate (Qtr) ⓘ"
 	if runway_title_btn:
 		runway_title_btn.text = "Runway (Time Left) ⓘ"
+	if users_title_btn:
+		users_title_btn.text = "Users ⓘ"
+	if team_title_btn:
+		team_title_btn.text = "Team ⓘ"
+
+
+func _wire_status_info_buttons() -> void:
+	# Add ⓘ buttons next to Economy and Energy labels in the StatusRow.
+	var status_row := economy_label.get_parent()
+	if status_row == null:
+		return
+
+	var econ_info := Button.new()
+	econ_info.text = "ⓘ"
+	econ_info.flat = true
+	econ_info.custom_minimum_size = Vector2(32, 32)
+	econ_info.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	econ_info.pressed.connect(Glossary.show_term.bind("economy_state"))
+	econ_info.tooltip_text = Glossary.get_tip("economy_state") if Glossary.has_term("economy_state") else ""
+	status_row.add_child(econ_info)
+	status_row.move_child(econ_info, economy_label.get_index() + 1)
+
+	var energy_info := Button.new()
+	energy_info.text = "ⓘ"
+	energy_info.flat = true
+	energy_info.custom_minimum_size = Vector2(32, 32)
+	energy_info.add_theme_font_size_override("font_size", ThemeManager.FONT_SM)
+	energy_info.pressed.connect(Glossary.show_term.bind("founder_energy"))
+	energy_info.tooltip_text = Glossary.get_tip("founder_energy") if Glossary.has_term("founder_energy") else ""
+	status_row.add_child(energy_info)
+	# energy_label is after economy_label; the energy_info goes right after energy_label.
+	status_row.move_child(energy_info, energy_label.get_index() + 1)
 
 
 func _exit_tree() -> void:
@@ -232,6 +269,12 @@ func _exit_tree() -> void:
 	_safe_disconnect(GameState.event_triggered, _on_event)
 	_safe_disconnect(GameState.save_error, _on_save_error)
 	_safe_disconnect(GameState.feature_shipped, _on_feature_shipped_dashboard)
+	if IdleEngine.passive_tick.is_connected(_on_passive_tick):
+		IdleEngine.passive_tick.disconnect(_on_passive_tick)
+	if IdleEngine.offline_income_ready.is_connected(_show_offline_summary):
+		IdleEngine.offline_income_ready.disconnect(_show_offline_summary)
+	if CurrencyManager.chips_changed.is_connected(_on_chips_changed):
+		CurrencyManager.chips_changed.disconnect(_on_chips_changed)
 	if office_banner and office_banner.resized.is_connected(_refresh_office_worker_ambient):
 		office_banner.resized.disconnect(_refresh_office_worker_ambient)
 

@@ -232,6 +232,8 @@ func _dismiss_detail() -> void:
 
 
 func _on_back() -> void:
+	if OS.is_debug_build():
+		print("[Market] _on_back() called — transitioning=%s" % SceneLoader._transitioning)
 	_dismiss_detail()
 	SceneLoader.goto_scene("res://src/ui/dashboard/quarter_dashboard.tscn")
 
