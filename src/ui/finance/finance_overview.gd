@@ -5,10 +5,10 @@ extends Control
 @onready var revenue_value: Label = %RevenueValue
 @onready var burn_value: Label = %BurnValue
 @onready var runway_value: Label = %RunwayValue
-@onready var cash_title_btn: Button = %CashTitle
-@onready var revenue_title_btn: Button = %RevenueTitle
-@onready var burn_title_btn: Button = %BurnTitle
-@onready var runway_title_btn: Button = %RunwayTitle
+@onready var cash_title_btn: Button = %CashTitle as Button
+@onready var revenue_title_btn: Button = %RevenueTitle as Button
+@onready var burn_title_btn: Button = %BurnTitle as Button
+@onready var runway_title_btn: Button = %RunwayTitle as Button
 @onready var equity_value: Label = %EquityValue
 @onready var valuation_value: Label = %ValuationValue
 @onready var trend_chart: Control = %TrendChart
@@ -57,8 +57,8 @@ func _ready() -> void:
 	_wire_glossary(revenue_title_btn, "quarterly_revenue")
 	_wire_glossary(burn_title_btn, "quarterly_burn")
 	_wire_glossary(runway_title_btn, "runway")
-	_wire_glossary(%EquityTitle, "equity")
-	_wire_glossary(%ValuationTitle, "valuation")
+	_wire_glossary(%EquityTitle as Button, "equity")
+	_wire_glossary(%ValuationTitle as Button, "valuation")
 	_add_info_button_near(board_label, "board_patience")
 	_build_context_hints()
 	_build_hosting_controls()
@@ -129,6 +129,7 @@ func _build_hosting_controls() -> void:
 	_hosting_plan_picker.add_item(CompanyData.HOSTING_PLAN_NAMES.get(CompanyData.HostingPlan.HYBRID, "Hybrid"))
 	_hosting_plan_picker.add_item(CompanyData.HOSTING_PLAN_NAMES.get(CompanyData.HostingPlan.IN_HOUSE, "In-house"))
 	_hosting_plan_picker.item_selected.connect(_on_hosting_plan_selected)
+	_apply_option_button_colors(_hosting_plan_picker)
 	row.add_child(_hosting_plan_picker)
 
 	_logistics_btn = Button.new()
@@ -174,6 +175,7 @@ func _build_marketing_controls() -> void:
 	for tier_name in MARKETING_TIER_NAMES:
 		_marketing_picker.add_item(tier_name)
 	_marketing_picker.item_selected.connect(_on_marketing_tier_selected)
+	_apply_option_button_colors(_marketing_picker)
 	row.add_child(_marketing_picker)
 
 	vbox.add_child(row)
@@ -469,6 +471,15 @@ func _as_dict(v: Variant) -> Dictionary:
 	if v is Dictionary:
 		return v
 	return {}
+
+
+func _apply_option_button_colors(btn: OptionButton) -> void:
+	if btn == null:
+		return
+	btn.add_theme_color_override("font_color", ThemeManager.C_TEXT)
+	btn.add_theme_color_override("font_hover_color", Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color", ThemeManager.C_BLUE)
+	btn.add_theme_color_override("font_focus_color", ThemeManager.C_TEXT)
 
 
 func _wire_glossary(btn: Button, key: String) -> void:

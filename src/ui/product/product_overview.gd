@@ -87,12 +87,13 @@ var _demo_count: int = 0   # diminishing returns on Product Demo taps per screen
 func _ready() -> void:
 	back_btn.pressed.connect(_on_back)
 	pick_btn.pressed.connect(_on_pick_feature)
-	%TechDebtTitle.pressed.connect(Glossary.show_term.bind("tech_debt"))
-	%StabilityTitle.pressed.connect(Glossary.show_term.bind("stability"))
-	%UxTitle.pressed.connect(Glossary.show_term.bind("ux_score"))
-	%ChurnTitle.pressed.connect(Glossary.show_term.bind("churn_rate"))
-	%BugsTitle.pressed.connect(Glossary.show_term.bind("bugs"))
-	%UsersTitle.pressed.connect(Glossary.show_term.bind("users"))
+	# Wire glossary buttons — safe pattern handles stale scene cache (Label vs Button).
+	_wire_glossary_btn(%TechDebtTitle, "tech_debt")
+	_wire_glossary_btn(%StabilityTitle, "stability")
+	_wire_glossary_btn(%UxTitle, "ux_score")
+	_wire_glossary_btn(%ChurnTitle, "churn_rate")
+	_wire_glossary_btn(%BugsTitle, "bugs")
+	_wire_glossary_btn(%UsersTitle, "users")
 	_add_features_info_button()
 	picker_panel.visible = false
 	build_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -110,6 +111,17 @@ func _ready() -> void:
 	var content := get_node_or_null("MarginContainer/ScrollContainer/VBox")
 	if content is Control:
 		AnimHelper.slide_in(content, Vector2(0, 28), 0.0, 0.22)
+
+
+## Safe glossary button wiring — handles stale scene cache where node might be
+## a Label instead of a Button (e.g. after external .tscn edits).
+func _wire_glossary_btn(node: Node, glossary_key: String) -> void:
+	if node == null:
+		return
+	if node is Button:
+		(node as Button).pressed.connect(Glossary.show_term.bind(glossary_key))
+	elif OS.is_debug_build():
+		print("[ProductOverview] WARN: %s is %s, expected Button (restart Godot to reload .tscn)" % [node.name, node.get_class()])
 
 
 func _exit_tree() -> void:

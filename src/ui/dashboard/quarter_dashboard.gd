@@ -16,12 +16,12 @@ extends Control
 @onready var employees_label: Label = %EmployeesLabel
 @onready var revenue_label: Label = %RevenueLabel
 @onready var burn_label: Label = %BurnLabel
-@onready var cash_title_btn: Button = %CashTitle
-@onready var revenue_title_btn: Button = %RevenueTitle
-@onready var burn_title_btn: Button = %BurnTitle
-@onready var runway_title_btn: Button = %RunwayTitle
-@onready var users_title_btn: Button = %UsersTitle
-@onready var team_title_btn: Button = %TeamTitle
+@onready var cash_title_btn: Button = %CashTitle as Button
+@onready var revenue_title_btn: Button = %RevenueTitle as Button
+@onready var burn_title_btn: Button = %BurnTitle as Button
+@onready var runway_title_btn: Button = %RunwayTitle as Button
+@onready var users_title_btn: Button = %UsersTitle as Button
+@onready var team_title_btn: Button = %TeamTitle as Button
 @onready var advance_btn: Button = %AdvanceButton
 @onready var people_btn: Button = %PeopleButton
 @onready var product_btn: Button = %ProductButton
@@ -38,7 +38,7 @@ extends Control
 @onready var headline_label: Label = %HeadlineLabel
 @onready var economy_label: Label = %EconomyLabel
 @onready var energy_label: Label = %EnergyLabel
-@onready var key_metric_title: Button = %KeyMetricTitle
+@onready var key_metric_title: Button = %KeyMetricTitle as Button
 @onready var key_metric_label: Label = %KeyMetricLabel
 @onready var ticker_strip: Label = %TickerStrip
 @onready var quarter_transition_tint: ColorRect = %QuarterTransitionTint
@@ -120,6 +120,13 @@ var _prev_users: float = 0.0
 
 
 func _ready() -> void:
+	if OS.is_debug_build():
+		print("[Dashboard] _ready() START — company=%s" % (GameState.company != null))
+		# Log @onready node types so stale-cache mismatches are immediately obvious.
+		print("[Dashboard]   UsersTitle type=%s  TeamTitle type=%s" % [
+			%UsersTitle.get_class() if %UsersTitle else "NULL",
+			%TeamTitle.get_class() if %TeamTitle else "NULL"])
+
 	advance_btn.pressed.connect(_on_advance)
 	people_btn.pressed.connect(_on_people)
 	product_btn.pressed.connect(_on_product)
@@ -138,6 +145,9 @@ func _ready() -> void:
 	if key_metric_title:
 		key_metric_title.pressed.connect(_on_key_metric_info_pressed)
 	_wire_status_info_buttons()
+
+	if OS.is_debug_build():
+		print("[Dashboard] signals + glossary wired OK")
 
 	GameState.quarter_advanced.connect(_refresh)
 	GameState.game_over.connect(_on_game_over)
@@ -165,11 +175,18 @@ func _ready() -> void:
 	_build_chip_hud()
 	_build_passive_ticker()
 
+	if OS.is_debug_build():
+		print("[Dashboard] all _build methods OK")
+
 	IdleEngine.passive_tick.connect(_on_passive_tick)
 	IdleEngine.offline_income_ready.connect(_show_offline_summary)
 	CurrencyManager.chips_changed.connect(_on_chips_changed)
 
 	_refresh(GameState.current_quarter)
+
+	if OS.is_debug_build():
+		print("[Dashboard] _refresh() completed — quarter=%d year=%d" % [GameState.current_quarter, GameState.current_year])
+
 	UITouchHelper.harden_tree(self)
 	Analytics.track_screen("dashboard")
 
@@ -181,6 +198,9 @@ func _ready() -> void:
 
 	# Start tutorial on first run (deferred so all nodes are fully laid out).
 	TutorialManager.start_if_needed.call_deferred()
+
+	if OS.is_debug_build():
+		print("[Dashboard] _ready() COMPLETE")
 
 
 func _wire_glossary_button(btn: Button, glossary_key: String) -> void:
@@ -231,6 +251,8 @@ func _apply_plain_finance_titles() -> void:
 
 func _wire_status_info_buttons() -> void:
 	# Add ⓘ buttons next to Economy and Energy labels in the StatusRow.
+	if economy_label == null or energy_label == null:
+		return
 	var status_row := economy_label.get_parent()
 	if status_row == null:
 		return
@@ -634,7 +656,14 @@ func _build_office_worker_layer() -> void:
 
 func _refresh(_q: int) -> void:
 	if GameState.company == null:
+		if OS.is_debug_build():
+			print("[Dashboard] _refresh() — BAILING: GameState.company is null")
 		return
+	if OS.is_debug_build():
+		print("[Dashboard] _refresh() — company=%s cash=%.0f users=%d employees=%d" % [
+			GameState.company.company_name, GameState.company.cash,
+			GameState.product.users if GameState.product else -1,
+			GameState.employees.size()])
 	quarter_label.text = "Year %d, Q%d" % [GameState.current_year, GameState.current_quarter]
 	company_label.text = "%s — %s" % [GameState.company.company_name, GameState.company.type_name_with_niche()]
 	employees_label.text = "%d / %d" % [GameState.employees.size(), GameState.company.office_capacity()]

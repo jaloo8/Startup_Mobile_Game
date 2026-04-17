@@ -89,6 +89,32 @@ func _ready() -> void:
 	difficulty_selector.item_selected.connect(_on_difficulty_changed)
 	scenario_selector.item_selected.connect(_on_scenario_changed)
 
+	# Force OptionButton text to be visible — the root theme's font_color
+	# doesn't always propagate to OptionButton in all Godot 4 builds.
+	_force_option_button_colors()
+
+	if OS.is_debug_build():
+		print("[NewGame] _ready() — TypeSelector: items=%d selected=%d text='%s'" % [
+			type_selector.item_count, type_selector.selected,
+			type_selector.get_item_text(type_selector.selected) if type_selector.selected >= 0 else "NONE"])
+		print("[NewGame]   DifficultySelector: items=%d selected=%d" % [
+			difficulty_selector.item_count, difficulty_selector.selected])
+		print("[NewGame]   ScenarioSelector: items=%d selected=%d" % [
+			scenario_selector.item_count, scenario_selector.selected])
+		print("[NewGame]   BackgroundSelector: items=%d selected=%d" % [
+			background_selector.item_count, background_selector.selected])
+		print("[NewGame]   TypeSelector modulate=%s visible=%s" % [
+			type_selector.modulate, type_selector.visible])
+		print("[NewGame]   TypeSelector self_modulate=%s" % type_selector.self_modulate)
+		# Check if the root theme has OptionButton font_color set
+		var root_theme: Theme = get_tree().root.theme if get_tree().root else null
+		if root_theme:
+			print("[NewGame]   Root theme has OptionButton font_color: %s" % root_theme.has_color("font_color", "OptionButton"))
+			if root_theme.has_color("font_color", "OptionButton"):
+				print("[NewGame]   Root theme OptionButton font_color = %s" % root_theme.get_color("font_color", "OptionButton"))
+		else:
+			print("[NewGame]   WARNING: No root theme found!")
+
 	_build_type_hint_label()
 	_build_difficulty_desc_label()
 	_build_scenario_desc_label()
@@ -99,9 +125,25 @@ func _ready() -> void:
 	_on_difficulty_changed(1)   # Normal is the default
 	_on_scenario_changed(0)
 	UITouchHelper.harden_tree(self)
-	var _form_container := type_selector.get_parent()
-	if _form_container:
-		AnimHelper.stagger_list(_form_container, 0.04, 0.0, 18.0)
+	# TEMP DISABLED — diagnosing invisible OptionButton text.
+	# var _form_container := type_selector.get_parent()
+	# if _form_container:
+	#	AnimHelper.stagger_list(_form_container, 0.04, 0.0, 18.0)
+
+
+func _force_option_button_colors() -> void:
+	# Explicit overrides ensure OptionButton text is always visible against the
+	# dark background. Works around a Godot 4 theme propagation issue where
+	# root-level theme font_color may not reach OptionButton internals.
+	var text_color := ThemeManager.C_TEXT
+	for btn: OptionButton in [type_selector, niche_selector, difficulty_selector,
+			scenario_selector, background_selector]:
+		if btn == null:
+			continue
+		btn.add_theme_color_override("font_color", text_color)
+		btn.add_theme_color_override("font_hover_color", Color.WHITE)
+		btn.add_theme_color_override("font_pressed_color", ThemeManager.C_BLUE)
+		btn.add_theme_color_override("font_focus_color", text_color)
 
 
 func _load_type_illustration(type_id: int) -> void:

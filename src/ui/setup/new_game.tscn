@@ -61,6 +61,9 @@ text = "Company Type"
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 46)
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.95, 0.95, 0.97, 1)
 
 [node name="TypeIllustration" type="TextureRect" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
@@ -77,6 +80,9 @@ text = "Starting Niche"
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 46)
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.95, 0.95, 0.97, 1)
 
 [node name="NicheDesc" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
@@ -93,6 +99,9 @@ text = "Difficulty"
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 46)
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.95, 0.95, 0.97, 1)
 
 [node name="ScenarioLabel" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 layout_mode = 2
@@ -102,6 +111,9 @@ text = "Starting Scenario"
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 46)
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.95, 0.95, 0.97, 1)
 
 [node name="BackgroundLabel" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 layout_mode = 2
@@ -111,6 +123,9 @@ text = "Your Background"
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 46)
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.95, 0.95, 0.97, 1)
 
 [node name="BackgroundDesc" type="Label" parent="ScrollContainer/MarginContainer/VBox"]
 unique_name_in_owner = true
